@@ -1,0 +1,98 @@
+[
+  {
+    "id": "nec-210-52-a",
+    "code_ref": "NEC 210.52(A)(1)",
+    "title": "Receptacle Outlets - Dwelling Unit Spacing",
+    "category": "electrical",
+    "jurisdiction": "National",
+    "summary": "Receptacles shall be installed such that no point along the floor line of any wall space is more than 6 feet from a receptacle outlet. Receptacles shall be no more than 12 feet apart.",
+    "source": "NEC 2023 Section 210.52(A)(1)",
+    "common_questions": [
+      "How far apart should outlets be?",
+      "What is the maximum spacing for electrical outlets?",
+      "How many outlets do I need in a room?"
+    ],
+    "notes": "Wall space includes any space 2 feet or more in width. Doorways, fireplaces, and similar openings do not break wall space.",
+    "related_codes": ["NEC 210.52(A)(2)", "NEC 210.52(A)(3)"]
+  },
+  {
+    "id": "nec-210-52-c",
+    "code_ref": "NEC 210.52(C)(1)",
+    "title": "Kitchen Countertop Receptacles",
+    "category": "electrical",
+    "jurisdiction": "National",
+    "summary": "Receptacle outlets shall be installed at kitchen countertops so that no point along the wall line is more than 24 inches from a receptacle outlet.",
+    "source": "NEC 2023 Section 210.52(C)(1)",
+    "common_questions": [
+      "How far apart should kitchen outlets be?",
+      "Do I need outlets above kitchen counters?",
+      "Kitchen outlet spacing requirements"
+    ],
+    "notes": "Receptacles shall be located above, but not more than 20 inches above, the countertop.",
+    "related_codes": ["NEC 210.52(C)(2)", "NEC 210.8(A)(6)"]
+  },
+  {
+    "id": "nec-210-8-a-1",
+    "code_ref": "NEC 210.8(A)(1)",
+    "title": "GFCI Protection - Bathrooms",
+    "category": "electrical",
+    "jurisdiction": "National",
+    "summary": "All 125-volt, single-phase, 15- and 20-ampere receptacles installed in bathrooms shall have ground-fault circuit-interrupter (GFCI) protection.",
+    "source": "NEC 2023 Section 210.8(A)(1)",
+    "common_questions": [
+      "Do I need GFCI in bathroom?",
+      "What outlets require GFCI protection?",
+      "Is GFCI required for bathroom outlets?"
+    ],
+    "notes": "This includes all receptacles, not just those near water sources.",
+    "related_codes": ["NEC 210.8(A)(6)", "NEC 210.8(A)(7)"]
+  },
+  {
+    "id": "irc-r311-7-5-1",
+    "code_ref": "IRC R311.7.5.1",
+    "title": "Stair Riser Height",
+    "category": "structural",
+    "jurisdiction": "National",
+    "summary": "The maximum riser height shall be 7-3/4 inches. The riser shall be measured vertically between leading edges of the adjacent treads.",
+    "source": "IRC 2021 Section R311.7.5.1",
+    "common_questions": [
+      "How tall can stair risers be?",
+      "Maximum stair riser height?",
+      "What is code for stair height?"
+    ],
+    "notes": "The greatest riser height within any flight of stairs shall not exceed the smallest by more than 3/8 inch.",
+    "related_codes": ["IRC R311.7.5.2", "IRC R311.7.5.3"]
+  },
+  {
+    "id": "irc-r311-7-5-2",
+    "code_ref": "IRC R311.7.5.2",
+    "title": "Stair Tread Depth",
+    "category": "structural",
+    "jurisdiction": "National",
+    "summary": "The minimum tread depth shall be 10 inches. The tread depth shall be measured horizontally between the vertical planes of the foremost projection of adjacent treads.",
+    "source": "IRC 2021 Section R311.7.5.2",
+    "common_questions": [
+      "How deep should stair treads be?",
+      "Minimum stair tread depth?",
+      "What is code for stair tread?"
+    ],
+    "notes": "The greatest tread depth within any flight of stairs shall not exceed the smallest by more than 3/8 inch.",
+    "related_codes": ["IRC R311.7.5.1", "IRC R311.7.6"]
+  },
+  {
+    "id": "ipc-709-1",
+    "code_ref": "IPC 709.1",
+    "title": "Kitchen Sink Drain Size",
+    "category": "plumbing",
+    "jurisdiction": "National",
+    "summary": "Kitchen sinks shall have a minimum 1-1/2 inch diameter drain pipe.",
+    "source": "IPC 2021 Section 709.1",
+    "common_questions": [
+      "What size drain pipe for kitchen sink?",
+      "Kitchen sink drain size requirements?",
+      "Minimum pipe size for kitchen drain?"
+    ],
+    "notes": "Garbage disposals typically require the same minimum size.",
+    "related_codes": ["IPC 709.2", "IPC 709.3"]
+  }
+]
