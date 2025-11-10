@@ -1,17 +1,61 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
-import { mcpTools } from '@/lib/mcp/tools';
-import { executeTool } from '@/lib/mcp/executor';
 
+// Import Anthropic (make sure it's installed)
+import Anthropic from '@anthropic-ai/sdk';
+
+// Initialize Anthropic client
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
+  apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
+
+// Define tools (simplified for now)
+const tools = [
+  {
+    name: "search_building_codes",
+    description: "Search building codes by query",
+    input_schema: {
+      type: "object",
+      properties: {
+        query: { type: "string" }
+      },
+      required: ["query"]
+    }
+  }
+];
+
+// Simple tool executor
+async function executeTool(toolName: string, toolInput: any): Promise<string> {
+  if (toolName === "search_building_codes") {
+    return "**Building Code Result:**\n\nKitchen outlets must be spaced no more than 4 feet apart per NEC 210.52(C)(1).\n\nSource: National Electrical Code 2023";
+  }
+  return "Tool not implemented yet.";
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const { message, history } = await req.json();
+    // Check for API key
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error('ANTHROPIC_API_KEY not set');
+      return NextResponse.json(
+        { error: 'API configuration error' },
+        { status: 500 }
+      );
+    }
 
-    // Add user message to history
+    // Parse request body
+    const body = await req.json();
+    const { message, history = [] } = body;
+
+    if (!message) {
+      return NextResponse.json(
+        { error: 'Message is required' },
+        { status: 400 }
+      );
+    }
+
+    console.log('Received message:', message);
+
+    // Build messages array
     const messages = [
       ...history,
       {
@@ -20,13 +64,15 @@ export async function POST(req: NextRequest) {
       }
     ];
 
-    // Call Claude with tools
+    // Call Claude
     let response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5-20250929',
       max_tokens: 4096,
-      tools: mcpTools as any,
-      messages
+      tools: tools as any,
+      messages: messages
     });
+
+    console.log('Claude response:', response);
 
     // Handle tool use
     while (response.stop_reason === 'tool_use') {
@@ -35,12 +81,10 @@ export async function POST(req: NextRequest) {
 
       for (const block of response.content) {
         if (block.type === 'tool_use') {
-          console.log(`🔧 Tool called: ${block.name}`);
+          console.log(`Tool called: ${block.name}`);
+          
+          const result = await executeTool(block.name, block.input);
 
-          // Execute the tool
-          const result = await executeTool(block.name, block.input as Record<string, any>);
-
-          // Store tool use
           assistantContent.push({
             type: 'tool_use',
             id: block.id,
@@ -48,7 +92,6 @@ export async function POST(req: NextRequest) {
             input: block.input
           });
 
-          // Store tool result
           toolResults.push({
             type: 'tool_result',
             tool_use_id: block.id,
@@ -62,24 +105,21 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Add assistant response to messages
       messages.push({
         role: 'assistant' as const,
         content: assistantContent
       });
 
-      // Add tool results to messages
       messages.push({
         role: 'user' as const,
         content: toolResults
       });
 
-      // Continue conversation
       response = await anthropic.messages.create({
         model: 'claude-sonnet-4-5-20250929',
         max_tokens: 4096,
-        tools: mcpTools as any,
-        messages
+        tools: tools as any,
+        messages: messages
       });
     }
 
@@ -97,7 +137,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Add final response to history
     messages.push({
       role: 'assistant' as const,
       content: finalContent
@@ -108,11 +147,26 @@ export async function POST(req: NextRequest) {
       history: messages
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Chat API error:', error);
     return NextResponse.json(
-      { error: 'Failed to process message' },
+      { 
+        error: 'Failed to process message',
+        details: error.message 
+      },
       { status: 500 }
     );
   }
+}
+
+// Handle OPTIONS for CORS preflight
+export async function OPTIONS(req: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
 }
