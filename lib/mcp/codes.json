@@ -94,5 +94,730 @@
     ],
     "notes": "Garbage disposals typically require the same minimum size.",
     "related_codes": ["IPC 709.2", "IPC 709.3"]
+  },
+  {
+    "id": "nec-210-8-a-2",
+    "code_ref": "NEC 210.8(A)(2)",
+    "title": "GFCI Protection - Garages",
+    "category": "electrical",
+    "jurisdiction": "National",
+    "summary": "All 125-volt, single-phase, 15- and 20-ampere receptacles installed in garages shall have ground-fault circuit-interrupter protection for personnel.",
+    "source": "NEC 2023 Section 210.8(A)(2)",
+    "common_questions": [
+      "Do garage outlets need GFCI?",
+      "GFCI requirements for garage",
+      "Are all garage outlets GFCI?"
+    ],
+    "notes": "Exception: Receptacles that are not readily accessible, such as ceiling-mounted receptacles for garage door openers.",
+    "related_codes": ["NEC 210.8(A)(1)", "NEC 210.8(A)(3)"]
+  },
+  {
+    "id": "nec-210-8-a-7",
+    "code_ref": "NEC 210.8(A)(7)",
+    "title": "GFCI Protection - Sinks",
+    "category": "electrical",
+    "jurisdiction": "National",
+    "summary": "Receptacles installed within 6 feet of the outside edge of a sink shall have GFCI protection.",
+    "source": "NEC 2023 Section 210.8(A)(7)",
+    "common_questions": [
+      "Do outlets near sinks need GFCI?",
+      "GFCI distance from sink",
+      "Kitchen sink outlet requirements"
+    ],
+    "notes": "Applies to sinks located in areas other than kitchens (laundry rooms, basements, etc.)",
+    "related_codes": ["NEC 210.52(C)", "NEC 210.8(A)(6)"]
+  },
+  {
+    "id": "nec-210-70-a-1",
+    "code_ref": "NEC 210.70(A)(1)",
+    "title": "Lighting Outlets Required - Habitable Rooms",
+    "category": "electrical",
+    "jurisdiction": "National",
+    "summary": "At least one wall switch-controlled lighting outlet shall be installed in every habitable room and bathroom.",
+    "source": "NEC 2023 Section 210.70(A)(1)",
+    "common_questions": [
+      "Do all rooms need a light switch?",
+      "Lighting outlet requirements",
+      "Do bedrooms need ceiling lights?"
+    ],
+    "notes": "In kitchens and bathrooms, the lighting outlet shall be ceiling or wall-mounted.",
+    "related_codes": ["NEC 210.70(A)(2)", "NEC 404.2"]
+  },
+  {
+    "id": "nec-334-30",
+    "code_ref": "NEC 334.30",
+    "title": "NM Cable - Securing and Supporting",
+    "category": "electrical",
+    "jurisdiction": "National",
+    "summary": "Nonmetallic-sheathed cable shall be secured within 12 inches of every cabinet, box, or fitting, and supported at intervals not exceeding 4.5 feet.",
+    "source": "NEC 2023 Section 334.30",
+    "common_questions": [
+      "How often do you staple Romex?",
+      "Romex cable support requirements",
+      "NM cable stapling distance"
+    ],
+    "notes": "Cable shall be secured by staples, cable ties, straps, or similar fittings.",
+    "related_codes": ["NEC 334.10", "NEC 334.15"]
+  },
+  {
+    "id": "irc-m1307-3",
+    "code_ref": "IRC M1307.3",
+    "title": "Appliance Access for Maintenance",
+    "category": "mechanical",
+    "jurisdiction": "National",
+    "summary": "Appliances shall be accessible for inspection, service, repair and replacement without removing permanent construction or building components.",
+    "source": "IRC 2021 Section M1307.3",
+    "common_questions": [
+      "Do HVAC units need access?",
+      "Water heater access requirements",
+      "Furnace clearance requirements"
+    ],
+    "notes": "A level working space at least 30 inches deep and 30 inches wide shall be provided in front of the control side.",
+    "related_codes": ["IRC M1305.1", "IPC 504.3"]
+  },
+  {
+    "id": "ipc-305-4",
+    "code_ref": "IPC 305.4",
+    "title": "Protection of Pipes - Freezing",
+    "category": "plumbing",
+    "jurisdiction": "National",
+    "summary": "Water, soil and waste pipes shall not be installed outside of a building, in attics or crawl spaces, or in any other place where they may be subjected to freezing temperatures unless adequate provision is made to protect such pipes from freezing.",
+    "source": "IPC 2021 Section 305.4",
+    "common_questions": [
+      "How to protect pipes from freezing?",
+      "Can pipes go in attic?",
+      "Pipe insulation requirements"
+    ],
+    "notes": "Protection may include insulation, heat tape, or routing pipes in conditioned spaces.",
+    "related_codes": ["IPC 305.1", "IRC P2603.6"]
+  },
+  {
+    "id": "ipc-708-1",
+    "code_ref": "IPC 708.1",
+    "title": "Shower Receptors - General",
+    "category": "plumbing",
+    "jurisdiction": "National",
+    "summary": "Shower receptors shall have a finished curb threshold not less than 1 inch below the sides and back of the receptor.",
+    "source": "IPC 2021 Section 708.1",
+    "common_questions": [
+      "How tall should shower curb be?",
+      "Shower pan height requirements",
+      "Shower threshold height"
+    ],
+    "notes": "The curb shall be not less than 2 inches and not more than 9 inches deep when measured from the top of the curb to the top of the drain.",
+    "related_codes": ["IPC 417.4", "IRC P2709.1"]
+  },
+  {
+    "id": "irc-r311-5-3",
+    "code_ref": "IRC R311.5.3",
+    "title": "Floor Elevations at Doors",
+    "category": "structural",
+    "jurisdiction": "National",
+    "summary": "Landings or floors at the required egress door shall not be more than 1.5 inches lower than the top of the threshold.",
+    "source": "IRC 2021 Section R311.5.3",
+    "common_questions": [
+      "How much can door threshold drop?",
+      "Door landing height requirements",
+      "Maximum step at exterior door"
+    ],
+    "notes": "Exception: The landing at an exterior doorway shall not be more than 7.75 inches below the top of the threshold provided the door does not swing over the landing.",
+    "related_codes": ["IRC R311.7", "IRC R311.5.1"]
+  },
+  {
+    "id": "irc-r806-2",
+    "code_ref": "IRC R806.2",
+    "title": "Minimum Vent Area - Attics",
+    "category": "structural",
+    "jurisdiction": "National",
+    "summary": "The minimum net free ventilating area shall be 1/150 of the area of the vented space.",
+    "source": "IRC 2021 Section R806.2",
+    "common_questions": [
+      "How much attic ventilation do I need?",
+      "Attic vent requirements",
+      "Roof ventilation code"
+    ],
+    "notes": "The minimum may be reduced to 1/300 when a vapor retarder is installed on the warm side of the ceiling and at least 50% of the venting is in the upper portion of the attic.",
+    "related_codes": ["IRC R806.1", "IRC R806.3"]
+  },
+  {
+    "id": "irc-r403-1-6",
+    "code_ref": "IRC R403.1.6",
+    "title": "Foundation Anchorage",
+    "category": "structural",
+    "jurisdiction": "National",
+    "summary": "Sill plates shall be anchored to foundations with anchor bolts spaced not more than 6 feet apart, with at least two bolts per piece and located within 12 inches of each end.",
+    "source": "IRC 2021 Section R403.1.6",
+    "common_questions": [
+      "How far apart are foundation anchor bolts?",
+      "Sill plate anchor requirements",
+      "Foundation bolt spacing"
+    ],
+    "notes": "Bolts shall be at least 1/2 inch in diameter and shall extend at least 7 inches into concrete or masonry.",
+    "related_codes": ["IRC R403.1", "IRC R602.11"]
+  },
+  {
+    "id": "nec-210-11-c-1",
+    "code_ref": "NEC 210.11(C)(1)",
+    "title": "Small-Appliance Branch Circuits - Dwelling Units",
+    "category": "electrical",
+    "jurisdiction": "National",
+    "summary": "In addition to the number of branch circuits required by other parts of this section, two or more 20-ampere small-appliance branch circuits shall be provided for all receptacle outlets specified by 210.52(B).",
+    "source": "NEC 2023 Section 210.11(C)(1)",
+    "common_questions": [
+      "How many kitchen circuits do I need?",
+      "Small appliance circuit requirements",
+      "Kitchen dedicated circuits"
+    ],
+    "notes": "These circuits shall have no other outlets and shall serve the kitchen, dining room, breakfast room, pantry, or similar areas.",
+    "related_codes": ["NEC 210.52(B)", "NEC 210.11(C)(2)"]
+  },
+  {
+    "id": "nec-210-11-c-3",
+    "code_ref": "NEC 210.11(C)(3)",
+    "title": "Laundry Branch Circuits",
+    "category": "electrical",
+    "jurisdiction": "National",
+    "summary": "At least one 20-ampere branch circuit shall be provided to supply the laundry receptacle outlet(s) required by 210.52(F). This circuit shall have no other outlets.",
+    "source": "NEC 2023 Section 210.11(C)(3)",
+    "common_questions": [
+      "Does laundry room need dedicated circuit?",
+      "Washing machine circuit requirements",
+      "Laundry room electrical code"
+    ],
+    "notes": "The laundry circuit must be 20-ampere and dedicated solely to laundry receptacles.",
+    "related_codes": ["NEC 210.52(F)", "NEC 210.11(C)(1)"]
+  },
+  {
+    "id": "nec-210-52-e-1",
+    "code_ref": "NEC 210.52(E)(1)",
+    "title": "Outdoor Receptacle Outlets - Dwelling Units",
+    "category": "electrical",
+    "jurisdiction": "National",
+    "summary": "For one- and two-family dwellings, at least one receptacle outlet shall be installed outdoors at the front and back of the dwelling at a readily accessible location at grade level.",
+    "source": "NEC 2023 Section 210.52(E)(1)",
+    "common_questions": [
+      "How many outdoor outlets are required?",
+      "Outdoor receptacle requirements",
+      "Do I need outlets outside?"
+    ],
+    "notes": "All outdoor receptacles must be GFCI protected per NEC 210.8(A)(3).",
+    "related_codes": ["NEC 210.8(A)(3)", "NEC 210.52(E)(3)"]
+  },
+  {
+    "id": "nec-210-8-f",
+    "code_ref": "NEC 210.8(F)",
+    "title": "GFCI Protection - Outdoor Outlets",
+    "category": "electrical",
+    "jurisdiction": "National",
+    "summary": "All 125-volt through 250-volt receptacles supplied by single-phase branch circuits rated 150 volts or less to ground, 50 amperes or less, and installed outdoors shall have GFCI protection.",
+    "source": "NEC 2023 Section 210.8(F)",
+    "common_questions": [
+      "Do outdoor outlets need GFCI?",
+      "Outdoor GFCI requirements",
+      "Is GFCI required outside?"
+    ],
+    "notes": "This applies to all outdoor receptacles in all occupancies.",
+    "related_codes": ["NEC 210.8(A)(3)", "NEC 406.9(A)"]
+  },
+  {
+    "id": "nec-210-63",
+    "code_ref": "NEC 210.63",
+    "title": "Heating, Air-Conditioning, and Refrigeration Equipment Outlet",
+    "category": "electrical",
+    "jurisdiction": "National",
+    "summary": "A 125-volt, single-phase, 15- or 20-ampere receptacle outlet shall be installed at an accessible location for the servicing of heating, air-conditioning, and refrigeration equipment.",
+    "source": "NEC 2023 Section 210.63",
+    "common_questions": [
+      "Does HVAC need a dedicated outlet?",
+      "Service receptacle for air conditioner",
+      "AC unit outlet requirements"
+    ],
+    "notes": "The receptacle shall be located on the same level and within 25 feet of the heating, air-conditioning, and refrigeration equipment.",
+    "related_codes": ["NEC 210.8(A)", "NEC 440.14"]
+  },
+  {
+    "id": "nec-314-16-a",
+    "code_ref": "NEC 314.16(A)",
+    "title": "Box Fill Calculations",
+    "category": "electrical",
+    "jurisdiction": "National",
+    "summary": "Boxes shall be of sufficient size to provide free space for all enclosed conductors. The minimum volume shall be calculated using conductor fill requirements.",
+    "source": "NEC 2023 Section 314.16(A)",
+    "common_questions": [
+      "How many wires can fit in a junction box?",
+      "Box fill calculation",
+      "Electrical box size requirements"
+    ],
+    "notes": "Each conductor counts as follows: 14 AWG = 2 cubic inches, 12 AWG = 2.25 cubic inches, 10 AWG = 2.5 cubic inches.",
+    "related_codes": ["NEC 314.16(B)", "NEC 314.16(C)"]
+  },
+  {
+    "id": "nec-406-12",
+    "code_ref": "NEC 406.12",
+    "title": "Tamper-Resistant Receptacles",
+    "category": "electrical",
+    "jurisdiction": "National",
+    "summary": "All nonlocking type 125-volt, 15- and 20-ampere receptacles in dwelling unit areas specified in 210.52 shall be listed tamper-resistant receptacles.",
+    "source": "NEC 2023 Section 406.12",
+    "common_questions": [
+      "Are tamper resistant outlets required?",
+      "TR receptacle requirements",
+      "Do I need child-proof outlets?"
+    ],
+    "notes": "This requirement applies to all areas where 125V, 15A and 20A receptacles are required by 210.52.",
+    "related_codes": ["NEC 210.52", "NEC 406.12(A)"]
+  },
+  {
+    "id": "nec-110-26-a",
+    "code_ref": "NEC 110.26(A)",
+    "title": "Working Space Around Electrical Equipment",
+    "category": "electrical",
+    "jurisdiction": "National",
+    "summary": "Working space for equipment operating at 600 volts or less shall be not less than 3 feet wide and 30 inches deep, extending from the floor to 6.5 feet above the floor.",
+    "source": "NEC 2023 Section 110.26(A)",
+    "common_questions": [
+      "How much clearance around electrical panel?",
+      "Breaker box clearance requirements",
+      "Electrical panel working space"
+    ],
+    "notes": "The working space shall be clear and extend from the grade, floor, or platform to the height required. Storage is not permitted in this space.",
+    "related_codes": ["NEC 110.26(B)", "NEC 110.26(C)"]
+  },
+  
+
+  {
+    "id": "ipc-305-6",
+    "code_ref": "IPC 305.6",
+    "title": "Trenching, Excavation and Backfill",
+    "category": "plumbing",
+    "jurisdiction": "National",
+    "summary": "Trenches shall be excavated to the depth and width required. The bottom of the trench shall provide a uniform bearing for the pipe.",
+    "source": "IPC 2021 Section 305.6",
+    "common_questions": [
+      "How deep should sewer pipe be buried?",
+      "Underground pipe depth requirements",
+      "Trench depth for plumbing"
+    ],
+    "notes": "Backfill shall be free from objects that could damage the pipe. Piping shall be laid on a bed of sand or gravel at least 4 inches deep.",
+    "related_codes": ["IPC 305.5", "IRC P2604.1"]
+  },
+  {
+    "id": "ipc-403-1",
+    "code_ref": "IPC 403.1",
+    "title": "Minimum Number of Fixtures",
+    "category": "plumbing",
+    "jurisdiction": "National",
+    "summary": "Plumbing fixtures shall be provided in the minimum number as shown in Table 403.1 for the type of occupancy and number of occupants.",
+    "source": "IPC 2021 Section 403.1",
+    "common_questions": [
+      "How many bathrooms do I need?",
+      "Minimum fixture requirements",
+      "Required plumbing fixtures"
+    ],
+    "notes": "For residential: At least 1 water closet, 1 lavatory, 1 bathtub or shower, and 1 kitchen sink are required.",
+    "related_codes": ["IPC 403.2", "IRC P2903.1"]
+  },
+  {
+    "id": "ipc-608-1",
+    "code_ref": "IPC 608.1",
+    "title": "Hot Water Supply System Requirements",
+    "category": "plumbing",
+    "jurisdiction": "National",
+    "summary": "All plumbing fixtures and equipment used for bathing, washing, culinary purposes, cleansing, laundry or building maintenance shall be supplied with hot water.",
+    "source": "IPC 2021 Section 608.1",
+    "common_questions": [
+      "Hot water requirements",
+      "Water heater temperature requirements",
+      "How hot should hot water be?"
+    ],
+    "notes": "Hot water shall be supplied to required fixtures at a temperature of not less than 110°F (43°C) and not greater than 120°F (49°C).",
+    "related_codes": ["IPC 607.1", "IPC 504.3"]
+  },
+  {
+    "id": "ipc-702-1",
+    "code_ref": "IPC 702.1",
+    "title": "Fixture Trap Requirements",
+    "category": "plumbing",
+    "jurisdiction": "National",
+    "summary": "Each plumbing fixture shall be separately trapped by a water seal trap. The trap shall be placed as close as possible to the fixture outlet.",
+    "source": "IPC 2021 Section 702.1",
+    "common_questions": [
+      "Does every drain need a trap?",
+      "P-trap requirements",
+      "How close should trap be to fixture?"
+    ],
+    "notes": "The vertical distance from fixture outlet to trap weir shall not exceed 24 inches.",
+    "related_codes": ["IPC 702.2", "IPC 702.4"]
+  },
+  {
+    "id": "ipc-903-1",
+    "code_ref": "IPC 903.1",
+    "title": "Vent Required",
+    "category": "plumbing",
+    "jurisdiction": "National",
+    "summary": "Every building in which plumbing fixtures are installed shall have a vent system. The vent system shall be designed to admit air to the drainage system.",
+    "source": "IPC 2021 Section 903.1",
+    "common_questions": [
+      "Do drains need vents?",
+      "Plumbing vent requirements",
+      "Why do drains need vents?"
+    ],
+    "notes": "Vents prevent siphoning of traps and allow for proper drainage. Every trap must be vented.",
+    "related_codes": ["IPC 903.2", "IPC 904.1"]
+  },
+  {
+    "id": "ipc-605-3",
+    "code_ref": "IPC 605.3",
+    "title": "Water Supply Fixture Units",
+    "category": "plumbing",
+    "jurisdiction": "National",
+    "summary": "Water supply systems shall be sized for the total demand on the system using the fixture unit method in accordance with Table 604.3.",
+    "source": "IPC 2021 Section 605.3",
+    "common_questions": [
+      "What size water pipe do I need?",
+      "Water supply line sizing",
+      "Main water line size requirements"
+    ],
+    "notes": "Common residential: 3/4 inch for main, 1/2 inch for branch lines to fixtures.",
+    "related_codes": ["IPC 604.3", "IPC 605.1"]
+  },
+  {
+    "id": "ipc-312-2",
+    "code_ref": "IPC 312.2",
+    "title": "Cleanouts Required",
+    "category": "plumbing",
+    "jurisdiction": "National",
+    "summary": "Cleanouts shall be installed at intervals of not more than 100 feet for 4-inch and smaller pipes. Changes of direction exceeding 45 degrees shall have a cleanout.",
+    "source": "IPC 2021 Section 312.2",
+    "common_questions": [
+      "Where do cleanouts need to be?",
+      "Sewer cleanout requirements",
+      "How often do I need cleanouts?"
+    ],
+    "notes": "Cleanouts shall be installed at the base of each waste stack and at changes in direction greater than 45 degrees.",
+    "related_codes": ["IPC 312.3", "IPC 312.4"]
+  },
+  {
+    "id": "ipc-608-16-1",
+    "code_ref": "IPC 608.16.1",
+    "title": "Hot Water System Controls",
+    "category": "plumbing",
+    "jurisdiction": "National",
+    "summary": "Water heaters shall be equipped with temperature controls to limit the maximum temperature of water delivered from the water heater to 120°F (49°C).",
+    "source": "IPC 2021 Section 608.16.1",
+    "common_questions": [
+      "Water heater temperature setting",
+      "Maximum hot water temperature",
+      "Water heater thermostat requirements"
+    ],
+    "notes": "Prevents scalding. Some applications may require tempering valves to further limit temperature.",
+    "related_codes": ["IPC 607.1", "IPC 504.3"]
+  },
+  
+  {
+    "id": "irc-r502-3-1",
+    "code_ref": "IRC R502.3.1",
+    "title": "Floor Joist Spans",
+    "category": "structural",
+    "jurisdiction": "National",
+    "summary": "Floor joist spans for common lumber species shall be in accordance with Tables R502.3.1(1) and R502.3.1(2). Spans are based on joist size, spacing, and lumber grade.",
+    "source": "IRC 2021 Section R502.3.1",
+    "common_questions": [
+      "How far can floor joists span?",
+      "Floor joist span table",
+      "2x10 joist span"
+    ],
+    "notes": "Example: 2x10 #2 grade at 16 inches on center can span approximately 16 feet for living areas.",
+    "related_codes": ["IRC R502.3", "IRC R502.6"]
+  },
+  {
+    "id": "irc-r602-3-1",
+    "code_ref": "IRC R602.3.1",
+    "title": "Stud Size and Spacing",
+    "category": "structural",
+    "jurisdiction": "National",
+    "summary": "Exterior and bearing wall studs shall be 2x4 or larger at 16 inches on center or 2x6 at 24 inches on center. Non-bearing walls may use 2x4 at 24 inches on center.",
+    "source": "IRC 2021 Section R602.3.1",
+    "common_questions": [
+      "How far apart should wall studs be?",
+      "Stud spacing requirements",
+      "Can I use 2x4 for exterior walls?"
+    ],
+    "notes": "Maximum stud spacing is 24 inches on center. Utility grade studs shall not be spaced more than 16 inches on center.",
+    "related_codes": ["IRC R602.3", "IRC R602.10"]
+  },
+  {
+    "id": "irc-r317-1",
+    "code_ref": "IRC R317.1",
+    "title": "Protection Against Decay",
+    "category": "structural",
+    "jurisdiction": "National",
+    "summary": "Wood in contact with the ground or in areas of high moisture shall be naturally durable wood or preservative-treated wood.",
+    "source": "IRC 2021 Section R317.1",
+    "common_questions": [
+      "What wood can touch the ground?",
+      "Pressure treated wood requirements",
+      "When is treated lumber required?"
+    ],
+    "notes": "Required for sills and sleepers on concrete or masonry, wood joists within 18 inches of exposed ground, and posts or columns in contact with ground.",
+    "related_codes": ["IRC R317.2", "IRC R317.3"]
+  },
+  {
+    "id": "irc-r507-2-1",
+    "code_ref": "IRC R507.2.1",
+    "title": "Deck Joist Spans",
+    "category": "structural",
+    "jurisdiction": "National",
+    "summary": "Deck joists shall be sized according to Table R507.5 based on joist span, spacing, and lumber species.",
+    "source": "IRC 2021 Section R507.2.1",
+    "common_questions": [
+      "How far can deck joists span?",
+      "Deck joist size requirements",
+      "2x8 deck joist span"
+    ],
+    "notes": "Example: 2x8 Southern Pine at 16 inches on center can span approximately 11 feet.",
+    "related_codes": ["IRC R507.2", "IRC R507.5"]
+  },
+  {
+    "id": "irc-r507-2-3",
+    "code_ref": "IRC R507.2.3",
+    "title": "Deck Ledger Connection to Band Joist",
+    "category": "structural",
+    "jurisdiction": "National",
+    "summary": "Deck ledgers shall be minimum 2x8 nominal lumber and shall be connected to the band joist with 1/2-inch lag screws or bolts with washers spaced per Table R507.2.3(1).",
+    "source": "IRC 2021 Section R507.2.3",
+    "common_questions": [
+      "How to attach deck ledger to house?",
+      "Deck ledger fastener requirements",
+      "Lag screw spacing for deck ledger"
+    ],
+    "notes": "This is a critical structural connection. Typical spacing is 16 inches on center for 1/2-inch lag screws.",
+    "related_codes": ["IRC R507.2", "IRC R507.2.4"]
+  },
+  {
+    "id": "irc-r802-4-1",
+    "code_ref": "IRC R802.4.1",
+    "title": "Rafter Spans",
+    "category": "structural",
+    "jurisdiction": "National",
+    "summary": "Rafter spans shall be in accordance with Tables R802.4.1(1) through R802.4.1(8) based on rafter size, spacing, species, and roof load.",
+    "source": "IRC 2021 Section R802.4.1",
+    "common_questions": [
+      "How far can roof rafters span?",
+      "Rafter span table",
+      "2x6 rafter maximum span"
+    ],
+    "notes": "Example: 2x6 rafters at 16 inches on center can span approximately 13 feet for typical residential roofs.",
+    "related_codes": ["IRC R802.4", "IRC R802.5"]
+  },
+  {
+    "id": "irc-r311-7-10-1",
+    "code_ref": "IRC R311.7.10.1",
+    "title": "Stairway Handrail Height",
+    "category": "structural",
+    "jurisdiction": "National",
+    "summary": "Handrails shall be not less than 34 inches nor more than 38 inches above the nosing of treads and landings.",
+    "source": "IRC 2021 Section R311.7.10.1",
+    "common_questions": [
+      "How high should stair handrail be?",
+      "Handrail height requirements",
+      "Stair railing height code"
+    ],
+    "notes": "Handrail height is measured vertically from the sloped plane adjoining the tread nosing.",
+    "related_codes": ["IRC R311.7.8", "IRC R312.1"]
+  },
+  {
+    "id": "irc-r312-1-1",
+    "code_ref": "IRC R312.1.1",
+    "title": "Guard Height",
+    "category": "structural",
+    "jurisdiction": "National",
+    "summary": "Guards on open sides of stairways, landings, balconies or porches that are more than 30 inches above grade shall be not less than 36 inches in height.",
+    "source": "IRC 2021 Section R312.1.1",
+    "common_questions": [
+      "How tall does deck railing need to be?",
+      "Guard rail height requirements",
+      "Porch railing height code"
+    ],
+    "notes": "Openings in guards shall not allow passage of a 4-inch diameter sphere.",
+    "related_codes": ["IRC R312.1.2", "IRC R312.1.3"]
+  },
+  {
+    "id": "irc-r403-1-4",
+    "code_ref": "IRC R403.1.4",
+    "title": "Minimum Depth of Footings",
+    "category": "structural",
+    "jurisdiction": "National",
+    "summary": "Footings shall be placed at least 12 inches below undisturbed ground surface. Where applicable, footings shall extend below the frost line.",
+    "source": "IRC 2021 Section R403.1.4",
+    "common_questions": [
+      "How deep should footings be?",
+      "Frost depth requirements",
+      "Foundation depth requirements"
+    ],
+    "notes": "Frost depth varies by location. Check local amendments for your area's frost depth requirement.",
+    "related_codes": ["IRC R403.1", "IRC R403.1.1"]
+  },
+  {
+    "id": "irc-r602-10-1",
+    "code_ref": "IRC R602.10.1",
+    "title": "Header Requirements",
+    "category": "structural",
+    "jurisdiction": "National",
+    "summary": "Headers shall be provided over each opening in load-bearing walls. Headers shall be sized according to Tables R602.7(1) and R602.7(2).",
+    "source": "IRC 2021 Section R602.10.1",
+    "common_questions": [
+      "What size header do I need?",
+      "Window header requirements",
+      "Door header size code"
+    ],
+    "notes": "Example: 4-foot window opening in a one-story building typically requires a double 2x6 header.",
+    "related_codes": ["IRC R602.7", "IRC R602.10"]
+  },
+  
+  {
+    "id": "irc-m1401-3",
+    "code_ref": "IRC M1401.3",
+    "title": "Appliance Access",
+    "category": "mechanical",
+    "jurisdiction": "National",
+    "summary": "Appliances shall be accessible for inspection, service, repair, and replacement without removing permanent construction or any other appliances.",
+    "source": "IRC 2021 Section M1401.3",
+    "common_questions": [
+      "HVAC access requirements",
+      "Furnace clearance requirements",
+      "Can I enclose my water heater?"
+    ],
+    "notes": "A level working space at least 30 inches deep and 30 inches wide shall be provided in front of the control side of the appliance.",
+    "related_codes": ["IRC M1305.1", "IRC M1307.3"]
+  },
+  {
+    "id": "irc-m1502-4-4",
+    "code_ref": "IRC M1502.4.4",
+    "title": "Return Air Limitations",
+    "category": "mechanical",
+    "jurisdiction": "National",
+    "summary": "Return air shall not be taken from a closet, bathroom, toilet room, kitchen, garage, mechanical room, furnace room, or unconditioned attic.",
+    "source": "IRC 2021 Section M1502.4.4",
+    "common_questions": [
+      "Where can return air vents be located?",
+      "Return air vent restrictions",
+      "Can return air be in bathroom?"
+    ],
+    "notes": "Return air openings cannot be within 10 feet of any appliance using fossil fuel.",
+    "related_codes": ["IRC M1602.2", "IRC G2407.4"]
+  },
+  {
+    "id": "irc-m1601-4-1",
+    "code_ref": "IRC M1601.4.1",
+    "title": "Duct Insulation - Exterior",
+    "category": "mechanical",
+    "jurisdiction": "National",
+    "summary": "Supply ducts in attics and other unconditioned spaces shall be insulated to a minimum of R-8. Return ducts shall be insulated to a minimum of R-6.",
+    "source": "IRC 2021 Section M1601.4.1",
+    "common_questions": [
+      "Do ducts in attic need insulation?",
+      "Duct insulation requirements",
+      "R-value for duct insulation"
+    ],
+    "notes": "Ducts in conditioned space may not require insulation. Check local energy code requirements.",
+    "related_codes": ["IRC N1103.3.4", "IRC M1601.4"]
+  },
+  {
+    "id": "irc-g2406-2",
+    "code_ref": "IRC G2406.2",
+    "title": "Appliance Shutoff Valve",
+    "category": "mechanical",
+    "jurisdiction": "National",
+    "summary": "Each appliance shall be provided with a shutoff valve separate from the gas meter. The shutoff valve shall be located in the same room as the appliance.",
+    "source": "IRC 2021 Section G2406.2",
+    "common_questions": [
+      "Do gas appliances need shutoff valves?",
+      "Gas line valve requirements",
+      "Where should gas shutoff be located?"
+    ],
+    "notes": "The shutoff valve shall be within 6 feet of the appliance and shall be accessible.",
+    "related_codes": ["IRC G2420.1", "IRC G2422.1"]
+  },
+  {
+    "id": "irc-m1305-1-3",
+    "code_ref": "IRC M1305.1.3",
+    "title": "Appliance Clearances",
+    "category": "mechanical",
+    "jurisdiction": "National",
+    "summary": "Appliances shall be installed with clearances from combustible materials as specified in the manufacturer's instructions and the listing.",
+    "source": "IRC 2021 Section M1305.1.3",
+    "common_questions": [
+      "Furnace clearance to combustibles",
+      "Water heater clearance requirements",
+      "HVAC equipment spacing"
+    ],
+    "notes": "Always refer to manufacturer's installation instructions for specific clearances. Typical minimum is 6 inches.",
+    "related_codes": ["IRC M1306.2", "IPC 504.3"]
+  },
+  
+  {
+    "id": "irc-r314-1",
+    "code_ref": "IRC R314.1",
+    "title": "Smoke Alarms - Where Required",
+    "category": "general",
+    "jurisdiction": "National",
+    "summary": "Smoke alarms shall be installed in each sleeping room, outside each separate sleeping area, and on each story of the dwelling including basements.",
+    "source": "IRC 2021 Section R314.1",
+    "common_questions": [
+      "Where do smoke detectors need to be?",
+      "Smoke alarm requirements",
+      "How many smoke detectors do I need?"
+    ],
+    "notes": "Smoke alarms shall be interconnected so that activation of one alarm activates all alarms in the dwelling.",
+    "related_codes": ["IRC R314.3", "IRC R314.4"]
+  },
+  {
+    "id": "irc-r315-1",
+    "code_ref": "IRC R315.1",
+    "title": "Carbon Monoxide Alarms",
+    "category": "general",
+    "jurisdiction": "National",
+    "summary": "Carbon monoxide alarms shall be installed outside of each separate sleeping area in the immediate vicinity of the bedrooms in dwelling units with fuel-burning appliances or attached garages.",
+    "source": "IRC 2021 Section R315.1",
+    "common_questions": [
+      "Do I need carbon monoxide detectors?",
+      "Where to install CO detectors?",
+      "CO alarm requirements"
+    ],
+    "notes": "Required if dwelling has fuel-burning appliances (gas furnace, water heater, fireplace) or attached garage.",
+    "related_codes": ["IRC R315.2", "IRC R315.3"]
+  },
+  {
+    "id": "irc-r310-1",
+    "code_ref": "IRC R310.1",
+    "title": "Emergency Escape and Rescue Openings",
+    "category": "general",
+    "jurisdiction": "National",
+    "summary": "Basements and every sleeping room shall have at least one operable emergency escape and rescue opening (egress window).",
+    "source": "IRC 2021 Section R310.1",
+    "common_questions": [
+      "Bedroom window size requirements",
+      "Egress window requirements",
+      "Basement bedroom window code"
+    ],
+    "notes": "Minimum opening: 5.7 square feet, minimum height 24 inches, minimum width 20 inches. Sill height maximum 44 inches from floor.",
+    "related_codes": ["IRC R310.2", "IRC R310.2.1"]
+  },
+  {
+    "id": "irc-r303-1",
+    "code_ref": "IRC R303.1",
+    "title": "Habitable Room Requirements",
+    "category": "general",
+    "jurisdiction": "National",
+    "summary": "Habitable rooms shall have an aggregate glazing area of not less than 8 percent of the floor area. The minimum openable area shall be 4 percent of floor area.",
+    "source": "IRC 2021 Section R303.1",
+    "common_questions": [
+      "How much window area is required?",
+      "Natural light requirements",
+      "Window size requirements for bedroom"
+    ],
+    "notes": "Artificial light and mechanical ventilation may be substituted where natural light and ventilation are not adequate.",
+    "related_codes": ["IRC R303.3", "IRC R303.4"]
   }
 ]
