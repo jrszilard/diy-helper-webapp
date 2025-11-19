@@ -1,39 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Import Anthropic (make sure it's installed)
 import Anthropic from '@anthropic-ai/sdk';
+import { searchBuildingCodes } from '@/lib/mcp/building-codes';
+import { searchProducts, calculateMaterials } from '@/lib/mcp/material-specs';
+import { tools } from '@/lib/mcp/tools';
+import { executeTool } from '@/lib/mcp/executor';
 
-// Initialize Anthropic client
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
 
-// Define tools (simplified for now)
-const tools = [
-  {
-    name: "search_building_codes",
-    description: "Search building codes by query",
-    input_schema: {
-      type: "object",
-      properties: {
-        query: { type: "string" }
-      },
-      required: ["query"]
-    }
-  }
-];
-
-// Simple tool executor
-async function executeTool(toolName: string, toolInput: any): Promise<string> {
-  if (toolName === "search_building_codes") {
-    return "**Building Code Result:**\n\nKitchen outlets must be spaced no more than 4 feet apart per NEC 210.52(C)(1).\n\nSource: National Electrical Code 2023";
-  }
-  return "Tool not implemented yet.";
-}
-
 export async function POST(req: NextRequest) {
   try {
-    // Check for API key
     if (!process.env.ANTHROPIC_API_KEY) {
       console.error('ANTHROPIC_API_KEY not set');
       return NextResponse.json(
@@ -42,7 +19,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Parse request body
     const body = await req.json();
     const { message, history = [] } = body;
 
@@ -55,7 +31,6 @@ export async function POST(req: NextRequest) {
 
     console.log('Received message:', message);
 
-    // Build messages array
     const messages = [
       ...history,
       {
@@ -64,7 +39,6 @@ export async function POST(req: NextRequest) {
       }
     ];
 
-    // Call Claude
     let response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5-20250929',
       max_tokens: 4096,
@@ -72,9 +46,8 @@ export async function POST(req: NextRequest) {
       messages: messages
     });
 
-    console.log('Claude response:', response);
+    console.log('Claude response received');
 
-    // Handle tool use
     while (response.stop_reason === 'tool_use') {
       const assistantContent: any[] = [];
       const toolResults: any[] = [];
@@ -123,7 +96,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Extract final response
     let finalResponse = '';
     const finalContent: any[] = [];
 
@@ -159,7 +131,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Handle OPTIONS for CORS preflight
 export async function OPTIONS(req: NextRequest) {
   return new NextResponse(null, {
     status: 200,
