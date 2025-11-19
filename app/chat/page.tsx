@@ -1,5 +1,8 @@
 'use client';
 
+// Force dynamic rendering - don't pre-render during build
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from 'react';
 import ChatInterface from '@/components/ChatInterface';
 import ProjectsSidebar from '@/components/ProjectsSidebar';
