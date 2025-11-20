@@ -25,6 +25,19 @@ export default function ChatPage() {
     return () => subscription.unsubscribe();
   }, []);
 
+  const handleProjectLinked = (projectId: string) => {
+    // When chat links to a project, update the selected project
+    // This will show the shopping list sidebar
+    supabase
+      .from('projects')
+      .select('*')
+      .eq('id', projectId)
+      .single()
+      .then(({ data }) => {
+        if (data) setSelectedProject(data);
+      });
+  };
+
   return (
     <div className="flex h-screen bg-gray-50">
       {user && (
@@ -57,14 +70,8 @@ export default function ChatPage() {
         <div className="flex-1 overflow-hidden flex">
           <div className="flex-1 overflow-hidden">
             <ChatInterface 
-              user={user} 
-              selectedProject={selectedProject}
-              onProjectSaved={() => {
-                // Reload sidebar when project is saved
-                if (user) {
-                  window.location.reload();
-                }
-              }}
+              projectId={selectedProject?.id}
+              onProjectLinked={handleProjectLinked}
             />
           </div>
           

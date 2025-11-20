@@ -2,10 +2,38 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { ShoppingCart, DollarSign } from 'lucide-react';
+import { ShoppingCart, DollarSign, Search, MapPin, TrendingDown, ExternalLink } from 'lucide-react';
+
+interface ShoppingItem {
+  id: string;
+  project_id: string;
+  product_name: string;
+  quantity: number;
+  price: number | null;
+  category: string;
+  required: boolean;
+  created_at: string;
+}
+
+interface StoreResult {
+  store: string;
+  price: number;
+  original_price?: number;
+  availability: 'in-stock' | 'limited' | 'out-of-stock' | 'online-only';
+  distance: string;
+  address: string;
+  phone: string;
+  link: string;
+  notes?: string;
+}
 
 export default function ShoppingListView({ project }: { project: any }) {
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<ShoppingItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [location, setLocation] = useState('');
+  const [searchResults, setSearchResults] = useState<Record<string, StoreResult[]>>({});
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearchPanel, setShowSearchPanel] = useState(false);
 
   useEffect(() => {
     if (project) loadItems();
@@ -21,62 +49,285 @@ export default function ShoppingListView({ project }: { project: any }) {
     if (data) setItems(data);
   };
 
+  const toggleItem = (itemId: string) => {
+    const newSelected = new Set(selectedItems);
+    if (newSelected.has(itemId)) {
+      newSelected.delete(itemId);
+    } else {
+      newSelected.add(itemId);
+    }
+    setSelectedItems(newSelected);
+  };
+
+  const handleSearchStores = async () => {
+    if (selectedItems.size === 0 || !location.trim()) return;
+    
+    setIsSearching(true);
+    const results: Record<string, StoreResult[]> = {};
+    
+    try {
+      for (const itemId of Array.from(selectedItems)) {
+        const item = items.find(i => i.id === itemId);
+        if (!item) continue;
+        
+        const response = await fetch('/api/search-stores', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            materialName: item.product_name,
+            location: location,
+            quantity: item.quantity
+          })
+        });
+        
+        const data = await response.json();
+        results[itemId] = data.results || [];
+        
+        if (data.results && data.results.length > 0) {
+          const bestPrice = Math.min(...data.results.map((r: StoreResult) => r.price));
+          await supabase
+            .from('shopping_list_items')
+            .update({ price: bestPrice })
+            .eq('id', itemId);
+        }
+      }
+      
+      setSearchResults(results);
+      await loadItems();
+    } catch (error) {
+      console.error('Error searching stores:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   if (!project) {
     return (
       <div className="p-8 text-center text-gray-400">
         <ShoppingCart className="w-16 h-16 mx-auto mb-4 opacity-50" />
-        <p>Select a project to view shopping list</p>
+        <p className="text-gray-500">Select a project to view shopping list</p>
       </div>
     );
   }
 
   const total = items.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
+  const selectedTotal = items
+    .filter(item => selectedItems.has(item.id))
+    .reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
+
+  const groupedItems = items.reduce((acc, item) => {
+    if (!acc[item.category]) acc[item.category] = [];
+    acc[item.category].push(item);
+    return acc;
+  }, {} as Record<string, ShoppingItem[]>);
 
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2">{project.name}</h2>
+        <h2 className="text-2xl font-bold mb-2 text-gray-900">{project.name}</h2>
         <p className="text-gray-600 text-sm">{project.description}</p>
       </div>
 
       {items.length === 0 ? (
-        <div className="text-center py-12 text-gray-400">
-          <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-50" />
-          <p>No items yet</p>
-          <p className="text-sm mt-1">Products will appear here automatically</p>
+        <div className="text-center py-12">
+          <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-50 text-gray-400" />
+          <p className="text-gray-500">No items yet</p>
+          <p className="text-sm mt-1 text-gray-400">Products will appear here automatically</p>
         </div>
       ) : (
         <div>
-          <div className="bg-white rounded-xl border border-gray-200 divide-y">
-            {items.map((item) => (
-              <div key={item.id} className="p-4 flex justify-between items-center">
-                <div className="flex-1">
-                  <div className="font-semibold">{item.product_name}</div>
-                  <div className="text-sm text-gray-500">Qty: {item.quantity}</div>
-                </div>
-                {item.price && (
-                  <div className="text-right">
-                    <div className="font-bold text-green-600">${item.price.toFixed(2)}</div>
-                    {item.quantity > 1 && (
-                      <div className="text-xs text-gray-500">
-                        ${(item.price * item.quantity).toFixed(2)} total
+          <div className="mb-4 flex gap-2">
+            <button
+              onClick={() => setShowSearchPanel(!showSearchPanel)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+              <Search className="w-4 h-4" />
+              {showSearchPanel ? 'Hide Search' : 'Search Local Stores'}
+            </button>
+            {selectedItems.size > 0 && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg font-medium">
+                {selectedItems.size} item(s) selected
+              </div>
+            )}
+          </div>
+
+          {showSearchPanel && (
+            <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-xl">
+              <div className="flex items-center gap-2 mb-4">
+                <MapPin className="w-5 h-5 text-gray-600" />
+                <h3 className="font-semibold text-gray-900">Search Local Stores</h3>
+              </div>
+              
+              <div className="flex gap-2 mb-3">
+                <input
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="Enter location (e.g., Portsmouth, NH)"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
+                />
+                <button
+                  onClick={handleSearchStores}
+                  disabled={selectedItems.size === 0 || !location.trim() || isSearching}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                >
+                  {isSearching ? 'Searching...' : 'Search'}
+                </button>
+              </div>
+              
+              <p className="text-sm text-gray-600">
+                💡 Select items below with checkboxes, then search to compare prices at nearby stores
+              </p>
+            </div>
+          )}
+
+          <div className="space-y-6">
+            {Object.entries(groupedItems).map(([category, categoryItems]) => (
+              <div key={category}>
+                <h3 className="text-lg font-semibold text-gray-800 mb-3 uppercase tracking-wide">
+                  {category}
+                </h3>
+                
+                <div className="bg-white rounded-xl border border-gray-200 divide-y">
+                  {categoryItems.map((item) => (
+                    <div key={item.id}>
+                      <div className="p-4 flex items-center gap-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.has(item.id)}
+                          onChange={() => toggleItem(item.id)}
+                          className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                        />
+                        
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-gray-900">{item.product_name}</span>
+                            {item.required && (
+                              <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-medium">
+                                Required
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-600">Qty: {item.quantity}</div>
+                        </div>
+                        
+                        {item.price && (
+                          <div className="text-right">
+                            <div className="font-bold text-green-600">${item.price.toFixed(2)}</div>
+                            {item.quantity > 1 && (
+                              <div className="text-xs text-gray-600">
+                                ${(item.price * item.quantity).toFixed(2)} total
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                )}
+                      
+                      {searchResults[item.id] && searchResults[item.id].length > 0 && (
+                        <div className="px-4 pb-4 bg-gray-50">
+                          <div className="flex items-center gap-2 mb-2">
+                            <TrendingDown className="w-4 h-4 text-green-600" />
+                            <span className="text-sm font-semibold text-gray-800">
+                              Available at {searchResults[item.id].length} stores:
+                            </span>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            {searchResults[item.id].map((result, idx) => {
+                              const isBestPrice = result.price === Math.min(...searchResults[item.id].map(r => r.price));
+                              
+                              return (
+                                <div
+                                  key={idx}
+                                  className={`p-3 rounded-lg border ${
+                                    isBestPrice 
+                                      ? 'border-green-500 bg-green-50' 
+                                      : 'border-gray-200 bg-white'
+                                  }`}
+                                >
+                                  <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-semibold text-gray-900">{result.store}</span>
+                                        {isBestPrice && (
+                                          <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded font-medium">
+                                            ⭐ BEST PRICE
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="text-xs text-gray-600">{result.distance} away</div>
+                                    </div>
+                                    
+                                    <div className="text-right">
+                                      <div className="text-lg font-bold text-green-600">
+                                        ${result.price.toFixed(2)}
+                                      </div>
+                                      {result.original_price && result.original_price > result.price && (
+                                        <div className="text-xs text-gray-500 line-through">
+                                          ${result.original_price.toFixed(2)}
+                                        </div>
+                                      )}
+                                      <div className={`text-xs px-2 py-0.5 rounded inline-block mt-1 font-medium ${
+                                        result.availability === 'in-stock' ? 'bg-green-100 text-green-800' :
+                                        result.availability === 'limited' ? 'bg-yellow-100 text-yellow-800' :
+                                        result.availability === 'out-of-stock' ? 'bg-red-100 text-red-800' :
+                                        'bg-blue-100 text-blue-800'
+                                      }`}>
+                                        {result.availability.replace('-', ' ').toUpperCase()}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="text-xs text-gray-700 mb-2">
+                                    <div className="text-gray-700">{result.address}</div>
+                                    <div className="text-gray-700">📞 {result.phone}</div>
+                                    {result.notes && (
+                                      <div className="text-gray-600 italic mt-1">{result.notes}</div>
+                                    )}
+                                  </div>
+                                  
+                                  <a 
+                                    href={result.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium"
+                                  >
+                                    View Product <ExternalLink className="w-3 h-3" />
+                                  </a>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
 
-          {total > 0 && (
-            <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-blue-600" />
-                <span className="font-bold">Estimated Total:</span>
+          <div className="mt-6 space-y-3">
+            {selectedItems.size > 0 && selectedTotal > 0 && (
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShoppingCart className="w-5 h-5 text-blue-600" />
+                  <span className="font-bold text-blue-900">Selected Items Total:</span>
+                </div>
+                <span className="text-2xl font-bold text-blue-600">${selectedTotal.toFixed(2)}</span>
               </div>
-              <span className="text-2xl font-bold text-blue-600">${total.toFixed(2)}</span>
-            </div>
-          )}
+            )}
+            
+            {total > 0 && (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-green-600" />
+                  <span className="font-bold text-green-900">Estimated Total:</span>
+                </div>
+                <span className="text-2xl font-bold text-green-600">${total.toFixed(2)}</span>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
