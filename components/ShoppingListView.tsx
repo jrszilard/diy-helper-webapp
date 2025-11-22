@@ -19,7 +19,7 @@ interface StoreResult {
   store: string;
   price: number;
   original_price?: number;
-  availability: 'in-stock' | 'limited' | 'out-of-stock' | 'online-only';
+  availability: 'in-stock' | 'limited' | 'out-of-stock' | 'online-only' | 'check-online';
   distance: string;
   address: string;
   phone: string;
@@ -60,42 +60,68 @@ export default function ShoppingListView({ project }: { project: any }) {
   };
 
   const handleSearchStores = async () => {
-    if (selectedItems.size === 0 || !location.trim()) return;
+    if (selectedItems.size === 0 || !location.trim()) {
+      console.log('Cannot search: no items selected or location missing');
+      return;
+    }
+    
+    console.log('Starting store search...');
+    console.log('Selected items:', Array.from(selectedItems));
+    console.log('Location:', location);
     
     setIsSearching(true);
     const results: Record<string, StoreResult[]> = {};
     
     try {
-      for (const itemId of Array.from(selectedItems)) {
-        const item = items.find(i => i.id === itemId);
-        if (!item) continue;
+      const itemsArray = Array.from(selectedItems);
+      
+      for (let i = 0; i < itemsArray.length; i++) {
+        const itemId = itemsArray[i];
+        const item = items.find(it => it.id === itemId);
+        
+        if (!item) {
+          console.log('Item not found for ID:', itemId);
+          continue;
+        }
+        
+        console.log(`Searching ${i + 1}/${itemsArray.length}: ${item.product_name}`);
+        
+        const requestBody = {
+          materialName: item.product_name,
+          location: location,
+          quantity: item.quantity
+        };
         
         const response = await fetch('/api/search-stores', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            materialName: item.product_name,
-            location: location,
-            quantity: item.quantity
-          })
+          body: JSON.stringify(requestBody)
         });
         
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('API error:', response.status, errorText);
+          continue;
+        }
+        
         const data = await response.json();
+        console.log('Search results for', item.product_name, ':', data);
+        
         results[itemId] = data.results || [];
         
-        if (data.results && data.results.length > 0) {
-          const bestPrice = Math.min(...data.results.map((r: StoreResult) => r.price));
-          await supabase
-            .from('shopping_list_items')
-            .update({ price: bestPrice })
-            .eq('id', itemId);
+        // Add 3 second delay between items to avoid rate limiting
+        if (i < itemsArray.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 3000));
         }
       }
       
+      console.log('Search complete. Results:', results);
       setSearchResults(results);
-      await loadItems();
     } catch (error) {
       console.error('Error searching stores:', error);
+      alert('Error searching stores: ' + (error as Error).message);
     } finally {
       setIsSearching(false);
     }
@@ -176,7 +202,7 @@ export default function ShoppingListView({ project }: { project: any }) {
               </div>
               
               <p className="text-sm text-gray-600">
-                💡 Select items below with checkboxes, then search to compare prices at nearby stores
+                💡 Select items below with checkboxes, then search to find products at nearby stores
               </p>
             </div>
           )}
@@ -211,7 +237,7 @@ export default function ShoppingListView({ project }: { project: any }) {
                           <div className="text-sm text-gray-600">Qty: {item.quantity}</div>
                         </div>
                         
-                        {item.price && (
+                        {item.price && item.price > 0 && (
                           <div className="text-right">
                             <div className="font-bold text-green-600">${item.price.toFixed(2)}</div>
                             {item.quantity > 1 && (
@@ -228,75 +254,70 @@ export default function ShoppingListView({ project }: { project: any }) {
                           <div className="flex items-center gap-2 mb-2">
                             <TrendingDown className="w-4 h-4 text-green-600" />
                             <span className="text-sm font-semibold text-gray-800">
-                              Available at {searchResults[item.id].length} stores:
+                              Found at {searchResults[item.id].length} stores:
                             </span>
                           </div>
                           
                           <div className="space-y-2">
-                            {searchResults[item.id].map((result, idx) => {
-                              const isBestPrice = result.price === Math.min(...searchResults[item.id].map(r => r.price));
-                              
-                              return (
-                                <div
-                                  key={idx}
-                                  className={`p-3 rounded-lg border ${
-                                    isBestPrice 
-                                      ? 'border-green-500 bg-green-50' 
-                                      : 'border-gray-200 bg-white'
-                                  }`}
-                                >
-                                  <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                      <div className="flex items-center gap-2">
-                                        <span className="font-semibold text-gray-900">{result.store}</span>
-                                        {isBestPrice && (
-                                          <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded font-medium">
-                                            ⭐ BEST PRICE
-                                          </span>
-                                        )}
-                                      </div>
-                                      <div className="text-xs text-gray-600">{result.distance} away</div>
+                            {searchResults[item.id].map((result, idx) => (
+                              <div
+                                key={idx}
+                                className="p-3 rounded-lg border border-gray-200 bg-white"
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-semibold text-gray-900">{result.store}</span>
                                     </div>
-                                    
-                                    <div className="text-right">
-                                      <div className="text-lg font-bold text-green-600">
-                                        ${result.price.toFixed(2)}
-                                      </div>
-                                      {result.original_price && result.original_price > result.price && (
-                                        <div className="text-xs text-gray-500 line-through">
-                                          ${result.original_price.toFixed(2)}
+                                    <div className="text-xs text-gray-600">{result.distance}</div>
+                                  </div>
+                                  
+                                  <div className="text-right">
+                                    {result.price > 0 ? (
+                                      <>
+                                        <div className="text-lg font-bold text-green-600">
+                                          ${result.price.toFixed(2)}
                                         </div>
-                                      )}
-                                      <div className={`text-xs px-2 py-0.5 rounded inline-block mt-1 font-medium ${
-                                        result.availability === 'in-stock' ? 'bg-green-100 text-green-800' :
-                                        result.availability === 'limited' ? 'bg-yellow-100 text-yellow-800' :
-                                        result.availability === 'out-of-stock' ? 'bg-red-100 text-red-800' :
-                                        'bg-blue-100 text-blue-800'
-                                      }`}>
-                                        {result.availability.replace('-', ' ').toUpperCase()}
+                                        {result.original_price && result.original_price > result.price && (
+                                          <div className="text-xs text-gray-500 line-through">
+                                            ${result.original_price.toFixed(2)}
+                                          </div>
+                                        )}
+                                      </>
+                                    ) : (
+                                      <div className="text-sm font-semibold text-blue-600">
+                                        See website
                                       </div>
+                                    )}
+                                    <div className={`text-xs px-2 py-0.5 rounded inline-block mt-1 font-medium ${
+                                      result.availability === 'in-stock' ? 'bg-green-100 text-green-800' :
+                                      result.availability === 'limited' ? 'bg-yellow-100 text-yellow-800' :
+                                      result.availability === 'out-of-stock' ? 'bg-red-100 text-red-800' :
+                                      'bg-blue-100 text-blue-800'
+                                    }`}>
+                                      {result.availability.replace('-', ' ').toUpperCase()}
                                     </div>
                                   </div>
-                                  
-                                  <div className="text-xs text-gray-700 mb-2">
-                                    <div className="text-gray-700">{result.address}</div>
-                                    <div className="text-gray-700">📞 {result.phone}</div>
-                                    {result.notes && (
-                                      <div className="text-gray-600 italic mt-1">{result.notes}</div>
-                                    )}
-                                  </div>
-                                  
-                                  <a 
-                                    href={result.link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium"
-                                  >
-                                    View Product <ExternalLink className="w-3 h-3" />
-                                  </a>
                                 </div>
-                              );
-                            })}
+                                
+                                <div className="text-xs text-gray-700 mb-2">
+                                  <div className="text-gray-700">{result.address}</div>
+                                  <div className="text-gray-700">📞 {result.phone}</div>
+                                  {result.notes && (
+                                    <div className="text-gray-600 italic mt-1">{result.notes}</div>
+                                  )}
+                                </div>
+
+                                <a 
+                                  href={result.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium"
+                                >
+                                  View Product <ExternalLink className="w-3 h-3" />
+                                </a>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       )}

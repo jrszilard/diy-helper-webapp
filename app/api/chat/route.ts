@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
+import { webSearch, webFetch } from '@/lib/search';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -296,6 +297,34 @@ const tools = [
       },
       required: ["material_name", "location"]
     }
+  },
+  {
+    name: "web_search",
+    description: "Search the web for current information. Use this to find real-time product prices, store locations, and availability.",
+    input_schema: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "The search query"
+        }
+      },
+      required: ["query"]
+    }
+  },
+  {
+    name: "web_fetch",
+    description: "Fetch and read the contents of a web page at a given URL",
+    input_schema: {
+      type: "object",
+      properties: {
+        url: {
+          type: "string",
+          description: "The URL to fetch"
+        }
+      },
+      required: ["url"]
+    }
   }
 ];
 
@@ -386,65 +415,42 @@ If you cannot find specific local codes, provide the national code reference and
   }
 
   if (toolName === "search_local_stores") {
-    const { material_name, city, state, radius_miles = 10 } = toolInput;
-    
-    return `Please search for "${material_name}" at local stores near ${city}, ${state}:
+    const { material_name, city, state, radius_miles = 25 } = toolInput;
+      
+    return `YOU MUST use web_search and web_fetch tools to find REAL products. DO NOT make up information.
 
-Follow this process:
-1. Use web_search to find: "${material_name} Home Depot ${city} ${state} in stock"
-2. Use web_search to find: "${material_name} Lowes ${city} ${state} price"
-3. Use web_search to find: "${material_name} Ace Hardware ${city} ${state}"
-4. Use web_fetch on store product pages to get:
-   - Exact pricing
-   - In-stock status
-   - Store locations within ${radius_miles} miles
-   - Online ordering/pickup options
-   - Product specifications
-5. Extract and format:
-   - Store name and address
-   - Price (including any sales/discounts)
-   - Availability (In Stock / Limited / Out of Stock / Order Online)
-   - Distance from ${city}
-   - Direct product link
-   - Store phone number
+    Step 1: Call web_search with query: "site:homedepot.com ${material_name}"
+    Step 2: Call web_search with query: "site:lowes.com ${material_name}"  
+    Step 3: Call web_search with query: "site:acehardware.com ${material_name}"
 
-Present results in a comparison table format with the best deal highlighted.
-Include a note about checking store websites for real-time availability.`;
+    Step 4: For each product URL found in search results, call web_fetch to get the actual price and details
+
+    Step 5: Search for store locations:
+    - Call web_search with: "Home Depot ${city} ${state} store location"
+    - Call web_search with: "Lowes ${city} ${state} store location"
+
+    CRITICAL RULES:
+    - ONLY return products you found via web_search
+    - ONLY include URLs that were in the search results
+    - If web_search returns no results for a store, DO NOT include that store
+    - DO NOT make up prices, URLs, or availability
+    - You MUST call web_search at least 3 times before responding
+
+    Return results ONLY after you have called web_search multiple times.`;
+    }
+
+  if (toolName === "web_search") {
+    console.log('🔍 WEB_SEARCH CALLED with query:', toolInput.query);
+    const result = await webSearch(toolInput.query);
+    console.log('📊 Search returned:', result.substring(0, 200));
+    return result;
   }
-  
-  if (toolName === "compare_store_prices") {
-    const { material_name, stores, location } = toolInput;
-    
-    const storeList = stores && stores.length > 0 
-      ? stores.join(', ')
-      : 'Home Depot, Lowes, Ace Hardware';
-    
-    return `Please compare prices for "${material_name}" across stores near ${location}:
 
-Follow this process:
-1. For each store (${storeList}):
-   - Use web_search: "${material_name} [STORE NAME] ${location} price"
-   - Use web_fetch on product pages
-   - Extract current price, sale prices, and bulk discounts
-2. Create a comparison showing:
-   - Store name
-   - Regular price
-   - Sale price (if applicable)
-   - Price per unit (if sold in bulk)
-   - Availability
-   - Delivery/pickup options
-   - Total cost for quantity needed
-3. Identify and highlight:
-   - Lowest price
-   - Best value (considering quality/quantity)
-   - Fastest availability
-   - Free delivery options
-4. Include:
-   - Direct purchase links
-   - Store locations
-   - Any promo codes or coupons found
-
-Present as a clear comparison table with a recommendation for the best option.`;
+  if (toolName === "web_fetch") {
+    console.log('📄 WEB_FETCH CALLED with URL:', toolInput.url);
+    const result = await webFetch(toolInput.url);
+    console.log('📄 Fetch returned:', result.substring(0, 200));
+    return result;
   }
 
   return "Tool not implemented yet.";
@@ -538,7 +544,7 @@ export async function POST(req: NextRequest) {
         max_tokens: 4096,
         system: systemPrompt,
         tools: tools as any,
-        messages: messages
+        messages: messages,
       });
     }
 
