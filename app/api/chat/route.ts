@@ -38,6 +38,40 @@ const anthropic = new Anthropic({
 
 const systemPrompt = `You are a helpful DIY assistant specializing in home improvement projects. You have access to several tools:
 
+**CRITICAL WORKFLOW - FOLLOW THIS EXACTLY:**
+
+1. User asks about a DIY project (e.g., "I want to install a ceiling fan")
+2. You provide helpful guidance and information about the project
+3. You ALWAYS end with: "Would you like to see some helpful videos of similar projects?"
+4. When user says YES or wants videos → **IMMEDIATELY call search_project_videos tool with the project description**
+5. Display video results to user with titles, descriptions, and links
+6. After showing videos, ask: "Would you like me to create a complete materials list for this project?"
+7. When user agrees to materials list → **IMMEDIATELY call extract_materials_list tool with ALL materials**
+8. User sees "Save Materials to Project" dialog
+9. After saving, materials appear in their shopping list with checkboxes
+10. User can then search local stores for prices
+
+**Video Search Guidelines:**
+- Search for instructional/tutorial videos, not product reviews
+- Use specific, actionable queries like "how to install ceiling fan" not just "ceiling fan"
+- Present videos in a clear, organized format with titles and links
+- Focus on beginner-friendly, comprehensive tutorials
+
+**WRONG - DO NOT DO THIS:**
+User: "I want to install a ceiling fan"
+You: "Here are the materials you need..." ❌ WRONG - Skipped video step!
+
+**CORRECT - DO THIS:**
+User: "I want to install a ceiling fan"
+You: [Provide helpful info about ceiling fans, safety, codes]
+     "Would you like to see some helpful videos of similar projects?" ✅ CORRECT
+
+User: "Yes please"
+You: [IMMEDIATELY call search_project_videos tool] ✅ CORRECT
+
+[After videos shown]
+You: "Would you like me to create a complete materials list for this project?" ✅ CORRECT
+
 **CRITICAL: Tool Selection Rules**
 - If user mentions a SPECIFIC CITY or STATE → ALWAYS use search_local_codes
 - If user asks about "my area", "local", "here" → ALWAYS use search_local_codes  
@@ -102,16 +136,19 @@ You can now save these materials to your project!"
 5. extract_materials_list - **REQUIRED when user wants materials list. MUST include markers in your response.**
 6. search_local_stores - Find materials at nearby stores with prices and availability
 7. compare_store_prices - Compare prices across stores for best deals
+8. search_project_videos - Search for DIY tutorial videos
 
 **Conversation Flow:**
 1. User asks about a project (e.g., "Help me install a ceiling fan in Portsmouth NH")
 2. You use search_local_codes to explain the process, codes, and requirements
-3. You ALWAYS end with: "Would you like me to create a complete materials list for this project?"
-4. When user says YES or requests materials list → call extract_materials_list with ALL materials
-5. Include the COMPLETE tool result (with markers) in your response
-6. User sees "Save Materials to Project" dialog
-7. After saving, materials appear in shopping list with checkboxes
-8. User can search local stores for prices
+3. You ALWAYS end with: "Would you like to see some helpful videos of similar projects?"
+4. User says yes → call search_project_videos
+5. After videos, ask: "Would you like me to create a complete materials list for this project?"
+6. When user says YES or requests materials list → call extract_materials_list with ALL materials
+7. Include the COMPLETE tool result (with markers) in your response
+8. User sees "Save Materials to Project" dialog
+9. After saving, materials appear in shopping list with checkboxes
+10. User can search local stores for prices
 
 **search_local_codes usage:**
 - "What do I need for an addition in Portsmouth, NH?" → search_local_codes
@@ -149,6 +186,25 @@ After user saves materials to project:
 - When calling extract_materials_list, INCLUDE THE COMPLETE TOOL RESULT WITH MARKERS in your response`;
 
 const tools = [
+  {
+    name: "search_project_videos",
+    description: "Search for helpful DIY tutorial videos related to a project. Use this when the user wants to see videos of similar projects or learn visually how to complete a task.",
+    input_schema: {
+      type: "object",
+      properties: {
+        project_query: {
+          type: "string",
+          description: "The DIY project to search videos for (e.g., 'ceiling fan installation', 'deck building', 'kitchen backsplash tile')"
+        },
+        max_results: {
+          type: "number",
+          description: "Maximum number of video results to return (default: 5)",
+          default: 5
+        }
+      },
+      required: ["project_query"]
+    }
+  },
   {
     name: "search_building_codes",
     description: "Search NATIONAL building codes ONLY (NEC, IRC, IBC). Use this ONLY when the user asks about national/international codes and does NOT mention any specific city, state, or location. If a location is mentioned, use search_local_codes instead.",
@@ -367,21 +423,80 @@ Follow this process:
 If you cannot find specific local codes, provide the national code reference and explain that local amendments may apply.`;
   }
   
+  if (toolName === "search_project_videos") {
+    const { project_query, max_results = 5 } = toolInput;
+    
+    try {
+      console.log('🎥 Searching videos for:', project_query);
+      
+      // Use Brave Search API to find videos
+      const searchQuery = `${project_query} DIY tutorial how to`;
+      const videoResponse = await fetch(
+        `https://api.search.brave.com/res/v1/videos/search?q=${encodeURIComponent(searchQuery)}&count=${max_results}`,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Accept-Encoding': 'gzip',
+            'X-Subscription-Token': process.env.BRAVE_SEARCH_API_KEY || ''
+          }
+        }
+      );
+      
+      if (!videoResponse.ok) {
+        throw new Error(`Brave Search API error: ${videoResponse.status}`);
+      }
+      
+      const data = await videoResponse.json();
+      const videos = data.results || [];
+      
+      console.log(`📹 Found ${videos.length} videos`);
+      
+      const formattedResults = videos.map((video: any) => ({
+        title: video.title || 'Untitled Video',
+        description: video.description || 'No description available',
+        url: video.url || video.page_url || '#',
+        thumbnail: video.thumbnail?.src || null,
+        duration: video.meta_url?.duration || null,
+        channel: video.creator || video.meta_url?.hostname || 'Unknown',
+        views: video.video?.views || null,
+        published: video.age || null
+      }));
+      
+      return JSON.stringify({
+        success: true,
+        query: project_query,
+        videos: formattedResults,
+        count: formattedResults.length,
+        message: formattedResults.length > 0 
+          ? `Found ${formattedResults.length} helpful video tutorials`
+          : 'No videos found for this search'
+      });
+      
+    } catch (error: any) {
+      console.error('❌ Video search error:', error);
+      return JSON.stringify({
+        success: false,
+        error: error.message,
+        message: 'Unable to search for videos at this time. Please try again later.'
+      });
+    }
+  }
+    
   if (toolName === "extract_materials_list") {
     const { project_description, materials } = toolInput;
     
-  // Log what we received
-  console.log('extract_materials_list called with:', {
-    project_description,
-    materials_count: materials?.length || 0,
-    materials: materials
-  });
-  
-  // Validate we have materials
-  if (!materials || materials.length === 0) {
-    console.error('❌ No materials provided to extract_materials_list!');
-    return "❌ Error: No materials were provided. Please list the specific materials needed for this project.";
-  }
+    // Log what we received
+    console.log('extract_materials_list called with:', {
+      project_description,
+      materials_count: materials?.length || 0,
+      materials: materials
+    });
+    
+    // Validate we have materials
+    if (!materials || materials.length === 0) {
+      console.error('❌ No materials provided to extract_materials_list!');
+      return "❌ Error: No materials were provided. Please list the specific materials needed for this project.";
+    }
 
     // Don't save to database yet - let user choose
     let response = `**Materials List for ${project_description}**\n\n`;
@@ -419,25 +534,25 @@ If you cannot find specific local codes, provide the national code reference and
       
     return `YOU MUST use web_search and web_fetch tools to find REAL products. DO NOT make up information.
 
-    Step 1: Call web_search with query: "site:homedepot.com ${material_name}"
-    Step 2: Call web_search with query: "site:lowes.com ${material_name}"  
-    Step 3: Call web_search with query: "site:acehardware.com ${material_name}"
+Step 1: Call web_search with query: "site:homedepot.com ${material_name}"
+Step 2: Call web_search with query: "site:lowes.com ${material_name}"  
+Step 3: Call web_search with query: "site:acehardware.com ${material_name}"
 
-    Step 4: For each product URL found in search results, call web_fetch to get the actual price and details
+Step 4: For each product URL found in search results, call web_fetch to get the actual price and details
 
-    Step 5: Search for store locations:
-    - Call web_search with: "Home Depot ${city} ${state} store location"
-    - Call web_search with: "Lowes ${city} ${state} store location"
+Step 5: Search for store locations:
+- Call web_search with: "Home Depot ${city} ${state} store location"
+- Call web_search with: "Lowes ${city} ${state} store location"
 
-    CRITICAL RULES:
-    - ONLY return products you found via web_search
-    - ONLY include URLs that were in the search results
-    - If web_search returns no results for a store, DO NOT include that store
-    - DO NOT make up prices, URLs, or availability
-    - You MUST call web_search at least 3 times before responding
+CRITICAL RULES:
+- ONLY return products you found via web_search
+- ONLY include URLs that were in the search results
+- If web_search returns no results for a store, DO NOT include that store
+- DO NOT make up prices, URLs, or availability
+- You MUST call web_search at least 3 times before responding
 
-    Return results ONLY after you have called web_search multiple times.`;
-    }
+Return results ONLY after you have called web_search multiple times.`;
+  }
 
   if (toolName === "web_search") {
     console.log('🔍 WEB_SEARCH CALLED with query:', toolInput.query);

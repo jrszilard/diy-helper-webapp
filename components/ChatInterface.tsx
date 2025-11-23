@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import ReactMarkdown from 'react-markdown';
+import VideoResults from './VideoResults';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -93,9 +94,13 @@ export default function ChatInterface({
   };
 
   const cleanMessageContent = (content: string): string => {
-    return content.replace(/---MATERIALS_DATA---[\s\S]*?---END_MATERIALS_DATA---/g, '').trim();
+    // Remove both materials data and video data markers
+    return content
+      .replace(/---MATERIALS_DATA---[\s\S]*?---END_MATERIALS_DATA---/g, '')
+      .replace(/\{[^{}]*"success":\s*true[^{}]*"videos":\s*\[[^\]]*\][^{}]*\}/gs, '')
+      .trim();
   };
-
+  
   const sendMessage = async () => {
     if (!input.trim()) return;
 
@@ -240,6 +245,27 @@ export default function ChatInterface({
       alert('An error occurred while creating project.');
     }
   };
+  const parseVideoResults = (content: string): { found: boolean; videos?: any[]; query?: string } => {
+    try {
+      // Look for the tool result JSON that contains video data
+      const jsonMatch = content.match(/\{[^{}]*"success":\s*true[^{}]*"videos":\s*\[[^\]]*\][^{}]*\}/s);
+      
+      if (jsonMatch) {
+        const data = JSON.parse(jsonMatch[0]);
+        if (data.success && data.videos && Array.isArray(data.videos)) {
+          return {
+            found: true,
+            videos: data.videos,
+            query: data.query || 'Project Tutorial'
+          };
+        }
+      }
+    } catch (e) {
+      console.error('Error parsing video results:', e);
+    }
+    
+    return { found: false };
+  };
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -255,23 +281,39 @@ export default function ChatInterface({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
+        {messages.map((msg, idx) => {
+          // ✅ NEW: Check if this message contains video results
+          const videoResults = msg.role === 'assistant' ? parseVideoResults(msg.content) : { found: false };
+          
+          return (
             <div
-              className={`max-w-3xl rounded-lg p-4 ${
-                msg.role === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white border border-gray-200 text-gray-900'
-              }`}
+              key={idx}
+              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={`prose prose-sm max-w-none ${
-                msg.role === 'user' 
-                  ? 'prose-invert' 
-                  : 'prose-gray'
-              }`}>
+              <div
+                className={`max-w-3xl rounded-lg ${
+                  msg.role === 'user'
+                    ? 'bg-blue-600 text-white p-4'
+                    : 'bg-transparent'  // ✅ CHANGED: was 'bg-white border...'
+                }`}
+              >
+                {/* ✅ NEW: Render video results if found */}
+                {videoResults.found && (
+                  <div className="mb-4">
+                    <VideoResults 
+                      videos={videoResults.videos || []} 
+                      projectQuery={videoResults.query || 'Project'}
+                    />
+                  </div>
+                )}
+
+                {/* ✅ NEW: Separate div for text content */}
+                <div className={msg.role === 'user' ? '' : 'bg-white border border-gray-200 text-gray-900 rounded-lg p-4'}>
+                  <div className={`prose prose-sm max-w-none ${
+                    msg.role === 'user' 
+                      ? 'prose-invert' 
+                      : 'prose-gray'
+                  }`}>
                 <ReactMarkdown
                   components={{
                     p: ({ children }) => (
@@ -358,7 +400,9 @@ export default function ChatInterface({
               </div>
             </div>
           </div>
-        ))}
+        </div>
+        );
+      })}
 
         {isLoading && (
           <div className="flex justify-start">
