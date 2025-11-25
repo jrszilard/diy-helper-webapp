@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import ReactMarkdown from 'react-markdown';
 import VideoResults from './VideoResults';
+import { Package, X } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -19,16 +20,25 @@ interface ExtractedMaterials {
     estimated_price: string;
     required: boolean;
   }>;
+  owned_items?: Array<{
+    name: string;
+    quantity: string;
+    category: string;
+    ownedAs: string;
+  }>;
+  total_estimate?: number;
 }
 
 export default function ChatInterface({ 
   projectId: initialProjectId,
   onProjectLinked,
-  userId
+  userId,
+  onOpenInventory
 }: { 
   projectId?: string;
   onProjectLinked?: (projectId: string) => void;
   userId?: string;
+  onOpenInventory?: () => void;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -40,12 +50,28 @@ export default function ChatInterface({
   const [newProjectName, setNewProjectName] = useState('');
   const [showCreateProjectDialog, setShowCreateProjectDialog] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Inventory notification state
+  const [inventoryNotification, setInventoryNotification] = useState<{
+    added: string[];
+    existing: string[];
+  } | null>(null);
 
   useEffect(() => {
     if (userId) {
       loadProjects();
     }
   }, [userId]);
+
+  // Detect inventory updates when messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === 'assistant') {
+        detectInventoryUpdate(lastMessage.content);
+      }
+    }
+  }, [messages]);
 
   const loadProjects = async () => {
     try {
@@ -81,6 +107,26 @@ export default function ChatInterface({
     scrollToBottom();
   }, [messages]);
 
+  // Detect inventory updates in assistant messages
+  const detectInventoryUpdate = (content: string) => {
+    const inventoryMatch = content.match(
+      /---INVENTORY_UPDATE---\n([\s\S]*?)\n---END_INVENTORY_UPDATE---/
+    );
+    
+    if (inventoryMatch) {
+      try {
+        const data = JSON.parse(inventoryMatch[1]);
+        if (data.added?.length > 0 || data.existing?.length > 0) {
+          setInventoryNotification(data);
+          // Auto-dismiss after 5 seconds
+          setTimeout(() => setInventoryNotification(null), 5000);
+        }
+      } catch (e) {
+        console.error('Error parsing inventory update:', e);
+      }
+    }
+  };
+
   const extractMaterialsData = (content: string): ExtractedMaterials | null => {
     const match = content.match(/---MATERIALS_DATA---([\s\S]*?)---END_MATERIALS_DATA---/);
     if (match && match[1]) {
@@ -94,11 +140,35 @@ export default function ChatInterface({
   };
 
   const cleanMessageContent = (content: string): string => {
-    // Remove both materials data and video data markers
+    // Remove all data markers from displayed content
     return content
       .replace(/---MATERIALS_DATA---[\s\S]*?---END_MATERIALS_DATA---/g, '')
+      .replace(/---INVENTORY_UPDATE---[\s\S]*?---END_INVENTORY_UPDATE---/g, '')
+      .replace(/---INVENTORY_DATA---[\s\S]*?---END_INVENTORY_DATA---/g, '')
       .replace(/\{[^{}]*"success":\s*true[^{}]*"videos":\s*\[[^\]]*\][^{}]*\}/gs, '')
       .trim();
+  };
+
+  const parseVideoResults = (content: string): { found: boolean; videos?: any[]; query?: string } => {
+    try {
+      // Look for the tool result JSON that contains video data
+      const jsonMatch = content.match(/\{[^{}]*"success":\s*true[^{}]*"videos":\s*\[[^\]]*\][^{}]*\}/s);
+      
+      if (jsonMatch) {
+        const data = JSON.parse(jsonMatch[0]);
+        if (data.success && data.videos && Array.isArray(data.videos)) {
+          return {
+            found: true,
+            videos: data.videos,
+            query: data.query || 'Project Tutorial'
+          };
+        }
+      }
+    } catch (e) {
+      console.error('Error parsing video results:', e);
+    }
+    
+    return { found: false };
   };
   
   const sendMessage = async () => {
@@ -116,7 +186,8 @@ export default function ChatInterface({
         body: JSON.stringify({
           message: userMessage,
           history: messages,
-          project_id: projectId
+          project_id: projectId,
+          userId: userId // Pass userId for inventory operations
         })
       });
 
@@ -125,7 +196,7 @@ export default function ChatInterface({
       if (data.response) {
         const materials = extractMaterialsData(data.response);
         
-        if (materials) {
+        if (materials && materials.materials && materials.materials.length > 0) {
           setExtractedMaterials(materials);
           setShowSaveDialog(true);
         }
@@ -160,6 +231,7 @@ export default function ChatInterface({
     }
 
     try {
+      // Only save items that need to be purchased (not owned items)
       const itemsToInsert = extractedMaterials.materials.map((mat) => ({
         project_id: targetProjectId,
         user_id: currentUserId,
@@ -167,7 +239,7 @@ export default function ChatInterface({
         quantity: parseInt(mat.quantity) || 1,
         category: mat.category || 'general',
         required: mat.required !== false,
-        price: null
+        price: mat.estimated_price ? parseFloat(mat.estimated_price) : null
       }));
 
       const { data, error } = await supabase
@@ -183,14 +255,19 @@ export default function ChatInterface({
 
       setProjectId(targetProjectId);
       setShowSaveDialog(false);
+      setExtractedMaterials(null);
       onProjectLinked?.(targetProjectId);
+
+      // Build success message
+      let successMsg = `✅ Successfully saved ${extractedMaterials.materials.length} items to your project!`;
+      if (extractedMaterials.owned_items && extractedMaterials.owned_items.length > 0) {
+        successMsg += ` (${extractedMaterials.owned_items.length} items you already own were not added to the shopping list)`;
+      }
+      successMsg += ` The shopping list should now appear on the right.`;
 
       setMessages(prev => [
         ...prev,
-        {
-          role: 'assistant',
-          content: `✅ Successfully saved ${extractedMaterials.materials.length} items to your project! The shopping list should now appear on the right.`
-        }
+        { role: 'assistant', content: successMsg }
       ]);
     } catch (err: any) {
       console.error('Error:', err);
@@ -245,44 +322,71 @@ export default function ChatInterface({
       alert('An error occurred while creating project.');
     }
   };
-  const parseVideoResults = (content: string): { found: boolean; videos?: any[]; query?: string } => {
-    try {
-      // Look for the tool result JSON that contains video data
-      const jsonMatch = content.match(/\{[^{}]*"success":\s*true[^{}]*"videos":\s*\[[^\]]*\][^{}]*\}/s);
-      
-      if (jsonMatch) {
-        const data = JSON.parse(jsonMatch[0]);
-        if (data.success && data.videos && Array.isArray(data.videos)) {
-          return {
-            found: true,
-            videos: data.videos,
-            query: data.query || 'Project Tutorial'
-          };
-        }
-      }
-    } catch (e) {
-      console.error('Error parsing video results:', e);
-    }
-    
-    return { found: false };
-  };
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
+      {/* Inventory Update Notification Toast */}
+      {inventoryNotification && (
+        <div className="fixed top-20 right-4 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-slide-in max-w-sm">
+          <Package size={20} className="flex-shrink-0" />
+          <div className="flex-1">
+            {inventoryNotification.added.length > 0 && (
+              <p className="font-medium text-sm">
+                Added to inventory: {inventoryNotification.added.join(', ')}
+              </p>
+            )}
+            {inventoryNotification.existing.length > 0 && (
+              <p className="text-green-100 text-xs mt-1">
+                Already owned: {inventoryNotification.existing.join(', ')}
+              </p>
+            )}
+          </div>
+          <button 
+            onClick={() => setInventoryNotification(null)}
+            className="ml-2 hover:bg-green-700 p-1 rounded flex-shrink-0"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
       {/* Header */}
-      <div className="bg-white border-b p-4">
-        <h1 className="text-xl font-bold text-gray-900">DIY Helper Chat</h1>
-        {projectId && (
-          <p className="text-sm text-gray-600">
-            💼 Linked to project: {projects.find(p => p.id === projectId)?.name || 'Unknown'}
-          </p>
+      <div className="bg-white border-b p-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">DIY Helper Chat</h1> 
+          {projectId && (
+            <p className="text-sm text-gray-600">
+              💼 Linked to project: {projects.find(p => p.id === projectId)?.name || 'Unknown'}
+            </p>
+          )}
+        </div>
+        {/* Inventory Button */}
+        {onOpenInventory && (
+          <button
+            onClick={onOpenInventory}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            title="View your tool inventory"
+          >
+            <Package size={18} />
+            <span className="hidden sm:inline">My Tools</span>
+          </button>
         )}
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.length === 0 && (
+          <div className="text-center text-gray-500 mt-8">
+            <p className="text-lg mb-2">👋 Welcome to DIY Helper!</p>
+            <p className="text-sm">Ask me about any home improvement project.</p>
+            <p className="text-xs text-gray-400 mt-2">
+              Tip: Mention tools you own (e.g., "I have a drill") and I'll remember them!
+            </p>
+          </div>
+        )}
+        
         {messages.map((msg, idx) => {
-          // ✅ NEW: Check if this message contains video results
+          // Check if this message contains video results
           const videoResults = msg.role === 'assistant' ? parseVideoResults(msg.content) : { found: false };
           
           return (
@@ -294,10 +398,10 @@ export default function ChatInterface({
                 className={`max-w-3xl rounded-lg ${
                   msg.role === 'user'
                     ? 'bg-blue-600 text-white p-4'
-                    : 'bg-transparent'  // ✅ CHANGED: was 'bg-white border...'
+                    : 'bg-transparent'
                 }`}
               >
-                {/* ✅ NEW: Render video results if found */}
+                {/* Render video results if found */}
                 {videoResults.found && (
                   <div className="mb-4">
                     <VideoResults 
@@ -307,102 +411,108 @@ export default function ChatInterface({
                   </div>
                 )}
 
-                {/* ✅ NEW: Separate div for text content */}
+                {/* Text content */}
                 <div className={msg.role === 'user' ? '' : 'bg-white border border-gray-200 text-gray-900 rounded-lg p-4'}>
                   <div className={`prose prose-sm max-w-none ${
                     msg.role === 'user' 
                       ? 'prose-invert' 
                       : 'prose-gray'
                   }`}>
-                <ReactMarkdown
-                  components={{
-                    p: ({ children }) => (
-                      <p className={`mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
-                        {children}
-                      </p>
-                    ),
-                    ul: ({ children }) => (
-                      <ul className={`list-disc ml-4 mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
-                        {children}
-                      </ul>
-                    ),
-                    ol: ({ children }) => (
-                      <ol className={`list-decimal ml-4 mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
-                        {children}
-                      </ol>
-                    ),
-                    li: ({ children }) => (
-                      <li className={msg.role === 'user' ? 'text-white' : 'text-gray-900'}>
-                        {children}
-                      </li>
-                    ),
-                    h1: ({ children }) => (
-                      <h1 className={`text-xl font-bold mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
-                        {children}
-                      </h1>
-                    ),
-                    h2: ({ children }) => (
-                      <h2 className={`text-lg font-bold mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
-                        {children}
-                      </h2>
-                    ),
-                    h3: ({ children }) => (
-                      <h3 className={`text-md font-bold mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
-                        {children}
-                      </h3>
-                    ),
-                    strong: ({ children }) => (
-                      <strong className={`font-bold ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
-                        {children}
-                      </strong>
-                    ),
-                    em: ({ children }) => (
-                      <em className={`italic ${msg.role === 'user' ? 'text-white' : 'text-gray-800'}`}>
-                        {children}
-                      </em>
-                    ),
-                    code: ({ children }) => (
-                      <code className={`px-1 py-0.5 rounded text-sm ${
-                        msg.role === 'user' 
-                          ? 'bg-blue-500 text-white' 
-                          : 'bg-gray-100 text-gray-900'
-                      }`}>
-                        {children}
-                      </code>
-                    ),
-                    a: ({ children, href }) => (
-                      <a 
-                        href={href} 
-                        className={`underline ${
-                          msg.role === 'user' 
-                            ? 'text-white hover:text-blue-100' 
-                            : 'text-blue-600 hover:text-blue-800'
-                        }`}
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                      >
-                        {children}
-                      </a>
-                    ),
-                    blockquote: ({ children }) => (
-                      <blockquote className={`border-l-4 pl-4 italic ${
-                        msg.role === 'user'
-                          ? 'border-blue-400 text-white'
-                          : 'border-gray-300 text-gray-700'
-                      }`}>
-                        {children}
-                      </blockquote>
-                    ),
-                  }}
-                >
-                  {cleanMessageContent(msg.content)}
-                </ReactMarkdown>
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }) => (
+                          <p className={`mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
+                            {children}
+                          </p>
+                        ),
+                        ul: ({ children }) => (
+                          <ul className={`list-disc ml-4 mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
+                            {children}
+                          </ul>
+                        ),
+                        ol: ({ children }) => (
+                          <ol className={`list-decimal ml-4 mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
+                            {children}
+                          </ol>
+                        ),
+                        li: ({ children }) => (
+                          <li className={msg.role === 'user' ? 'text-white' : 'text-gray-900'}>
+                            {children}
+                          </li>
+                        ),
+                        h1: ({ children }) => (
+                          <h1 className={`text-xl font-bold mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
+                            {children}
+                          </h1>
+                        ),
+                        h2: ({ children }) => (
+                          <h2 className={`text-lg font-bold mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
+                            {children}
+                          </h2>
+                        ),
+                        h3: ({ children }) => (
+                          <h3 className={`text-md font-bold mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
+                            {children}
+                          </h3>
+                        ),
+                        strong: ({ children }) => (
+                          <strong className={`font-bold ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
+                            {children}
+                          </strong>
+                        ),
+                        em: ({ children }) => (
+                          <em className={`italic ${msg.role === 'user' ? 'text-white' : 'text-gray-800'}`}>
+                            {children}
+                          </em>
+                        ),
+                        code: ({ children }) => (
+                          <code className={`px-1 py-0.5 rounded text-sm ${
+                            msg.role === 'user' 
+                              ? 'bg-blue-500 text-white' 
+                              : 'bg-gray-100 text-gray-900'
+                          }`}>
+                            {children}
+                          </code>
+                        ),
+                        a: ({ children, href }) => (
+                          <a 
+                            href={href} 
+                            className={`underline ${
+                              msg.role === 'user' 
+                                ? 'text-white hover:text-blue-100' 
+                                : 'text-blue-600 hover:text-blue-800'
+                            }`}
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            {children}
+                          </a>
+                        ),
+                        blockquote: ({ children }) => (
+                          <blockquote className={`border-l-4 pl-4 italic ${
+                            msg.role === 'user'
+                              ? 'border-blue-400 text-white'
+                              : 'border-gray-300 text-gray-700'
+                          }`}>
+                            {children}
+                          </blockquote>
+                        ),
+                        // Handle strikethrough for owned items
+                        del: ({ children }) => (
+                          <del className="text-gray-400 line-through">
+                            {children}
+                          </del>
+                        ),
+                      }}
+                    >
+                      {cleanMessageContent(msg.content)}
+                    </ReactMarkdown>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-        );
-      })}
+          );
+        })}
 
         {isLoading && (
           <div className="flex justify-start">
@@ -422,7 +532,8 @@ export default function ChatInterface({
       {/* Manual "Save Materials" Button */}
       {!showSaveDialog && messages.length > 0 && messages[messages.length - 1].role === 'assistant' && 
         (messages[messages.length - 1].content.toLowerCase().includes('materials list') || 
-        messages[messages.length - 1].content.toLowerCase().includes('shopping list')) &&
+        messages[messages.length - 1].content.toLowerCase().includes('shopping list') ||
+        messages[messages.length - 1].content.toLowerCase().includes('items to purchase')) &&
         !extractedMaterials && (
         <div className="px-4 py-3 bg-yellow-50 border-t border-yellow-200">
           <div className="flex items-center gap-3">
@@ -451,10 +562,19 @@ export default function ChatInterface({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-xl font-bold mb-4 text-gray-900">Save Materials to Project</h3>
-            <p className="text-gray-600 mb-4">
-              I found {extractedMaterials.materials.length} materials for "{extractedMaterials.project_description}". 
-              Would you like to save them to a project?
+            <p className="text-gray-600 mb-2">
+              I found {extractedMaterials.materials.length} items to purchase for "{extractedMaterials.project_description}".
             </p>
+            {extractedMaterials.owned_items && extractedMaterials.owned_items.length > 0 && (
+              <p className="text-green-600 text-sm mb-4">
+                ✅ {extractedMaterials.owned_items.length} items you already own were excluded from the list.
+              </p>
+            )}
+            {extractedMaterials.total_estimate && (
+              <p className="text-gray-500 text-sm mb-4">
+                Estimated total: ${extractedMaterials.total_estimate.toFixed(2)}
+              </p>
+            )}
 
             {projects.length > 0 && (
               <div className="mb-4">
@@ -486,7 +606,10 @@ export default function ChatInterface({
                 Create New Project
               </button>
               <button
-                onClick={() => setShowSaveDialog(false)}
+                onClick={() => {
+                  setShowSaveDialog(false);
+                  setExtractedMaterials(null);
+                }}
                 className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300"
               >
                 Skip for Now

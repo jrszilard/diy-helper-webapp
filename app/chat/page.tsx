@@ -8,10 +8,14 @@ import Link from 'next/link';
 import { Home, Wrench } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import AuthButton from '@/components/AuthButton';
+import InventoryPanel from '@/components/InventoryPanel';
+import { Package } from 'lucide-react';
 
 export default function ChatPage() {
   const [user, setUser] = useState<any>(null);
   const [selectedProject, setSelectedProject] = useState<any>(null);
+
+  const [showInventory, setShowInventory] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -62,6 +66,14 @@ export default function ChatPage() {
                   <span className="hidden sm:inline font-medium">Home</span>
                 </Link>
                 <AuthButton user={user} />
+                <button
+                  onClick={() => setShowInventory(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  title="View your tool inventory"
+                >
+                  <Package size={18} />
+                  <span className="hidden sm:inline">My Tools</span>
+                </button>
               </div>
             </div>
           </div>
@@ -69,7 +81,8 @@ export default function ChatPage() {
 
         <div className="flex-1 overflow-hidden flex">
           <div className="flex-1 overflow-hidden">
-            <ChatInterface 
+            <ChatInterface
+              userId={user?.id} 
               projectId={selectedProject?.id}
               onProjectLinked={handleProjectLinked}
             />
@@ -82,6 +95,11 @@ export default function ChatPage() {
           )}
         </div>
       </div>
+        <InventoryPanel
+          userId={user?.id}
+          isOpen={showInventory}
+          onClose={() => setShowInventory(false)}
+        />
     </div>
   );
 }

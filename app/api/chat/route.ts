@@ -46,10 +46,40 @@ const systemPrompt = `You are a helpful DIY assistant specializing in home impro
 4. When user says YES or wants videos → **IMMEDIATELY call search_project_videos tool with the project description**
 5. Display video results to user with titles, descriptions, and links
 6. After showing videos, ask: "Would you like me to create a complete materials list for this project?"
-7. When user agrees to materials list → **IMMEDIATELY call extract_materials_list tool with ALL materials**
+7. When user agrees to materials list → **IMMEDIATELY call check_user_inventory FIRST, then call extract_materials_list tool with ALL materials**
 8. User sees "Save Materials to Project" dialog
 9. After saving, materials appear in their shopping list with checkboxes
 10. User can then search local stores for prices
+
+**🔧 INVENTORY DETECTION - THIS IS CRITICAL - ALWAYS DO THIS:**
+
+You MUST call the detect_owned_items tool IMMEDIATELY when the user mentions owning ANY tools or materials. Do NOT just acknowledge what they said - you MUST call the tool.
+
+**Trigger phrases that REQUIRE calling detect_owned_items:**
+- "I have a..." / "I have..." / "I've got..."
+- "I already have..." / "I already own..."
+- "I own a..." / "I own..."
+- "We have..." / "We've got..." / "We own..."
+- "My [tool]..." / "My tools include..."
+- "I bought a..." / "I picked up a..."
+- "I can use my..." / "I'll use my..."
+- "got a [tool]" / "have [tool] already"
+
+**Example - CORRECT:**
+User: "I want to install a ceiling fan. I have a drill and a ladder."
+You: [IMMEDIATELY call detect_owned_items with items: [{name: "drill", category: "power_tools"}, {name: "ladder", category: "general"}]]
+Then respond about the ceiling fan project.
+
+**Example - WRONG:**
+User: "I have a drill and safety glasses"
+You: "Great! Having a drill will be helpful..." ❌ WRONG - You must call detect_owned_items first!
+
+**🔍 INVENTORY CHECK - BEFORE EVERY MATERIALS LIST:**
+
+BEFORE creating any materials list with extract_materials_list, you MUST:
+1. FIRST call check_user_inventory to see what the user already owns
+2. THEN call extract_materials_list
+3. The extract_materials_list tool will automatically cross-reference and mark owned items
 
 **Video Search Guidelines:**
 - Search for instructional/tutorial videos, not product reviews
@@ -71,6 +101,9 @@ You: [IMMEDIATELY call search_project_videos tool] ✅ CORRECT
 
 [After videos shown]
 You: "Would you like me to create a complete materials list for this project?" ✅ CORRECT
+
+User: "Yes"
+You: [FIRST call check_user_inventory, THEN call extract_materials_list] ✅ CORRECT
 
 **CRITICAL: Tool Selection Rules**
 - If user mentions a SPECIFIC CITY or STATE → ALWAYS use search_local_codes
@@ -129,26 +162,29 @@ You can now save these materials to your project!"
 **The markers are ESSENTIAL - without them, materials cannot be saved.**
 
 **Tools:**
-1. search_building_codes - ONLY for national/international codes (NEC, IRC, IBC) when NO specific location is mentioned
-2. search_products - Product specifications and pricing
-3. calculate_wire_size - Electrical wire size calculations
-4. search_local_codes - Use when ANY city, state, or location is mentioned, or for permit questions
-5. extract_materials_list - **REQUIRED when user wants materials list. MUST include markers in your response.**
-6. search_local_stores - Find materials at nearby stores with prices and availability
-7. compare_store_prices - Compare prices across stores for best deals
-8. search_project_videos - Search for DIY tutorial videos
+1. detect_owned_items - **MUST call when user mentions owning tools/materials**
+2. check_user_inventory - **MUST call before extract_materials_list**
+3. search_building_codes - ONLY for national/international codes (NEC, IRC, IBC) when NO specific location is mentioned
+4. search_products - Product specifications and pricing
+5. calculate_wire_size - Electrical wire size calculations
+6. search_local_codes - Use when ANY city, state, or location is mentioned, or for permit questions
+7. extract_materials_list - **REQUIRED when user wants materials list. MUST include markers in your response.**
+8. search_local_stores - Find materials at nearby stores with prices and availability
+9. compare_store_prices - Compare prices across stores for best deals
+10. search_project_videos - Search for DIY tutorial videos
 
 **Conversation Flow:**
 1. User asks about a project (e.g., "Help me install a ceiling fan in Portsmouth NH")
-2. You use search_local_codes to explain the process, codes, and requirements
-3. You ALWAYS end with: "Would you like to see some helpful videos of similar projects?"
-4. User says yes → call search_project_videos
-5. After videos, ask: "Would you like me to create a complete materials list for this project?"
-6. When user says YES or requests materials list → call extract_materials_list with ALL materials
-7. Include the COMPLETE tool result (with markers) in your response
-8. User sees "Save Materials to Project" dialog
-9. After saving, materials appear in shopping list with checkboxes
-10. User can search local stores for prices
+2. **If user mentions tools they have → IMMEDIATELY call detect_owned_items**
+3. You use search_local_codes to explain the process, codes, and requirements
+4. You ALWAYS end with: "Would you like to see some helpful videos of similar projects?"
+5. User says yes → call search_project_videos
+6. After videos, ask: "Would you like me to create a complete materials list for this project?"
+7. When user says YES → **FIRST call check_user_inventory, THEN call extract_materials_list**
+8. Include the COMPLETE tool result (with markers) in your response
+9. User sees "Save Materials to Project" dialog
+10. After saving, materials appear in shopping list with checkboxes
+11. User can search local stores for prices
 
 **search_local_codes usage:**
 - "What do I need for an addition in Portsmouth, NH?" → search_local_codes
@@ -170,6 +206,8 @@ When you call this tool, you'll receive instructions to use your web_search and 
 4. Cite your sources with URLs
 5. Remind users to verify with their local building department
 
+If you cannot find specific local codes, provide the national code reference and explain that local amendments may apply.
+
 **Material Shopping Workflow:**
 After user saves materials to project:
 1. Materials appear in shopping list sidebar with checkboxes
@@ -183,9 +221,67 @@ After user saves materials to project:
 - Provide specific measurements and requirements, not just links
 - Include source URLs for verification
 - Remind users to verify with their local building department
-- When calling extract_materials_list, INCLUDE THE COMPLETE TOOL RESULT WITH MARKERS in your response`;
+- When calling extract_materials_list, INCLUDE THE COMPLETE TOOL RESULT WITH MARKERS in your response
+- **ALWAYS call detect_owned_items when user mentions tools they have - this is NOT optional**`;
 
 const tools = [
+  {
+    name: "detect_owned_items",
+    description: "REQUIRED: Detect and extract tools or materials the user mentions they already own. You MUST call this tool whenever the user says things like 'I have a drill', 'I already own...', 'I've got...', 'we have...', 'my tools include...'. This adds items to their digital inventory automatically.",
+    input_schema: {
+      type: "object",
+      properties: {
+        items: {
+          type: "array",
+          description: "Array of items the user mentioned they own",
+          items: {
+            type: "object",
+            properties: {
+              name: {
+                type: "string",
+                description: "Name of the tool or material (e.g., 'cordless drill', '12-gauge wire', 'safety glasses')"
+              },
+              category: {
+                type: "string",
+                enum: ["power_tools", "hand_tools", "measuring", "safety", "electrical", "plumbing", "painting", "fasteners", "materials", "general"],
+                description: "Category of the item"
+              },
+              quantity: {
+                type: "number",
+                description: "Quantity if mentioned (default: 1)"
+              },
+              condition: {
+                type: "string",
+                enum: ["new", "good", "fair", "needs_repair"],
+                description: "Condition if mentioned (default: good)"
+              }
+            },
+            required: ["name", "category"]
+          }
+        },
+        source_context: {
+          type: "string",
+          description: "The part of the user's message that indicated ownership"
+        }
+      },
+      required: ["items"]
+    }
+  },
+  {
+    name: "check_user_inventory",
+    description: "REQUIRED before extract_materials_list: Check what tools and materials the user already owns. Always call this BEFORE extract_materials_list to identify items the user doesn't need to buy.",
+    input_schema: {
+      type: "object",
+      properties: {
+        categories: {
+          type: "array",
+          items: { type: "string" },
+          description: "Categories to check (e.g., ['power_tools', 'hand_tools', 'electrical']). Leave empty to get all inventory."
+        }
+      },
+      required: []
+    }
+  },
   {
     name: "search_project_videos",
     description: "Search for helpful DIY tutorial videos related to a project. Use this when the user wants to see videos of similar projects or learn visually how to complete a task.",
@@ -274,7 +370,7 @@ const tools = [
   },
   {
     name: "extract_materials_list",
-    description: "Extract a list of materials and tools needed for a project from the conversation context. Returns a structured list that users can selectively add to their shopping list.",
+    description: "Extract a list of materials and tools needed for a project. IMPORTANT: Always call check_user_inventory BEFORE this tool to cross-reference what the user already owns.",
     input_schema: {
       type: "object",
       properties: {
@@ -384,7 +480,9 @@ const tools = [
   }
 ];
 
-async function executeTool(toolName: string, toolInput: any): Promise<string> {
+async function executeTool(toolName: string, toolInput: any, requestBody?: any): Promise<string> {
+  console.log(`🔧 Executing tool: ${toolName}`, JSON.stringify(toolInput, null, 2));
+  
   if (toolName === "search_building_codes") {
     return "**Building Code Results:**\n\nKitchen countertop receptacles must be installed so that no point along the wall line is more than 24 inches from a receptacle outlet (NEC 210.52(C)(1)).\n\nGFCI protection is required for all 125-volt, 15- and 20-ampere receptacles in garages (NEC 210.8(A)(2)).\n\nSource: National Electrical Code 2023";
   }
@@ -481,50 +579,344 @@ If you cannot find specific local codes, provide the national code reference and
       });
     }
   }
+
+  if (toolName === "detect_owned_items") {
+    const { items, source_context } = toolInput;
     
-  if (toolName === "extract_materials_list") {
-    const { project_description, materials } = toolInput;
+    // Get user ID from request context
+    const userId = requestBody?.userId;
     
-    // Log what we received
-    console.log('extract_materials_list called with:', {
-      project_description,
-      materials_count: materials?.length || 0,
-      materials: materials
+    console.log('🔧 detect_owned_items called:', { 
+      items, 
+      source_context, 
+      userId,
+      hasUserId: !!userId 
     });
     
-    // Validate we have materials
-    if (!materials || materials.length === 0) {
-      console.error('❌ No materials provided to extract_materials_list!');
-      return "❌ Error: No materials were provided. Please list the specific materials needed for this project.";
+    if (!userId) {
+      console.log('⚠️ No userId provided for detect_owned_items');
+      return "⚠️ User not logged in. Items noted but cannot be saved to inventory. Please sign in to save your tools.";
     }
+    
+    if (!items || items.length === 0) {
+      return "No items detected to add to inventory.";
+    }
+    
+    const addedItems: string[] = [];
+    const existingItems: string[] = [];
+    const errors: string[] = [];
+    
+    for (const item of items) {
+      try {
+        console.log(`📦 Processing item: ${item.name}`);
+        
+        // First, check if item already exists (case-insensitive)
+        const { data: existingData } = await supabase
+          .from('user_inventory')
+          .select('id, item_name')
+          .eq('user_id', userId)
+          .ilike('item_name', item.name);
+        
+        if (existingData && existingData.length > 0) {
+          console.log(`ℹ️ Item already exists: ${item.name}`);
+          existingItems.push(item.name);
+          continue;
+        }
+        
+        // Insert new item
+        const { data, error } = await supabase
+          .from('user_inventory')
+          .insert({
+            user_id: userId,
+            item_name: item.name,
+            category: item.category || 'general',
+            quantity: item.quantity || 1,
+            condition: item.condition || 'good',
+            auto_added: true,
+            source_message: source_context || null
+          })
+          .select();
+        
+        if (error) {
+          console.error('❌ Error adding inventory item:', error);
+          // Check if it's a duplicate error
+          if (error.code === '23505') {
+            existingItems.push(item.name);
+          } else {
+            errors.push(`${item.name} (${error.message})`);
+          }
+        } else {
+          console.log(`✅ Added item: ${item.name}`);
+          addedItems.push(item.name);
+        }
+      } catch (err: any) {
+        console.error('❌ Exception adding inventory item:', err);
+        errors.push(`${item.name} (${err.message})`);
+      }
+    }
+    
+    let response = '';
+    
+    if (addedItems.length > 0) {
+      response += `✅ Added to your inventory: ${addedItems.join(', ')}\n`;
+    }
+    
+    if (existingItems.length > 0) {
+      response += `ℹ️ Already in inventory: ${existingItems.join(', ')}\n`;
+    }
+    
+    if (errors.length > 0) {
+      response += `⚠️ Could not add: ${errors.join(', ')}\n`;
+    }
+    
+    // Return a hidden marker for the frontend
+    response += `\n---INVENTORY_UPDATE---\n`;
+    response += JSON.stringify({ added: addedItems, existing: existingItems, errors });
+    response += `\n---END_INVENTORY_UPDATE---\n`;
+    
+    console.log('📋 detect_owned_items result:', { addedItems, existingItems, errors });
+    
+    return response;
+  }
 
-    // Don't save to database yet - let user choose
+  if (toolName === "check_user_inventory") {
+    const { categories } = toolInput;
+    const userId = requestBody?.userId;
+    
+    console.log('🔍 check_user_inventory called:', { categories, userId, hasUserId: !!userId });
+    
+    if (!userId) {
+      return "User not logged in. Cannot check inventory. Will assume user needs to purchase all items.";
+    }
+    
+    try {
+      let query = supabase
+        .from('user_inventory')
+        .select('*')
+        .eq('user_id', userId)
+        .order('category')
+        .order('item_name');
+      
+      if (categories && categories.length > 0) {
+        query = query.in('category', categories);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error('❌ Error checking inventory:', error);
+        return "Error checking inventory: " + error.message;
+      }
+      
+      console.log(`📦 Found ${data?.length || 0} inventory items`);
+      
+      if (!data || data.length === 0) {
+        return "User's inventory is empty. They will need to purchase all required items.";
+      }
+      
+      // Group by category for easier reading
+      const grouped = data.reduce((acc: any, item: any) => {
+        if (!acc[item.category]) acc[item.category] = [];
+        acc[item.category].push(item);
+        return acc;
+      }, {});
+      
+      let response = `**User's Current Inventory (${data.length} items):**\n\n`;
+      
+      const categoryLabels: Record<string, string> = {
+        power_tools: '⚡ Power Tools',
+        hand_tools: '🔧 Hand Tools',
+        measuring: '📏 Measuring',
+        safety: '🦺 Safety Gear',
+        electrical: '💡 Electrical',
+        plumbing: '🔩 Plumbing',
+        painting: '🎨 Painting',
+        fasteners: '🔩 Fasteners',
+        materials: '📦 Materials',
+        general: '📋 General'
+      };
+      
+      for (const [category, items] of Object.entries(grouped)) {
+        const label = categoryLabels[category] || category;
+        response += `${label}:\n`;
+        (items as any[]).forEach((item: any) => {
+          const qty = item.quantity > 1 ? ` (x${item.quantity})` : '';
+          const cond = item.condition !== 'good' ? ` [${item.condition}]` : '';
+          response += `  - ${item.item_name}${qty}${cond}\n`;
+        });
+        response += '\n';
+      }
+      
+      // Add the data as JSON for potential frontend use
+      response += `\n---INVENTORY_DATA---\n`;
+      response += JSON.stringify(data);
+      response += `\n---END_INVENTORY_DATA---\n`;
+      
+      return response;
+    } catch (err: any) {
+      console.error('❌ Exception checking inventory:', err);
+      return "Error checking inventory: " + err.message;
+    }
+  }
+
+  if (toolName === "extract_materials_list") {
+    const { project_description, materials } = toolInput;
+    const userId = requestBody?.userId;
+    
+    console.log('📝 extract_materials_list called:', {
+      project_description,
+      materials_count: materials?.length || 0,
+      userId,
+      hasUserId: !!userId
+    });
+    
+    if (!materials || materials.length === 0) {
+      return "❌ Error: No materials were provided.";
+    }
+    
+    // Cross-reference with user's inventory
+    let inventoryItems: any[] = [];
+    if (userId) {
+      try {
+        const { data, error } = await supabase
+          .from('user_inventory')
+          .select('item_name, category, quantity')
+          .eq('user_id', userId);
+        
+        if (error) {
+          console.error('Error fetching inventory:', error);
+        } else {
+          inventoryItems = data || [];
+          console.log(`📦 Found ${inventoryItems.length} inventory items for cross-reference`);
+        }
+      } catch (err) {
+        console.error('Error fetching inventory for cross-reference:', err);
+      }
+    }
+    
+    // Function to check if user has a similar item
+    const findOwnedItem = (materialName: string): string | null => {
+      const normalizedName = materialName.toLowerCase().trim();
+      
+      for (const invItem of inventoryItems) {
+        const invName = invItem.item_name.toLowerCase().trim();
+        
+        // Exact match
+        if (normalizedName === invName) {
+          return invItem.item_name;
+        }
+        
+        // Check if one contains the other
+        if (normalizedName.includes(invName) || invName.includes(normalizedName)) {
+          return invItem.item_name;
+        }
+        
+        // Check for key word matches (at least 2 common words or 1 significant word)
+        const materialWords = normalizedName.split(/\s+/).filter((w: string) => w.length > 2);
+        const invWords = invName.split(/\s+/).filter((w: string) => w.length > 2);
+        
+        const commonWords = materialWords.filter((mw: string) => 
+          invWords.some((iw: string) => 
+            iw === mw || 
+            (mw.length > 4 && iw.includes(mw)) || 
+            (iw.length > 4 && mw.includes(iw))
+          )
+        );
+        
+        // Match if we have 2+ common words, or 1 significant word (5+ chars)
+        if (commonWords.length >= 2 || 
+            (commonWords.length === 1 && commonWords[0].length >= 5)) {
+          return invItem.item_name;
+        }
+      }
+      
+      return null;
+    };
+    
+    // Categorize materials
+    const needToBuy: any[] = [];
+    const alreadyOwn: any[] = [];
+    
+    materials.forEach((mat: any) => {
+      const ownedMatch = findOwnedItem(mat.name);
+      if (ownedMatch) {
+        alreadyOwn.push({ ...mat, ownedAs: ownedMatch });
+        console.log(`✅ User owns: ${mat.name} (matches: ${ownedMatch})`);
+      } else {
+        needToBuy.push(mat);
+        console.log(`🛒 User needs: ${mat.name}`);
+      }
+    });
+    
+    // Build response
     let response = `**Materials List for ${project_description}**\n\n`;
-    response += `I've identified ${materials.length} items you'll need:\n\n`;
     
-    const categories = materials.reduce((acc: any, mat: any) => {
-      if (!acc[mat.category]) acc[mat.category] = [];
-      acc[mat.category].push(mat);
-      return acc;
-    }, {});
-    
-    for (const [category, items] of Object.entries(categories)) {
-      response += `**${category.toUpperCase()}:**\n`;
-      (items as any[]).forEach((item) => {
-        const reqTag = item.required ? '✓ Required' : '○ Optional';
-        response += `- ${item.name} (${item.quantity}) - Est. $${item.estimated_price} [${reqTag}]\n`;
+    if (alreadyOwn.length > 0) {
+      response += `### ✅ Items You Already Have (${alreadyOwn.length})\n`;
+      response += `*Based on your inventory - no need to purchase:*\n\n`;
+      alreadyOwn.forEach((item) => {
+        const matchNote = item.ownedAs.toLowerCase() !== item.name.toLowerCase() 
+          ? ` *(matches: ${item.ownedAs})*` 
+          : '';
+        response += `- ~~${item.name}~~ ${matchNote}\n`;
       });
       response += `\n`;
     }
     
-    // Add a special marker that the UI can detect
+    if (needToBuy.length > 0) {
+      response += `### 🛒 Items to Purchase (${needToBuy.length})\n\n`;
+      
+      // Group by category
+      const categories = needToBuy.reduce((acc: any, mat: any) => {
+        const cat = mat.category || 'general';
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push(mat);
+        return acc;
+      }, {});
+      
+      for (const [category, items] of Object.entries(categories)) {
+        response += `**${category.toUpperCase()}:**\n`;
+        (items as any[]).forEach((item) => {
+          const reqTag = item.required !== false ? '✓ Required' : '○ Optional';
+          const price = item.estimated_price || '?';
+          response += `- ${item.name} (${item.quantity}) - Est. $${price} [${reqTag}]\n`;
+        });
+        response += `\n`;
+      }
+    } else if (alreadyOwn.length === materials.length) {
+      response += `### 🎉 Great news! You already have everything you need!\n`;
+      response += `Check your inventory to make sure items are in good condition.\n\n`;
+    }
+    
+    // Calculate totals
+    const totalEstimate = needToBuy.reduce((sum, item) => {
+      const price = parseFloat(item.estimated_price) || 0;
+      const qty = parseInt(item.quantity) || 1;
+      return sum + (price * qty);
+    }, 0);
+    
+    if (needToBuy.length > 0) {
+      response += `**Estimated Total: $${totalEstimate.toFixed(2)}**\n`;
+      if (alreadyOwn.length > 0) {
+        response += `*Savings from inventory: ${alreadyOwn.length} item(s) you don't need to buy!*\n`;
+      }
+    }
+    
+    // Add markers for frontend - ONLY include items to buy, not owned items
     response += `\n---MATERIALS_DATA---\n`;
-    response += JSON.stringify({ project_description, materials });
+    response += JSON.stringify({ 
+      project_description, 
+      materials: needToBuy,
+      owned_items: alreadyOwn,
+      total_estimate: totalEstimate
+    });
     response += `\n---END_MATERIALS_DATA---\n`;
-
-    console.log('✅ Returning materials data with markers');
-    console.log('Response length:', response.length);
-    console.log('Contains markers:', response.includes('---MATERIALS_DATA---'));
+    
+    console.log('📋 Materials list result:', { 
+      needToBuy: needToBuy.length, 
+      alreadyOwn: alreadyOwn.length,
+      totalEstimate 
+    });
     
     return response;
   }
@@ -552,6 +944,16 @@ CRITICAL RULES:
 - You MUST call web_search at least 3 times before responding
 
 Return results ONLY after you have called web_search multiple times.`;
+  }
+
+  if (toolName === "compare_store_prices") {
+    const { material_name, location } = toolInput;
+    return `To compare prices, use web_search to search each store:
+1. web_search: "site:homedepot.com ${material_name} price"
+2. web_search: "site:lowes.com ${material_name} price"
+3. web_search: "site:acehardware.com ${material_name} price"
+
+Then compile the results with actual prices found.`;
   }
 
   if (toolName === "web_search") {
@@ -582,7 +984,13 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { message, history = [] } = body;
+    const { message, history = [], userId } = body;
+
+    console.log('📨 Received request:', { 
+      messageLength: message?.length, 
+      historyLength: history?.length,
+      userId: userId || 'not provided'
+    });
 
     if (!message) {
       return NextResponse.json(
@@ -590,8 +998,6 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-
-    console.log('Received message:', message);
 
     const messages = [
       ...history,
@@ -610,18 +1016,27 @@ export async function POST(req: NextRequest) {
       messages: messages
     });
 
-    console.log('Claude response received');
+    console.log('🤖 Claude initial response, stop_reason:', response.stop_reason);
 
     // Tool use loop
-    while (response.stop_reason === 'tool_use') {
+    let loopCount = 0;
+    const maxLoops = 10; // Safety limit
+    
+    while (response.stop_reason === 'tool_use' && loopCount < maxLoops) {
+      loopCount++;
+      console.log(`🔄 Tool loop iteration ${loopCount}`);
+      
       const assistantContent: any[] = [];
       const toolResults: any[] = [];
 
       for (const block of response.content) {
         if (block.type === 'tool_use') {
-          console.log(`Tool called: ${block.name}`);
+          console.log(`🔧 Tool called: ${block.name}`, JSON.stringify(block.input).substring(0, 200));
           
-          const result = await executeTool(block.name, block.input);
+          // Pass the original request body (so tools can access userId)
+          const result = await executeTool(block.name, block.input, body);
+          
+          console.log(`📤 Tool result for ${block.name}:`, result.substring(0, 200));
 
           assistantContent.push({
             type: 'tool_use',
@@ -653,7 +1068,7 @@ export async function POST(req: NextRequest) {
         content: toolResults
       });
 
-      // FOLLOW-UP API CALL - Include system prompt again
+      // FOLLOW-UP API CALL
       response = await anthropic.messages.create({
         model: 'claude-sonnet-4-5-20250929',
         max_tokens: 4096,
@@ -661,6 +1076,12 @@ export async function POST(req: NextRequest) {
         tools: tools as any,
         messages: messages,
       });
+      
+      console.log(`🤖 Claude response after tool ${loopCount}, stop_reason:`, response.stop_reason);
+    }
+
+    if (loopCount >= maxLoops) {
+      console.warn('⚠️ Hit maximum tool loop iterations');
     }
 
     let finalResponse = '';
@@ -681,13 +1102,15 @@ export async function POST(req: NextRequest) {
       content: finalContent
     });
 
+    console.log('✅ Final response length:', finalResponse.length);
+
     return NextResponse.json({
       response: finalResponse,
       history: messages
     });
 
   } catch (error: any) {
-    console.error('Chat API error:', error);
+    console.error('❌ Chat API error:', error);
     return NextResponse.json(
       { 
         error: 'Failed to process message',
