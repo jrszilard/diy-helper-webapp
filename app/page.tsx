@@ -45,7 +45,7 @@ export default function LandingPage() {
               </span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl text-gray-800 mb-10 max-w-2xl mx-auto leading-relaxed">
               Get instant help with building codes, material recommendations, and project calculations.
               Just ask—no searching required.
             </p>
@@ -55,7 +55,7 @@ export default function LandingPage() {
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
 
-            <p className="mt-4 text-sm text-gray-500">
+            <p className="mt-4 text-sm text-gray-700">
               Free to use • No signup required
             </p>
           </div>
@@ -75,7 +75,7 @@ export default function LandingPage() {
                   href="/chat"
                   className="group text-left p-4 rounded-xl border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all"
                 >
-                  <p className="text-sm text-gray-700 group-hover:text-blue-700 font-medium">
+                  <p className="text-sm text-gray-900 group-hover:text-blue-700 font-medium">
                     {prompt}
                   </p>
                 </Link>
@@ -91,7 +91,7 @@ export default function LandingPage() {
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
               Everything you need in one chat
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-800">
               No more jumping between websites and forums
             </p>
           </div>
@@ -102,7 +102,7 @@ export default function LandingPage() {
                 📖
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">Building Codes</h3>
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-800 text-sm">
                 NEC, IRC, and IPC codes at your fingertips
               </p>
             </div>
@@ -112,7 +112,7 @@ export default function LandingPage() {
                 🛒
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">Product Finder</h3>
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-800 text-sm">
                 Find the right materials with pricing
               </p>
             </div>
@@ -122,7 +122,7 @@ export default function LandingPage() {
                 🧮
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">Smart Calculator</h3>
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-800 text-sm">
                 Calculate materials and measurements
               </p>
             </div>
@@ -154,8 +154,8 @@ export default function LandingPage() {
                     For a 20-amp circuit, you need <strong>12-gauge wire</strong> per NEC 210.19.
                   </p>
                   <div className="bg-white rounded-lg p-3 border border-gray-200 text-sm">
-                    <div className="font-semibold">Southwire 250ft 12/2 NM-B</div>
-                    <div className="text-xs text-gray-600 mt-1">Copper with Ground • $87.43 • In stock</div>
+                    <div className="font-semibold text-gray-900">Southwire 250ft 12/2 NM-B</div>
+                    <div className="text-xs text-gray-800 mt-1">Copper with Ground • $87.43 • In stock</div>
                   </div>
                 </div>
               </div>
@@ -206,10 +206,10 @@ export default function LandingPage() {
             <Wrench className="w-5 h-5 text-blue-600" />
             <span className="font-bold text-gray-900">DIY Helper</span>
           </div>
-          <p className="text-gray-600 text-sm mb-4">
+          <p className="text-gray-800 text-sm mb-4">
             AI-powered guidance for your home improvement projects
           </p>
-          <p className="text-gray-500 text-xs">
+          <p className="text-gray-700 text-xs">
             © 2024 DIY Helper. Built for DIYers, by DIYers.
           </p>
         </div>
