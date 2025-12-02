@@ -232,7 +232,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
         <div className="bg-blue-600 text-white p-4 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold">My Tool Inventory</h2>
-            <p className="text-blue-100 text-sm">{inventory.length} items</p>
+            <p className="text-blue-50 text-sm">{inventory.length} items</p>
           </div>
           <button 
             onClick={onClose}
@@ -245,7 +245,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
         {/* Search and Filter */}
         <div className="p-4 border-b space-y-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={18} />
             <input
               type="text"
               placeholder="Search inventory..."
@@ -259,9 +259,9 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
             <button
               onClick={() => setSelectedCategory(null)}
               className={`px-3 py-1 rounded-full text-sm ${
-                !selectedCategory 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                !selectedCategory
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
               }`}
             >
               All
@@ -273,9 +273,9 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                   selectedCategory === cat.value ? null : cat.value
                 )}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  selectedCategory === cat.value 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  selectedCategory === cat.value
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                 }`}
               >
                 <cat.icon size={14} />
@@ -363,18 +363,18 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
         {/* Inventory List */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-gray-800">
               Loading inventory...
             </div>
           ) : filteredInventory.length === 0 ? (
             <div className="p-8 text-center">
               <Package className="mx-auto text-gray-300 mb-4" size={48} />
-              <p className="text-gray-500 mb-2">
-                {searchQuery || selectedCategory 
-                  ? 'No items match your search' 
+              <p className="text-gray-800 mb-2">
+                {searchQuery || selectedCategory
+                  ? 'No items match your search'
                   : 'Your inventory is empty'}
               </p>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-700">
                 Add items manually or mention tools you own in chat
               </p>
             </div>
@@ -386,10 +386,10 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                 
                 return (
                   <div key={category}>
-                    <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                    <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                       <Icon size={16} />
                       {catInfo?.label || category}
-                      <span className="text-gray-400 font-normal">({items.length})</span>
+                      <span className="text-gray-600 font-normal">({items.length})</span>
                     </h4>
                     <div className="space-y-2">
                       {items.map(item => (
@@ -398,15 +398,15 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                           className="bg-white border rounded-lg p-3 flex items-center justify-between group hover:shadow-sm transition-shadow"
                         >
                           <div className="flex-1">
-                            <div className="font-medium text-gray-800">
+                            <div className="font-medium text-gray-900">
                               {item.item_name}
                               {item.quantity > 1 && (
-                                <span className="text-gray-500 font-normal ml-1">
+                                <span className="text-gray-700 font-normal ml-1">
                                   x{item.quantity}
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs text-gray-500 flex items-center gap-2">
+                            <div className="text-xs text-gray-700 flex items-center gap-2">
                               <span className={`px-2 py-0.5 rounded-full ${
                                 item.condition === 'new' ? 'bg-green-100 text-green-700' :
                                 item.condition === 'good' ? 'bg-blue-100 text-blue-700' :
@@ -416,24 +416,24 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                                 {item.condition}
                               </span>
                               {item.auto_added && (
-                                <span className="text-gray-400">auto-added</span>
+                                <span className="text-gray-600">auto-added</span>
                               )}
                             </div>
                             {item.notes && (
-                              <p className="text-xs text-gray-400 mt-1">{item.notes}</p>
+                              <p className="text-xs text-gray-700 mt-1">{item.notes}</p>
                             )}
                           </div>
                           
                           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                               onClick={() => startEdit(item)}
-                              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                              className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded"
                             >
                               <Edit2 size={16} />
                             </button>
                             <button
                               onClick={() => handleDeleteItem(item.id)}
-                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
+                              className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded"
                             >
                               <Trash2 size={16} />
                             </button>
