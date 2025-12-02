@@ -1,269 +1,147 @@
 import Link from 'next/link'
-import { Wrench, BookOpen, ShoppingCart, Calculator, CheckCircle, ArrowRight, Zap, Shield, Clock, Star, Users, TrendingUp } from 'lucide-react'
+import { Wrench, MessageSquare, ArrowRight, Sparkles, CheckCircle } from 'lucide-react'
 
 export default function LandingPage() {
+  const examplePrompts = [
+    "How do I install a ceiling fan safely?",
+    "What's the right wood stain for outdoor furniture?",
+    "Calculate materials for tiling my bathroom",
+    "Which outlet should I use for a home office?"
+  ]
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <nav className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white">
+      <nav className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
               <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-2 rounded-lg">
                 <Wrench className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+              <span className="text-xl font-bold text-gray-900">
                 DIY Helper
               </span>
             </div>
-            <div className="flex items-center gap-4">
-              <Link href="/chat" className="hidden sm:block text-gray-600 hover:text-gray-900 font-medium transition">
-                Try Demo
-              </Link>
-              <Link href="/chat" className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-lg hover:from-blue-700 hover:to-blue-800 font-semibold transition shadow-md hover:shadow-lg">
-                Get Started Free
-              </Link>
-            </div>
+            <Link href="/chat" className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium transition">
+              Start Chat
+            </Link>
           </div>
         </div>
       </nav>
 
-      <section className="relative pt-20 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-20"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-100 rounded-full blur-3xl opacity-20"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-8 shadow-sm">
-              <Zap className="w-4 h-4" />
-              <span>Powered by Claude AI - Instant Expert Guidance</span>
+      <section className="relative pt-16 sm:pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium mb-6">
+              <Sparkles className="w-4 h-4" />
+              <span>Powered by Claude AI</span>
             </div>
 
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-              Stop Googling.
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Your AI Assistant for
               <br />
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Start Building.
+              <span className="bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
+                DIY Projects
               </span>
             </h1>
 
-            <p className="text-xl sm:text-2xl text-gray-600 mb-10 leading-relaxed max-w-3xl mx-auto">
-              Get instant answers about building codes, materials, and calculations. 
-              No more watching 20 YouTube videos or digging through code books.
+            <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+              Get instant help with building codes, material recommendations, and project calculations.
+              Just ask—no searching required.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Link href="/chat" className="group inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-blue-800 font-semibold text-lg transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                Try It Free Now
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <a href="#demo" className="inline-flex items-center justify-center gap-2 border-2 border-gray-300 bg-white text-gray-700 px-8 py-4 rounded-xl hover:border-gray-400 hover:bg-gray-50 font-semibold text-lg transition shadow-sm hover:shadow">
-                Watch Demo
-              </a>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-8 text-sm">
-              <div className="flex items-center gap-2 text-gray-600">
-                <div className="flex -space-x-2">
-                  <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold">A</div>
-                  <div className="w-8 h-8 rounded-full bg-green-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold">B</div>
-                  <div className="w-8 h-8 rounded-full bg-purple-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold">C</div>
-                </div>
-                <span className="font-medium">Trusted by DIYers</span>
-              </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <div className="flex text-yellow-400">
-                  <Star className="w-4 h-4 fill-current" />
-                  <Star className="w-4 h-4 fill-current" />
-                  <Star className="w-4 h-4 fill-current" />
-                  <Star className="w-4 h-4 fill-current" />
-                  <Star className="w-4 h-4 fill-current" />
-                </div>
-                <span className="font-medium">50+ Codes • 40+ Products</span>
-              </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <CheckCircle className="w-5 h-5 text-green-500" />
-                <span className="font-medium">Always Free</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-12 bg-white border-y">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold text-blue-600 mb-2">50+</div>
-              <div className="text-gray-600 font-medium">Building Codes</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-green-600 mb-2">40+</div>
-              <div className="text-gray-600 font-medium">Products Listed</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-purple-600 mb-2">7</div>
-              <div className="text-gray-600 font-medium">Smart Calculators</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-orange-600 mb-2">5s</div>
-              <div className="text-gray-600 font-medium">Response Time</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Everything You Need in One Place
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Stop switching between tabs. Get codes, products, and calculations instantly.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="group relative bg-white p-8 rounded-2xl border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity"></div>
-              <div className="relative">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 w-14 h-14 rounded-xl flex items-center justify-center mb-5 shadow-lg">
-                  <BookOpen className="w-7 h-7 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Building Codes</h3>
-                <p className="text-gray-600 leading-relaxed mb-4">
-                  Instant access to NEC, IRC, and IPC codes. No more flipping through books or searching forums.
-                </p>
-                <div className="flex items-center text-blue-600 font-semibold text-sm">
-                  <span>50+ codes available</span>
-                  <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </div>
-
-            <div className="group relative bg-white p-8 rounded-2xl border-2 border-gray-100 hover:border-green-200 hover:shadow-xl transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-transparent opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity"></div>
-              <div className="relative">
-                <div className="bg-gradient-to-br from-green-500 to-green-600 w-14 h-14 rounded-xl flex items-center justify-center mb-5 shadow-lg">
-                  <ShoppingCart className="w-7 h-7 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Smart Shopping</h3>
-                <p className="text-gray-600 leading-relaxed mb-4">
-                  Find the right materials with current pricing. Know exactly what to buy before you go to the store.
-                </p>
-                <div className="flex items-center text-green-600 font-semibold text-sm">
-                  <span>40+ products with pricing</span>
-                  <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </div>
-
-            <div className="group relative bg-white p-8 rounded-2xl border-2 border-gray-100 hover:border-purple-200 hover:shadow-xl transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-transparent opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity"></div>
-              <div className="relative">
-                <div className="bg-gradient-to-br from-purple-500 to-purple-600 w-14 h-14 rounded-xl flex items-center justify-center mb-5 shadow-lg">
-                  <Calculator className="w-7 h-7 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Project Math</h3>
-                <p className="text-gray-600 leading-relaxed mb-4">
-                  Calculate wire, outlets, tile, paint, and more. Get exact quantities to avoid waste and extra trips.
-                </p>
-                <div className="flex items-center text-purple-600 font-semibold text-sm">
-                  <span>7 specialized calculators</span>
-                  <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </div>
-
-            <div className="group relative bg-white p-8 rounded-2xl border-2 border-gray-100 hover:border-orange-200 hover:shadow-xl transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-transparent opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity"></div>
-              <div className="relative">
-                <div className="bg-gradient-to-br from-orange-500 to-orange-600 w-14 h-14 rounded-xl flex items-center justify-center mb-5 shadow-lg">
-                  <Wrench className="w-7 h-7 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Expert Guidance</h3>
-                <p className="text-gray-600 leading-relaxed mb-4">
-                  Step-by-step help for your entire project. Like having a contractor in your pocket.
-                </p>
-                <div className="flex items-center text-orange-600 font-semibold text-sm">
-                  <span>Ask anything, anytime</span>
-                  <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Get Answers in Seconds
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              No signup required. No credit card. Just instant help for your project.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-12">
-            <div className="text-center">
-              <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg">
-                1
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Ask Your Question</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Type in plain English. Ask about codes, materials, or how to do something safely.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg">
-                2
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">AI Searches Everything</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Claude searches codes, products, and runs calculations. All in under 5 seconds.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg">
-                3
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Build with Confidence</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Get code-compliant answers with products and quantities. Ask follow-ups anytime.
-              </p>
-            </div>
-          </div>
-
-          <div className="text-center mt-16">
-            <Link href="/chat" className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-10 py-5 rounded-xl hover:from-blue-700 hover:to-blue-800 font-bold text-lg transition shadow-xl">
-              Start Your Project Now
-              <ArrowRight className="w-6 h-6" />
+            <Link href="/chat" className="group inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl hover:bg-blue-700 font-semibold text-lg transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+              Start Your Project
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
+
+            <p className="mt-4 text-sm text-gray-500">
+              Free to use • No signup required
+            </p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 sm:p-8 mb-12">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-blue-100 p-2 rounded-lg">
+                <MessageSquare className="w-5 h-5 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">Try asking...</h3>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-3">
+              {examplePrompts.map((prompt, index) => (
+                <Link
+                  key={index}
+                  href="/chat"
+                  className="group text-left p-4 rounded-xl border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all"
+                >
+                  <p className="text-sm text-gray-700 group-hover:text-blue-700 font-medium">
+                    {prompt}
+                  </p>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      <section id="demo" className="py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              See It In Action
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              Everything you need in one chat
             </h2>
-            <p className="text-xl text-gray-600">
-              Real questions. Real answers. Real fast.
+            <p className="text-lg text-gray-600">
+              No more jumping between websites and forums
             </p>
           </div>
 
-          <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
-            <div className="space-y-6">
+          <div className="grid sm:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="bg-blue-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                📖
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Building Codes</h3>
+              <p className="text-gray-600 text-sm">
+                NEC, IRC, and IPC codes at your fingertips
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="bg-green-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                🛒
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Product Finder</h3>
+              <p className="text-gray-600 text-sm">
+                Find the right materials with pricing
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="bg-purple-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                🧮
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Smart Calculator</h3>
+              <p className="text-gray-600 text-sm">
+                Calculate materials and measurements
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              See it in action
+            </h2>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-200">
+            <div className="space-y-4">
               <div className="flex justify-end">
-                <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl rounded-tr-sm px-5 py-3 max-w-[85%]">
+                <div className="bg-blue-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-[80%]">
                   <p className="text-sm">
                     What size wire for a 20-amp kitchen circuit 35 feet from the panel?
                   </p>
@@ -271,32 +149,20 @@ export default function LandingPage() {
               </div>
 
               <div className="flex justify-start">
-                <div className="bg-gray-50 text-gray-900 rounded-2xl rounded-tl-sm px-5 py-4 max-w-[90%] border border-gray-200">
+                <div className="bg-gray-100 text-gray-900 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
                   <p className="text-sm mb-3">
                     For a 20-amp circuit, you need <strong>12-gauge wire</strong> per NEC 210.19.
                   </p>
-                  <div className="bg-white rounded-xl p-4 border border-gray-200">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <div className="font-bold text-sm">Southwire 250ft 12/2 NM-B</div>
-                        <div className="text-xs text-gray-600">Copper with Ground</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-bold text-green-600">$87.43</div>
-                        <div className="text-xs text-green-600">In stock</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
-                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                      <span>4.7/5 reviews</span>
-                    </div>
+                  <div className="bg-white rounded-lg p-3 border border-gray-200 text-sm">
+                    <div className="font-semibold">Southwire 250ft 12/2 NM-B</div>
+                    <div className="text-xs text-gray-600 mt-1">Copper with Ground • $87.43 • In stock</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 text-center">
-              <Link href="/chat" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold">
+            <div className="mt-6 text-center">
+              <Link href="/chat" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold text-sm">
                 Try it yourself
                 <ArrowRight className="w-4 h-4" />
               </Link>
@@ -305,31 +171,42 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Ready to Start Your Project?
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+            Ready to start your project?
           </h2>
-          <p className="text-xl text-gray-600 mb-10">
-            Join DIYers getting instant, code-compliant answers
+          <p className="text-lg text-blue-100 mb-8">
+            Get expert guidance for your DIY project right now
           </p>
-          <Link href="/chat" className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-10 py-5 rounded-xl hover:from-blue-700 hover:to-blue-800 font-bold text-lg transition shadow-xl">
-            Start Chatting Free
-            <ArrowRight className="w-6 h-6" />
+          <Link href="/chat" className="inline-flex items-center gap-2 bg-white text-blue-600 px-8 py-4 rounded-xl hover:bg-blue-50 font-bold text-lg transition shadow-lg">
+            Start Chatting
+            <ArrowRight className="w-5 h-5" />
           </Link>
-          <p className="mt-6 text-sm text-gray-500">
-            No signup • No credit card • Always free
-          </p>
+          <div className="flex items-center justify-center gap-6 mt-8 text-sm text-blue-100">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              <span>Always free</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              <span>No signup</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              <span>Instant answers</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      <footer className="border-t bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Wrench className="w-6 h-6 text-blue-600" />
-            <span className="font-bold text-gray-900 text-lg">DIY Helper</span>
+      <footer className="border-t bg-white py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto text-center">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <Wrench className="w-5 h-5 text-blue-600" />
+            <span className="font-bold text-gray-900">DIY Helper</span>
           </div>
-          <p className="text-gray-600 text-sm mb-6">
+          <p className="text-gray-600 text-sm mb-4">
             AI-powered guidance for your home improvement projects
           </p>
           <p className="text-gray-500 text-xs">
