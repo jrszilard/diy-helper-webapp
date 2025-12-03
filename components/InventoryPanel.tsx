@@ -288,7 +288,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
         {/* Add/Edit Form */}
         {(showAddForm || editingItem) && (
           <div className="p-4 bg-gray-50 border-b">
-            <h3 className="font-semibold mb-3">
+            <h3 className="font-semibold text-gray-900 mb-3">
               {editingItem ? 'Edit Item' : 'Add New Item'}
             </h3>
             <div className="space-y-3">
@@ -351,7 +351,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                   onClick={() => {
                     editingItem ? cancelEdit() : setShowAddForm(false);
                   }}
-                  className="px-4 py-2 border rounded-lg hover:bg-gray-100"
+                  className="px-4 py-2 border border-gray-300 text-gray-900 rounded-lg hover:bg-gray-100"
                 >
                   Cancel
                 </button>
