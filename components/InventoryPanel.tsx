@@ -297,14 +297,14 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                 placeholder="Item name (e.g., Cordless Drill)"
                 value={formData.item_name}
                 onChange={(e) => setFormData({ ...formData, item_name: e.target.value })}
-                className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               
               <div className="flex gap-2">
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 p-2 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {CATEGORIES.map(cat => (
                     <option key={cat.value} value={cat.value}>{cat.label}</option>
@@ -316,7 +316,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                   min="1"
                   value={formData.quantity}
                   onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
-                  className="w-20 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-20 p-2 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Qty"
                 />
               </div>
@@ -324,7 +324,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
               <select
                 value={formData.condition}
                 onChange={(e) => setFormData({ ...formData, condition: e.target.value })}
-                className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {CONDITIONS.map(cond => (
                   <option key={cond.value} value={cond.value}>{cond.label}</option>
@@ -335,7 +335,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                 placeholder="Notes (optional)"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="w-full p-2 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 rows={2}
               />
               
