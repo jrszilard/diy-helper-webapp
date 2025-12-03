@@ -58,7 +58,7 @@ export default function AuthButton({ user }: { user: any }) {
     return (
       <button
         onClick={handleSignOut}
-        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition"
+        className="flex items-center gap-2 text-gray-900 hover:text-blue-600 transition"
       >
         <User className="w-5 h-5" />
         <span className="hidden sm:inline">{user.email}</span>
@@ -111,14 +111,14 @@ export default function AuthButton({ user }: { user: any }) {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">Or continue with email</span>
+                <span className="px-4 bg-white text-gray-700">Or continue with email</span>
               </div>
             </div>
 
             {/* Email/Password Form */}
             <form onSubmit={handleEmailAuth} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
                   Email
                 </label>
                 <input
@@ -126,13 +126,13 @@ export default function AuthButton({ user }: { user: any }) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
                   Password
                 </label>
                 <input
@@ -140,11 +140,11 @@ export default function AuthButton({ user }: { user: any }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                   minLength={6}
                 />
-                <p className="text-xs text-gray-500 mt-1">At least 6 characters</p>
+                <p className="text-xs text-gray-700 mt-1">At least 6 characters</p>
               </div>
 
               <button
