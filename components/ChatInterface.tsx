@@ -29,16 +29,18 @@ interface ExtractedMaterials {
   total_estimate?: number;
 }
 
-export default function ChatInterface({ 
+export default function ChatInterface({
   projectId: initialProjectId,
   onProjectLinked,
   userId,
-  onOpenInventory
-}: { 
+  onOpenInventory,
+  onRequestAuth
+}: {
   projectId?: string;
   onProjectLinked?: (projectId: string) => void;
   userId?: string;
   onOpenInventory?: () => void;
+  onRequestAuth?: () => void;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -49,8 +51,9 @@ export default function ChatInterface({
   const [projects, setProjects] = useState<any[]>([]);
   const [newProjectName, setNewProjectName] = useState('');
   const [showCreateProjectDialog, setShowCreateProjectDialog] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   // Inventory notification state
   const [inventoryNotification, setInventoryNotification] = useState<{
     added: string[];
@@ -226,7 +229,8 @@ export default function ChatInterface({
       currentUserId = user?.id;
     }
     if (!currentUserId) {
-      alert('You must be logged in to save materials');
+      setShowSaveDialog(false);
+      setShowAuthPrompt(true);
       return;
     }
 
@@ -277,6 +281,8 @@ export default function ChatInterface({
 
   const createNewProjectAndSave = async () => {
     if (!extractedMaterials) return;
+    // Auto-fill the project name with the suggested description
+    setNewProjectName(extractedMaterials.project_description);
     setShowCreateProjectDialog(true);
   };
 
@@ -293,7 +299,8 @@ export default function ChatInterface({
     }
     
     if (!currentUserId) {
-      alert('You must be logged in to create a project');
+      setShowCreateProjectDialog(false);
+      setShowAuthPrompt(true);
       return;
     }
 
@@ -652,6 +659,47 @@ export default function ChatInterface({
                   setNewProjectName('');
                 }}
                 className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Auth Prompt Dialog */}
+      {showAuthPrompt && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold mb-4 text-gray-900">Sign In Required</h3>
+            <p className="text-gray-600 mb-6">
+              You need to be signed in to save materials and create projects.
+              Create a free account to get started!
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  setShowAuthPrompt(false);
+                  setShowSaveDialog(false);
+                  setShowCreateProjectDialog(false);
+                  // Trigger the auth modal
+                  if (onRequestAuth) {
+                    onRequestAuth();
+                  }
+                }}
+                className="bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 font-semibold"
+              >
+                Create Account / Sign In
+              </button>
+              <button
+                onClick={() => {
+                  setShowAuthPrompt(false);
+                  setShowSaveDialog(false);
+                  setShowCreateProjectDialog(false);
+                  setExtractedMaterials(null);
+                }}
+                className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300"
               >
                 Cancel
               </button>
