@@ -679,6 +679,8 @@ export default function ChatInterface({
               <button
                 onClick={() => {
                   setShowAuthPrompt(false);
+                  setShowSaveDialog(false);
+                  setShowCreateProjectDialog(false);
                   // Scroll to top where the sign-in button is
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                   // Show a message to guide the user
@@ -697,6 +699,8 @@ export default function ChatInterface({
               <button
                 onClick={() => {
                   setShowAuthPrompt(false);
+                  setShowSaveDialog(false);
+                  setShowCreateProjectDialog(false);
                   setExtractedMaterials(null);
                 }}
                 className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300"
