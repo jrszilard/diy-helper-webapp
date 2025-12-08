@@ -27,7 +27,12 @@ interface StoreResult {
   notes?: string;
 }
 
-export default function ShoppingListView({ project }: { project: any }) {
+interface ShoppingListViewProps {
+  project: any;
+  isMobile?: boolean;
+}
+
+export default function ShoppingListView({ project, isMobile = false }: ShoppingListViewProps) {
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [location, setLocation] = useState('');
@@ -148,30 +153,33 @@ export default function ShoppingListView({ project }: { project: any }) {
   }, {} as Record<string, ShoppingItem[]>);
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2 text-gray-900">{project.name}</h2>
-        <p className="text-gray-600 text-sm">{project.description}</p>
-      </div>
+    <div className={`${isMobile ? 'p-4' : 'p-6'}`}>
+      {/* Only show project header on desktop - mobile has header in overlay */}
+      {!isMobile && (
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold mb-2 text-gray-900">{project.name}</h2>
+          <p className="text-gray-600 text-sm">{project.description}</p>
+        </div>
+      )}
 
       {items.length === 0 ? (
-        <div className="text-center py-12">
-          <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-50 text-gray-400" />
-          <p className="text-gray-500">No items yet</p>
-          <p className="text-sm mt-1 text-gray-400">Products will appear here automatically</p>
+        <div className={`text-center ${isMobile ? 'py-16' : 'py-12'}`}>
+          <ShoppingCart className={`${isMobile ? 'w-16 h-16' : 'w-12 h-12'} mx-auto mb-3 opacity-50 text-gray-400`} />
+          <p className={`text-gray-500 ${isMobile ? 'text-lg' : ''}`}>No items yet</p>
+          <p className={`${isMobile ? 'text-base' : 'text-sm'} mt-1 text-gray-400`}>Products will appear here automatically</p>
         </div>
       ) : (
         <div>
-          <div className="mb-4 flex gap-2">
+          <div className={`mb-4 ${isMobile ? 'space-y-3' : 'flex gap-2'}`}>
             <button
               onClick={() => setShowSearchPanel(!showSearchPanel)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              className={`flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 active:bg-blue-800 transition ${isMobile ? 'w-full text-base' : ''}`}
             >
-              <Search className="w-4 h-4" />
+              <Search className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />
               {showSearchPanel ? 'Hide Search' : 'Search Local Stores'}
             </button>
             {selectedItems.size > 0 && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg font-medium">
+              <div className={`flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-xl font-medium ${isMobile ? 'w-full' : ''}`}>
                 {selectedItems.size} item(s) selected
               </div>
             )}
@@ -183,26 +191,26 @@ export default function ShoppingListView({ project }: { project: any }) {
                 <MapPin className="w-5 h-5 text-gray-600" />
                 <h3 className="font-semibold text-gray-900">Search Local Stores</h3>
               </div>
-              
-              <div className="flex gap-2 mb-3">
+
+              <div className={`${isMobile ? 'space-y-3' : 'flex gap-2'} mb-3`}>
                 <input
                   type="text"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="Enter location (e.g., Portsmouth, NH)"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
+                  className={`flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500 ${isMobile ? 'w-full text-base' : ''}`}
                 />
                 <button
                   onClick={handleSearchStores}
                   disabled={selectedItems.size === 0 || !location.trim() || isSearching}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                  className={`px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 active:bg-blue-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition ${isMobile ? 'w-full text-base font-medium' : ''}`}
                 >
                   {isSearching ? 'Searching...' : 'Search'}
                 </button>
               </div>
-              
-              <p className="text-sm text-gray-600">
-                💡 Select items below with checkboxes, then search to find products at nearby stores
+
+              <p className={`${isMobile ? 'text-base' : 'text-sm'} text-gray-600`}>
+                Select items below with checkboxes, then search to find products at nearby stores
               </p>
             </div>
           )}
@@ -210,38 +218,42 @@ export default function ShoppingListView({ project }: { project: any }) {
           <div className="space-y-6">
             {Object.entries(groupedItems).map(([category, categoryItems]) => (
               <div key={category}>
-                <h3 className="text-lg font-semibold text-gray-800 mb-3 uppercase tracking-wide">
+                <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-gray-800 mb-3 uppercase tracking-wide`}>
                   {category}
                 </h3>
-                
+
                 <div className="bg-white rounded-xl border border-gray-200 divide-y">
                   {categoryItems.map((item) => (
                     <div key={item.id}>
-                      <div className="p-4 flex items-center gap-4">
+                      <div
+                        className={`${isMobile ? 'p-4' : 'p-4'} flex items-center gap-4 ${isMobile ? 'active:bg-gray-50' : ''}`}
+                        onClick={isMobile ? () => toggleItem(item.id) : undefined}
+                      >
                         <input
                           type="checkbox"
                           checked={selectedItems.has(item.id)}
                           onChange={() => toggleItem(item.id)}
-                          className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                          onClick={(e) => e.stopPropagation()}
+                          className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} text-blue-600 rounded focus:ring-2 focus:ring-blue-500 flex-shrink-0`}
                         />
-                        
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-gray-900">{item.product_name}</span>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`font-semibold text-gray-900 ${isMobile ? 'text-base' : ''}`}>{item.product_name}</span>
                             {item.required && (
                               <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-medium">
                                 Required
                               </span>
                             )}
                           </div>
-                          <div className="text-sm text-gray-600">Qty: {item.quantity}</div>
+                          <div className={`${isMobile ? 'text-base' : 'text-sm'} text-gray-600`}>Qty: {item.quantity}</div>
                         </div>
-                        
+
                         {item.price && item.price > 0 && (
-                          <div className="text-right">
-                            <div className="font-bold text-green-600">${item.price.toFixed(2)}</div>
+                          <div className="text-right flex-shrink-0">
+                            <div className={`font-bold text-green-600 ${isMobile ? 'text-lg' : ''}`}>${item.price.toFixed(2)}</div>
                             {item.quantity > 1 && (
-                              <div className="text-xs text-gray-600">
+                              <div className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-600`}>
                                 ${(item.price * item.quantity).toFixed(2)} total
                               </div>
                             )}
@@ -328,24 +340,24 @@ export default function ShoppingListView({ project }: { project: any }) {
             ))}
           </div>
 
-          <div className="mt-6 space-y-3">
+          <div className={`mt-6 space-y-3 ${isMobile ? 'pb-4' : ''}`}>
             {selectedItems.size > 0 && selectedTotal > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
+              <div className={`bg-blue-50 border border-blue-200 rounded-xl ${isMobile ? 'p-4' : 'p-4'} flex items-center justify-between`}>
                 <div className="flex items-center gap-2">
-                  <ShoppingCart className="w-5 h-5 text-blue-600" />
-                  <span className="font-bold text-blue-900">Selected Items Total:</span>
+                  <ShoppingCart className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} text-blue-600`} />
+                  <span className={`font-bold text-blue-900 ${isMobile ? 'text-base' : ''}`}>Selected Total:</span>
                 </div>
-                <span className="text-2xl font-bold text-blue-600">${selectedTotal.toFixed(2)}</span>
+                <span className={`${isMobile ? 'text-2xl' : 'text-2xl'} font-bold text-blue-600`}>${selectedTotal.toFixed(2)}</span>
               </div>
             )}
-            
+
             {total > 0 && (
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
+              <div className={`bg-green-50 border border-green-200 rounded-xl ${isMobile ? 'p-4' : 'p-4'} flex items-center justify-between`}>
                 <div className="flex items-center gap-2">
-                  <DollarSign className="w-5 h-5 text-green-600" />
-                  <span className="font-bold text-green-900">Estimated Total:</span>
+                  <DollarSign className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} text-green-600`} />
+                  <span className={`font-bold text-green-900 ${isMobile ? 'text-base' : ''}`}>Estimated Total:</span>
                 </div>
-                <span className="text-2xl font-bold text-green-600">${total.toFixed(2)}</span>
+                <span className={`${isMobile ? 'text-2xl' : 'text-2xl'} font-bold text-green-600`}>${total.toFixed(2)}</span>
               </div>
             )}
           </div>
