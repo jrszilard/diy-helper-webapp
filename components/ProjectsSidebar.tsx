@@ -4,7 +4,13 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { FolderOpen, Trash2 } from 'lucide-react';
 
-export default function ProjectsSidebar({ user, onSelectProject }: any) {
+interface ProjectsSidebarProps {
+  user: any;
+  onSelectProject: (project: any) => void;
+  isMobile?: boolean;
+}
+
+export default function ProjectsSidebar({ user, onSelectProject, isMobile = false }: ProjectsSidebarProps) {
   const [projects, setProjects] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -39,10 +45,62 @@ export default function ProjectsSidebar({ user, onSelectProject }: any) {
     onSelectProject(project);
   };
 
+  // Mobile view - just the content without wrapper
+  if (isMobile) {
+    return (
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-4 space-y-3">
+          {projects.map((project) => (
+            <div
+              key={project.id}
+              onClick={() => selectProject(project)}
+              className={`relative p-4 rounded-xl cursor-pointer transition active:scale-[0.98] ${
+                selectedId === project.id
+                  ? 'bg-blue-50 border-2 border-blue-500'
+                  : 'bg-gray-50 border-2 border-transparent active:bg-gray-100'
+              }`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <FolderOpen className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                    <span className="font-semibold text-base truncate text-gray-900">{project.name}</span>
+                  </div>
+                  {project.description && (
+                    <p className="text-sm text-gray-600 line-clamp-2 ml-7">{project.description}</p>
+                  )}
+                  <p className="text-xs text-gray-400 mt-2 ml-7">
+                    {new Date(project.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <button
+                  onClick={(e) => deleteProject(project.id, e)}
+                  className="p-2 hover:bg-red-100 active:bg-red-200 rounded-lg transition"
+                  title="Delete project"
+                >
+                  <Trash2 className="w-5 h-5 text-red-500" />
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {projects.length === 0 && (
+            <div className="text-center py-12 text-gray-400">
+              <FolderOpen className="w-16 h-16 mx-auto mb-3 opacity-50" />
+              <p className="text-lg font-medium text-gray-500">No projects yet</p>
+              <p className="text-sm mt-1">Save your first conversation!</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop view - original layout
   return (
-    <div className="w-64 bg-white border-r flex flex-col">
+    <div className="w-64 bg-white border-r flex flex-col h-full">
       <div className="p-4 border-b">
-        <h2 className="font-bold text-lg">My Projects</h2>
+        <h2 className="font-bold text-lg text-gray-900">My Projects</h2>
         <p className="text-xs text-gray-500 mt-1">Saved conversations</p>
       </div>
 
@@ -61,7 +119,7 @@ export default function ProjectsSidebar({ user, onSelectProject }: any) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <FolderOpen className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                  <span className="font-semibold text-sm truncate">{project.name}</span>
+                  <span className="font-semibold text-sm truncate text-gray-900">{project.name}</span>
                 </div>
                 {project.description && (
                   <p className="text-xs text-gray-500 line-clamp-2">{project.description}</p>

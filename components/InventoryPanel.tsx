@@ -227,16 +227,19 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
-      <div className="w-full max-w-md bg-white h-full overflow-hidden flex flex-col shadow-xl">
+      {/* Backdrop for closing on mobile */}
+      <div className="absolute inset-0 md:hidden" onClick={onClose} />
+
+      <div className="w-full max-w-md bg-white h-full overflow-hidden flex flex-col shadow-xl relative animate-slide-in-right">
         {/* Header */}
-        <div className="bg-blue-600 text-white p-4 flex items-center justify-between">
+        <div className="bg-blue-600 text-white p-4 flex items-center justify-between safe-area-top">
           <div>
-            <h2 className="text-xl font-bold">My Tool Inventory</h2>
-            <p className="text-blue-50 text-sm">{inventory.length} items</p>
+            <h2 className="text-lg sm:text-xl font-bold">My Tool Inventory</h2>
+            <p className="text-blue-100 text-sm">{inventory.length} items</p>
           </div>
-          <button 
+          <button
             onClick={onClose}
-            className="p-2 hover:bg-blue-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-blue-700 active:bg-blue-800 rounded-lg transition-colors"
           >
             <X size={24} />
           </button>
@@ -393,12 +396,12 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                     </h4>
                     <div className="space-y-2">
                       {items.map(item => (
-                        <div 
+                        <div
                           key={item.id}
-                          className="bg-white border rounded-lg p-3 flex items-center justify-between group hover:shadow-sm transition-shadow"
+                          className="bg-white border rounded-lg p-3 sm:p-3 flex items-center justify-between group hover:shadow-sm transition-shadow"
                         >
-                          <div className="flex-1">
-                            <div className="font-medium text-gray-900">
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-gray-900 text-sm sm:text-base">
                               {item.item_name}
                               {item.quantity > 1 && (
                                 <span className="text-gray-700 font-normal ml-1">
@@ -406,7 +409,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs text-gray-700 flex items-center gap-2">
+                            <div className="text-xs text-gray-700 flex items-center gap-2 flex-wrap mt-1">
                               <span className={`px-2 py-0.5 rounded-full ${
                                 item.condition === 'new' ? 'bg-green-100 text-green-700' :
                                 item.condition === 'good' ? 'bg-blue-100 text-blue-700' :
@@ -420,22 +423,23 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                               )}
                             </div>
                             {item.notes && (
-                              <p className="text-xs text-gray-700 mt-1">{item.notes}</p>
+                              <p className="text-xs text-gray-700 mt-1 line-clamp-2">{item.notes}</p>
                             )}
                           </div>
-                          
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+
+                          {/* Always visible on mobile, hover on desktop */}
+                          <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
                             <button
                               onClick={() => startEdit(item)}
-                              className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded"
+                              className="p-2 text-gray-600 hover:text-blue-600 active:text-blue-700 hover:bg-blue-50 active:bg-blue-100 rounded-lg"
                             >
-                              <Edit2 size={16} />
+                              <Edit2 size={18} />
                             </button>
                             <button
                               onClick={() => handleDeleteItem(item.id)}
-                              className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded"
+                              className="p-2 text-gray-600 hover:text-red-600 active:text-red-700 hover:bg-red-50 active:bg-red-100 rounded-lg"
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={18} />
                             </button>
                           </div>
                         </div>
@@ -450,10 +454,10 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
 
         {/* Add Button */}
         {!showAddForm && !editingItem && (
-          <div className="p-4 border-t">
+          <div className="p-4 border-t safe-area-bottom bg-white">
             <button
               onClick={() => setShowAddForm(true)}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 font-medium"
+              className="w-full bg-blue-600 text-white py-3 sm:py-3 rounded-xl hover:bg-blue-700 active:bg-blue-800 flex items-center justify-center gap-2 font-medium text-base transition-colors"
             >
               <Plus size={20} />
               Add Item to Inventory
