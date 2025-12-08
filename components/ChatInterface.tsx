@@ -29,16 +29,18 @@ interface ExtractedMaterials {
   total_estimate?: number;
 }
 
-export default function ChatInterface({ 
+export default function ChatInterface({
   projectId: initialProjectId,
   onProjectLinked,
   userId,
-  onOpenInventory
-}: { 
+  onOpenInventory,
+  onRequestAuth
+}: {
   projectId?: string;
   onProjectLinked?: (projectId: string) => void;
   userId?: string;
   onOpenInventory?: () => void;
+  onRequestAuth?: () => void;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -681,16 +683,10 @@ export default function ChatInterface({
                   setShowAuthPrompt(false);
                   setShowSaveDialog(false);
                   setShowCreateProjectDialog(false);
-                  // Scroll to top where the sign-in button is
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                  // Show a message to guide the user
-                  setMessages(prev => [
-                    ...prev,
-                    {
-                      role: 'assistant',
-                      content: '👆 Please click the "Sign In" button at the top of the page to create an account or sign in. Once you\'re signed in, you can save materials to your projects!'
-                    }
-                  ]);
+                  // Trigger the auth modal
+                  if (onRequestAuth) {
+                    onRequestAuth();
+                  }
                 }}
                 className="bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 font-semibold"
               >

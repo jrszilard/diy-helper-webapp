@@ -4,12 +4,29 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { User, LogOut, X, Mail } from 'lucide-react';
 
-export default function AuthButton({ user }: { user: any }) {
+export default function AuthButton({
+  user,
+  externalShowAuth,
+  onAuthToggle
+}: {
+  user: any;
+  externalShowAuth?: boolean;
+  onAuthToggle?: (show: boolean) => void;
+}) {
   const [loading, setLoading] = useState(false);
-  const [showAuth, setShowAuth] = useState(false);
+  const [internalShowAuth, setInternalShowAuth] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const showAuth = externalShowAuth !== undefined ? externalShowAuth : internalShowAuth;
+  const setShowAuth = (show: boolean) => {
+    if (onAuthToggle) {
+      onAuthToggle(show);
+    } else {
+      setInternalShowAuth(show);
+    }
+  };
 
   const handleGoogleSignIn = async () => {
     setLoading(true);

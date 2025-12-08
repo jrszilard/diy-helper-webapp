@@ -16,6 +16,7 @@ export default function ChatPage() {
   const [selectedProject, setSelectedProject] = useState<any>(null);
 
   const [showInventory, setShowInventory] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -65,7 +66,11 @@ export default function ChatPage() {
                   <Home className="w-5 h-5" />
                   <span className="hidden sm:inline font-medium">Home</span>
                 </Link>
-                <AuthButton user={user} />
+                <AuthButton
+                  user={user}
+                  externalShowAuth={showAuthModal}
+                  onAuthToggle={setShowAuthModal}
+                />
                 <button
                   onClick={() => setShowInventory(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
@@ -82,9 +87,10 @@ export default function ChatPage() {
         <div className="flex-1 overflow-hidden flex">
           <div className="flex-1 overflow-hidden">
             <ChatInterface
-              userId={user?.id} 
+              userId={user?.id}
               projectId={selectedProject?.id}
               onProjectLinked={handleProjectLinked}
+              onRequestAuth={() => setShowAuthModal(true)}
             />
           </div>
           
