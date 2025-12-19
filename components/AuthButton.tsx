@@ -28,17 +28,34 @@ export default function AuthButton({
     }
   };
 
+  // Get the proper redirect URL, avoiding chrome-extension:// URLs
+  const getRedirectUrl = () => {
+    const origin = window.location.origin;
+    // If we're in a chrome extension context, use a fallback
+    if (origin.startsWith('chrome-extension://')) {
+      // Fall back to the current host without the extension protocol
+      // or use a configured base URL
+      console.warn('Detected chrome-extension context, using alternative redirect');
+      return undefined; // Let Supabase use its default redirect
+    }
+    return `${origin}/chat`;
+  };
+
   const handleGoogleSignIn = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/chat`
+    try {
+      const redirectTo = getRedirectUrl();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: redirectTo ? { redirectTo } : {}
+      });
+      if (error) {
+        console.error('Google sign in error:', error);
+        alert('Google sign in not configured yet. Please use email/password.');
       }
-    });
-    if (error) {
-      console.error('Google sign in error:', error);
-      alert('Google sign in not configured yet. Please use email/password.');
+    } catch (err) {
+      console.error('Sign in error:', err);
+      alert('An error occurred during sign in. Please try again.');
     }
     setLoading(false);
   };

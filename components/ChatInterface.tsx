@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import ReactMarkdown from 'react-markdown';
 import VideoResults from './VideoResults';
-import { Package, X } from 'lucide-react';
+import { Package, X, Trash2 } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -29,6 +29,25 @@ interface ExtractedMaterials {
   total_estimate?: number;
 }
 
+const CHAT_STORAGE_KEY = 'diy-helper-chat-messages';
+
+// Helper to load messages from localStorage
+const loadMessagesFromStorage = (): Message[] => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const saved = localStorage.getItem(CHAT_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Error loading chat history:', e);
+  }
+  return [];
+};
+
 export default function ChatInterface({
   projectId: initialProjectId,
   onProjectLinked,
@@ -42,7 +61,7 @@ export default function ChatInterface({
   onOpenInventory?: () => void;
   onRequestAuth?: () => void;
 }) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() => loadMessagesFromStorage());
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [projectId, setProjectId] = useState<string | undefined>(initialProjectId);
@@ -59,6 +78,17 @@ export default function ChatInterface({
     added: string[];
     existing: string[];
   } | null>(null);
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+      } catch (e) {
+        console.error('Error saving chat history:', e);
+      }
+    }
+  }, [messages]);
 
   useEffect(() => {
     if (userId) {
@@ -360,24 +390,42 @@ export default function ChatInterface({
       {/* Header */}
       <div className="bg-white border-b p-4 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">DIY Helper Chat</h1> 
+          <h1 className="text-xl font-bold text-gray-900">DIY Helper Chat</h1>
           {projectId && (
             <p className="text-sm text-gray-600">
               💼 Linked to project: {projects.find(p => p.id === projectId)?.name || 'Unknown'}
             </p>
           )}
         </div>
-        {/* Inventory Button */}
-        {onOpenInventory && (
-          <button
-            onClick={onOpenInventory}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            title="View your tool inventory"
-          >
-            <Package size={18} />
-            <span className="hidden sm:inline">My Tools</span>
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {/* Clear Chat Button */}
+          {messages.length > 0 && (
+            <button
+              onClick={() => {
+                if (confirm('Clear chat history? This cannot be undone.')) {
+                  setMessages([]);
+                  localStorage.removeItem(CHAT_STORAGE_KEY);
+                }
+              }}
+              className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Clear chat history"
+            >
+              <Trash2 size={18} />
+              <span className="hidden sm:inline text-sm">Clear</span>
+            </button>
+          )}
+          {/* Inventory Button */}
+          {onOpenInventory && (
+            <button
+              onClick={onOpenInventory}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              title="View your tool inventory"
+            >
+              <Package size={18} />
+              <span className="hidden sm:inline">My Tools</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Messages */}

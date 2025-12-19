@@ -74,8 +74,14 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
   });
 
   useEffect(() => {
-    if (isOpen && userId) {
-      loadInventory();
+    if (isOpen) {
+      if (userId) {
+        loadInventory();
+      } else {
+        // No user logged in - stop loading immediately
+        setLoading(false);
+        setInventory([]);
+      }
     }
   }, [isOpen, userId]);
 
@@ -369,6 +375,16 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
             <div className="p-8 text-center text-gray-800">
               Loading inventory...
             </div>
+          ) : !userId ? (
+            <div className="p-8 text-center">
+              <Package className="mx-auto text-gray-300 mb-4" size={48} />
+              <p className="text-gray-800 mb-2 font-medium">
+                Sign in to access your tool inventory
+              </p>
+              <p className="text-sm text-gray-700">
+                Your tools will be saved and remembered across sessions
+              </p>
+            </div>
           ) : filteredInventory.length === 0 ? (
             <div className="p-8 text-center">
               <Package className="mx-auto text-gray-300 mb-4" size={48} />
@@ -452,8 +468,8 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
           )}
         </div>
 
-        {/* Add Button */}
-        {!showAddForm && !editingItem && (
+        {/* Add Button - only show when logged in */}
+        {!showAddForm && !editingItem && userId && (
           <div className="p-4 border-t safe-area-bottom bg-white">
             <button
               onClick={() => setShowAddForm(true)}
