@@ -30,6 +30,7 @@ interface ExtractedMaterials {
 }
 
 const CHAT_STORAGE_KEY = 'diy-helper-chat-messages';
+const INITIAL_MESSAGE_KEY = 'initialChatMessage';
 
 // Helper to load messages from localStorage
 const loadMessagesFromStorage = (): Message[] => {
@@ -46,6 +47,16 @@ const loadMessagesFromStorage = (): Message[] => {
     console.error('Error loading chat history:', e);
   }
   return [];
+};
+
+// Helper to check for initial message from homepage
+const getInitialMessage = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  const message = sessionStorage.getItem(INITIAL_MESSAGE_KEY);
+  if (message) {
+    sessionStorage.removeItem(INITIAL_MESSAGE_KEY); // Clear it after reading
+  }
+  return message;
 };
 
 export default function ChatInterface({
@@ -71,6 +82,7 @@ export default function ChatInterface({
   const [newProjectName, setNewProjectName] = useState('');
   const [showCreateProjectDialog, setShowCreateProjectDialog] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [hasProcessedInitialMessage, setHasProcessedInitialMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Inventory notification state
@@ -95,6 +107,20 @@ export default function ChatInterface({
       loadProjects();
     }
   }, [userId]);
+
+  // Check for initial message from homepage and send it automatically
+  useEffect(() => {
+    if (hasProcessedInitialMessage) return;
+    
+    const initialMessage = getInitialMessage();
+    if (initialMessage && !isLoading) {
+      setHasProcessedInitialMessage(true);
+      // Use setTimeout to ensure component is fully mounted
+      setTimeout(() => {
+        sendMessageWithContent(initialMessage);
+      }, 100);
+    }
+  }, [hasProcessedInitialMessage, isLoading]);
 
   // Detect inventory updates when messages change
   useEffect(() => {
@@ -203,13 +229,12 @@ export default function ChatInterface({
     
     return { found: false };
   };
-  
-  const sendMessage = async () => {
-    if (!input.trim()) return;
 
-    const userMessage = input;
-    setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+  // Function to send a message with specific content (used for initial message from homepage)
+  const sendMessageWithContent = async (messageContent: string) => {
+    if (!messageContent.trim()) return;
+
+    setMessages(prev => [...prev, { role: 'user', content: messageContent }]);
     setIsLoading(true);
 
     try {
@@ -217,10 +242,10 @@ export default function ChatInterface({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: userMessage,
+          message: messageContent,
           history: messages,
           project_id: projectId,
-          userId: userId // Pass userId for inventory operations
+          userId: userId
         })
       });
 
@@ -248,6 +273,14 @@ export default function ChatInterface({
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+
+    const userMessage = input;
+    setInput('');
+    await sendMessageWithContent(userMessage);
   };
 
   const saveToProject = async (targetProjectId: string) => {
