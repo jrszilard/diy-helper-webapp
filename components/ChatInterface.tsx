@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import ReactMarkdown from 'react-markdown';
 import VideoResults from './VideoResults';
 import ProgressIndicator, { ProgressStep } from './ProgressIndicator';
-import { Package, X, Trash2, Search } from 'lucide-react';
+import { Package, X, Trash2, Search, FolderPlus } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -451,7 +451,7 @@ export default function ChatInterface({
   };
 
   const confirmCreateProject = async () => {
-    if (!extractedMaterials || !newProjectName.trim()) {
+    if (!newProjectName.trim()) {
       alert('Please enter a project name');
       return;
     }
@@ -469,11 +469,16 @@ export default function ChatInterface({
     }
 
     try {
+      // Generate description from first user message if no extracted materials
+      const description = extractedMaterials?.project_description ||
+        messages.find(m => m.role === 'user')?.content.slice(0, 200) ||
+        'DIY Project';
+
       const { data: newProject, error: projectError } = await supabase
         .from('projects')
         .insert({
           name: newProjectName.trim(),
-          description: extractedMaterials.project_description,
+          description: description,
           user_id: currentUserId
         })
         .select()
@@ -487,7 +492,19 @@ export default function ChatInterface({
       setShowCreateProjectDialog(false);
       setNewProjectName('');
       await loadProjects();
-      await saveToProject(newProject.id);
+
+      // Only save materials if we have extracted materials
+      if (extractedMaterials) {
+        await saveToProject(newProject.id);
+      } else {
+        // Just link the project
+        setProjectId(newProject.id);
+        onProjectLinked?.(newProject.id);
+        setMessages(prev => [
+          ...prev,
+          { role: 'assistant', content: `✅ Created project "${newProjectName.trim()}"! Your conversation is now linked to this project.` }
+        ]);
+      }
     } catch (err: any) {
       console.error('Error creating project:', err);
       alert('An error occurred while creating project.');
@@ -546,6 +563,25 @@ export default function ChatInterface({
             >
               <Trash2 size={18} />
               <span className="hidden sm:inline text-sm">Clear</span>
+            </button>
+          )}
+          {/* Save to Project Button - shows when there are messages and no project linked */}
+          {messages.length > 0 && !projectId && (
+            <button
+              onClick={() => {
+                if (!userId) {
+                  setShowAuthPrompt(true);
+                  return;
+                }
+                // Create a simple project from the conversation
+                setNewProjectName('');
+                setShowCreateProjectDialog(true);
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors shadow-sm"
+              title="Save this conversation to a new project"
+            >
+              <FolderPlus size={18} />
+              <span className="hidden sm:inline">Save to Project</span>
             </button>
           )}
           {/* Inventory Button */}
@@ -847,19 +883,23 @@ export default function ChatInterface({
       )}
 
       {/* Create New Project Dialog */}
-      {showCreateProjectDialog && extractedMaterials && (
+      {showCreateProjectDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold mb-4 text-gray-900">Create New Project</h3>
+            <h3 className="text-xl font-bold mb-4 text-gray-900">
+              {extractedMaterials ? 'Create New Project' : 'Save to New Project'}
+            </h3>
             <p className="text-gray-600 mb-4">
-              Enter a name for your project:
+              {extractedMaterials
+                ? 'Enter a name for your project:'
+                : 'Save this conversation to a new project. You can add materials later.'}
             </p>
 
             <input
               type="text"
               value={newProjectName}
               onChange={(e) => setNewProjectName(e.target.value)}
-              placeholder={extractedMaterials.project_description}
+              placeholder={extractedMaterials?.project_description || 'My DIY Project'}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 mb-4"
               onKeyPress={(e) => e.key === 'Enter' && confirmCreateProject()}
               autoFocus
@@ -869,9 +909,9 @@ export default function ChatInterface({
               <button
                 onClick={confirmCreateProject}
                 disabled={!newProjectName.trim()}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="flex-1 bg-amber-500 text-white py-2 px-4 rounded-lg hover:bg-amber-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
-                Create & Save
+                {extractedMaterials ? 'Create & Save' : 'Create Project'}
               </button>
               <button
                 onClick={() => {
