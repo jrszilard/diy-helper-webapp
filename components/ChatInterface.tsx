@@ -512,7 +512,7 @@ export default function ChatInterface({
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-full bg-gray-50">
       {/* Inventory Update Notification Toast */}
       {inventoryNotification && (
         <div className="fixed top-20 right-4 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-slide-in max-w-sm">
@@ -964,6 +964,33 @@ export default function ChatInterface({
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Save to Project Banner - shows prominently when there are messages but no project */}
+      {messages.length > 0 && !projectId && !isLoading && (
+        <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3 shadow-lg">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-white min-w-0">
+              <FolderPlus size={20} className="flex-shrink-0" />
+              <span className="text-sm font-medium truncate">
+                Save this conversation to track your project
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                if (!userId) {
+                  setShowAuthPrompt(true);
+                  return;
+                }
+                setNewProjectName('');
+                setShowCreateProjectDialog(true);
+              }}
+              className="flex-shrink-0 bg-white text-amber-600 px-4 py-1.5 rounded-lg font-semibold text-sm hover:bg-amber-50 transition-colors shadow-sm"
+            >
+              Save to Project
+            </button>
           </div>
         </div>
       )}
