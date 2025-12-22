@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  Wrench, 
-  ArrowRight, 
-  Zap, 
-  BookOpen, 
-  ShoppingCart, 
+import {
+  Wrench,
+  ArrowRight,
+  Zap,
+  BookOpen,
+  ShoppingCart,
   Video,
   MapPin,
   Package,
@@ -16,6 +16,8 @@ import {
   Sparkles,
   Send
 } from 'lucide-react';
+import WhyDIYHelper from '@/components/WhyDIYHelper';
+import ProjectTemplates from '@/components/ProjectTemplates';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -258,6 +260,9 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Why DIY Helper Comparison */}
+      <WhyDIYHelper />
+
       {/* Features Grid */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
@@ -395,6 +400,21 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Project Templates Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-stone-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-stone-900 mb-4">
+              Popular Project Templates
+            </h2>
+            <p className="text-lg text-stone-600 max-w-2xl mx-auto">
+              Get started quickly with step-by-step guidance for common DIY projects
+            </p>
+          </div>
+          <ProjectTemplates variant="grid" maxItems={6} />
         </div>
       </section>
 

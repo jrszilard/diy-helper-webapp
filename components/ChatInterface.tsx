@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import ReactMarkdown from 'react-markdown';
 import VideoResults from './VideoResults';
-import { Package, X, Trash2 } from 'lucide-react';
+import ProgressIndicator, { ProgressStep } from './ProgressIndicator';
+import { Package, X, Trash2, Search, FolderPlus } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -85,6 +86,14 @@ export default function ChatInterface({
   const [hasProcessedInitialMessage, setHasProcessedInitialMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Streaming state
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamingContent, setStreamingContent] = useState('');
+  const [progressSteps, setProgressSteps] = useState<ProgressStep[]>([]);
+  const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null);
+  const [showGoogleFallback, setShowGoogleFallback] = useState(false);
+  const [lastQuery, setLastQuery] = useState('');
+
   // Inventory notification state
   const [inventoryNotification, setInventoryNotification] = useState<{
     added: string[];
@@ -111,7 +120,7 @@ export default function ChatInterface({
   // Check for initial message from homepage and send it automatically
   useEffect(() => {
     if (hasProcessedInitialMessage) return;
-    
+
     const initialMessage = getInitialMessage();
     if (initialMessage && !isLoading) {
       setHasProcessedInitialMessage(true);
@@ -132,26 +141,38 @@ export default function ChatInterface({
     }
   }, [messages]);
 
+  // Show Google fallback after 5 seconds of loading
+  useEffect(() => {
+    if (isLoading && loadingStartTime) {
+      const timer = setTimeout(() => {
+        setShowGoogleFallback(true);
+      }, 5000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowGoogleFallback(false);
+    }
+  }, [isLoading, loadingStartTime]);
+
   const loadProjects = async () => {
     try {
       let currentUserId = userId;
-      
+
       if (!currentUserId) {
         const { data: { user } } = await supabase.auth.getUser();
         currentUserId = user?.id;
       }
-      
+
       if (!currentUserId) {
         console.log('No user ID available for loading projects');
         return;
       }
-      
+
       const { data } = await supabase
         .from('projects')
         .select('*')
         .eq('user_id', currentUserId)
         .order('created_at', { ascending: false });
-      
+
       if (data) setProjects(data);
     } catch (error) {
       console.error('Error loading projects:', error);
@@ -164,14 +185,14 @@ export default function ChatInterface({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, streamingContent]);
 
   // Detect inventory updates in assistant messages
   const detectInventoryUpdate = (content: string) => {
     const inventoryMatch = content.match(
       /---INVENTORY_UPDATE---\n([\s\S]*?)\n---END_INVENTORY_UPDATE---/
     );
-    
+
     if (inventoryMatch) {
       try {
         const data = JSON.parse(inventoryMatch[1]);
@@ -212,7 +233,7 @@ export default function ChatInterface({
     try {
       // Look for the tool result JSON that contains video data
       const jsonMatch = content.match(/\{[^{}]*"success":\s*true[^{}]*"videos":\s*\[[^\]]*\][^{}]*\}/s);
-      
+
       if (jsonMatch) {
         const data = JSON.parse(jsonMatch[0]);
         if (data.success && data.videos && Array.isArray(data.videos)) {
@@ -226,7 +247,7 @@ export default function ChatInterface({
     } catch (e) {
       console.error('Error parsing video results:', e);
     }
-    
+
     return { found: false };
   };
 
@@ -234,8 +255,14 @@ export default function ChatInterface({
   const sendMessageWithContent = async (messageContent: string) => {
     if (!messageContent.trim()) return;
 
+    setLastQuery(messageContent);
     setMessages(prev => [...prev, { role: 'user', content: messageContent }]);
     setIsLoading(true);
+    setIsStreaming(true);
+    setStreamingContent('');
+    setProgressSteps([]);
+    setLoadingStartTime(Date.now());
+    setShowGoogleFallback(false);
 
     try {
       const response = await fetch('/api/chat', {
@@ -245,24 +272,85 @@ export default function ChatInterface({
           message: messageContent,
           history: messages,
           project_id: projectId,
-          userId: userId
+          userId: userId,
+          streaming: true
         })
       });
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-      if (data.response) {
-        const materials = extractMaterialsData(data.response);
-        
-        if (materials && materials.materials && materials.materials.length > 0) {
-          setExtractedMaterials(materials);
-          setShowSaveDialog(true);
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedContent = '';
+
+      if (!reader) {
+        throw new Error('No response body reader available');
+      }
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const eventData = line.slice(6);
+              if (!eventData.trim()) continue;
+
+              const event = JSON.parse(eventData);
+
+              switch (event.type) {
+                case 'progress':
+                  setProgressSteps(prev => [
+                    ...prev.map(s => ({ ...s, completed: true })),
+                    {
+                      step: event.step,
+                      message: event.message,
+                      icon: event.icon,
+                      completed: false
+                    }
+                  ]);
+                  break;
+
+                case 'text':
+                  if (event.content) {
+                    accumulatedContent += event.content;
+                    setStreamingContent(accumulatedContent);
+                  }
+                  break;
+
+                case 'error':
+                  console.error('Stream error:', event.content);
+                  accumulatedContent += `\n\n${event.content}`;
+                  setStreamingContent(accumulatedContent);
+                  break;
+
+                case 'done':
+                  setProgressSteps(prev => prev.map(s => ({ ...s, completed: true })));
+                  if (accumulatedContent) {
+                    // Check for materials data in the accumulated content
+                    const materials = extractMaterialsData(accumulatedContent);
+                    if (materials && materials.materials && materials.materials.length > 0) {
+                      setExtractedMaterials(materials);
+                      setShowSaveDialog(true);
+                    }
+
+                    setMessages(prev => [...prev, { role: 'assistant', content: accumulatedContent }]);
+                  }
+                  setStreamingContent('');
+                  setIsStreaming(false);
+                  break;
+              }
+            } catch (parseError) {
+              console.error('Error parsing SSE event:', parseError, line);
+            }
+          }
         }
-
-        setMessages(prev => [
-          ...prev,
-          { role: 'assistant', content: data.response }
-        ]);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -270,17 +358,30 @@ export default function ChatInterface({
         ...prev,
         { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }
       ]);
+      setStreamingContent('');
+      setIsStreaming(false);
     } finally {
       setIsLoading(false);
+      setIsStreaming(false);
+      setProgressSteps([]);
+      setLoadingStartTime(null);
+      setShowGoogleFallback(false);
     }
   };
-  
+
   const sendMessage = async () => {
     if (!input.trim()) return;
 
     const userMessage = input;
     setInput('');
     await sendMessageWithContent(userMessage);
+  };
+
+  const handleGoogleSearch = () => {
+    const query = lastQuery || input;
+    if (query) {
+      window.open(`https://www.google.com/search?q=${encodeURIComponent(query + ' DIY')}`, '_blank');
+    }
   };
 
   const saveToProject = async (targetProjectId: string) => {
@@ -326,7 +427,7 @@ export default function ChatInterface({
       onProjectLinked?.(targetProjectId);
 
       // Build success message
-      let successMsg = `✅ Successfully saved ${extractedMaterials.materials.length} items to your project!`;
+      let successMsg = `Successfully saved ${extractedMaterials.materials.length} items to your project!`;
       if (extractedMaterials.owned_items && extractedMaterials.owned_items.length > 0) {
         successMsg += ` (${extractedMaterials.owned_items.length} items you already own were not added to the shopping list)`;
       }
@@ -350,7 +451,7 @@ export default function ChatInterface({
   };
 
   const confirmCreateProject = async () => {
-    if (!extractedMaterials || !newProjectName.trim()) {
+    if (!newProjectName.trim()) {
       alert('Please enter a project name');
       return;
     }
@@ -360,7 +461,7 @@ export default function ChatInterface({
       const { data: { user } } = await supabase.auth.getUser();
       currentUserId = user?.id;
     }
-    
+
     if (!currentUserId) {
       setShowCreateProjectDialog(false);
       setShowAuthPrompt(true);
@@ -368,11 +469,16 @@ export default function ChatInterface({
     }
 
     try {
+      // Generate description from first user message if no extracted materials
+      const description = extractedMaterials?.project_description ||
+        messages.find(m => m.role === 'user')?.content.slice(0, 200) ||
+        'DIY Project';
+
       const { data: newProject, error: projectError } = await supabase
         .from('projects')
         .insert({
           name: newProjectName.trim(),
-          description: extractedMaterials.project_description,
+          description: description,
           user_id: currentUserId
         })
         .select()
@@ -386,7 +492,19 @@ export default function ChatInterface({
       setShowCreateProjectDialog(false);
       setNewProjectName('');
       await loadProjects();
-      await saveToProject(newProject.id);
+
+      // Only save materials if we have extracted materials
+      if (extractedMaterials) {
+        await saveToProject(newProject.id);
+      } else {
+        // Just link the project
+        setProjectId(newProject.id);
+        onProjectLinked?.(newProject.id);
+        setMessages(prev => [
+          ...prev,
+          { role: 'assistant', content: `✅ Created project "${newProjectName.trim()}"! Your conversation is now linked to this project.` }
+        ]);
+      }
     } catch (err: any) {
       console.error('Error creating project:', err);
       alert('An error occurred while creating project.');
@@ -394,7 +512,7 @@ export default function ChatInterface({
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-full bg-gray-50">
       {/* Inventory Update Notification Toast */}
       {inventoryNotification && (
         <div className="fixed top-20 right-4 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-slide-in max-w-sm">
@@ -411,7 +529,7 @@ export default function ChatInterface({
               </p>
             )}
           </div>
-          <button 
+          <button
             onClick={() => setInventoryNotification(null)}
             className="ml-2 hover:bg-green-700 p-1 rounded flex-shrink-0"
           >
@@ -426,7 +544,7 @@ export default function ChatInterface({
           <h1 className="text-xl font-bold text-gray-900">DIY Helper Chat</h1>
           {projectId && (
             <p className="text-sm text-gray-600">
-              💼 Linked to project: {projects.find(p => p.id === projectId)?.name || 'Unknown'}
+              Linked to project: {projects.find(p => p.id === projectId)?.name || 'Unknown'}
             </p>
           )}
         </div>
@@ -447,6 +565,25 @@ export default function ChatInterface({
               <span className="hidden sm:inline text-sm">Clear</span>
             </button>
           )}
+          {/* Save to Project Button - shows when there are messages and no project linked */}
+          {messages.length > 0 && !projectId && (
+            <button
+              onClick={() => {
+                if (!userId) {
+                  setShowAuthPrompt(true);
+                  return;
+                }
+                // Create a simple project from the conversation
+                setNewProjectName('');
+                setShowCreateProjectDialog(true);
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors shadow-sm"
+              title="Save this conversation to a new project"
+            >
+              <FolderPlus size={18} />
+              <span className="hidden sm:inline">Save to Project</span>
+            </button>
+          )}
           {/* Inventory Button */}
           {onOpenInventory && (
             <button
@@ -463,20 +600,20 @@ export default function ChatInterface({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 && (
+        {messages.length === 0 && !isStreaming && (
           <div className="text-center text-gray-500 mt-8">
-            <p className="text-lg mb-2">👋 Welcome to DIY Helper!</p>
+            <p className="text-lg mb-2">Welcome to DIY Helper!</p>
             <p className="text-sm">Ask me about any home improvement project.</p>
             <p className="text-xs text-gray-400 mt-2">
               Tip: Mention tools you own (e.g., "I have a drill") and I'll remember them!
             </p>
           </div>
         )}
-        
+
         {messages.map((msg, idx) => {
           // Check if this message contains video results
           const videoResults = msg.role === 'assistant' ? parseVideoResults(msg.content) : { found: false };
-          
+
           return (
             <div
               key={idx}
@@ -492,8 +629,8 @@ export default function ChatInterface({
                 {/* Render video results if found */}
                 {videoResults.found && (
                   <div className="mb-4">
-                    <VideoResults 
-                      videos={videoResults.videos || []} 
+                    <VideoResults
+                      videos={videoResults.videos || []}
                       projectQuery={videoResults.query || 'Project'}
                     />
                   </div>
@@ -502,8 +639,8 @@ export default function ChatInterface({
                 {/* Text content */}
                 <div className={msg.role === 'user' ? '' : 'bg-white border border-gray-200 text-gray-900 rounded-lg p-4'}>
                   <div className={`prose prose-sm max-w-none ${
-                    msg.role === 'user' 
-                      ? 'prose-invert' 
+                    msg.role === 'user'
+                      ? 'prose-invert'
                       : 'prose-gray'
                   }`}>
                     <ReactMarkdown
@@ -555,22 +692,22 @@ export default function ChatInterface({
                         ),
                         code: ({ children }) => (
                           <code className={`px-1 py-0.5 rounded text-sm ${
-                            msg.role === 'user' 
-                              ? 'bg-blue-500 text-white' 
+                            msg.role === 'user'
+                              ? 'bg-blue-500 text-white'
                               : 'bg-gray-100 text-gray-900'
                           }`}>
                             {children}
                           </code>
                         ),
                         a: ({ children, href }) => (
-                          <a 
-                            href={href} 
+                          <a
+                            href={href}
                             className={`underline ${
-                              msg.role === 'user' 
-                                ? 'text-white hover:text-blue-100' 
+                              msg.role === 'user'
+                                ? 'text-white hover:text-blue-100'
                                 : 'text-blue-600 hover:text-blue-800'
                             }`}
-                            target="_blank" 
+                            target="_blank"
                             rel="noopener noreferrer"
                           >
                             {children}
@@ -602,14 +739,36 @@ export default function ChatInterface({
           );
         })}
 
-        {isLoading && (
+        {/* Streaming content with progress indicator */}
+        {isStreaming && (
           <div className="flex justify-start">
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-              </div>
+            <div className="max-w-3xl w-full">
+              {/* Progress indicator */}
+              {progressSteps.length > 0 && (
+                <ProgressIndicator steps={progressSteps} />
+              )}
+
+              {/* Streaming text content */}
+              {streamingContent && (
+                <div className="bg-white border border-gray-200 text-gray-900 rounded-lg p-4">
+                  <div className="prose prose-sm max-w-none prose-gray">
+                    <ReactMarkdown>
+                      {cleanMessageContent(streamingContent)}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              )}
+
+              {/* Loading dots when no content yet */}
+              {!streamingContent && progressSteps.length === 0 && (
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -617,9 +776,25 @@ export default function ChatInterface({
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Google Search Fallback */}
+      {showGoogleFallback && isLoading && (
+        <div className="px-4 py-2 bg-amber-50 border-t border-amber-200">
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-sm text-amber-700">Taking too long?</span>
+            <button
+              onClick={handleGoogleSearch}
+              className="inline-flex items-center gap-1 text-sm text-amber-600 hover:text-amber-800 underline font-medium"
+            >
+              <Search size={14} />
+              Search Google instead
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Manual "Save Materials" Button */}
-      {!showSaveDialog && messages.length > 0 && messages[messages.length - 1].role === 'assistant' && 
-        (messages[messages.length - 1].content.toLowerCase().includes('materials list') || 
+      {!showSaveDialog && messages.length > 0 && messages[messages.length - 1].role === 'assistant' &&
+        (messages[messages.length - 1].content.toLowerCase().includes('materials list') ||
         messages[messages.length - 1].content.toLowerCase().includes('shopping list') ||
         messages[messages.length - 1].content.toLowerCase().includes('items to purchase')) &&
         !extractedMaterials && (
@@ -627,7 +802,7 @@ export default function ChatInterface({
           <div className="flex items-center gap-3">
             <div className="flex-1">
               <p className="text-sm text-yellow-800 font-medium">
-                💡 To save these materials to your project, ask me to:
+                To save these materials to your project, ask me to:
               </p>
               <p className="text-xs text-yellow-700 mt-1">
                 "Call the extract_materials_list tool" or "Save these to my shopping list"
@@ -655,7 +830,7 @@ export default function ChatInterface({
             </p>
             {extractedMaterials.owned_items && extractedMaterials.owned_items.length > 0 && (
               <p className="text-green-600 text-sm mb-4">
-                ✅ {extractedMaterials.owned_items.length} items you already own were excluded from the list.
+                {extractedMaterials.owned_items.length} items you already own were excluded from the list.
               </p>
             )}
             {extractedMaterials.total_estimate && (
@@ -681,7 +856,7 @@ export default function ChatInterface({
                     </option>
                   ))}
                 </select>
-                
+
                 <div className="text-center text-gray-500 text-sm my-3">or</div>
               </div>
             )}
@@ -708,19 +883,23 @@ export default function ChatInterface({
       )}
 
       {/* Create New Project Dialog */}
-      {showCreateProjectDialog && extractedMaterials && (
+      {showCreateProjectDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold mb-4 text-gray-900">Create New Project</h3>
+            <h3 className="text-xl font-bold mb-4 text-gray-900">
+              {extractedMaterials ? 'Create New Project' : 'Save to New Project'}
+            </h3>
             <p className="text-gray-600 mb-4">
-              Enter a name for your project:
+              {extractedMaterials
+                ? 'Enter a name for your project:'
+                : 'Save this conversation to a new project. You can add materials later.'}
             </p>
 
             <input
               type="text"
               value={newProjectName}
               onChange={(e) => setNewProjectName(e.target.value)}
-              placeholder={extractedMaterials.project_description}
+              placeholder={extractedMaterials?.project_description || 'My DIY Project'}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 mb-4"
               onKeyPress={(e) => e.key === 'Enter' && confirmCreateProject()}
               autoFocus
@@ -730,9 +909,9 @@ export default function ChatInterface({
               <button
                 onClick={confirmCreateProject}
                 disabled={!newProjectName.trim()}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="flex-1 bg-amber-500 text-white py-2 px-4 rounded-lg hover:bg-amber-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
-                Create & Save
+                {extractedMaterials ? 'Create & Save' : 'Create Project'}
               </button>
               <button
                 onClick={() => {
@@ -785,6 +964,33 @@ export default function ChatInterface({
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Save to Project Banner - shows prominently when there are messages but no project */}
+      {messages.length > 0 && !projectId && !isLoading && (
+        <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3 shadow-lg">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-white min-w-0">
+              <FolderPlus size={20} className="flex-shrink-0" />
+              <span className="text-sm font-medium truncate">
+                Save this conversation to track your project
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                if (!userId) {
+                  setShowAuthPrompt(true);
+                  return;
+                }
+                setNewProjectName('');
+                setShowCreateProjectDialog(true);
+              }}
+              className="flex-shrink-0 bg-white text-amber-600 px-4 py-1.5 rounded-lg font-semibold text-sm hover:bg-amber-50 transition-colors shadow-sm"
+            >
+              Save to Project
+            </button>
           </div>
         </div>
       )}

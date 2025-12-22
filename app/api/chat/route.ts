@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
 import { webSearch, webFetch } from '@/lib/search';
@@ -9,32 +9,36 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 );
 
-// Helper to detect if query mentions a location
-function detectLocation(message: string): { city?: string; state?: string } | null {
-  const message_lower = message.toLowerCase();
-  
-  // Common patterns for location mentions
-  const patterns = [
-    /in\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?),?\s+([A-Z]{2}|[A-Z][a-z]+)/i,  // "in Portsmouth, NH"
-    /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?),?\s+([A-Z]{2}|[A-Z][a-z]+)/i,      // "Portsmouth NH" or "Portsmouth, New Hampshire"
-  ];
-  
-  for (const pattern of patterns) {
-    const match = message.match(pattern);
-    if (match) {
-      return {
-        city: match[1].trim(),
-        state: match[2].trim()
-      };
-    }
-  }
-  
-  return null;
-}
-
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
+
+// Progress event types
+interface StreamEvent {
+  type: 'progress' | 'text' | 'tool_start' | 'tool_result' | 'done' | 'error';
+  step?: string;
+  message?: string;
+  icon?: string;
+  content?: string;
+  toolName?: string;
+  result?: any;
+}
+
+// Progress messages for each tool
+const progressMessages: Record<string, { message: string; icon: string }> = {
+  search_building_codes: { message: 'Searching building codes...', icon: '📋' },
+  search_local_codes: { message: 'Looking up local building codes...', icon: '🏛️' },
+  search_project_videos: { message: 'Finding tutorial videos...', icon: '🎥' },
+  extract_materials_list: { message: 'Creating materials list...', icon: '📝' },
+  search_local_stores: { message: 'Checking local store prices...', icon: '🏪' },
+  check_user_inventory: { message: 'Cross-referencing your inventory...', icon: '🔧' },
+  detect_owned_items: { message: 'Adding items to your inventory...', icon: '📦' },
+  search_products: { message: 'Searching for products...', icon: '🔍' },
+  calculate_wire_size: { message: 'Calculating wire requirements...', icon: '⚡' },
+  compare_store_prices: { message: 'Comparing store prices...', icon: '💰' },
+  web_search: { message: 'Searching the web...', icon: '🌐' },
+  web_fetch: { message: 'Fetching page content...', icon: '📄' }
+};
 
 const systemPrompt = `You are a helpful DIY assistant specializing in home improvement projects. You have access to several tools:
 
@@ -51,7 +55,7 @@ const systemPrompt = `You are a helpful DIY assistant specializing in home impro
 9. After saving, materials appear in their shopping list with checkboxes
 10. User can then search local stores for prices
 
-**🔧 INVENTORY DETECTION - THIS IS CRITICAL - ALWAYS DO THIS:**
+**INVENTORY DETECTION - THIS IS CRITICAL - ALWAYS DO THIS:**
 
 You MUST call the detect_owned_items tool IMMEDIATELY when the user mentions owning ANY tools or materials. Do NOT just acknowledge what they said - you MUST call the tool.
 
@@ -65,16 +69,7 @@ You MUST call the detect_owned_items tool IMMEDIATELY when the user mentions own
 - "I can use my..." / "I'll use my..."
 - "got a [tool]" / "have [tool] already"
 
-**Example - CORRECT:**
-User: "I want to install a ceiling fan. I have a drill and a ladder."
-You: [IMMEDIATELY call detect_owned_items with items: [{name: "drill", category: "power_tools"}, {name: "ladder", category: "general"}]]
-Then respond about the ceiling fan project.
-
-**Example - WRONG:**
-User: "I have a drill and safety glasses"
-You: "Great! Having a drill will be helpful..." ❌ WRONG - You must call detect_owned_items first!
-
-**🔍 INVENTORY CHECK - BEFORE EVERY MATERIALS LIST:**
+**INVENTORY CHECK - BEFORE EVERY MATERIALS LIST:**
 
 BEFORE creating any materials list with extract_materials_list, you MUST:
 1. FIRST call check_user_inventory to see what the user already owns
@@ -87,27 +82,9 @@ BEFORE creating any materials list with extract_materials_list, you MUST:
 - Present videos in a clear, organized format with titles and links
 - Focus on beginner-friendly, comprehensive tutorials
 
-**WRONG - DO NOT DO THIS:**
-User: "I want to install a ceiling fan"
-You: "Here are the materials you need..." ❌ WRONG - Skipped video step!
-
-**CORRECT - DO THIS:**
-User: "I want to install a ceiling fan"
-You: [Provide helpful info about ceiling fans, safety, codes]
-     "Would you like to see some helpful videos of similar projects?" ✅ CORRECT
-
-User: "Yes please"
-You: [IMMEDIATELY call search_project_videos tool] ✅ CORRECT
-
-[After videos shown]
-You: "Would you like me to create a complete materials list for this project?" ✅ CORRECT
-
-User: "Yes"
-You: [FIRST call check_user_inventory, THEN call extract_materials_list] ✅ CORRECT
-
 **CRITICAL: Tool Selection Rules**
 - If user mentions a SPECIFIC CITY or STATE → ALWAYS use search_local_codes
-- If user asks about "my area", "local", "here" → ALWAYS use search_local_codes  
+- If user asks about "my area", "local", "here" → ALWAYS use search_local_codes
 - If user asks about permits → ALWAYS use search_local_codes
 - Only use search_building_codes for NATIONAL codes (NEC, IRC, IBC) when no location is mentioned
 
@@ -122,7 +99,7 @@ You: [FIRST call check_user_inventory, THEN call extract_materials_list] ✅ COR
 
 When user says ANY of these phrases, immediately call extract_materials_list:
 - "create a materials list"
-- "create a complete materials list"  
+- "create a complete materials list"
 - "add to shopping list"
 - "add all items to shopping list"
 - "save to shopping list"
@@ -142,24 +119,6 @@ When user says ANY of these phrases, immediately call extract_materials_list:
 
 **CRITICAL - After calling the tool:**
 The tool will return a response with special markers. You MUST include the complete tool result in your response to the user, including all the markers.
-
-**Example - CORRECT Response:**
-"✅ I've created your materials list!
-
-[Include the ENTIRE tool result here, word-for-word, including the markers]
-
-Materials List for Ceiling Fan Installation
-...
----MATERIALS_DATA---
-{"project_description":"...","materials":[...]}
----END_MATERIALS_DATA---
-
-You can now save these materials to your project!"
-
-**Example - WRONG Response:**
-"✅ I've created your materials list! You should now see a dialog." (without including the tool result) ❌
-
-**The markers are ESSENTIAL - without them, materials cannot be saved.**
 
 **Tools:**
 1. detect_owned_items - **MUST call when user mentions owning tools/materials**
@@ -185,36 +144,6 @@ You can now save these materials to your project!"
 9. User sees "Save Materials to Project" dialog
 10. After saving, materials appear in shopping list with checkboxes
 11. User can search local stores for prices
-
-**search_local_codes usage:**
-- "What do I need for an addition in Portsmouth, NH?" → search_local_codes
-- "I'm in Austin, what's required for a deck?" → search_local_codes
-- "Chicago outlet requirements" → search_local_codes
-- "Do I need a permit for a fence?" → search_local_codes (ask for location first)
-- "Local building codes for my area" → search_local_codes (ask for location first)
-
-**search_building_codes usage:**
-- "What's the national code for outlet spacing?" → search_building_codes
-- "NEC requirements for wire gauge" → search_building_codes
-- "IRC deck railing height" → search_building_codes
-
-**How search_local_codes works:**
-When you call this tool, you'll receive instructions to use your web_search and web_fetch tools to find official local building codes. Follow the instructions to:
-1. Search for official municipal code websites (.gov, municode.com, ecode360.com)
-2. Fetch the relevant pages
-3. Extract specific requirements (measurements, specifications)
-4. Cite your sources with URLs
-5. Remind users to verify with their local building department
-
-If you cannot find specific local codes, provide the national code reference and explain that local amendments may apply.
-
-**Material Shopping Workflow:**
-After user saves materials to project:
-1. Materials appear in shopping list sidebar with checkboxes
-2. User selects items they want to price check
-3. User enters their location (e.g., "Portsmouth, NH")
-4. They click "Search" to find local store prices
-5. Results show with best deals highlighted
 
 **Important Reminders:**
 - Always prioritize official government sources for building codes
@@ -307,7 +236,7 @@ const tools = [
     input_schema: {
       type: "object",
       properties: {
-        query: { 
+        query: {
           type: "string",
           description: "Search query for NATIONAL building codes only"
         }
@@ -321,7 +250,7 @@ const tools = [
     input_schema: {
       type: "object",
       properties: {
-        query: { 
+        query: {
           type: "string",
           description: "Product search query"
         },
@@ -482,15 +411,15 @@ const tools = [
 
 async function executeTool(toolName: string, toolInput: any, requestBody?: any): Promise<string> {
   console.log(`🔧 Executing tool: ${toolName}`, JSON.stringify(toolInput, null, 2));
-  
+
   if (toolName === "search_building_codes") {
     return "**Building Code Results:**\n\nKitchen countertop receptacles must be installed so that no point along the wall line is more than 24 inches from a receptacle outlet (NEC 210.52(C)(1)).\n\nGFCI protection is required for all 125-volt, 15- and 20-ampere receptacles in garages (NEC 210.8(A)(2)).\n\nSource: National Electrical Code 2023";
   }
-  
+
   if (toolName === "search_products") {
     return "**Product Results:**\n\n1. Southwire 250 ft. 12/2 Solid Romex NM-B Wire\n   - Price: $87.43\n   - Rating: 4.7/5 (2,340 reviews)\n   - In Stock\n\n2. Leviton 20 Amp GFCI Outlet, White\n   - Price: $18.97\n   - Rating: 4.6/5 (1,892 reviews)\n   - In Stock";
   }
-  
+
   if (toolName === "calculate_wire_size") {
     const { amperage, distance } = toolInput;
     if (amperage <= 15 && distance <= 50) {
@@ -501,10 +430,10 @@ async function executeTool(toolName: string, toolInput: any, requestBody?: any):
       return "For a 30-amp circuit or longer runs: Use 10 AWG wire (per NEC 210.19)";
     }
   }
-  
+
   if (toolName === "search_local_codes") {
     const { query, city, state } = toolInput;
-    
+
     return `Please search for local building codes for ${city}, ${state} regarding: ${query}
 
 Follow this process:
@@ -520,13 +449,13 @@ Follow this process:
 
 If you cannot find specific local codes, provide the national code reference and explain that local amendments may apply.`;
   }
-  
+
   if (toolName === "search_project_videos") {
     const { project_query, max_results = 5 } = toolInput;
-    
+
     try {
       console.log('🎥 Searching videos for:', project_query);
-      
+
       // Use Brave Search API to find videos
       const searchQuery = `${project_query} DIY tutorial how to`;
       const videoResponse = await fetch(
@@ -539,16 +468,16 @@ If you cannot find specific local codes, provide the national code reference and
           }
         }
       );
-      
+
       if (!videoResponse.ok) {
         throw new Error(`Brave Search API error: ${videoResponse.status}`);
       }
-      
+
       const data = await videoResponse.json();
       const videos = data.results || [];
-      
+
       console.log(`📹 Found ${videos.length} videos`);
-      
+
       const formattedResults = videos.map((video: any) => ({
         title: video.title || 'Untitled Video',
         description: video.description || 'No description available',
@@ -559,17 +488,17 @@ If you cannot find specific local codes, provide the national code reference and
         views: video.video?.views || null,
         published: video.age || null
       }));
-      
+
       return JSON.stringify({
         success: true,
         query: project_query,
         videos: formattedResults,
         count: formattedResults.length,
-        message: formattedResults.length > 0 
+        message: formattedResults.length > 0
           ? `Found ${formattedResults.length} helpful video tutorials`
           : 'No videos found for this search'
       });
-      
+
     } catch (error: any) {
       console.error('❌ Video search error:', error);
       return JSON.stringify({
@@ -582,47 +511,47 @@ If you cannot find specific local codes, provide the national code reference and
 
   if (toolName === "detect_owned_items") {
     const { items, source_context } = toolInput;
-    
+
     // Get user ID from request context
     const userId = requestBody?.userId;
-    
-    console.log('🔧 detect_owned_items called:', { 
-      items, 
-      source_context, 
+
+    console.log('🔧 detect_owned_items called:', {
+      items,
+      source_context,
       userId,
-      hasUserId: !!userId 
+      hasUserId: !!userId
     });
-    
+
     if (!userId) {
       console.log('⚠️ No userId provided for detect_owned_items');
       return "⚠️ User not logged in. Items noted but cannot be saved to inventory. Please sign in to save your tools.";
     }
-    
+
     if (!items || items.length === 0) {
       return "No items detected to add to inventory.";
     }
-    
+
     const addedItems: string[] = [];
     const existingItems: string[] = [];
     const errors: string[] = [];
-    
+
     for (const item of items) {
       try {
         console.log(`📦 Processing item: ${item.name}`);
-        
+
         // First, check if item already exists (case-insensitive)
         const { data: existingData } = await supabase
           .from('user_inventory')
           .select('id, item_name')
           .eq('user_id', userId)
           .ilike('item_name', item.name);
-        
+
         if (existingData && existingData.length > 0) {
           console.log(`ℹ️ Item already exists: ${item.name}`);
           existingItems.push(item.name);
           continue;
         }
-        
+
         // Insert new item
         const { data, error } = await supabase
           .from('user_inventory')
@@ -636,7 +565,7 @@ If you cannot find specific local codes, provide the national code reference and
             source_message: source_context || null
           })
           .select();
-        
+
         if (error) {
           console.error('❌ Error adding inventory item:', error);
           // Check if it's a duplicate error
@@ -654,41 +583,41 @@ If you cannot find specific local codes, provide the national code reference and
         errors.push(`${item.name} (${err.message})`);
       }
     }
-    
+
     let response = '';
-    
+
     if (addedItems.length > 0) {
       response += `✅ Added to your inventory: ${addedItems.join(', ')}\n`;
     }
-    
+
     if (existingItems.length > 0) {
       response += `ℹ️ Already in inventory: ${existingItems.join(', ')}\n`;
     }
-    
+
     if (errors.length > 0) {
       response += `⚠️ Could not add: ${errors.join(', ')}\n`;
     }
-    
+
     // Return a hidden marker for the frontend
     response += `\n---INVENTORY_UPDATE---\n`;
     response += JSON.stringify({ added: addedItems, existing: existingItems, errors });
     response += `\n---END_INVENTORY_UPDATE---\n`;
-    
+
     console.log('📋 detect_owned_items result:', { addedItems, existingItems, errors });
-    
+
     return response;
   }
 
   if (toolName === "check_user_inventory") {
     const { categories } = toolInput;
     const userId = requestBody?.userId;
-    
+
     console.log('🔍 check_user_inventory called:', { categories, userId, hasUserId: !!userId });
-    
+
     if (!userId) {
       return "User not logged in. Cannot check inventory. Will assume user needs to purchase all items.";
     }
-    
+
     try {
       let query = supabase
         .from('user_inventory')
@@ -696,33 +625,33 @@ If you cannot find specific local codes, provide the national code reference and
         .eq('user_id', userId)
         .order('category')
         .order('item_name');
-      
+
       if (categories && categories.length > 0) {
         query = query.in('category', categories);
       }
-      
+
       const { data, error } = await query;
-      
+
       if (error) {
         console.error('❌ Error checking inventory:', error);
         return "Error checking inventory: " + error.message;
       }
-      
+
       console.log(`📦 Found ${data?.length || 0} inventory items`);
-      
+
       if (!data || data.length === 0) {
         return "User's inventory is empty. They will need to purchase all required items.";
       }
-      
+
       // Group by category for easier reading
       const grouped = data.reduce((acc: any, item: any) => {
         if (!acc[item.category]) acc[item.category] = [];
         acc[item.category].push(item);
         return acc;
       }, {});
-      
+
       let response = `**User's Current Inventory (${data.length} items):**\n\n`;
-      
+
       const categoryLabels: Record<string, string> = {
         power_tools: '⚡ Power Tools',
         hand_tools: '🔧 Hand Tools',
@@ -735,7 +664,7 @@ If you cannot find specific local codes, provide the national code reference and
         materials: '📦 Materials',
         general: '📋 General'
       };
-      
+
       for (const [category, items] of Object.entries(grouped)) {
         const label = categoryLabels[category] || category;
         response += `${label}:\n`;
@@ -746,12 +675,12 @@ If you cannot find specific local codes, provide the national code reference and
         });
         response += '\n';
       }
-      
+
       // Add the data as JSON for potential frontend use
       response += `\n---INVENTORY_DATA---\n`;
       response += JSON.stringify(data);
       response += `\n---END_INVENTORY_DATA---\n`;
-      
+
       return response;
     } catch (err: any) {
       console.error('❌ Exception checking inventory:', err);
@@ -762,18 +691,18 @@ If you cannot find specific local codes, provide the national code reference and
   if (toolName === "extract_materials_list") {
     const { project_description, materials } = toolInput;
     const userId = requestBody?.userId;
-    
+
     console.log('📝 extract_materials_list called:', {
       project_description,
       materials_count: materials?.length || 0,
       userId,
       hasUserId: !!userId
     });
-    
+
     if (!materials || materials.length === 0) {
       return "❌ Error: No materials were provided.";
     }
-    
+
     // Cross-reference with user's inventory
     let inventoryItems: any[] = [];
     if (userId) {
@@ -782,7 +711,7 @@ If you cannot find specific local codes, provide the national code reference and
           .from('user_inventory')
           .select('item_name, category, quantity')
           .eq('user_id', userId);
-        
+
         if (error) {
           console.error('Error fetching inventory:', error);
         } else {
@@ -793,50 +722,50 @@ If you cannot find specific local codes, provide the national code reference and
         console.error('Error fetching inventory for cross-reference:', err);
       }
     }
-    
+
     // Function to check if user has a similar item
     const findOwnedItem = (materialName: string): string | null => {
       const normalizedName = materialName.toLowerCase().trim();
-      
+
       for (const invItem of inventoryItems) {
         const invName = invItem.item_name.toLowerCase().trim();
-        
+
         // Exact match
         if (normalizedName === invName) {
           return invItem.item_name;
         }
-        
+
         // Check if one contains the other
         if (normalizedName.includes(invName) || invName.includes(normalizedName)) {
           return invItem.item_name;
         }
-        
+
         // Check for key word matches (at least 2 common words or 1 significant word)
         const materialWords = normalizedName.split(/\s+/).filter((w: string) => w.length > 2);
         const invWords = invName.split(/\s+/).filter((w: string) => w.length > 2);
-        
-        const commonWords = materialWords.filter((mw: string) => 
-          invWords.some((iw: string) => 
-            iw === mw || 
-            (mw.length > 4 && iw.includes(mw)) || 
+
+        const commonWords = materialWords.filter((mw: string) =>
+          invWords.some((iw: string) =>
+            iw === mw ||
+            (mw.length > 4 && iw.includes(mw)) ||
             (iw.length > 4 && mw.includes(iw))
           )
         );
-        
+
         // Match if we have 2+ common words, or 1 significant word (5+ chars)
-        if (commonWords.length >= 2 || 
+        if (commonWords.length >= 2 ||
             (commonWords.length === 1 && commonWords[0].length >= 5)) {
           return invItem.item_name;
         }
       }
-      
+
       return null;
     };
-    
+
     // Categorize materials
     const needToBuy: any[] = [];
     const alreadyOwn: any[] = [];
-    
+
     materials.forEach((mat: any) => {
       const ownedMatch = findOwnedItem(mat.name);
       if (ownedMatch) {
@@ -847,25 +776,25 @@ If you cannot find specific local codes, provide the national code reference and
         console.log(`🛒 User needs: ${mat.name}`);
       }
     });
-    
+
     // Build response
     let response = `**Materials List for ${project_description}**\n\n`;
-    
+
     if (alreadyOwn.length > 0) {
       response += `### ✅ Items You Already Have (${alreadyOwn.length})\n`;
       response += `*Based on your inventory - no need to purchase:*\n\n`;
       alreadyOwn.forEach((item) => {
-        const matchNote = item.ownedAs.toLowerCase() !== item.name.toLowerCase() 
-          ? ` *(matches: ${item.ownedAs})*` 
+        const matchNote = item.ownedAs.toLowerCase() !== item.name.toLowerCase()
+          ? ` *(matches: ${item.ownedAs})*`
           : '';
         response += `- ~~${item.name}~~ ${matchNote}\n`;
       });
       response += `\n`;
     }
-    
+
     if (needToBuy.length > 0) {
       response += `### 🛒 Items to Purchase (${needToBuy.length})\n\n`;
-      
+
       // Group by category
       const categories = needToBuy.reduce((acc: any, mat: any) => {
         const cat = mat.category || 'general';
@@ -873,7 +802,7 @@ If you cannot find specific local codes, provide the national code reference and
         acc[cat].push(mat);
         return acc;
       }, {});
-      
+
       for (const [category, items] of Object.entries(categories)) {
         response += `**${category.toUpperCase()}:**\n`;
         (items as any[]).forEach((item) => {
@@ -887,47 +816,47 @@ If you cannot find specific local codes, provide the national code reference and
       response += `### 🎉 Great news! You already have everything you need!\n`;
       response += `Check your inventory to make sure items are in good condition.\n\n`;
     }
-    
+
     // Calculate totals
     const totalEstimate = needToBuy.reduce((sum, item) => {
       const price = parseFloat(item.estimated_price) || 0;
       const qty = parseInt(item.quantity) || 1;
       return sum + (price * qty);
     }, 0);
-    
+
     if (needToBuy.length > 0) {
       response += `**Estimated Total: $${totalEstimate.toFixed(2)}**\n`;
       if (alreadyOwn.length > 0) {
         response += `*Savings from inventory: ${alreadyOwn.length} item(s) you don't need to buy!*\n`;
       }
     }
-    
+
     // Add markers for frontend - ONLY include items to buy, not owned items
     response += `\n---MATERIALS_DATA---\n`;
-    response += JSON.stringify({ 
-      project_description, 
+    response += JSON.stringify({
+      project_description,
       materials: needToBuy,
       owned_items: alreadyOwn,
       total_estimate: totalEstimate
     });
     response += `\n---END_MATERIALS_DATA---\n`;
-    
-    console.log('📋 Materials list result:', { 
-      needToBuy: needToBuy.length, 
+
+    console.log('📋 Materials list result:', {
+      needToBuy: needToBuy.length,
       alreadyOwn: alreadyOwn.length,
-      totalEstimate 
+      totalEstimate
     });
-    
+
     return response;
   }
 
   if (toolName === "search_local_stores") {
     const { material_name, city, state, radius_miles = 25 } = toolInput;
-      
+
     return `YOU MUST use web_search and web_fetch tools to find REAL products. DO NOT make up information.
 
 Step 1: Call web_search with query: "site:homedepot.com ${material_name}"
-Step 2: Call web_search with query: "site:lowes.com ${material_name}"  
+Step 2: Call web_search with query: "site:lowes.com ${material_name}"
 Step 3: Call web_search with query: "site:acehardware.com ${material_name}"
 
 Step 4: For each product URL found in search results, call web_fetch to get the actual price and details
@@ -974,123 +903,256 @@ Then compile the results with actual prices found.`;
 }
 
 export async function POST(req: NextRequest) {
+  const encoder = new TextEncoder();
+
   try {
     if (!process.env.ANTHROPIC_API_KEY) {
       console.error('ANTHROPIC_API_KEY not set');
-      return NextResponse.json(
-        { error: 'API configuration error' },
-        { status: 500 }
+      return new Response(
+        JSON.stringify({ error: 'API configuration error' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     const body = await req.json();
-    const { message, history = [], userId } = body;
+    const { message, history = [], userId, streaming = true } = body;
 
-    console.log('📨 Received request:', { 
-      messageLength: message?.length, 
+    console.log('📨 Received request:', {
+      messageLength: message?.length,
       historyLength: history?.length,
-      userId: userId || 'not provided'
+      userId: userId || 'not provided',
+      streaming
     });
 
     if (!message) {
-      return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ error: 'Message is required' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    const messages = [
-      ...history,
-      {
-        role: 'user' as const,
-        content: message
-      }
-    ];
+    // If not streaming, use the old behavior
+    if (!streaming) {
+      return handleNonStreamingRequest(body, message, history, userId);
+    }
 
-    // FIRST API CALL - Include system prompt
-    let response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 4096,
-      system: systemPrompt,
-      tools: tools as any,
-      messages: messages
-    });
+    // Streaming response using Server-Sent Events
+    const stream = new ReadableStream({
+      async start(controller) {
+        const sendEvent = (event: StreamEvent) => {
+          try {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+          } catch (e) {
+            console.error('Error sending event:', e);
+          }
+        };
 
-    console.log('🤖 Claude initial response, stop_reason:', response.stop_reason);
-
-    // Tool use loop
-    let loopCount = 0;
-    const maxLoops = 10; // Safety limit
-    
-    while (response.stop_reason === 'tool_use' && loopCount < maxLoops) {
-      loopCount++;
-      console.log(`🔄 Tool loop iteration ${loopCount}`);
-      
-      const assistantContent: any[] = [];
-      const toolResults: any[] = [];
-
-      for (const block of response.content) {
-        if (block.type === 'tool_use') {
-          console.log(`🔧 Tool called: ${block.name}`, JSON.stringify(block.input).substring(0, 200));
-          
-          // Pass the original request body (so tools can access userId)
-          const result = await executeTool(block.name, block.input, body);
-          
-          console.log(`📤 Tool result for ${block.name}:`, result.substring(0, 200));
-
-          assistantContent.push({
-            type: 'tool_use',
-            id: block.id,
-            name: block.name,
-            input: block.input
+        try {
+          sendEvent({
+            type: 'progress',
+            step: 'thinking',
+            message: 'Analyzing your question...',
+            icon: '🤔'
           });
 
-          toolResults.push({
-            type: 'tool_result',
-            tool_use_id: block.id,
-            content: result
+          const messages = [
+            ...history,
+            { role: 'user' as const, content: message }
+          ];
+
+          // First API call
+          let response = await anthropic.messages.create({
+            model: 'claude-sonnet-4-5-20250929',
+            max_tokens: 4096,
+            system: systemPrompt,
+            tools: tools as any,
+            messages
           });
-        } else if (block.type === 'text') {
-          assistantContent.push({
-            type: 'text',
-            text: block.text
+
+          console.log('🤖 Claude initial response, stop_reason:', response.stop_reason);
+
+          // Tool use loop
+          let loopCount = 0;
+          const maxLoops = 10;
+
+          while (response.stop_reason === 'tool_use' && loopCount < maxLoops) {
+            loopCount++;
+            console.log(`🔄 Tool loop iteration ${loopCount}`);
+
+            const assistantContent: any[] = [];
+            const toolResults: any[] = [];
+
+            for (const block of response.content) {
+              if (block.type === 'tool_use') {
+                // Send progress for this tool
+                const progress = progressMessages[block.name] || {
+                  message: `Running ${block.name}...`,
+                  icon: '⚙️'
+                };
+                sendEvent({
+                  type: 'progress',
+                  step: block.name,
+                  message: progress.message,
+                  icon: progress.icon
+                });
+
+                console.log(`🔧 Tool called: ${block.name}`, JSON.stringify(block.input).substring(0, 200));
+
+                // Execute tool
+                const result = await executeTool(block.name, block.input, body);
+
+                console.log(`📤 Tool result for ${block.name}:`, result.substring(0, 200));
+
+                assistantContent.push({
+                  type: 'tool_use',
+                  id: block.id,
+                  name: block.name,
+                  input: block.input
+                });
+
+                toolResults.push({
+                  type: 'tool_result',
+                  tool_use_id: block.id,
+                  content: result
+                });
+              } else if (block.type === 'text') {
+                assistantContent.push({
+                  type: 'text',
+                  text: block.text
+                });
+
+                // Stream intermediate text content
+                if (block.text) {
+                  sendEvent({ type: 'text', content: block.text });
+                }
+              }
+            }
+
+            messages.push({
+              role: 'assistant' as const,
+              content: assistantContent
+            });
+
+            messages.push({
+              role: 'user' as const,
+              content: toolResults
+            });
+
+            sendEvent({
+              type: 'progress',
+              step: 'synthesizing',
+              message: 'Putting it all together...',
+              icon: '✨'
+            });
+
+            // Continue conversation with tool results
+            response = await anthropic.messages.create({
+              model: 'claude-sonnet-4-5-20250929',
+              max_tokens: 4096,
+              system: systemPrompt,
+              tools: tools as any,
+              messages
+            });
+
+            console.log(`🤖 Claude response after tool ${loopCount}, stop_reason:`, response.stop_reason);
+          }
+
+          if (loopCount >= maxLoops) {
+            console.warn('⚠️ Hit maximum tool loop iterations');
+          }
+
+          // Stream final response in chunks for visual effect
+          for (const block of response.content) {
+            if (block.type === 'text') {
+              const text = block.text;
+              const chunkSize = 50; // Characters per chunk
+
+              for (let i = 0; i < text.length; i += chunkSize) {
+                sendEvent({ type: 'text', content: text.slice(i, i + chunkSize) });
+                // Small delay for visual streaming effect
+                await new Promise(resolve => setTimeout(resolve, 15));
+              }
+            }
+          }
+
+          sendEvent({ type: 'done' });
+          controller.close();
+
+        } catch (error: any) {
+          console.error('❌ Stream error:', error);
+          sendEvent({
+            type: 'error',
+            content: `An error occurred: ${error.message}. Please try again.`
           });
+          sendEvent({ type: 'done' });
+          controller.close();
         }
       }
+    });
 
-      messages.push({
-        role: 'assistant' as const,
-        content: assistantContent
-      });
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      }
+    });
 
-      messages.push({
-        role: 'user' as const,
-        content: toolResults
-      });
+  } catch (error: any) {
+    console.error('❌ Chat API error:', error);
+    return new Response(
+      JSON.stringify({
+        error: 'Failed to process message',
+        details: error.message
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+}
 
-      // FOLLOW-UP API CALL
-      response = await anthropic.messages.create({
-        model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 4096,
-        system: systemPrompt,
-        tools: tools as any,
-        messages: messages,
-      });
-      
-      console.log(`🤖 Claude response after tool ${loopCount}, stop_reason:`, response.stop_reason);
-    }
+// Handle non-streaming requests (backward compatibility)
+async function handleNonStreamingRequest(body: any, message: string, history: any[], userId?: string) {
+  const messages = [
+    ...history,
+    { role: 'user' as const, content: message }
+  ];
 
-    if (loopCount >= maxLoops) {
-      console.warn('⚠️ Hit maximum tool loop iterations');
-    }
+  let response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-5-20250929',
+    max_tokens: 4096,
+    system: systemPrompt,
+    tools: tools as any,
+    messages
+  });
 
-    let finalResponse = '';
-    const finalContent: any[] = [];
+  // Tool use loop
+  let loopCount = 0;
+  const maxLoops = 10;
+
+  while (response.stop_reason === 'tool_use' && loopCount < maxLoops) {
+    loopCount++;
+
+    const assistantContent: any[] = [];
+    const toolResults: any[] = [];
 
     for (const block of response.content) {
-      if (block.type === 'text') {
-        finalResponse += block.text;
-        finalContent.push({
+      if (block.type === 'tool_use') {
+        const result = await executeTool(block.name, block.input, body);
+
+        assistantContent.push({
+          type: 'tool_use',
+          id: block.id,
+          name: block.name,
+          input: block.input
+        });
+
+        toolResults.push({
+          type: 'tool_result',
+          tool_use_id: block.id,
+          content: result
+        });
+      } else if (block.type === 'text') {
+        assistantContent.push({
           type: 'text',
           text: block.text
         });
@@ -1099,30 +1161,52 @@ export async function POST(req: NextRequest) {
 
     messages.push({
       role: 'assistant' as const,
-      content: finalContent
+      content: assistantContent
     });
 
-    console.log('✅ Final response length:', finalResponse.length);
+    messages.push({
+      role: 'user' as const,
+      content: toolResults
+    });
 
-    return NextResponse.json({
+    response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-5-20250929',
+      max_tokens: 4096,
+      system: systemPrompt,
+      tools: tools as any,
+      messages
+    });
+  }
+
+  let finalResponse = '';
+  const finalContent: any[] = [];
+
+  for (const block of response.content) {
+    if (block.type === 'text') {
+      finalResponse += block.text;
+      finalContent.push({
+        type: 'text',
+        text: block.text
+      });
+    }
+  }
+
+  messages.push({
+    role: 'assistant' as const,
+    content: finalContent
+  });
+
+  return new Response(
+    JSON.stringify({
       response: finalResponse,
       history: messages
-    });
-
-  } catch (error: any) {
-    console.error('❌ Chat API error:', error);
-    return NextResponse.json(
-      { 
-        error: 'Failed to process message',
-        details: error.message 
-      },
-      { status: 500 }
-    );
-  }
+    }),
+    { headers: { 'Content-Type': 'application/json' } }
+  );
 }
 
 export async function OPTIONS(req: NextRequest) {
-  return new NextResponse(null, {
+  return new Response(null, {
     status: 200,
     headers: {
       'Access-Control-Allow-Origin': '*',
@@ -1131,3 +1215,6 @@ export async function OPTIONS(req: NextRequest) {
     },
   });
 }
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
