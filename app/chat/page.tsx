@@ -60,7 +60,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen blueprint-bg-subtle">
       {/* Desktop Projects Sidebar - hidden on mobile */}
       {user && (
         <div className="hidden md:block">
@@ -74,13 +74,13 @@ export default function ChatPage() {
       {/* Mobile Projects Overlay */}
       {showMobileProjects && user && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={closeMobilePanels} />
-          <div className="absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-white shadow-xl animate-slide-in-left">
-            <div className="flex items-center justify-between p-4 border-b bg-blue-600 text-white">
+          <div className="absolute inset-0 bg-[#3E2723] bg-opacity-50" onClick={closeMobilePanels} />
+          <div className="absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-[#FDFBF7] shadow-xl animate-slide-in-left">
+            <div className="flex items-center justify-between p-4 border-b border-[#D4C8B8] bg-[#5D7B93] text-white">
               <h2 className="font-bold text-lg">My Projects</h2>
               <button
                 onClick={() => setShowMobileProjects(false)}
-                className="p-2 hover:bg-blue-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-[#4A6275] rounded-lg transition-colors"
               >
                 <X size={20} />
               </button>
@@ -97,16 +97,16 @@ export default function ChatPage() {
       {/* Mobile Shopping List Overlay */}
       {showMobileShopping && selectedProject && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={closeMobilePanels} />
-          <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-xl animate-slide-in-right overflow-y-auto">
-            <div className="sticky top-0 flex items-center justify-between p-4 border-b bg-green-600 text-white z-10">
+          <div className="absolute inset-0 bg-[#3E2723] bg-opacity-50" onClick={closeMobilePanels} />
+          <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-[#FDFBF7] shadow-xl animate-slide-in-right overflow-y-auto">
+            <div className="sticky top-0 flex items-center justify-between p-4 border-b border-[#D4C8B8] bg-[#4A7C59] text-white z-10">
               <div className="flex items-center gap-2">
                 <ShoppingCart size={20} />
                 <h2 className="font-bold text-lg">Shopping List</h2>
               </div>
               <button
                 onClick={() => setShowMobileShopping(false)}
-                className="p-2 hover:bg-green-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-[#2D5A3B] rounded-lg transition-colors"
               >
                 <X size={20} />
               </button>
@@ -117,7 +117,7 @@ export default function ChatPage() {
       )}
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-white border-b shadow-sm">
+        <header className="bg-[#FDFBF7] border-b border-[#D4C8B8] shadow-sm">
           <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-14 sm:h-16">
               {/* Left side: Menu button (mobile) + Logo */}
@@ -126,7 +126,7 @@ export default function ChatPage() {
                 {user && (
                   <button
                     onClick={() => setShowMobileProjects(true)}
-                    className="md:hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition"
+                    className="md:hidden p-2 text-[#7D6B5D] hover:text-[#5D7B93] hover:bg-[#E8DFD0] rounded-lg transition"
                     title="My Projects"
                   >
                     <Menu size={22} />
@@ -134,8 +134,10 @@ export default function ChatPage() {
                 )}
 
                 <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
-                  <Wrench className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
-                  <span className="text-lg sm:text-xl font-bold text-gray-900 hidden xs:inline">DIY Helper</span>
+                  <div className="bg-gradient-to-br from-[#C67B5C] to-[#A65D3F] p-1.5 rounded-lg">
+                    <Wrench className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  </div>
+                  <span className="text-lg sm:text-xl font-bold text-[#3E2723] hidden xs:inline">DIY Helper</span>
                 </Link>
               </div>
 
@@ -145,17 +147,17 @@ export default function ChatPage() {
                 {selectedProject && (
                   <button
                     onClick={() => setShowMobileShopping(true)}
-                    className="md:hidden relative p-2 text-gray-600 hover:text-green-600 hover:bg-gray-100 rounded-lg transition"
+                    className="md:hidden relative p-2 text-[#7D6B5D] hover:text-[#4A7C59] hover:bg-[#E8DFD0] rounded-lg transition"
                     title="Shopping List"
                   >
                     <ShoppingCart size={22} />
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-green-600 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#4A7C59] text-white text-xs rounded-full flex items-center justify-center font-medium">
                       !
                     </span>
                   </button>
                 )}
 
-                <Link href="/" className="flex items-center gap-2 text-gray-900 hover:text-blue-600 transition p-2 sm:p-0">
+                <Link href="/" className="flex items-center gap-2 text-[#3E2723] hover:text-[#C67B5C] transition p-2 sm:p-0">
                   <Home className="w-5 h-5" />
                   <span className="hidden sm:inline font-medium">Home</span>
                 </Link>
@@ -166,7 +168,7 @@ export default function ChatPage() {
                 />
                 <button
                   onClick={() => setShowInventory(true)}
-                  className="flex items-center gap-2 px-3 py-2 sm:px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                  className="flex items-center gap-2 px-3 py-2 sm:px-4 bg-[#4A7C59] text-white rounded-lg hover:bg-[#2D5A3B] transition"
                   title="View your tool inventory"
                 >
                   <Package size={18} />
@@ -179,14 +181,14 @@ export default function ChatPage() {
 
         {/* Mobile context bar - shows selected project */}
         {selectedProject && (
-          <div className="md:hidden bg-blue-50 border-b px-4 py-2 flex items-center justify-between">
+          <div className="md:hidden bg-[#E8DFD0] border-b border-[#D4C8B8] px-4 py-2 flex items-center justify-between">
             <div className="flex items-center gap-2 min-w-0">
-              <FolderOpen className="w-4 h-4 text-blue-600 flex-shrink-0" />
-              <span className="text-sm font-medium text-blue-900 truncate">{selectedProject.name}</span>
+              <FolderOpen className="w-4 h-4 text-[#5D7B93] flex-shrink-0" />
+              <span className="text-sm font-medium text-[#3E2723] truncate">{selectedProject.name}</span>
             </div>
             <button
               onClick={() => setShowMobileShopping(true)}
-              className="flex items-center gap-1 text-xs text-blue-600 font-medium flex-shrink-0"
+              className="flex items-center gap-1 text-xs text-[#5D7B93] font-medium flex-shrink-0"
             >
               <ShoppingCart size={14} />
               View List
@@ -206,7 +208,7 @@ export default function ChatPage() {
 
           {/* Desktop Shopping List Sidebar - hidden on mobile */}
           {selectedProject && (
-            <div className="hidden md:block w-80 lg:w-96 bg-gray-50 border-l overflow-y-auto flex-shrink-0">
+            <div className="hidden md:block w-80 lg:w-96 bg-[#FDFBF7] border-l border-[#D4C8B8] overflow-y-auto flex-shrink-0">
               <ShoppingListView project={selectedProject} />
             </div>
           )}

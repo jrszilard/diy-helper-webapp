@@ -502,7 +502,7 @@ export default function ChatInterface({
         onProjectLinked?.(newProject.id);
         setMessages(prev => [
           ...prev,
-          { role: 'assistant', content: `✅ Created project "${newProjectName.trim()}"! Your conversation is now linked to this project.` }
+          { role: 'assistant', content: `Created project "${newProjectName.trim()}"! Your conversation is now linked to this project.` }
         ]);
       }
     } catch (err: any) {
@@ -512,10 +512,10 @@ export default function ChatInterface({
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50">
+    <div className="flex flex-col h-full bg-[#F5F0E6]">
       {/* Inventory Update Notification Toast */}
       {inventoryNotification && (
-        <div className="fixed top-20 right-4 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-slide-in max-w-sm">
+        <div className="fixed top-20 right-4 bg-[#4A7C59] text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-slide-in max-w-sm">
           <Package size={20} className="flex-shrink-0" />
           <div className="flex-1">
             {inventoryNotification.added.length > 0 && (
@@ -524,14 +524,14 @@ export default function ChatInterface({
               </p>
             )}
             {inventoryNotification.existing.length > 0 && (
-              <p className="text-green-100 text-xs mt-1">
+              <p className="text-[#B8E0C0] text-xs mt-1">
                 Already owned: {inventoryNotification.existing.join(', ')}
               </p>
             )}
           </div>
           <button
             onClick={() => setInventoryNotification(null)}
-            className="ml-2 hover:bg-green-700 p-1 rounded flex-shrink-0"
+            className="ml-2 hover:bg-[#2D5A3B] p-1 rounded flex-shrink-0"
           >
             <X size={16} />
           </button>
@@ -539,11 +539,11 @@ export default function ChatInterface({
       )}
 
       {/* Header */}
-      <div className="bg-white border-b p-4 flex items-center justify-between">
+      <div className="bg-[#FDFBF7] border-b border-[#D4C8B8] p-4 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">DIY Helper Chat</h1>
+          <h1 className="text-xl font-bold text-[#3E2723]">DIY Helper Chat</h1>
           {projectId && (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-[#7D6B5D]">
               Linked to project: {projects.find(p => p.id === projectId)?.name || 'Unknown'}
             </p>
           )}
@@ -558,7 +558,7 @@ export default function ChatInterface({
                   localStorage.removeItem(CHAT_STORAGE_KEY);
                 }
               }}
-              className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-3 py-2 text-[#7D6B5D] hover:text-[#B8593B] hover:bg-[#FDF3ED] rounded-lg transition-colors"
               title="Clear chat history"
             >
               <Trash2 size={18} />
@@ -577,7 +577,7 @@ export default function ChatInterface({
                 setNewProjectName('');
                 setShowCreateProjectDialog(true);
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-[#C67B5C] text-white rounded-lg hover:bg-[#A65D3F] transition-colors shadow-sm"
               title="Save this conversation to a new project"
             >
               <FolderPlus size={18} />
@@ -588,7 +588,7 @@ export default function ChatInterface({
           {onOpenInventory && (
             <button
               onClick={onOpenInventory}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-[#4A7C59] text-white rounded-lg hover:bg-[#2D5A3B] transition-colors"
               title="View your tool inventory"
             >
               <Package size={18} />
@@ -601,10 +601,10 @@ export default function ChatInterface({
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && !isStreaming && (
-          <div className="text-center text-gray-500 mt-8">
+          <div className="text-center text-[#7D6B5D] mt-8">
             <p className="text-lg mb-2">Welcome to DIY Helper!</p>
             <p className="text-sm">Ask me about any home improvement project.</p>
-            <p className="text-xs text-gray-400 mt-2">
+            <p className="text-xs text-[#A89880] mt-2">
               Tip: Mention tools you own (e.g., "I have a drill") and I'll remember them!
             </p>
           </div>
@@ -622,7 +622,7 @@ export default function ChatInterface({
               <div
                 className={`max-w-3xl rounded-lg ${
                   msg.role === 'user'
-                    ? 'bg-blue-600 text-white p-4'
+                    ? 'bg-[#C67B5C] text-white p-4'
                     : 'bg-transparent'
                 }`}
               >
@@ -637,64 +637,64 @@ export default function ChatInterface({
                 )}
 
                 {/* Text content */}
-                <div className={msg.role === 'user' ? '' : 'bg-white border border-gray-200 text-gray-900 rounded-lg p-4'}>
+                <div className={msg.role === 'user' ? '' : 'bg-[#FDFBF7] border border-[#D4C8B8] text-[#3E2723] rounded-lg p-4'}>
                   <div className={`prose prose-sm max-w-none ${
                     msg.role === 'user'
                       ? 'prose-invert'
-                      : 'prose-gray'
+                      : 'prose-stone'
                   }`}>
                     <ReactMarkdown
                       components={{
                         p: ({ children }) => (
-                          <p className={`mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
+                          <p className={`mb-2 ${msg.role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>
                             {children}
                           </p>
                         ),
                         ul: ({ children }) => (
-                          <ul className={`list-disc ml-4 mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
+                          <ul className={`list-disc ml-4 mb-2 ${msg.role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>
                             {children}
                           </ul>
                         ),
                         ol: ({ children }) => (
-                          <ol className={`list-decimal ml-4 mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
+                          <ol className={`list-decimal ml-4 mb-2 ${msg.role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>
                             {children}
                           </ol>
                         ),
                         li: ({ children }) => (
-                          <li className={msg.role === 'user' ? 'text-white' : 'text-gray-900'}>
+                          <li className={msg.role === 'user' ? 'text-white' : 'text-[#3E2723]'}>
                             {children}
                           </li>
                         ),
                         h1: ({ children }) => (
-                          <h1 className={`text-xl font-bold mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
+                          <h1 className={`text-xl font-bold mb-2 ${msg.role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>
                             {children}
                           </h1>
                         ),
                         h2: ({ children }) => (
-                          <h2 className={`text-lg font-bold mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
+                          <h2 className={`text-lg font-bold mb-2 ${msg.role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>
                             {children}
                           </h2>
                         ),
                         h3: ({ children }) => (
-                          <h3 className={`text-md font-bold mb-2 ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
+                          <h3 className={`text-md font-bold mb-2 ${msg.role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>
                             {children}
                           </h3>
                         ),
                         strong: ({ children }) => (
-                          <strong className={`font-bold ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>
+                          <strong className={`font-bold ${msg.role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>
                             {children}
                           </strong>
                         ),
                         em: ({ children }) => (
-                          <em className={`italic ${msg.role === 'user' ? 'text-white' : 'text-gray-800'}`}>
+                          <em className={`italic ${msg.role === 'user' ? 'text-white' : 'text-[#5C4D42]'}`}>
                             {children}
                           </em>
                         ),
                         code: ({ children }) => (
                           <code className={`px-1 py-0.5 rounded text-sm ${
                             msg.role === 'user'
-                              ? 'bg-blue-500 text-white'
-                              : 'bg-gray-100 text-gray-900'
+                              ? 'bg-[#A65D3F] text-white'
+                              : 'bg-[#E8DFD0] text-[#3E2723]'
                           }`}>
                             {children}
                           </code>
@@ -704,8 +704,8 @@ export default function ChatInterface({
                             href={href}
                             className={`underline ${
                               msg.role === 'user'
-                                ? 'text-white hover:text-blue-100'
-                                : 'text-blue-600 hover:text-blue-800'
+                                ? 'text-white hover:text-[#FFE0D0]'
+                                : 'text-[#5D7B93] hover:text-[#4A6275]'
                             }`}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -716,15 +716,15 @@ export default function ChatInterface({
                         blockquote: ({ children }) => (
                           <blockquote className={`border-l-4 pl-4 italic ${
                             msg.role === 'user'
-                              ? 'border-blue-400 text-white'
-                              : 'border-gray-300 text-gray-700'
+                              ? 'border-[#A65D3F] text-white'
+                              : 'border-[#C67B5C] text-[#5C4D42]'
                           }`}>
                             {children}
                           </blockquote>
                         ),
                         // Handle strikethrough for owned items
                         del: ({ children }) => (
-                          <del className="text-gray-400 line-through">
+                          <del className="text-[#A89880] line-through">
                             {children}
                           </del>
                         ),
@@ -750,8 +750,8 @@ export default function ChatInterface({
 
               {/* Streaming text content */}
               {streamingContent && (
-                <div className="bg-white border border-gray-200 text-gray-900 rounded-lg p-4">
-                  <div className="prose prose-sm max-w-none prose-gray">
+                <div className="bg-[#FDFBF7] border border-[#D4C8B8] text-[#3E2723] rounded-lg p-4">
+                  <div className="prose prose-sm max-w-none prose-stone">
                     <ReactMarkdown>
                       {cleanMessageContent(streamingContent)}
                     </ReactMarkdown>
@@ -761,11 +761,11 @@ export default function ChatInterface({
 
               {/* Loading dots when no content yet */}
               {!streamingContent && progressSteps.length === 0 && (
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="bg-[#FDFBF7] border border-[#D4C8B8] rounded-lg p-4">
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-2 h-2 bg-[#C67B5C] rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-[#C67B5C] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-[#C67B5C] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                   </div>
                 </div>
               )}
@@ -778,12 +778,12 @@ export default function ChatInterface({
 
       {/* Google Search Fallback */}
       {showGoogleFallback && isLoading && (
-        <div className="px-4 py-2 bg-amber-50 border-t border-amber-200">
+        <div className="px-4 py-2 bg-[#FDF3ED] border-t border-[#E8D5CC]">
           <div className="flex items-center justify-center gap-2">
-            <span className="text-sm text-amber-700">Taking too long?</span>
+            <span className="text-sm text-[#B8593B]">Taking too long?</span>
             <button
               onClick={handleGoogleSearch}
-              className="inline-flex items-center gap-1 text-sm text-amber-600 hover:text-amber-800 underline font-medium"
+              className="inline-flex items-center gap-1 text-sm text-[#C67B5C] hover:text-[#A65D3F] underline font-medium"
             >
               <Search size={14} />
               Search Google instead
@@ -798,13 +798,13 @@ export default function ChatInterface({
         messages[messages.length - 1].content.toLowerCase().includes('shopping list') ||
         messages[messages.length - 1].content.toLowerCase().includes('items to purchase')) &&
         !extractedMaterials && (
-        <div className="px-4 py-3 bg-yellow-50 border-t border-yellow-200">
+        <div className="px-4 py-3 bg-[#FDF8F3] border-t border-[#E8D5CC]">
           <div className="flex items-center gap-3">
             <div className="flex-1">
-              <p className="text-sm text-yellow-800 font-medium">
+              <p className="text-sm text-[#7D6B5D] font-medium">
                 To save these materials to your project, ask me to:
               </p>
-              <p className="text-xs text-yellow-700 mt-1">
+              <p className="text-xs text-[#A89880] mt-1">
                 "Call the extract_materials_list tool" or "Save these to my shopping list"
               </p>
             </div>
@@ -812,7 +812,7 @@ export default function ChatInterface({
               onClick={() => {
                 setInput("Call the extract_materials_list tool to save these materials");
               }}
-              className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 text-sm font-medium whitespace-nowrap"
+              className="bg-[#C67B5C] text-white px-4 py-2 rounded-lg hover:bg-[#A65D3F] text-sm font-medium whitespace-nowrap"
             >
               Save Materials
             </button>
@@ -822,30 +822,30 @@ export default function ChatInterface({
 
       {/* Save to Project Dialog */}
       {showSaveDialog && extractedMaterials && !showCreateProjectDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold mb-4 text-gray-900">Save Materials to Project</h3>
-            <p className="text-gray-600 mb-2">
+        <div className="fixed inset-0 bg-[#3E2723] bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#FDFBF7] rounded-lg p-6 max-w-md w-full mx-4 border border-[#D4C8B8]">
+            <h3 className="text-xl font-bold mb-4 text-[#3E2723]">Save Materials to Project</h3>
+            <p className="text-[#5C4D42] mb-2">
               I found {extractedMaterials.materials.length} items to purchase for "{extractedMaterials.project_description}".
             </p>
             {extractedMaterials.owned_items && extractedMaterials.owned_items.length > 0 && (
-              <p className="text-green-600 text-sm mb-4">
+              <p className="text-[#4A7C59] text-sm mb-4">
                 {extractedMaterials.owned_items.length} items you already own were excluded from the list.
               </p>
             )}
             {extractedMaterials.total_estimate && (
-              <p className="text-gray-500 text-sm mb-4">
+              <p className="text-[#7D6B5D] text-sm mb-4">
                 Estimated total: ${extractedMaterials.total_estimate.toFixed(2)}
               </p>
             )}
 
             {projects.length > 0 && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#5C4D42] mb-2">
                   Select existing project:
                 </label>
                 <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] bg-white"
                   onChange={(e) => e.target.value && saveToProject(e.target.value)}
                   defaultValue=""
                 >
@@ -857,14 +857,14 @@ export default function ChatInterface({
                   ))}
                 </select>
 
-                <div className="text-center text-gray-500 text-sm my-3">or</div>
+                <div className="text-center text-[#A89880] text-sm my-3">or</div>
               </div>
             )}
 
             <div className="flex gap-2">
               <button
                 onClick={createNewProjectAndSave}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+                className="flex-1 bg-[#5D7B93] text-white py-2 px-4 rounded-lg hover:bg-[#4A6275]"
               >
                 Create New Project
               </button>
@@ -873,7 +873,7 @@ export default function ChatInterface({
                   setShowSaveDialog(false);
                   setExtractedMaterials(null);
                 }}
-                className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300"
+                className="flex-1 bg-[#E8DFD0] text-[#5C4D42] py-2 px-4 rounded-lg hover:bg-[#D4C8B8]"
               >
                 Skip for Now
               </button>
@@ -884,12 +884,12 @@ export default function ChatInterface({
 
       {/* Create New Project Dialog */}
       {showCreateProjectDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold mb-4 text-gray-900">
+        <div className="fixed inset-0 bg-[#3E2723] bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#FDFBF7] rounded-lg p-6 max-w-md w-full mx-4 border border-[#D4C8B8]">
+            <h3 className="text-xl font-bold mb-4 text-[#3E2723]">
               {extractedMaterials ? 'Create New Project' : 'Save to New Project'}
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-[#5C4D42] mb-4">
               {extractedMaterials
                 ? 'Enter a name for your project:'
                 : 'Save this conversation to a new project. You can add materials later.'}
@@ -900,7 +900,7 @@ export default function ChatInterface({
               value={newProjectName}
               onChange={(e) => setNewProjectName(e.target.value)}
               placeholder={extractedMaterials?.project_description || 'My DIY Project'}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 mb-4"
+              className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] placeholder-[#A89880] mb-4 bg-white"
               onKeyPress={(e) => e.key === 'Enter' && confirmCreateProject()}
               autoFocus
             />
@@ -909,7 +909,7 @@ export default function ChatInterface({
               <button
                 onClick={confirmCreateProject}
                 disabled={!newProjectName.trim()}
-                className="flex-1 bg-amber-500 text-white py-2 px-4 rounded-lg hover:bg-amber-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="flex-1 bg-[#C67B5C] text-white py-2 px-4 rounded-lg hover:bg-[#A65D3F] disabled:bg-[#D4C8B8] disabled:cursor-not-allowed"
               >
                 {extractedMaterials ? 'Create & Save' : 'Create Project'}
               </button>
@@ -918,7 +918,7 @@ export default function ChatInterface({
                   setShowCreateProjectDialog(false);
                   setNewProjectName('');
                 }}
-                className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300"
+                className="flex-1 bg-[#E8DFD0] text-[#5C4D42] py-2 px-4 rounded-lg hover:bg-[#D4C8B8]"
               >
                 Cancel
               </button>
@@ -929,10 +929,10 @@ export default function ChatInterface({
 
       {/* Auth Prompt Dialog */}
       {showAuthPrompt && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold mb-4 text-gray-900">Sign In Required</h3>
-            <p className="text-gray-600 mb-6">
+        <div className="fixed inset-0 bg-[#3E2723] bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#FDFBF7] rounded-lg p-6 max-w-md w-full mx-4 border border-[#D4C8B8]">
+            <h3 className="text-xl font-bold mb-4 text-[#3E2723]">Sign In Required</h3>
+            <p className="text-[#5C4D42] mb-6">
               You need to be signed in to save materials and create projects.
               Create a free account to get started!
             </p>
@@ -948,7 +948,7 @@ export default function ChatInterface({
                     onRequestAuth();
                   }
                 }}
-                className="bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 font-semibold"
+                className="bg-[#5D7B93] text-white py-3 px-4 rounded-lg hover:bg-[#4A6275] font-semibold"
               >
                 Create Account / Sign In
               </button>
@@ -959,7 +959,7 @@ export default function ChatInterface({
                   setShowCreateProjectDialog(false);
                   setExtractedMaterials(null);
                 }}
-                className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300"
+                className="bg-[#E8DFD0] text-[#5C4D42] py-2 px-4 rounded-lg hover:bg-[#D4C8B8]"
               >
                 Cancel
               </button>
@@ -970,7 +970,7 @@ export default function ChatInterface({
 
       {/* Floating Save to Project Banner - shows prominently when there are messages but no project */}
       {messages.length > 0 && !projectId && !isLoading && (
-        <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3 shadow-lg">
+        <div className="bg-gradient-to-r from-[#C67B5C] to-[#A65D3F] px-4 py-3 shadow-lg">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-white min-w-0">
               <FolderPlus size={20} className="flex-shrink-0" />
@@ -987,7 +987,7 @@ export default function ChatInterface({
                 setNewProjectName('');
                 setShowCreateProjectDialog(true);
               }}
-              className="flex-shrink-0 bg-white text-amber-600 px-4 py-1.5 rounded-lg font-semibold text-sm hover:bg-amber-50 transition-colors shadow-sm"
+              className="flex-shrink-0 bg-white text-[#C67B5C] px-4 py-1.5 rounded-lg font-semibold text-sm hover:bg-[#FDF8F3] transition-colors shadow-sm"
             >
               Save to Project
             </button>
@@ -996,7 +996,7 @@ export default function ChatInterface({
       )}
 
       {/* Input */}
-      <div className="bg-white border-t p-4">
+      <div className="bg-[#FDFBF7] border-t border-[#D4C8B8] p-4">
         <div className="flex gap-2">
           <input
             type="text"
@@ -1004,13 +1004,13 @@ export default function ChatInterface({
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && !isLoading && sendMessage()}
             placeholder="Ask me anything about your DIY project..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
+            className="flex-1 px-4 py-2 border border-[#D4C8B8] rounded-lg focus:ring-2 focus:ring-[#C67B5C] focus:border-[#C67B5C] text-[#3E2723] placeholder-[#A89880] bg-white"
             disabled={isLoading}
           />
           <button
             onClick={sendMessage}
             disabled={isLoading || !input.trim()}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="bg-[#C67B5C] text-white px-6 py-2 rounded-lg hover:bg-[#A65D3F] disabled:bg-[#D4C8B8] disabled:cursor-not-allowed"
           >
             Send
           </button>
