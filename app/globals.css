@@ -78,18 +78,31 @@ body {
   background-position: -1px -1px, -1px -1px, -0.5px -0.5px, -0.5px -0.5px;
 }
 
-/* Light overlay for better text contrast - "tracing paper" effect */
+/* Two-Tone Blueprint Accessibility Fix */
 .blueprint-bg::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(250, 248, 245, 0.85);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(240, 240, 240, 0.85);
   pointer-events: none;
   z-index: 1;
 }
 
 /* Ensure all content is above the overlay */
-.blueprint-bg > * {
+.blueprint-bg h1,
+.blueprint-bg h2,
+.blueprint-bg p,
+.blueprint-bg form,
+.blueprint-bg button,
+.blueprint-bg span,
+.blueprint-bg nav,
+.blueprint-bg section,
+.blueprint-bg footer,
+.blueprint-bg div {
   position: relative;
   z-index: 2;
 }
