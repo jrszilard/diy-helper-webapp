@@ -160,11 +160,11 @@ export default function LandingPage() {
           </div>
 
           {/* Main Headline */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-[#3E2723] mb-6 leading-[1.1] tracking-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-[#C67B5C] mb-6 leading-[1.1] tracking-tight">
             Your DIY projects,
             <br />
             <span className="relative">
-              <span className="text-earth-gradient">
+              <span className="text-[#3E2723]">
                 done right
               </span>
               <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 200 8" fill="none">
@@ -180,7 +180,7 @@ export default function LandingPage() {
             </span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-[#7D6B5D] mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl text-[#333333] mb-10 max-w-2xl mx-auto leading-relaxed">
             Get expert guidance, building codes, materials lists, and local store prices—all in one conversation.
           </p>
 
