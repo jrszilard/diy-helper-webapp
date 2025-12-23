@@ -107,7 +107,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen blueprint-bg">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 backdrop-blur-xl bg-[#F5F0E6]/90 border-b border-[#D4C8B8]">
+      <nav className="sticky top-0 z-50 backdrop-blur-xl bg-[#2A2520]/95 border-b border-[#4A4238]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-3">
@@ -117,21 +117,21 @@ export default function LandingPage() {
                   <Wrench className="w-5 h-5 text-white" />
                 </div>
               </div>
-              <span className="text-xl font-bold text-[#3E2723] tracking-tight">
+              <span className="text-xl font-bold text-white tracking-tight">
                 DIY Helper
               </span>
             </div>
             <div className="flex items-center gap-4">
               <Link
                 href="/chat"
-                className="hidden sm:flex items-center gap-2 text-[#7D6B5D] hover:text-[#3E2723] font-medium transition-colors"
+                className="hidden sm:flex items-center gap-2 text-[#D4C8B8] hover:text-white font-medium transition-colors"
               >
                 <span>Open Full Chat</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/chat"
-                className="bg-[#4A3F35] text-white px-5 py-2.5 rounded-xl hover:bg-[#3E2723] font-semibold transition-all hover:shadow-lg hover:shadow-[#4A3F35]/20 hover:-translate-y-0.5"
+                className="bg-[#C67B5C] text-white px-5 py-2.5 rounded-xl hover:bg-[#A65D3F] font-semibold transition-all hover:shadow-lg hover:shadow-[#C67B5C]/30 hover:-translate-y-0.5"
               >
                 Get Started
               </Link>
@@ -141,120 +141,121 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section with Integrated Chat */}
-      <section className="relative pt-12 sm:pt-20 pb-8 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Decorative construction elements */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-[#C67B5C] rounded-full blur-3xl opacity-10" />
-        <div className="absolute top-40 right-20 w-96 h-96 bg-[#4A7C59] rounded-full blur-3xl opacity-10" />
-
+      <section className="relative pt-12 sm:pt-20 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Blueprint corner markers */}
-        <div className="absolute top-8 left-8 w-16 h-16 border-l-2 border-t-2 border-[#A89880] opacity-40" />
-        <div className="absolute top-8 right-8 w-16 h-16 border-r-2 border-t-2 border-[#A89880] opacity-40" />
-        <div className="absolute bottom-8 left-8 w-16 h-16 border-l-2 border-b-2 border-[#A89880] opacity-40" />
-        <div className="absolute bottom-8 right-8 w-16 h-16 border-r-2 border-b-2 border-[#A89880] opacity-40" />
+        <div className="absolute top-8 left-8 w-16 h-16 border-l-2 border-t-2 border-white/20" />
+        <div className="absolute top-8 right-8 w-16 h-16 border-r-2 border-t-2 border-white/20" />
+        <div className="absolute bottom-8 left-8 w-16 h-16 border-l-2 border-b-2 border-white/20" />
+        <div className="absolute bottom-8 right-8 w-16 h-16 border-r-2 border-b-2 border-white/20" />
 
-        <div className="relative max-w-4xl mx-auto text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-[#FDFBF7] border border-[#D4C8B8] text-[#5C4D42] px-4 py-2 rounded-full text-sm font-medium mb-8 shadow-sm">
-            <HardHat className="w-4 h-4 text-[#C67B5C]" />
-            <span>AI-Powered Project Assistant</span>
-          </div>
+        {/* Content Card for Accessibility */}
+        <div className="relative max-w-4xl mx-auto">
+          <div className="content-card text-center">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-[#F5F0E6] border border-[#D4C8B8] text-[#5C4D42] px-4 py-2 rounded-full text-sm font-medium mb-8 shadow-sm">
+              <HardHat className="w-4 h-4 text-[#C67B5C]" />
+              <span>AI-Powered Project Assistant</span>
+            </div>
 
-          {/* Main Headline */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-[#C67B5C] mb-6 leading-[1.1] tracking-tight">
-            Your DIY projects,
-            <br />
-            <span className="relative">
-              <span className="text-[#3E2723]">
-                done right
+            {/* Main Headline */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-[#C67B5C] mb-6 leading-[1.1] tracking-tight">
+              Your DIY projects,
+              <br />
+              <span className="relative inline-block">
+                <span className="text-[#3E2723]">
+                  done right
+                </span>
+                <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 200 8" fill="none">
+                  <path d="M2 6C50 2 150 2 198 6" stroke="url(#underline-gradient)" strokeWidth="3" strokeLinecap="round"/>
+                  <defs>
+                    <linearGradient id="underline-gradient" x1="0" y1="0" x2="200" y2="0">
+                      <stop stopColor="#C67B5C"/>
+                      <stop offset="0.5" stopColor="#B8593B"/>
+                      <stop offset="1" stopColor="#B87333"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
               </span>
-              <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 200 8" fill="none">
-                <path d="M2 6C50 2 150 2 198 6" stroke="url(#underline-gradient)" strokeWidth="3" strokeLinecap="round"/>
-                <defs>
-                  <linearGradient id="underline-gradient" x1="0" y1="0" x2="200" y2="0">
-                    <stop stopColor="#C67B5C"/>
-                    <stop offset="0.5" stopColor="#B8593B"/>
-                    <stop offset="1" stopColor="#B87333"/>
-                  </linearGradient>
-                </defs>
-              </svg>
-            </span>
-          </h1>
+            </h1>
 
-          <p className="text-lg sm:text-xl text-[#333333] mb-10 max-w-2xl mx-auto leading-relaxed">
-            Get expert guidance, building codes, materials lists, and local store prices—all in one conversation.
-          </p>
-
-          {/* Main Chat Input - The Hero Element */}
-          <div className="relative max-w-2xl mx-auto mb-8">
-            <form onSubmit={handleChatSubmit}>
-              <div className={`relative bg-[#FDFBF7] rounded-2xl shadow-2xl shadow-[#4A3F35]/10 border-2 transition-all duration-300 ${
-                isInputFocused
-                  ? 'border-[#C67B5C] shadow-[#C67B5C]/20'
-                  : 'border-[#D4C8B8] hover:border-[#A89880]'
-              }`}>
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onFocus={() => setIsInputFocused(true)}
-                  onBlur={() => setIsInputFocused(false)}
-                  placeholder={placeholders[placeholderIndex]}
-                  className="w-full px-6 py-5 pr-16 text-lg text-[#3E2723] placeholder-[#A89880] rounded-2xl focus:outline-none bg-transparent"
-                />
-                <button
-                  type="submit"
-                  disabled={!chatInput.trim()}
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-xl transition-all duration-200 ${
-                    chatInput.trim()
-                      ? 'bg-gradient-to-r from-[#C67B5C] to-[#A65D3F] text-white shadow-lg shadow-[#C67B5C]/30 hover:shadow-xl hover:shadow-[#C67B5C]/40 hover:scale-105'
-                      : 'bg-[#E8DFD0] text-[#A89880]'
-                  }`}
-                >
-                  <Send className="w-5 h-5" />
-                </button>
-              </div>
-            </form>
-
-            {/* Helper text */}
-            <p className="text-sm text-[#7D6B5D] mt-3">
-              Press <kbd className="px-2 py-0.5 bg-[#E8DFD0] rounded text-[#5C4D42] font-mono text-xs border border-[#D4C8B8]">Enter</kbd> to start chatting
+            <p className="text-lg sm:text-xl text-[#5C4D42] mb-10 max-w-2xl mx-auto leading-relaxed">
+              Get expert guidance, building codes, materials lists, and local store prices—all in one conversation.
             </p>
-          </div>
 
-          {/* Quick Start Prompts */}
-          <div className="flex flex-wrap justify-center gap-2 max-w-2xl mx-auto">
-            {popularProjects.map((project, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleQuickStart(project.label)}
-                className="group flex items-center gap-2 px-4 py-2.5 bg-[#FDFBF7] border border-[#D4C8B8] rounded-xl hover:border-[#C67B5C] hover:bg-[#FDF8F3] transition-all text-sm font-medium text-[#5C4D42] hover:text-[#3E2723] shadow-sm hover:shadow"
-              >
-                <span>{project.icon}</span>
-                <span>{project.label}</span>
-                <ChevronRight className="w-3 h-3 text-[#A89880] group-hover:text-[#C67B5C] group-hover:translate-x-0.5 transition-all" />
-              </button>
-            ))}
+            {/* Main Chat Input - The Hero Element */}
+            <div className="relative max-w-2xl mx-auto mb-8">
+              <form onSubmit={handleChatSubmit}>
+                <div className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 ${
+                  isInputFocused
+                    ? 'border-[#C67B5C] shadow-[#C67B5C]/20'
+                    : 'border-[#D4C8B8] hover:border-[#A89880]'
+                }`}>
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onFocus={() => setIsInputFocused(true)}
+                    onBlur={() => setIsInputFocused(false)}
+                    placeholder={placeholders[placeholderIndex]}
+                    className="w-full px-6 py-5 pr-16 text-lg text-[#3E2723] placeholder-[#A89880] rounded-2xl focus:outline-none bg-transparent"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!chatInput.trim()}
+                    className={`absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-xl transition-all duration-200 ${
+                      chatInput.trim()
+                        ? 'bg-gradient-to-r from-[#C67B5C] to-[#A65D3F] text-white shadow-lg shadow-[#C67B5C]/30 hover:shadow-xl hover:shadow-[#C67B5C]/40 hover:scale-105'
+                        : 'bg-[#E8DFD0] text-[#A89880]'
+                    }`}
+                  >
+                    <Send className="w-5 h-5" />
+                  </button>
+                </div>
+              </form>
+
+              {/* Helper text */}
+              <p className="text-sm text-[#7D6B5D] mt-3">
+                Press <kbd className="px-2 py-0.5 bg-[#E8DFD0] rounded text-[#5C4D42] font-mono text-xs border border-[#D4C8B8]">Enter</kbd> to start chatting
+              </p>
+            </div>
+
+            {/* Quick Start Prompts */}
+            <div className="flex flex-wrap justify-center gap-2 max-w-2xl mx-auto">
+              {popularProjects.map((project, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleQuickStart(project.label)}
+                  className="group flex items-center gap-2 px-4 py-2.5 bg-white border border-[#D4C8B8] rounded-xl hover:border-[#C67B5C] hover:bg-[#FDF8F3] transition-all text-sm font-medium text-[#5C4D42] hover:text-[#3E2723] shadow-sm hover:shadow"
+                >
+                  <span>{project.icon}</span>
+                  <span>{project.label}</span>
+                  <ChevronRight className="w-3 h-3 text-[#A89880] group-hover:text-[#C67B5C] group-hover:translate-x-0.5 transition-all" />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Social Proof Bar */}
-      <section className="py-8 border-y border-[#D4C8B8] bg-[#FDFBF7]/50 backdrop-blur-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-16 text-[#7D6B5D]">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-[#3E2723]">Free</span>
-              <span className="text-sm">to use</span>
-            </div>
-            <div className="h-8 w-px bg-[#D4C8B8] hidden sm:block" />
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-[#3E2723]">Instant</span>
-              <span className="text-sm">answers</span>
-            </div>
-            <div className="h-8 w-px bg-[#D4C8B8] hidden sm:block" />
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-[#3E2723]">No signup</span>
-              <span className="text-sm">required</span>
+      <section className="py-4 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-[#FDFBF7] rounded-2xl py-6 px-8 shadow-lg border border-[#E8DFD0]">
+            <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-16 text-[#7D6B5D]">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-[#3E2723]">Free</span>
+                <span className="text-sm">to use</span>
+              </div>
+              <div className="h-8 w-px bg-[#D4C8B8] hidden sm:block" />
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-[#3E2723]">Instant</span>
+                <span className="text-sm">answers</span>
+              </div>
+              <div className="h-8 w-px bg-[#D4C8B8] hidden sm:block" />
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-[#3E2723]">No signup</span>
+                <span className="text-sm">required</span>
+              </div>
             </div>
           </div>
         </div>
@@ -264,38 +265,40 @@ export default function LandingPage() {
       <WhyDIYHelper />
 
       {/* Features Grid */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 mb-4">
-              <Ruler className="w-5 h-5 text-[#5D7B93]" />
-              <span className="text-sm font-medium text-[#5D7B93] uppercase tracking-wider">Features</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
-              Everything you need to DIY with confidence
-            </h2>
-            <p className="text-lg text-[#7D6B5D] max-w-2xl mx-auto">
-              From planning to purchasing, we've got you covered
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, idx) => (
-              <div
-                key={idx}
-                className="group relative bg-[#FDFBF7] rounded-2xl p-6 border border-[#D4C8B8] hover:border-[#A89880] transition-all duration-300 hover:shadow-xl hover:shadow-[#4A3F35]/5 hover:-translate-y-1"
-              >
-                <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${feature.color} mb-4 shadow-lg`}>
-                  <feature.icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-lg font-bold text-[#3E2723] mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-[#7D6B5D] text-sm leading-relaxed">
-                  {feature.description}
-                </p>
+          <div className="content-card">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 mb-4">
+                <Ruler className="w-5 h-5 text-[#5D7B93]" />
+                <span className="text-sm font-medium text-[#5D7B93] uppercase tracking-wider">Features</span>
               </div>
-            ))}
+              <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
+                Everything you need to DIY with confidence
+              </h2>
+              <p className="text-lg text-[#5C4D42] max-w-2xl mx-auto">
+                From planning to purchasing, we've got you covered
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {features.map((feature, idx) => (
+                <div
+                  key={idx}
+                  className="group relative bg-white rounded-2xl p-6 border border-[#E8DFD0] hover:border-[#C67B5C] transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                >
+                  <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${feature.color} mb-4 shadow-lg`}>
+                    <feature.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-[#3E2723] mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-[#5C4D42] text-sm leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -376,52 +379,56 @@ export default function LandingPage() {
       </section>
 
       {/* Workflow Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
-              From question to completion
-            </h2>
-            <p className="text-lg text-[#7D6B5D]">
-              A streamlined workflow designed for DIYers
-            </p>
-          </div>
+          <div className="content-card">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
+                From question to completion
+              </h2>
+              <p className="text-lg text-[#5C4D42]">
+                A streamlined workflow designed for DIYers
+              </p>
+            </div>
 
-          <div className="grid sm:grid-cols-4 gap-8">
-            {[
-              { step: "1", title: "Ask", desc: "Describe your project or ask a question", emoji: "💬" },
-              { step: "2", title: "Learn", desc: "Get codes, tutorials, and expert guidance", emoji: "📚" },
-              { step: "3", title: "Plan", desc: "Generate a complete materials list", emoji: "📋" },
-              { step: "4", title: "Shop", desc: "Find the best prices at local stores", emoji: "🛒" }
-            ].map((item, idx) => (
-              <div key={idx} className="relative text-center">
-                {idx < 3 && (
-                  <div className="hidden sm:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-[#C67B5C] to-transparent" />
-                )}
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#F5F0E6] to-[#E8DFD0] rounded-2xl text-3xl mb-4 border border-[#D4C8B8]">
-                  {item.emoji}
+            <div className="grid sm:grid-cols-4 gap-8">
+              {[
+                { step: "1", title: "Ask", desc: "Describe your project or ask a question", emoji: "💬" },
+                { step: "2", title: "Learn", desc: "Get codes, tutorials, and expert guidance", emoji: "📚" },
+                { step: "3", title: "Plan", desc: "Generate a complete materials list", emoji: "📋" },
+                { step: "4", title: "Shop", desc: "Find the best prices at local stores", emoji: "🛒" }
+              ].map((item, idx) => (
+                <div key={idx} className="relative text-center">
+                  {idx < 3 && (
+                    <div className="hidden sm:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-[#C67B5C] to-transparent" />
+                  )}
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl text-3xl mb-4 border border-[#E8DFD0] shadow-sm">
+                    {item.emoji}
+                  </div>
+                  <div className="text-xs font-bold text-[#C67B5C] mb-1">STEP {item.step}</div>
+                  <h3 className="text-lg font-bold text-[#3E2723] mb-1">{item.title}</h3>
+                  <p className="text-sm text-[#5C4D42]">{item.desc}</p>
                 </div>
-                <div className="text-xs font-bold text-[#C67B5C] mb-1">STEP {item.step}</div>
-                <h3 className="text-lg font-bold text-[#3E2723] mb-1">{item.title}</h3>
-                <p className="text-sm text-[#7D6B5D]">{item.desc}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Project Templates Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#FDFBF7]/50">
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
-              Popular Project Templates
-            </h2>
-            <p className="text-lg text-[#7D6B5D] max-w-2xl mx-auto">
-              Get started quickly with step-by-step guidance for common DIY projects
-            </p>
+          <div className="content-card">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
+                Popular Project Templates
+              </h2>
+              <p className="text-lg text-[#5C4D42] max-w-2xl mx-auto">
+                Get started quickly with step-by-step guidance for common DIY projects
+              </p>
+            </div>
+            <ProjectTemplates variant="grid" maxItems={6} />
           </div>
-          <ProjectTemplates variant="grid" maxItems={6} />
         </div>
       </section>
 
@@ -462,18 +469,20 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-[#D4C8B8]">
+      <footer className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-[#C67B5C] to-[#A65D3F] p-2 rounded-lg">
-                <Wrench className="w-4 h-4 text-white" />
+          <div className="bg-[#FDFBF7] rounded-2xl py-6 px-8 shadow-lg border border-[#E8DFD0]">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-gradient-to-br from-[#C67B5C] to-[#A65D3F] p-2 rounded-lg">
+                  <Wrench className="w-4 h-4 text-white" />
+                </div>
+                <span className="font-bold text-[#3E2723]">DIY Helper</span>
               </div>
-              <span className="font-bold text-[#3E2723]">DIY Helper</span>
+              <p className="text-sm text-[#5C4D42]">
+                Built for DIYers, by DIYers. Powered by Claude AI.
+              </p>
             </div>
-            <p className="text-sm text-[#7D6B5D]">
-              Built for DIYers, by DIYers. Powered by Claude AI.
-            </p>
           </div>
         </div>
       </footer>

@@ -59,17 +59,16 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Blueprint Grid Background */
+/* Dark Brown Blueprint Grid Background */
 .blueprint-bg {
-  position: relative;
-  background-color: var(--blueprint-bg);
+  background-color: #3E3530;
   background-image:
     /* Major grid lines */
-    linear-gradient(var(--blueprint-grid-major) 1px, transparent 1px),
-    linear-gradient(90deg, var(--blueprint-grid-major) 1px, transparent 1px),
+    linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px),
     /* Minor grid lines */
-    linear-gradient(var(--blueprint-grid) 0.5px, transparent 0.5px),
-    linear-gradient(90deg, var(--blueprint-grid) 0.5px, transparent 0.5px);
+    linear-gradient(rgba(255,255,255,0.04) 0.5px, transparent 0.5px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 0.5px, transparent 0.5px);
   background-size:
     100px 100px,
     100px 100px,
@@ -78,33 +77,14 @@ body {
   background-position: -1px -1px, -1px -1px, -0.5px -0.5px, -0.5px -0.5px;
 }
 
-/* Two-Tone Blueprint Accessibility Fix */
-.blueprint-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(240, 240, 240, 0.85);
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Ensure all content is above the overlay */
-.blueprint-bg h1,
-.blueprint-bg h2,
-.blueprint-bg p,
-.blueprint-bg form,
-.blueprint-bg button,
-.blueprint-bg span,
-.blueprint-bg nav,
-.blueprint-bg section,
-.blueprint-bg footer,
-.blueprint-bg div {
-  position: relative;
-  z-index: 2;
+/* Content card for readable text on dark background */
+.content-card {
+  background: rgba(253, 251, 247, 0.97);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.15),
+    0 8px 40px rgba(0, 0, 0, 0.1);
 }
 
 /* Subtle blueprint for lighter areas */
