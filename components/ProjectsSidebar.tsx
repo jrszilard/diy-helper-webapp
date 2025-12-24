@@ -67,27 +67,27 @@ function getCategoryIcon(category: string) {
   return icons[category] || icons.other;
 }
 
-// Get status color and icon
+// Get status color and icon - updated with earthy colors
 function getStatusStyle(status: string) {
   const styles: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
     research: {
-      bg: 'bg-blue-100',
-      text: 'text-blue-700',
+      bg: 'bg-[#E8F0F5]',
+      text: 'text-[#5D7B93]',
       icon: <FlaskConical className="w-3 h-3" />
     },
     in_progress: {
-      bg: 'bg-amber-100',
-      text: 'text-amber-700',
+      bg: 'bg-[#FDF3ED]',
+      text: 'text-[#C67B5C]',
       icon: <Clock className="w-3 h-3" />
     },
     waiting_parts: {
-      bg: 'bg-purple-100',
-      text: 'text-purple-700',
+      bg: 'bg-[#F3EDF5]',
+      text: 'text-[#9B7BA6]',
       icon: <Package className="w-3 h-3" />
     },
     completed: {
-      bg: 'bg-green-100',
-      text: 'text-green-700',
+      bg: 'bg-[#E8F3EC]',
+      text: 'text-[#4A7C59]',
       icon: <CheckCircle2 className="w-3 h-3" />
     }
   };
@@ -212,25 +212,25 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
     return (
       <div className="flex-1 overflow-y-auto">
         {/* Search and Filter */}
-        <div className="p-4 space-y-3 bg-white border-b sticky top-0 z-10">
+        <div className="p-4 space-y-3 bg-[#FDFBF7] border-b border-[#D4C8B8] sticky top-0 z-10">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A89880]" />
             <input
               type="text"
               placeholder="Search projects..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-9 pr-4 py-2 border border-[#D4C8B8] rounded-lg text-sm focus:ring-2 focus:ring-[#C67B5C] focus:border-[#C67B5C] text-[#3E2723] placeholder-[#A89880] bg-white"
             />
           </div>
 
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 text-sm font-medium ${hasActiveFilters ? 'text-blue-600' : 'text-gray-600'}`}
+            className={`flex items-center gap-2 text-sm font-medium ${hasActiveFilters ? 'text-[#5D7B93]' : 'text-[#7D6B5D]'}`}
           >
             <Filter className="w-4 h-4" />
             Filters
-            {hasActiveFilters && <span className="bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">2</span>}
+            {hasActiveFilters && <span className="bg-[#5D7B93] text-white text-xs px-1.5 py-0.5 rounded-full">2</span>}
             <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
           </button>
 
@@ -239,7 +239,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 border border-[#D4C8B8] rounded-lg text-sm focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] bg-white"
               >
                 {statusOptions.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -248,7 +248,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 border border-[#D4C8B8] rounded-lg text-sm focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] bg-white"
               >
                 {categoryOptions.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -260,9 +260,9 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
 
         <div className="p-4 space-y-3">
           {filteredProjects.length === 0 ? (
-            <div className="text-center py-12 text-gray-400">
+            <div className="text-center py-12 text-[#A89880]">
               <FolderOpen className="w-16 h-16 mx-auto mb-3 opacity-50" />
-              <p className="text-lg font-medium text-gray-500">
+              <p className="text-lg font-medium text-[#7D6B5D]">
                 {searchQuery || hasActiveFilters ? 'No matching projects' : 'No projects yet'}
               </p>
               <p className="text-sm mt-1">
@@ -278,37 +278,37 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                   onClick={() => selectProject(project)}
                   className={`relative p-4 rounded-xl cursor-pointer transition active:scale-[0.98] ${
                     selectedId === project.id
-                      ? 'bg-blue-50 border-2 border-blue-500'
-                      : 'bg-gray-50 border-2 border-transparent active:bg-gray-100'
+                      ? 'bg-[#FDF3ED] border-2 border-[#C67B5C]'
+                      : 'bg-[#FDFBF7] border-2 border-transparent active:bg-[#F5F0E6]'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-blue-600">
+                        <span className="text-[#5D7B93]">
                           {getCategoryIcon(project.category || 'other')}
                         </span>
-                        <span className="font-semibold text-base truncate text-gray-900">{project.name}</span>
+                        <span className="font-semibold text-base truncate text-[#3E2723]">{project.name}</span>
                       </div>
                       {project.description && (
-                        <p className="text-sm text-gray-600 line-clamp-2 ml-6">{project.description}</p>
+                        <p className="text-sm text-[#7D6B5D] line-clamp-2 ml-6">{project.description}</p>
                       )}
                       <div className="flex items-center gap-2 mt-2 ml-6">
                         <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${statusStyle.bg} ${statusStyle.text}`}>
                           {statusStyle.icon}
                           {project.status?.replace('_', ' ') || 'Research'}
                         </span>
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-[#A89880]">
                           {new Date(project.created_at).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
                     <button
                       onClick={(e) => deleteProject(project.id, e)}
-                      className="p-2 hover:bg-red-100 active:bg-red-200 rounded-lg transition"
+                      className="p-2 hover:bg-[#FDF3ED] active:bg-[#FADDD0] rounded-lg transition"
                       title="Delete project"
                     >
-                      <Trash2 className="w-5 h-5 text-red-500" />
+                      <Trash2 className="w-5 h-5 text-[#B8593B]" />
                     </button>
                   </div>
                 </div>
@@ -322,35 +322,35 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
 
   // Desktop view - enhanced layout with grouping
   return (
-    <div className="w-64 bg-white border-r flex flex-col h-full">
-      <div className="p-4 border-b">
-        <h2 className="font-bold text-lg text-gray-900">My Projects</h2>
-        <p className="text-xs text-gray-500 mt-1">Saved conversations</p>
+    <div className="w-64 bg-[#FDFBF7] border-r border-[#D4C8B8] flex flex-col h-full">
+      <div className="p-4 border-b border-[#D4C8B8]">
+        <h2 className="font-bold text-lg text-[#3E2723]">My Projects</h2>
+        <p className="text-xs text-[#7D6B5D] mt-1">Saved conversations</p>
       </div>
 
       {/* Search */}
-      <div className="p-3 border-b">
+      <div className="p-3 border-b border-[#D4C8B8]">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A89880]" />
           <input
             type="text"
             placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full pl-9 pr-3 py-1.5 border border-[#D4C8B8] rounded-lg text-sm focus:ring-2 focus:ring-[#C67B5C] focus:border-[#C67B5C] text-[#3E2723] placeholder-[#A89880] bg-white"
           />
         </div>
       </div>
 
       {/* Filters */}
-      <div className="px-3 py-2 border-b bg-gray-50">
+      <div className="px-3 py-2 border-b border-[#D4C8B8] bg-[#F5F0E6]">
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-1 text-xs font-medium ${hasActiveFilters ? 'text-blue-600' : 'text-gray-500'}`}
+          className={`flex items-center gap-1 text-xs font-medium ${hasActiveFilters ? 'text-[#5D7B93]' : 'text-[#7D6B5D]'}`}
         >
           <Filter className="w-3 h-3" />
           Filters
-          {hasActiveFilters && <span className="bg-blue-600 text-white text-xs px-1 rounded-full ml-1">!</span>}
+          {hasActiveFilters && <span className="bg-[#5D7B93] text-white text-xs px-1 rounded-full ml-1">!</span>}
           <ChevronDown className={`w-3 h-3 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
         </button>
 
@@ -359,7 +359,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:ring-2 focus:ring-blue-500"
+              className="w-full px-2 py-1 border border-[#D4C8B8] rounded text-xs focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] bg-white"
             >
               {statusOptions.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -368,7 +368,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:ring-2 focus:ring-blue-500"
+              className="w-full px-2 py-1 border border-[#D4C8B8] rounded text-xs focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] bg-white"
             >
               {categoryOptions.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -381,7 +381,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
       {/* Projects List */}
       <div className="flex-1 overflow-y-auto p-3 space-y-4">
         {Object.keys(groupedProjects).length === 0 ? (
-          <div className="text-center py-8 text-gray-400 text-sm">
+          <div className="text-center py-8 text-[#A89880] text-sm">
             <FolderOpen className="w-12 h-12 mx-auto mb-2 opacity-50" />
             <p>{searchQuery || hasActiveFilters ? 'No matching projects' : 'No projects yet'}</p>
             <p className="text-xs mt-1">
@@ -391,10 +391,10 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
         ) : (
           Object.entries(groupedProjects).map(([category, categoryProjects]) => (
             <div key={category}>
-              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[#7D6B5D] uppercase tracking-wide mb-2">
                 {getCategoryIcon(category)}
                 <span>{category}</span>
-                <span className="text-gray-400">({categoryProjects.length})</span>
+                <span className="text-[#A89880]">({categoryProjects.length})</span>
               </div>
               <div className="space-y-2">
                 {categoryProjects.map((project) => {
@@ -405,17 +405,17 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                       onClick={() => selectProject(project)}
                       className={`group relative p-3 rounded-lg cursor-pointer transition ${
                         selectedId === project.id
-                          ? 'bg-blue-50 border-2 border-blue-500'
-                          : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                          ? 'bg-[#FDF3ED] border-2 border-[#C67B5C]'
+                          : 'bg-[#F5F0E6] hover:bg-[#E8DFD0] border-2 border-transparent'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <span className="font-semibold text-sm text-gray-900 block truncate">
+                          <span className="font-semibold text-sm text-[#3E2723] block truncate">
                             {project.name}
                           </span>
                           {project.description && (
-                            <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">{project.description}</p>
+                            <p className="text-xs text-[#7D6B5D] line-clamp-1 mt-0.5">{project.description}</p>
                           )}
                           <div className="flex items-center gap-2 mt-1">
                             <span className={`inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full ${statusStyle.bg} ${statusStyle.text}`}>
@@ -426,10 +426,10 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                         </div>
                         <button
                           onClick={(e) => deleteProject(project.id, e)}
-                          className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 rounded transition"
+                          className="opacity-0 group-hover:opacity-100 p-1 hover:bg-[#FDF3ED] rounded transition"
                           title="Delete project"
                         >
-                          <Trash2 className="w-4 h-4 text-red-600" />
+                          <Trash2 className="w-4 h-4 text-[#B8593B]" />
                         </button>
                       </div>
                     </div>

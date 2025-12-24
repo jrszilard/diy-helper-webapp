@@ -232,45 +232,45 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
+    <div className="fixed inset-0 bg-[#3E2723]/50 z-50 flex justify-end">
       {/* Backdrop for closing on mobile */}
       <div className="absolute inset-0 md:hidden" onClick={onClose} />
 
-      <div className="w-full max-w-md bg-white h-full overflow-hidden flex flex-col shadow-xl relative animate-slide-in-right">
+      <div className="w-full max-w-md bg-[#FDFBF7] h-full overflow-hidden flex flex-col shadow-xl relative animate-slide-in-right">
         {/* Header */}
-        <div className="bg-blue-600 text-white p-4 flex items-center justify-between safe-area-top">
+        <div className="bg-[#C67B5C] text-white p-4 flex items-center justify-between safe-area-top">
           <div>
             <h2 className="text-lg sm:text-xl font-bold">My Tool Inventory</h2>
-            <p className="text-blue-100 text-sm">{inventory.length} items</p>
+            <p className="text-[#FDF3ED] text-sm">{inventory.length} items</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-blue-700 active:bg-blue-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-[#A65D3F] active:bg-[#8B4D33] rounded-lg transition-colors"
           >
             <X size={24} />
           </button>
         </div>
 
         {/* Search and Filter */}
-        <div className="p-4 border-b space-y-3">
+        <div className="p-4 border-b border-[#D4C8B8] space-y-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={18} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#7D6B5D]" size={18} />
             <input
               type="text"
               placeholder="Search inventory..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 border border-[#D4C8B8] rounded-lg text-[#3E2723] bg-white focus:outline-none focus:ring-2 focus:ring-[#C67B5C] placeholder-[#A89880]"
             />
           </div>
-          
+
           <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setSelectedCategory(null)}
               className={`px-3 py-1 rounded-full text-sm ${
                 !selectedCategory
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                  ? 'bg-[#C67B5C] text-white'
+                  : 'bg-[#F5F0E6] text-[#5C4D42] hover:bg-[#E8DFD0]'
               }`}
             >
               All
@@ -283,8 +283,8 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                 )}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
                   selectedCategory === cat.value
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                    ? 'bg-[#C67B5C] text-white'
+                    : 'bg-[#F5F0E6] text-[#5C4D42] hover:bg-[#E8DFD0]'
                 }`}
               >
                 <cat.icon size={14} />
@@ -296,8 +296,8 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
 
         {/* Add/Edit Form */}
         {(showAddForm || editingItem) && (
-          <div className="p-4 bg-gray-50 border-b">
-            <h3 className="font-semibold text-gray-900 mb-3">
+          <div className="p-4 bg-[#F5F0E6] border-b border-[#D4C8B8]">
+            <h3 className="font-semibold text-[#3E2723] mb-3">
               {editingItem ? 'Edit Item' : 'Add New Item'}
             </h3>
             <div className="space-y-3">
@@ -306,52 +306,52 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                 placeholder="Item name (e.g., Cordless Drill)"
                 value={formData.item_name}
                 onChange={(e) => setFormData({ ...formData, item_name: e.target.value })}
-                className="w-full p-2 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border border-[#D4C8B8] rounded-lg text-[#3E2723] bg-white focus:outline-none focus:ring-2 focus:ring-[#C67B5C] placeholder-[#A89880]"
               />
-              
+
               <div className="flex gap-2">
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="flex-1 p-2 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 p-2 border border-[#D4C8B8] rounded-lg text-[#3E2723] bg-white focus:outline-none focus:ring-2 focus:ring-[#C67B5C]"
                 >
                   {CATEGORIES.map(cat => (
                     <option key={cat.value} value={cat.value}>{cat.label}</option>
                   ))}
                 </select>
-                
+
                 <input
                   type="number"
                   min="1"
                   value={formData.quantity}
                   onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
-                  className="w-20 p-2 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-20 p-2 border border-[#D4C8B8] rounded-lg text-[#3E2723] bg-white focus:outline-none focus:ring-2 focus:ring-[#C67B5C]"
                   placeholder="Qty"
                 />
               </div>
-              
+
               <select
                 value={formData.condition}
                 onChange={(e) => setFormData({ ...formData, condition: e.target.value })}
-                className="w-full p-2 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border border-[#D4C8B8] rounded-lg text-[#3E2723] bg-white focus:outline-none focus:ring-2 focus:ring-[#C67B5C]"
               >
                 {CONDITIONS.map(cond => (
                   <option key={cond.value} value={cond.value}>{cond.label}</option>
                 ))}
               </select>
-              
+
               <textarea
                 placeholder="Notes (optional)"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="w-full p-2 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="w-full p-2 border border-[#D4C8B8] rounded-lg text-[#3E2723] bg-white focus:outline-none focus:ring-2 focus:ring-[#C67B5C] resize-none placeholder-[#A89880]"
                 rows={2}
               />
-              
+
               <div className="flex gap-2">
                 <button
                   onClick={editingItem ? handleUpdateItem : handleAddItem}
-                  className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2"
+                  className="flex-1 bg-[#C67B5C] text-white py-2 rounded-lg hover:bg-[#A65D3F] flex items-center justify-center gap-2"
                 >
                   <Check size={18} />
                   {editingItem ? 'Update' : 'Add Item'}
@@ -360,7 +360,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                   onClick={() => {
                     editingItem ? cancelEdit() : setShowAddForm(false);
                   }}
-                  className="px-4 py-2 border border-gray-300 text-gray-900 rounded-lg hover:bg-gray-100"
+                  className="px-4 py-2 border border-[#D4C8B8] text-[#3E2723] rounded-lg hover:bg-[#E8DFD0]"
                 >
                   Cancel
                 </button>
@@ -372,28 +372,28 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
         {/* Inventory List */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="p-8 text-center text-gray-800">
+            <div className="p-8 text-center text-[#5C4D42]">
               Loading inventory...
             </div>
           ) : !userId ? (
             <div className="p-8 text-center">
-              <Package className="mx-auto text-gray-300 mb-4" size={48} />
-              <p className="text-gray-800 mb-2 font-medium">
+              <Package className="mx-auto text-[#D4C8B8] mb-4" size={48} />
+              <p className="text-[#3E2723] mb-2 font-medium">
                 Sign in to access your tool inventory
               </p>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-[#7D6B5D]">
                 Your tools will be saved and remembered across sessions
               </p>
             </div>
           ) : filteredInventory.length === 0 ? (
             <div className="p-8 text-center">
-              <Package className="mx-auto text-gray-300 mb-4" size={48} />
-              <p className="text-gray-800 mb-2">
+              <Package className="mx-auto text-[#D4C8B8] mb-4" size={48} />
+              <p className="text-[#3E2723] mb-2">
                 {searchQuery || selectedCategory
                   ? 'No items match your search'
                   : 'Your inventory is empty'}
               </p>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-[#7D6B5D]">
                 Add items manually or mention tools you own in chat
               </p>
             </div>
@@ -402,44 +402,44 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
               {Object.entries(groupedInventory).map(([category, items]) => {
                 const catInfo = CATEGORIES.find(c => c.value === category);
                 const Icon = catInfo?.icon || Package;
-                
+
                 return (
                   <div key={category}>
-                    <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                      <Icon size={16} />
+                    <h4 className="font-semibold text-[#3E2723] mb-2 flex items-center gap-2">
+                      <Icon size={16} className="text-[#C67B5C]" />
                       {catInfo?.label || category}
-                      <span className="text-gray-600 font-normal">({items.length})</span>
+                      <span className="text-[#7D6B5D] font-normal">({items.length})</span>
                     </h4>
                     <div className="space-y-2">
                       {items.map(item => (
                         <div
                           key={item.id}
-                          className="bg-white border rounded-lg p-3 sm:p-3 flex items-center justify-between group hover:shadow-sm transition-shadow"
+                          className="bg-white border border-[#D4C8B8] rounded-lg p-3 sm:p-3 flex items-center justify-between group hover:shadow-sm transition-shadow"
                         >
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-gray-900 text-sm sm:text-base">
+                            <div className="font-medium text-[#3E2723] text-sm sm:text-base">
                               {item.item_name}
                               {item.quantity > 1 && (
-                                <span className="text-gray-700 font-normal ml-1">
+                                <span className="text-[#7D6B5D] font-normal ml-1">
                                   x{item.quantity}
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs text-gray-700 flex items-center gap-2 flex-wrap mt-1">
+                            <div className="text-xs text-[#7D6B5D] flex items-center gap-2 flex-wrap mt-1">
                               <span className={`px-2 py-0.5 rounded-full ${
-                                item.condition === 'new' ? 'bg-green-100 text-green-700' :
-                                item.condition === 'good' ? 'bg-blue-100 text-blue-700' :
-                                item.condition === 'fair' ? 'bg-yellow-100 text-yellow-700' :
-                                'bg-red-100 text-red-700'
+                                item.condition === 'new' ? 'bg-[#E8F3EC] text-[#4A7C59]' :
+                                item.condition === 'good' ? 'bg-[#E8F0F5] text-[#5D7B93]' :
+                                item.condition === 'fair' ? 'bg-[#FDF3ED] text-[#C67B5C]' :
+                                'bg-[#FADDD0] text-[#B8593B]'
                               }`}>
                                 {item.condition}
                               </span>
                               {item.auto_added && (
-                                <span className="text-gray-600">auto-added</span>
+                                <span className="text-[#A89880]">auto-added</span>
                               )}
                             </div>
                             {item.notes && (
-                              <p className="text-xs text-gray-700 mt-1 line-clamp-2">{item.notes}</p>
+                              <p className="text-xs text-[#7D6B5D] mt-1 line-clamp-2">{item.notes}</p>
                             )}
                           </div>
 
@@ -447,13 +447,13 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                           <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
                             <button
                               onClick={() => startEdit(item)}
-                              className="p-2 text-gray-600 hover:text-blue-600 active:text-blue-700 hover:bg-blue-50 active:bg-blue-100 rounded-lg"
+                              className="p-2 text-[#7D6B5D] hover:text-[#5D7B93] active:text-[#4A6275] hover:bg-[#E8F0F5] active:bg-[#D4E4ED] rounded-lg"
                             >
                               <Edit2 size={18} />
                             </button>
                             <button
                               onClick={() => handleDeleteItem(item.id)}
-                              className="p-2 text-gray-600 hover:text-red-600 active:text-red-700 hover:bg-red-50 active:bg-red-100 rounded-lg"
+                              className="p-2 text-[#7D6B5D] hover:text-[#B8593B] active:text-[#9A4830] hover:bg-[#FADDD0] active:bg-[#F5C9B8] rounded-lg"
                             >
                               <Trash2 size={18} />
                             </button>
@@ -470,10 +470,10 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
 
         {/* Add Button - only show when logged in */}
         {!showAddForm && !editingItem && userId && (
-          <div className="p-4 border-t safe-area-bottom bg-white">
+          <div className="p-4 border-t border-[#D4C8B8] safe-area-bottom bg-[#FDFBF7]">
             <button
               onClick={() => setShowAddForm(true)}
-              className="w-full bg-blue-600 text-white py-3 sm:py-3 rounded-xl hover:bg-blue-700 active:bg-blue-800 flex items-center justify-center gap-2 font-medium text-base transition-colors"
+              className="w-full bg-[#C67B5C] text-white py-3 sm:py-3 rounded-xl hover:bg-[#A65D3F] active:bg-[#8B4D33] flex items-center justify-center gap-2 font-medium text-base transition-colors"
             >
               <Plus size={20} />
               Add Item to Inventory

@@ -1,8 +1,39 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Earthy Color Palette */
+  --background: #F5F0E6;
+  --foreground: #3E2723;
+
+  /* Blueprint/Construction Colors */
+  --blueprint-bg: #F5F0E6;
+  --blueprint-grid: #C9B99A;
+  --blueprint-grid-major: #A89880;
+  --blueprint-accent: #5D7B93;
+
+  /* Primary Earthy Tones */
+  --earth-cream: #F5F0E6;
+  --earth-tan: #E8DFD0;
+  --earth-sand: #D4C8B8;
+  --earth-brown-light: #A89880;
+  --earth-brown: #7D6B5D;
+  --earth-brown-dark: #4A3F35;
+
+  /* Accent Colors - Warm & Natural */
+  --terracotta: #C67B5C;
+  --terracotta-dark: #A65D3F;
+  --rust: #B8593B;
+  --copper: #B87333;
+  --forest-green: #4A7C59;
+  --forest-green-dark: #2D5A3B;
+  --sage: #7D9A6F;
+  --slate-blue: #5D7B93;
+
+  /* Status Colors - Earthy versions */
+  --status-research: #5D7B93;
+  --status-progress: #C67B5C;
+  --status-waiting: #9B7BA6;
+  --status-complete: #4A7C59;
 }
 
 @theme inline {
@@ -14,8 +45,11 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #2A2520;
+    --foreground: #E8DFD0;
+    --blueprint-bg: #2A2520;
+    --blueprint-grid: #3E3830;
+    --blueprint-grid-major: #4A4238;
   }
 }
 
@@ -23,6 +57,114 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Dark Brown Blueprint Grid Background */
+.blueprint-bg {
+  background-color: #3E3530;
+  background-image:
+    /* Major grid lines */
+    linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px),
+    /* Minor grid lines */
+    linear-gradient(rgba(255,255,255,0.04) 0.5px, transparent 0.5px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 0.5px, transparent 0.5px);
+  background-size:
+    100px 100px,
+    100px 100px,
+    20px 20px,
+    20px 20px;
+  background-position: -1px -1px, -1px -1px, -0.5px -0.5px, -0.5px -0.5px;
+}
+
+/* Content card for readable text on dark background */
+.content-card {
+  background: rgba(253, 251, 247, 0.97);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.15),
+    0 8px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Subtle blueprint for lighter areas */
+.blueprint-bg-subtle {
+  background-color: var(--blueprint-bg);
+  background-image:
+    linear-gradient(var(--blueprint-grid) 0.5px, transparent 0.5px),
+    linear-gradient(90deg, var(--blueprint-grid) 0.5px, transparent 0.5px);
+  background-size: 25px 25px;
+  background-position: -0.5px -0.5px;
+}
+
+/* Construction paper texture overlay */
+.paper-texture {
+  position: relative;
+}
+
+.paper-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Earthy card styles */
+.earth-card {
+  background: linear-gradient(145deg, #FDFBF7 0%, #F5F0E6 100%);
+  border: 1px solid var(--earth-sand);
+  box-shadow:
+    0 1px 3px rgba(74, 63, 53, 0.08),
+    0 4px 12px rgba(74, 63, 53, 0.04);
+}
+
+.earth-card:hover {
+  border-color: var(--earth-brown-light);
+  box-shadow:
+    0 4px 12px rgba(74, 63, 53, 0.1),
+    0 8px 24px rgba(74, 63, 53, 0.06);
+}
+
+/* Earthy button styles */
+.btn-earth-primary {
+  background: linear-gradient(135deg, var(--terracotta) 0%, var(--terracotta-dark) 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 2px 8px rgba(198, 123, 92, 0.3);
+}
+
+.btn-earth-primary:hover {
+  background: linear-gradient(135deg, var(--terracotta-dark) 0%, var(--rust) 100%);
+  box-shadow: 0 4px 12px rgba(198, 123, 92, 0.4);
+}
+
+.btn-earth-secondary {
+  background: linear-gradient(135deg, var(--forest-green) 0%, var(--forest-green-dark) 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 2px 8px rgba(74, 124, 89, 0.3);
+}
+
+.btn-earth-secondary:hover {
+  background: linear-gradient(135deg, var(--forest-green-dark) 0%, #1F4D2D 100%);
+  box-shadow: 0 4px 12px rgba(74, 124, 89, 0.4);
+}
+
+/* Construction/Blueprint accents */
+.blueprint-accent {
+  border-left: 3px solid var(--slate-blue);
+  padding-left: 1rem;
+  background: linear-gradient(90deg, rgba(93, 123, 147, 0.08) 0%, transparent 100%);
+}
+
+/* Earthy gradient text */
+.text-earth-gradient {
+  background: linear-gradient(135deg, var(--terracotta) 0%, var(--rust) 50%, var(--copper) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Mobile slide-in animations */
@@ -104,4 +246,23 @@ body {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Scrollbar styling for earthy theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--earth-tan);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--earth-brown-light);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--earth-brown);
 }

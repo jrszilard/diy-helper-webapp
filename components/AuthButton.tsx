@@ -92,7 +92,7 @@ export default function AuthButton({
     return (
       <button
         onClick={handleSignOut}
-        className="flex items-center gap-2 text-gray-900 hover:text-blue-600 transition"
+        className="flex items-center gap-2 text-[#3E2723] hover:text-[#C67B5C] transition"
       >
         <User className="w-5 h-5" />
         <span className="hidden sm:inline">{user.email}</span>
@@ -105,23 +105,23 @@ export default function AuthButton({
     <>
       <button
         onClick={() => setShowAuth(true)}
-        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-semibold transition"
+        className="bg-[#5D7B93] text-white px-6 py-2 rounded-lg hover:bg-[#4A6275] font-semibold transition"
       >
         Sign In
       </button>
 
       {showAuth && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
+        <div className="fixed inset-0 bg-[#3E2723]/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#FDFBF7] rounded-2xl p-6 max-w-md w-full shadow-2xl border border-[#D4C8B8]">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold">
+              <h3 className="text-2xl font-bold text-[#3E2723]">
                 {isSignUp ? 'Create Account' : 'Welcome Back'}
               </h3>
               <button
                 onClick={() => setShowAuth(false)}
-                className="p-1 hover:bg-gray-100 rounded-lg transition"
+                className="p-1 hover:bg-[#E8DFD0] rounded-lg transition"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 text-[#7D6B5D]" />
               </button>
             </div>
 
@@ -129,7 +129,7 @@ export default function AuthButton({
             <button
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 font-semibold transition disabled:opacity-50 mb-4"
+              className="w-full flex items-center justify-center gap-3 border-2 border-[#D4C8B8] rounded-lg px-4 py-3 hover:bg-[#F5F0E6] font-semibold transition disabled:opacity-50 mb-4 text-[#3E2723]"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -142,17 +142,17 @@ export default function AuthButton({
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
+                <div className="w-full border-t border-[#D4C8B8]"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-700">Or continue with email</span>
+                <span className="px-4 bg-[#FDFBF7] text-[#7D6B5D]">Or continue with email</span>
               </div>
             </div>
 
             {/* Email/Password Form */}
             <form onSubmit={handleEmailAuth} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                <label className="block text-sm font-semibold text-[#3E2723] mb-2">
                   Email
                 </label>
                 <input
@@ -160,13 +160,13 @@ export default function AuthButton({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-[#D4C8B8] rounded-lg px-4 py-3 text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white placeholder-[#A89880]"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                <label className="block text-sm font-semibold text-[#3E2723] mb-2">
                   Password
                 </label>
                 <input
@@ -174,17 +174,17 @@ export default function AuthButton({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-[#D4C8B8] rounded-lg px-4 py-3 text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white placeholder-[#A89880]"
                   required
                   minLength={6}
                 />
-                <p className="text-xs text-gray-700 mt-1">At least 6 characters</p>
+                <p className="text-xs text-[#7D6B5D] mt-1">At least 6 characters</p>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 font-semibold disabled:opacity-50 transition"
+                className="w-full bg-[#C67B5C] text-white px-4 py-3 rounded-lg hover:bg-[#A65D3F] font-semibold disabled:opacity-50 transition"
               >
                 {loading ? 'Loading...' : isSignUp ? 'Create Account' : 'Sign In'}
               </button>
@@ -193,7 +193,7 @@ export default function AuthButton({
             <div className="mt-4 text-center">
               <button
                 onClick={() => setIsSignUp(!isSignUp)}
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                className="text-[#5D7B93] hover:text-[#4A6275] text-sm font-medium"
               >
                 {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
               </button>
