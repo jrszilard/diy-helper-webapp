@@ -34,14 +34,29 @@ interface ShoppingItem {
 
 interface StoreResult {
   store: string;
+  retailer: string;
   price: number;
-  original_price?: number;
+  originalPrice?: number;
   availability: 'in-stock' | 'limited' | 'out-of-stock' | 'online-only' | 'check-online';
   distance: string;
   address: string;
   phone: string;
   link: string;
   notes?: string;
+  confidence?: 'high' | 'medium' | 'low';
+  priceWarning?: string;
+  sku?: string;
+  storeStock?: string;
+}
+
+interface SearchResultWithMeta {
+  results: StoreResult[];
+  priceRange?: {
+    min: number | null;
+    max: number | null;
+    avg: number | null;
+    sources: number;
+  } | null;
 }
 
 interface ShoppingListViewProps {
@@ -53,7 +68,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [location, setLocation] = useState('');
-  const [searchResults, setSearchResults] = useState<Record<string, StoreResult[]>>({});
+  const [searchResults, setSearchResults] = useState<Record<string, SearchResultWithMeta>>({});
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchPanel, setShowSearchPanel] = useState(false);
 
@@ -220,7 +235,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
     console.log('Location:', location);
 
     setIsSearching(true);
-    const results: Record<string, StoreResult[]> = {};
+    const results: Record<string, SearchResultWithMeta> = {};
 
     try {
       const itemsArray = Array.from(selectedItems);
@@ -239,7 +254,8 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
         const requestBody = {
           materialName: item.product_name,
           location: location,
-          quantity: item.quantity
+          quantity: item.quantity,
+          validatePricing: true
         };
 
         const response = await fetch('/api/search-stores', {
@@ -259,7 +275,10 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
         const data = await response.json();
         console.log('Search results for', item.product_name, ':', data);
 
-        results[itemId] = data.results || [];
+        results[itemId] = {
+          results: data.results || [],
+          priceRange: data.priceRange || null
+        };
 
         // Add 3 second delay between items to avoid rate limiting
         if (i < itemsArray.length - 1) {
@@ -557,75 +576,109 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                         </div>
                       </div>
 
-                      {searchResults[item.id] && searchResults[item.id].length > 0 && (
+                      {searchResults[item.id] && searchResults[item.id].results.length > 0 && (
                         <div className="px-4 pb-4 bg-[#F5F0E6]">
-                          <div className="flex items-center gap-2 mb-2">
-                            <TrendingDown className="w-4 h-4 text-[#4A7C59]" />
-                            <span className="text-sm font-semibold text-[#3E2723]">
-                              Found at {searchResults[item.id].length} stores:
-                            </span>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <TrendingDown className="w-4 h-4 text-[#4A7C59]" />
+                              <span className="text-sm font-semibold text-[#3E2723]">
+                                Found at {searchResults[item.id].results.length} stores:
+                              </span>
+                            </div>
+                            {searchResults[item.id].priceRange && searchResults[item.id].priceRange!.min && (
+                              <span className="text-xs text-[#7D6B5D]">
+                                Market range: ${searchResults[item.id].priceRange!.min!.toFixed(2)} - ${searchResults[item.id].priceRange!.max!.toFixed(2)}
+                              </span>
+                            )}
                           </div>
 
                           <div className="space-y-2">
-                            {searchResults[item.id].map((result, idx) => (
-                              <div
-                                key={idx}
-                                className="p-3 rounded-lg border border-[#D4C8B8] bg-white"
-                              >
-                                <div className="flex justify-between items-start mb-2">
-                                  <div>
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-semibold text-[#3E2723]">{result.store}</span>
-                                    </div>
-                                    <div className="text-xs text-[#7D6B5D]">{result.distance}</div>
-                                  </div>
-
-                                  <div className="text-right">
-                                    {result.price > 0 ? (
-                                      <>
-                                        <div className="text-lg font-bold text-[#4A7C59]">
-                                          ${result.price.toFixed(2)}
-                                        </div>
-                                        {result.original_price && result.original_price > result.price && (
-                                          <div className="text-xs text-[#A89880] line-through">
-                                            ${result.original_price.toFixed(2)}
-                                          </div>
-                                        )}
-                                      </>
-                                    ) : (
-                                      <div className="text-sm font-semibold text-[#5D7B93]">
-                                        See website
-                                      </div>
-                                    )}
-                                    <div className={`text-xs px-2 py-0.5 rounded inline-block mt-1 font-medium ${
-                                      result.availability === 'in-stock' ? 'bg-[#E8F3EC] text-[#4A7C59]' :
-                                      result.availability === 'limited' ? 'bg-[#FDF3ED] text-[#C67B5C]' :
-                                      result.availability === 'out-of-stock' ? 'bg-[#FADDD0] text-[#B8593B]' :
-                                      'bg-[#E8F0F5] text-[#5D7B93]'
-                                    }`}>
-                                      {result.availability.replace('-', ' ').toUpperCase()}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="text-xs text-[#5C4D42] mb-2">
-                                  <div className="text-[#5C4D42]">{result.address}</div>
-                                  <div className="text-[#5C4D42]">{result.phone}</div>
-                                  {result.notes && (
-                                    <div className="text-[#7D6B5D] italic mt-1">{result.notes}</div>
-                                  )}
-                                </div>
-
-                                <a
-                                  href={result.link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 text-xs text-[#5D7B93] hover:text-[#4A6275] font-medium"
+                            {searchResults[item.id].results.map((result, idx) => {
+                              const isOutOfStock = result.availability === 'out-of-stock';
+                              return (
+                                <div
+                                  key={idx}
+                                  className={`p-3 rounded-lg border border-[#D4C8B8] bg-white ${isOutOfStock ? 'opacity-60' : ''}`}
                                 >
-                                  View Product <ExternalLink className="w-3 h-3" />
-                                </a>
-                              </div>
-                            ))}
+                                  <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-semibold text-[#3E2723]">{result.store}</span>
+                                        {result.confidence && (
+                                          <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
+                                            result.confidence === 'high' ? 'bg-green-50 text-green-600' :
+                                            result.confidence === 'medium' ? 'bg-amber-50 text-amber-600' :
+                                            'bg-gray-100 text-gray-500'
+                                          }`}>
+                                            {result.confidence === 'high' ? 'Verified' : result.confidence === 'medium' ? 'Est.' : 'Check'}
+                                          </span>
+                                        )}
+                                      </div>
+                                      {result.sku && (
+                                        <div className="text-xs text-[#9B8B7D]">SKU: {result.sku}</div>
+                                      )}
+                                      <div className="text-xs text-[#7D6B5D]">{result.distance}</div>
+                                    </div>
+
+                                    <div className="text-right">
+                                      {result.price > 0 ? (
+                                        <>
+                                          <div className={`text-lg font-bold ${isOutOfStock ? 'text-gray-400 line-through' : 'text-[#4A7C59]'}`}>
+                                            ${result.price.toFixed(2)}
+                                          </div>
+                                          {result.originalPrice && result.originalPrice > result.price && (
+                                            <div className="text-xs text-[#A89880] line-through">
+                                              ${result.originalPrice.toFixed(2)}
+                                            </div>
+                                          )}
+                                        </>
+                                      ) : (
+                                        <div className="text-sm font-semibold text-[#5D7B93]">
+                                          See website
+                                        </div>
+                                      )}
+                                      <div className="flex items-center justify-end gap-1 mt-1">
+                                        <span className={`text-xs px-2 py-0.5 rounded font-medium ${
+                                          result.availability === 'in-stock' ? 'bg-[#E8F3EC] text-[#4A7C59]' :
+                                          result.availability === 'limited' ? 'bg-[#FDF3ED] text-[#C67B5C]' :
+                                          result.availability === 'out-of-stock' ? 'bg-[#FADDD0] text-[#B8593B]' :
+                                          'bg-[#E8F0F5] text-[#5D7B93]'
+                                        }`}>
+                                          {result.availability.replace(/-/g, ' ').toUpperCase()}
+                                        </span>
+                                      </div>
+                                      {result.storeStock && (
+                                        <div className="text-xs text-[#7D6B5D] mt-0.5">{result.storeStock}</div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {result.priceWarning && (
+                                    <div className="text-xs text-amber-700 bg-amber-50 p-2 rounded mb-2 flex items-start gap-1">
+                                      <span className="flex-shrink-0">!</span>
+                                      <span>{result.priceWarning}</span>
+                                    </div>
+                                  )}
+
+                                  <div className="text-xs text-[#5C4D42] mb-2">
+                                    <div className="text-[#5C4D42]">{result.address}</div>
+                                    <div className="text-[#5C4D42]">{result.phone}</div>
+                                    {result.notes && !result.priceWarning && (
+                                      <div className="text-[#7D6B5D] italic mt-1">{result.notes}</div>
+                                    )}
+                                  </div>
+
+                                  <a
+                                    href={result.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-xs text-[#5D7B93] hover:text-[#4A6275] font-medium"
+                                  >
+                                    {isOutOfStock ? 'Check for Updates' : 'View Product'} <ExternalLink className="w-3 h-3" />
+                                  </a>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       )}

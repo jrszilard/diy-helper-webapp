@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
 import { webSearch } from '@/lib/search';
+import {
+  fetchProductData,
+  searchGoogleShopping,
+  validatePrices,
+  ExtractedProductData,
+} from '@/lib/product-extractor';
 
 // Helper function to add delay
 function sleep(ms: number) {
@@ -13,14 +19,16 @@ const STORE_CONFIGS = {
     domain: 'homedepot.com',
     phone: '1-800-466-3337',
     productPathPatterns: ['/p/'],
-    excludePatterns: ['/b/', '/c/'],
+    excludePatterns: ['/b/', '/c/', '/search'],
+    priceMultiplier: 1.0, // For any store-specific adjustments
   },
   'lowes': {
     name: "Lowe's",
     domain: 'lowes.com',
     phone: '1-800-445-6937',
     productPathPatterns: ['/pd/'],
-    excludePatterns: ['/pl/'],
+    excludePatterns: ['/pl/', '/search'],
+    priceMultiplier: 1.0,
   },
   'ace-hardware': {
     name: 'Ace Hardware',
@@ -28,24 +36,43 @@ const STORE_CONFIGS = {
     phone: '1-888-827-4223',
     productPathPatterns: ['/product/', '/p/'],
     excludePatterns: ['/category/', '/search'],
+    priceMultiplier: 1.0,
   },
   'menards': {
     name: 'Menards',
     domain: 'menards.com',
     phone: '1-800-871-2800',
     productPathPatterns: ['/main/p-'],
-    excludePatterns: ['/main/store'],
+    excludePatterns: ['/main/store', '/search'],
+    priceMultiplier: 1.0,
   },
 };
 
 type StoreKey = keyof typeof STORE_CONFIGS;
+
+interface StoreResult {
+  store: string;
+  retailer: string;
+  price: number;
+  originalPrice?: number;
+  availability: 'in-stock' | 'limited' | 'out-of-stock' | 'online-only' | 'check-online';
+  distance: string;
+  address: string;
+  phone: string;
+  link: string;
+  notes?: string;
+  confidence: 'high' | 'medium' | 'low';
+  priceWarning?: string;
+  sku?: string;
+  storeStock?: string;
+}
 
 // Extract product URLs from search results
 function extractProductUrls(searchResults: string, config: typeof STORE_CONFIGS[StoreKey]): string[] {
   console.log('Extracting URLs for', config.domain);
 
   const escapedDomain = config.domain.replace('.', '\\.');
-  const urlRegex = new RegExp(`https?://(?:www\\.)?${escapedDomain}[^\\s<>"']+`, 'g');
+  const urlRegex = new RegExp(`https?://(?:www\\.)?${escapedDomain}[^\\s<>"'\\]\\)]+`, 'g');
   const matches = searchResults.match(urlRegex) || [];
 
   console.log(`Found ${matches.length} total URLs`);
@@ -53,9 +80,9 @@ function extractProductUrls(searchResults: string, config: typeof STORE_CONFIGS[
   // Clean and filter URLs
   const productUrls = matches
     .map(url => {
-      // Clean up URL
+      // Clean up URL - remove trailing punctuation and query params
       return url
-        .replace(/[)\]}>'",.;]+$/, '')
+        .replace(/[)\]}>'",.;:]+$/, '')
         .split('?')[0]
         .split('#')[0];
     })
@@ -71,21 +98,91 @@ function extractProductUrls(searchResults: string, config: typeof STORE_CONFIGS[
 
   console.log(`Filtered to ${productUrls.length} product URLs`);
 
-  return productUrls.slice(0, 3);
+  // Return up to 5 URLs for better price/availability coverage
+  return productUrls.slice(0, 5);
+}
+
+// Fetch and extract data from multiple product URLs, return the best result
+async function fetchBestProductData(
+  urls: string[],
+  storeKey: string
+): Promise<ExtractedProductData & { url: string } | null> {
+  if (urls.length === 0) return null;
+
+  const results: (ExtractedProductData & { url: string })[] = [];
+
+  // Fetch data from up to 3 URLs in parallel
+  const urlsToFetch = urls.slice(0, 3);
+  const fetchPromises = urlsToFetch.map(url => fetchProductData(url, storeKey));
+
+  try {
+    const fetched = await Promise.all(fetchPromises);
+    results.push(...fetched.filter(r => r.price !== null || r.availability !== 'check-online'));
+  } catch (error) {
+    console.error('Error fetching product data:', error);
+  }
+
+  if (results.length === 0) {
+    // Return first URL even if we couldn't extract data
+    return {
+      url: urls[0],
+      price: null,
+      originalPrice: null,
+      currency: 'USD',
+      availability: 'check-online',
+      sku: null,
+      productName: null,
+      brand: null,
+      rating: null,
+      reviewCount: null,
+      storeStock: null,
+      confidence: 'low',
+      source: 'no-extraction',
+    };
+  }
+
+  // Prioritize results with both price and availability
+  const withBoth = results.find(r => r.price !== null && r.availability !== 'check-online');
+  if (withBoth) return withBoth;
+
+  // Then prioritize results with in-stock availability
+  const inStock = results.find(r => r.availability === 'in-stock' || r.availability === 'limited');
+  if (inStock) return inStock;
+
+  // Then prioritize results with price
+  const withPrice = results.find(r => r.price !== null);
+  if (withPrice) return withPrice;
+
+  // Return first result
+  return results[0];
 }
 
 export async function POST(req: Request) {
   try {
-    const { materialName, location, stores = ['home-depot', 'lowes', 'ace-hardware'] } = await req.json();
+    const {
+      materialName,
+      location,
+      stores = ['home-depot', 'lowes', 'ace-hardware'],
+      validatePricing = true, // Enable multi-source price validation
+    } = await req.json();
 
     if (!materialName || !location) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
+    console.log(`\n========================================`);
     console.log(`Searching for "${materialName}" near ${location}`);
     console.log(`Stores to search: ${stores.join(', ')}`);
+    console.log(`Price validation: ${validatePricing ? 'enabled' : 'disabled'}`);
+    console.log(`========================================\n`);
 
-    const results: any[] = [];
+    const results: StoreResult[] = [];
+    let shoppingPrices: Awaited<ReturnType<typeof searchGoogleShopping>> | null = null;
+
+    // First, get aggregated pricing for validation (in parallel with first store search)
+    const shoppingPromise = validatePricing
+      ? searchGoogleShopping(materialName)
+      : Promise.resolve(null);
 
     // Search each requested store
     for (let i = 0; i < stores.length; i++) {
@@ -97,28 +194,85 @@ export async function POST(req: Request) {
         continue;
       }
 
-      console.log(`===== ${config.name.toUpperCase()} SEARCH =====`);
+      console.log(`\n===== ${config.name.toUpperCase()} SEARCH =====`);
 
       try {
+        // Use more specific search query for better results
         const searchQuery = `${materialName} site:${config.domain}`;
+        console.log(`Search query: ${searchQuery}`);
+
         const searchResult = await webSearch(searchQuery);
 
-        if (!searchResult.includes('Search API error')) {
-          const urls = extractProductUrls(searchResult, config);
-          console.log(`${config.name} URLs found:`, urls.length);
+        if (searchResult.includes('Search API error') || searchResult.includes('No search results')) {
+          console.log(`No results from ${config.name}`);
+          continue;
+        }
 
-          if (urls.length > 0) {
-            results.push({
+        const urls = extractProductUrls(searchResult, config);
+        console.log(`${config.name} product URLs found:`, urls.length);
+
+        if (urls.length > 0) {
+          console.log(`URLs: ${urls.slice(0, 3).join(', ')}`);
+
+          // Fetch and extract actual product data
+          const productData = await fetchBestProductData(urls, storeKey);
+
+          if (productData) {
+            // Wait for shopping prices if this is the first store
+            if (i === 0 && validatePricing) {
+              shoppingPrices = await shoppingPromise;
+              console.log(`Shopping price range: $${shoppingPrices?.minPrice?.toFixed(2)} - $${shoppingPrices?.maxPrice?.toFixed(2)}`);
+            }
+
+            // Validate price against aggregated data
+            let priceData: { price: number | null; confidence: 'high' | 'medium' | 'low'; warning?: string } = {
+              price: productData.price,
+              confidence: productData.confidence,
+            };
+
+            if (productData.price && shoppingPrices) {
+              const validated = validatePrices(productData.price, shoppingPrices);
+              priceData = {
+                price: validated.price,
+                confidence: validated.confidence,
+                warning: validated.warning,
+              };
+            }
+
+            // Build result notes
+            const notes: string[] = [];
+            if (productData.storeStock) {
+              notes.push(productData.storeStock);
+            }
+            if (productData.rating && productData.reviewCount) {
+              notes.push(`${productData.rating}★ (${productData.reviewCount} reviews)`);
+            }
+            if (priceData.warning) {
+              notes.push(priceData.warning);
+            }
+            if (productData.confidence === 'low' && !productData.price) {
+              notes.push('Click to verify price and availability');
+            }
+
+            const storeResult: StoreResult = {
               store: `${config.name} - ${location}`,
               retailer: storeKey,
-              price: 0, // User checks on website
-              availability: 'check-online',
+              price: priceData.price || 0,
+              originalPrice: productData.originalPrice || undefined,
+              availability: productData.availability,
               distance: 'Search by ZIP on website',
               address: 'Multiple locations - check website',
               phone: config.phone,
-              link: urls[0],
-              notes: 'Click "View Product" to see current price and check local availability',
-            });
+              link: productData.url,
+              notes: notes.length > 0 ? notes.join(' | ') : undefined,
+              confidence: priceData.confidence as 'high' | 'medium' | 'low',
+              priceWarning: priceData.warning,
+              sku: productData.sku || undefined,
+              storeStock: productData.storeStock || undefined,
+            };
+
+            console.log(`Result: $${storeResult.price} | ${storeResult.availability} | Confidence: ${storeResult.confidence}`);
+            results.push(storeResult);
           }
         }
       } catch (error) {
@@ -127,18 +281,52 @@ export async function POST(req: Request) {
 
       // Add delay between stores to avoid rate limiting
       if (i < stores.length - 1) {
-        await sleep(2000);
+        await sleep(1500);
       }
     }
 
-    console.log('===== FINAL RESULTS =====');
+    // Sort results: in-stock first, then by confidence, then by price
+    results.sort((a, b) => {
+      // Availability priority
+      const availPriority = {
+        'in-stock': 0,
+        'limited': 1,
+        'online-only': 2,
+        'check-online': 3,
+        'out-of-stock': 4,
+      };
+      const availDiff = availPriority[a.availability] - availPriority[b.availability];
+      if (availDiff !== 0) return availDiff;
+
+      // Confidence priority
+      const confPriority = { high: 0, medium: 1, low: 2 };
+      const confDiff = confPriority[a.confidence] - confPriority[b.confidence];
+      if (confDiff !== 0) return confDiff;
+
+      // Price (lower is better, but 0 means unknown)
+      if (a.price && b.price) return a.price - b.price;
+      if (a.price) return -1;
+      if (b.price) return 1;
+      return 0;
+    });
+
+    console.log(`\n===== FINAL RESULTS =====`);
     console.log('Total stores found:', results.length);
+    for (const r of results) {
+      console.log(`  ${r.retailer}: $${r.price} | ${r.availability} | ${r.confidence}`);
+    }
 
     return NextResponse.json({
       results,
       stores_searched: stores.length,
       query: materialName,
       location,
+      priceRange: shoppingPrices ? {
+        min: shoppingPrices.minPrice,
+        max: shoppingPrices.maxPrice,
+        avg: shoppingPrices.avgPrice,
+        sources: shoppingPrices.sources.length,
+      } : null,
     });
 
   } catch (error: any) {
