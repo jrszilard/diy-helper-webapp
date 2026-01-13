@@ -235,8 +235,26 @@ export async function POST(req: Request) {
 
         const searchResult = await webSearch(searchQuery);
 
-        if (searchResult.includes('Search API error') || searchResult.includes('No search results')) {
-          console.log(`No results from ${config.name}`);
+        // Check if search failed - still add a fallback result
+        if (searchResult.includes('Search API error') || searchResult.includes('No search results') || searchResult.includes('Search error') || searchResult.includes('Search failed')) {
+          console.log(`Search issue for ${config.name}, creating fallback`);
+          const searchUrl = `https://www.${config.domain}/search?q=${encodeURIComponent(materialName)}`;
+          results.push({
+            store: `${config.name} - ${location}`,
+            retailer: storeKey,
+            price: 0,
+            availability: 'check-online',
+            distance: 'Search by ZIP on website',
+            address: 'Multiple locations - check website',
+            phone: config.phone,
+            link: searchUrl,
+            notes: 'Search on store website for product availability',
+            confidence: 'low',
+          });
+          // Continue to next store but we've added a fallback
+          if (i < stores.length - 1) {
+            await sleep(1000);
+          }
           continue;
         }
 
@@ -327,6 +345,20 @@ export async function POST(req: Request) {
         }
       } catch (error) {
         console.error(`Error searching ${config.name}:`, error);
+        // Still add a fallback result on error
+        const searchUrl = `https://www.${config.domain}/search?q=${encodeURIComponent(materialName)}`;
+        results.push({
+          store: `${config.name} - ${location}`,
+          retailer: storeKey,
+          price: 0,
+          availability: 'check-online',
+          distance: 'Search by ZIP on website',
+          address: 'Multiple locations - check website',
+          phone: config.phone,
+          link: searchUrl,
+          notes: 'Search on store website for product availability',
+          confidence: 'low',
+        });
       }
 
       // Add delay between stores to avoid rate limiting

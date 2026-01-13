@@ -1,6 +1,6 @@
-export async function webSearch(query: string): Promise<string> {
+export async function webSearch(query: string, retries: number = 2): Promise<string> {
   const apiKey = process.env.BRAVE_SEARCH_API_KEY;
-  
+
   if (!apiKey) {
     console.error('BRAVE_SEARCH_API_KEY not set');
     return "Web search not configured. Please add BRAVE_SEARCH_API_KEY to environment variables.";
@@ -8,44 +8,63 @@ export async function webSearch(query: string): Promise<string> {
 
   console.log('Searching for:', query);
 
-  try {
-    const response = await fetch(
-      `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=10`,
-      {
-        headers: {
-          'Accept': 'application/json',
-          'Accept-Encoding': 'gzip',
-          'X-Subscription-Token': apiKey
-        }
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      if (attempt > 0) {
+        console.log(`Retry attempt ${attempt} for query: ${query}`);
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
       }
-    );
 
-    if (!response.ok) {
-      console.error('Brave API error:', response.status, response.statusText);
-      return `Search API error: ${response.status}`;
+      const response = await fetch(
+        `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=15`,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Accept-Encoding': 'gzip',
+            'X-Subscription-Token': apiKey
+          }
+        }
+      );
+
+      if (!response.ok) {
+        console.error('Brave API error:', response.status, response.statusText);
+        if (attempt < retries && response.status >= 500) {
+          continue; // Retry on server errors
+        }
+        return `Search API error: ${response.status}`;
+      }
+
+      const data = await response.json();
+
+      if (!data.web || !data.web.results || data.web.results.length === 0) {
+        if (attempt < retries) {
+          continue; // Retry if no results
+        }
+        return "No search results found";
+      }
+
+      console.log('Found', data.web.results.length, 'results');
+
+      let results = `Search results for "${query}":\n\n`;
+
+      // Return more results for better URL coverage
+      for (const result of data.web.results.slice(0, 12)) {
+        results += `**${result.title}**\n`;
+        results += `${result.description}\n`;
+        results += `URL: ${result.url}\n\n`;
+      }
+
+      return results;
+    } catch (error) {
+      console.error('Search error:', error);
+      if (attempt < retries) {
+        continue; // Retry on network errors
+      }
+      return `Search error: ${error}`;
     }
-
-    const data = await response.json();
-    
-    if (!data.web || !data.web.results || data.web.results.length === 0) {
-      return "No search results found";
-    }
-
-    console.log('Found', data.web.results.length, 'results');
-
-    let results = `Search results for "${query}":\n\n`;
-    
-    for (const result of data.web.results.slice(0, 8)) {
-      results += `**${result.title}**\n`;
-      results += `${result.description}\n`;
-      results += `URL: ${result.url}\n\n`;
-    }
-
-    return results;
-  } catch (error) {
-    console.error('Search error:', error);
-    return `Search error: ${error}`;
   }
+
+  return "Search failed after retries";
 }
 
 export async function webFetch(url: string): Promise<string> {
