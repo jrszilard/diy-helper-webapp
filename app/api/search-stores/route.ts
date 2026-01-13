@@ -68,7 +68,7 @@ interface StoreResult {
 }
 
 // Extract product URLs from search results
-function extractProductUrls(searchResults: string, config: typeof STORE_CONFIGS[StoreKey]): string[] {
+function extractProductUrls(searchResults: string, config: typeof STORE_CONFIGS[StoreKey]): { productUrls: string[]; anyUrls: string[] } {
   console.log('Extracting URLs for', config.domain);
 
   const escapedDomain = config.domain.replace('.', '\\.');
@@ -77,8 +77,8 @@ function extractProductUrls(searchResults: string, config: typeof STORE_CONFIGS[
 
   console.log(`Found ${matches.length} total URLs`);
 
-  // Clean and filter URLs
-  const productUrls = matches
+  // Clean all URLs
+  const cleanedUrls = matches
     .map(url => {
       // Clean up URL - remove trailing punctuation and query params
       return url
@@ -86,6 +86,10 @@ function extractProductUrls(searchResults: string, config: typeof STORE_CONFIGS[
         .split('?')[0]
         .split('#')[0];
     })
+    .filter((url, index, self) => self.indexOf(url) === index); // Remove duplicates
+
+  // Filter for product URLs
+  const productUrls = cleanedUrls
     .filter(url => {
       // Check if URL contains any product path pattern
       const hasProductPath = config.productPathPatterns.some(pattern => url.includes(pattern));
@@ -93,52 +97,80 @@ function extractProductUrls(searchResults: string, config: typeof STORE_CONFIGS[
       const hasExcludePath = config.excludePatterns.some(pattern => url.includes(pattern));
 
       return hasProductPath && !hasExcludePath;
-    })
-    .filter((url, index, self) => self.indexOf(url) === index); // Remove duplicates
+    });
 
   console.log(`Filtered to ${productUrls.length} product URLs`);
 
-  // Return up to 5 URLs for better price/availability coverage
-  return productUrls.slice(0, 5);
+  // Return both product URLs and any store URLs as fallback
+  return {
+    productUrls: productUrls.slice(0, 5),
+    anyUrls: cleanedUrls.slice(0, 3), // Keep some general URLs as fallback
+  };
 }
 
 // Fetch and extract data from multiple product URLs, return the best result
 async function fetchBestProductData(
   urls: string[],
-  storeKey: string
-): Promise<ExtractedProductData & { url: string } | null> {
-  if (urls.length === 0) return null;
+  storeKey: string,
+  timeoutMs: number = 8000
+): Promise<ExtractedProductData & { url: string }> {
+  // Always return something - default to first URL with low confidence
+  const defaultResult: ExtractedProductData & { url: string } = {
+    url: urls[0],
+    price: null,
+    originalPrice: null,
+    currency: 'USD',
+    availability: 'check-online',
+    sku: null,
+    productName: null,
+    brand: null,
+    rating: null,
+    reviewCount: null,
+    storeStock: null,
+    confidence: 'low',
+    source: 'fallback',
+  };
+
+  if (urls.length === 0) return defaultResult;
 
   const results: (ExtractedProductData & { url: string })[] = [];
 
-  // Fetch data from up to 3 URLs in parallel
-  const urlsToFetch = urls.slice(0, 3);
-  const fetchPromises = urlsToFetch.map(url => fetchProductData(url, storeKey));
+  // Fetch data from up to 2 URLs in parallel with timeout
+  const urlsToFetch = urls.slice(0, 2);
 
   try {
+    const fetchWithTimeout = async (url: string) => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+      try {
+        const result = await fetchProductData(url, storeKey);
+        clearTimeout(timeoutId);
+        return result;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        console.log(`Fetch failed for ${url}:`, error);
+        return null;
+      }
+    };
+
+    const fetchPromises = urlsToFetch.map(url => fetchWithTimeout(url));
     const fetched = await Promise.all(fetchPromises);
-    results.push(...fetched.filter(r => r.price !== null || r.availability !== 'check-online'));
+
+    // Filter out null results and add valid ones
+    for (const result of fetched) {
+      if (result && (result.price !== null || result.availability !== 'check-online')) {
+        results.push(result);
+      }
+    }
   } catch (error) {
-    console.error('Error fetching product data:', error);
+    console.error('Error in fetchBestProductData:', error);
   }
 
+  // If no extraction succeeded, return default with first URL
   if (results.length === 0) {
-    // Return first URL even if we couldn't extract data
-    return {
-      url: urls[0],
-      price: null,
-      originalPrice: null,
-      currency: 'USD',
-      availability: 'check-online',
-      sku: null,
-      productName: null,
-      brand: null,
-      rating: null,
-      reviewCount: null,
-      storeStock: null,
-      confidence: 'low',
-      source: 'no-extraction',
-    };
+    console.log(`No extraction succeeded, using fallback for ${urls[0]}`);
+    return defaultResult;
   }
 
   // Prioritize results with both price and availability
@@ -208,72 +240,90 @@ export async function POST(req: Request) {
           continue;
         }
 
-        const urls = extractProductUrls(searchResult, config);
-        console.log(`${config.name} product URLs found:`, urls.length);
+        const { productUrls, anyUrls } = extractProductUrls(searchResult, config);
+        console.log(`${config.name} product URLs found:`, productUrls.length);
+        console.log(`${config.name} total URLs found:`, anyUrls.length);
 
-        if (urls.length > 0) {
-          console.log(`URLs: ${urls.slice(0, 3).join(', ')}`);
+        // Use product URLs if available, otherwise fall back to any store URLs
+        const urlsToUse = productUrls.length > 0 ? productUrls : anyUrls;
 
-          // Fetch and extract actual product data
-          const productData = await fetchBestProductData(urls, storeKey);
+        if (urlsToUse.length > 0) {
+          console.log(`Using URLs: ${urlsToUse.slice(0, 3).join(', ')}`);
 
-          if (productData) {
-            // Wait for shopping prices if this is the first store
-            if (i === 0 && validatePricing) {
-              shoppingPrices = await shoppingPromise;
-              console.log(`Shopping price range: $${shoppingPrices?.minPrice?.toFixed(2)} - $${shoppingPrices?.maxPrice?.toFixed(2)}`);
-            }
+          // Fetch and extract actual product data (always returns non-null with fallback)
+          const productData = await fetchBestProductData(urlsToUse, storeKey);
 
-            // Validate price against aggregated data
-            let priceData: { price: number | null; confidence: 'high' | 'medium' | 'low'; warning?: string } = {
-              price: productData.price,
-              confidence: productData.confidence,
-            };
-
-            if (productData.price && shoppingPrices) {
-              const validated = validatePrices(productData.price, shoppingPrices);
-              priceData = {
-                price: validated.price,
-                confidence: validated.confidence,
-                warning: validated.warning,
-              };
-            }
-
-            // Build result notes
-            const notes: string[] = [];
-            if (productData.storeStock) {
-              notes.push(productData.storeStock);
-            }
-            if (productData.rating && productData.reviewCount) {
-              notes.push(`${productData.rating}★ (${productData.reviewCount} reviews)`);
-            }
-            if (priceData.warning) {
-              notes.push(priceData.warning);
-            }
-            if (productData.confidence === 'low' && !productData.price) {
-              notes.push('Click to verify price and availability');
-            }
-
-            const storeResult: StoreResult = {
-              store: `${config.name} - ${location}`,
-              retailer: storeKey,
-              price: priceData.price || 0,
-              originalPrice: productData.originalPrice || undefined,
-              availability: productData.availability,
-              distance: 'Search by ZIP on website',
-              address: 'Multiple locations - check website',
-              phone: config.phone,
-              link: productData.url,
-              notes: notes.length > 0 ? notes.join(' | ') : undefined,
-              confidence: priceData.confidence as 'high' | 'medium' | 'low',
-              priceWarning: priceData.warning,
-              sku: productData.sku || undefined,
-              storeStock: productData.storeStock || undefined,
-            };
-
-            console.log(`Result: $${storeResult.price} | ${storeResult.availability} | Confidence: ${storeResult.confidence}`);
-            results.push(storeResult);
+          // Wait for shopping prices if this is the first store
+          if (i === 0 && validatePricing) {
+            shoppingPrices = await shoppingPromise;
+            console.log(`Shopping price range: $${shoppingPrices?.minPrice?.toFixed(2)} - $${shoppingPrices?.maxPrice?.toFixed(2)}`);
           }
+
+          // Validate price against aggregated data
+          let priceData: { price: number | null; confidence: 'high' | 'medium' | 'low'; warning?: string } = {
+            price: productData.price,
+            confidence: productData.confidence,
+          };
+
+          if (productData.price && shoppingPrices) {
+            const validated = validatePrices(productData.price, shoppingPrices);
+            priceData = {
+              price: validated.price,
+              confidence: validated.confidence,
+              warning: validated.warning,
+            };
+          }
+
+          // Build result notes
+          const notes: string[] = [];
+          if (productData.storeStock) {
+            notes.push(productData.storeStock);
+          }
+          if (productData.rating && productData.reviewCount) {
+            notes.push(`${productData.rating}★ (${productData.reviewCount} reviews)`);
+          }
+          if (priceData.warning) {
+            notes.push(priceData.warning);
+          }
+          if (productData.confidence === 'low' && !productData.price) {
+            notes.push('Click to verify price and availability');
+          }
+
+          const storeResult: StoreResult = {
+            store: `${config.name} - ${location}`,
+            retailer: storeKey,
+            price: priceData.price || 0,
+            originalPrice: productData.originalPrice || undefined,
+            availability: productData.availability,
+            distance: 'Search by ZIP on website',
+            address: 'Multiple locations - check website',
+            phone: config.phone,
+            link: productData.url,
+            notes: notes.length > 0 ? notes.join(' | ') : undefined,
+            confidence: priceData.confidence as 'high' | 'medium' | 'low',
+            priceWarning: priceData.warning,
+            sku: productData.sku || undefined,
+            storeStock: productData.storeStock || undefined,
+          };
+
+          console.log(`Result: $${storeResult.price} | ${storeResult.availability} | Confidence: ${storeResult.confidence}`);
+          results.push(storeResult);
+        } else {
+          // No URLs found, but search had results - create a generic search link
+          console.log(`No URLs extracted for ${config.name}, creating search fallback`);
+          const searchUrl = `https://www.${config.domain}/search?q=${encodeURIComponent(materialName)}`;
+          results.push({
+            store: `${config.name} - ${location}`,
+            retailer: storeKey,
+            price: 0,
+            availability: 'check-online',
+            distance: 'Search by ZIP on website',
+            address: 'Multiple locations - check website',
+            phone: config.phone,
+            link: searchUrl,
+            notes: 'Search on store website for product availability',
+            confidence: 'low',
+          });
         }
       } catch (error) {
         console.error(`Error searching ${config.name}:`, error);

@@ -560,7 +560,7 @@ export async function fetchProductData(url: string, store?: string): Promise<Ext
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
     const response = await fetch(url, {
       headers: {
