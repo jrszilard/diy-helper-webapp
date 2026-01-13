@@ -12,39 +12,67 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Store-specific configurations
+/**
+ * Enhanced Store Configuration with URL Scoring
+ *
+ * - urlPatterns: Array of objects with pattern, weight, and type for intelligent URL ranking
+ * - minProductPathScore: Threshold to consider a URL a valid product link
+ */
 const STORE_CONFIGS = {
   'home-depot': {
     name: 'Home Depot',
     domain: 'homedepot.com',
     phone: '1-800-466-3337',
     productPathPatterns: ['/p/'],
-    excludePatterns: ['/b/', '/c/', '/search'],
-    priceMultiplier: 1.0, // For any store-specific adjustments
+    excludePatterns: ['/b/', '/c/', '/s/', '/search', '/deals', '/offers'],
+    urlPatterns: [
+      { pattern: '/p/[A-Za-z0-9-]+/[0-9]+', weight: 100, type: 'direct-product' },
+      { pattern: '/p/', weight: 80, type: 'product-page' },
+      { pattern: '/search\\?', weight: 10, type: 'search-query' },
+      { pattern: '/b/', weight: 0, type: 'category' },
+    ],
+    minProductPathScore: 50,
   },
   'lowes': {
     name: "Lowe's",
     domain: 'lowes.com',
     phone: '1-800-445-6937',
     productPathPatterns: ['/pd/'],
-    excludePatterns: ['/pl/', '/search'],
-    priceMultiplier: 1.0,
+    excludePatterns: ['/pl/', '/ppl/', '/new', '/deals', '/browse', '/search'],
+    urlPatterns: [
+      { pattern: '/pd/[A-Za-z0-9-]+/[0-9]+', weight: 100, type: 'direct-product' },
+      { pattern: '/pd/', weight: 80, type: 'product-page' },
+      { pattern: '/search\\?', weight: 10, type: 'search-query' },
+    ],
+    minProductPathScore: 50,
   },
   'ace-hardware': {
     name: 'Ace Hardware',
     domain: 'acehardware.com',
     phone: '1-888-827-4223',
     productPathPatterns: ['/product/', '/p/'],
-    excludePatterns: ['/category/', '/search'],
-    priceMultiplier: 1.0,
+    excludePatterns: ['/category/', '/search', '/deals', '/specials'],
+    urlPatterns: [
+      { pattern: '/departments/[^/]+/[^/]+/[^/]+/[0-9]+', weight: 100, type: 'direct-product' },
+      { pattern: '/product/[0-9]+', weight: 90, type: 'product-id' },
+      { pattern: '/product/', weight: 80, type: 'product-page' },
+      { pattern: '/p/', weight: 70, type: 'short-product' },
+      { pattern: '/search', weight: 10, type: 'search-query' },
+    ],
+    minProductPathScore: 50,
   },
   'menards': {
     name: 'Menards',
     domain: 'menards.com',
     phone: '1-800-871-2800',
     productPathPatterns: ['/main/p-'],
-    excludePatterns: ['/main/store', '/search'],
-    priceMultiplier: 1.0,
+    excludePatterns: ['/main/store', '/main/search', '/specials'],
+    urlPatterns: [
+      { pattern: '/main/p-[0-9]+', weight: 100, type: 'direct-product' },
+      { pattern: '/main/p-', weight: 80, type: 'product-page' },
+      { pattern: '/main/search', weight: 10, type: 'search-query' },
+    ],
+    minProductPathScore: 50,
   },
 };
 
@@ -65,58 +93,153 @@ interface StoreResult {
   priceWarning?: string;
   sku?: string;
   storeStock?: string;
+  linkQuality?: 'high' | 'medium' | 'low' | 'search-fallback';
+  searchFallback?: boolean;
 }
 
-// Extract product URLs from search results
-function extractProductUrls(searchResults: string, config: typeof STORE_CONFIGS[StoreKey]): { productUrls: string[]; anyUrls: string[] } {
-  console.log('Extracting URLs for', config.domain);
+/**
+ * URL Scoring System
+ * Scores each URL to rank better product URLs higher than search results.
+ */
+function scoreUrl(url: string, config: typeof STORE_CONFIGS[StoreKey]): number {
+  let score = 0;
 
-  const escapedDomain = config.domain.replace('.', '\\.');
-  const urlRegex = new RegExp(`https?://(?:www\\.)?${escapedDomain}[^\\s<>"'\\]\\)]+`, 'g');
-  const matches = searchResults.match(urlRegex) || [];
+  try {
+    // Score based on matching patterns
+    for (const pattern of config.urlPatterns) {
+      const regex = new RegExp(pattern.pattern);
+      if (regex.test(url)) {
+        score += pattern.weight;
+        console.log(`    Pattern match: ${pattern.type} (+${pattern.weight})`);
+        // Only apply highest matching pattern
+        break;
+      }
+    }
 
-  console.log(`Found ${matches.length} total URLs`);
+    // Bonus for deeper paths (more specific)
+    const pathDepth = (url.match(/\//g) || []).length;
+    if (pathDepth > 4) {
+      score += 10;
+    }
 
-  // Clean all URLs
-  const cleanedUrls = matches
-    .map(url => {
-      // Clean up URL - remove trailing punctuation and query params
-      return url
-        .replace(/[)\]}>'",.;:]+$/, '')
-        .split('?')[0]
-        .split('#')[0];
-    })
-    .filter((url, index, self) => self.indexOf(url) === index); // Remove duplicates
+    // Penalize query parameters (often search results)
+    if (url.includes('?')) {
+      score -= 20;
+    }
 
-  // Filter for product URLs
-  const productUrls = cleanedUrls
-    .filter(url => {
-      // Check if URL contains any product path pattern
-      const hasProductPath = config.productPathPatterns.some(pattern => url.includes(pattern));
-      // Check if URL contains any exclude pattern
-      const hasExcludePath = config.excludePatterns.some(pattern => url.includes(pattern));
+    // Penalize tracking parameters
+    if (url.includes('utm_') || url.includes('ref=') || url.includes('cm_mmc')) {
+      score -= 5;
+    }
 
-      return hasProductPath && !hasExcludePath;
-    });
+    // Check for excluded patterns (strong penalty)
+    for (const excludePattern of config.excludePatterns) {
+      if (url.includes(excludePattern)) {
+        score -= 50;
+        break;
+      }
+    }
 
-  console.log(`Filtered to ${productUrls.length} product URLs`);
+  } catch (error) {
+    console.error(`Error scoring URL ${url}:`, error);
+    return 0;
+  }
 
-  // Return both product URLs and any store URLs as fallback
-  return {
-    productUrls: productUrls.slice(0, 5),
-    anyUrls: cleanedUrls.slice(0, 3), // Keep some general URLs as fallback
-  };
+  return score;
 }
 
-// Fetch and extract data from multiple product URLs, return the best result
+/**
+ * Enhanced URL Extraction with Scoring
+ */
+function extractProductUrls(
+  searchResults: string,
+  config: typeof STORE_CONFIGS[StoreKey],
+  materialName: string
+): { urls: string[]; quality: 'high' | 'medium' | 'low'; fallbackSearch: boolean } {
+  console.log(`\n  Extracting URLs for ${config.domain}`);
+
+  try {
+    const escapedDomain = config.domain.replace(/\./g, '\\.');
+    const urlRegex = new RegExp(
+      `https?://(?:www\\.)?${escapedDomain}[^\\s<>"'\\]\\)]+`,
+      'g'
+    );
+
+    const matches = searchResults.match(urlRegex) || [];
+    console.log(`  Found ${matches.length} raw URLs`);
+
+    // Clean URLs
+    const cleanedUrls = matches
+      .map(url => {
+        return url
+          .replace(/[)\]}>'",.;:]+$/, '') // Remove trailing punctuation
+          .split('#')[0]; // Remove hash fragments (keep query for now for scoring)
+      })
+      .filter(Boolean);
+
+    // Remove duplicates before scoring
+    const uniqueUrls = [...new Set(cleanedUrls)];
+    console.log(`  After dedup: ${uniqueUrls.length} URLs`);
+
+    // Score and filter URLs
+    const scoredUrls = uniqueUrls
+      .map(url => {
+        // Clean query params for the final URL but score with them
+        const cleanUrl = url.split('?')[0];
+        const score = scoreUrl(url, config);
+        return { url: cleanUrl, score };
+      })
+      .filter(({ score }) => score >= config.minProductPathScore)
+      .sort((a, b) => b.score - a.score)
+      .filter((item, index, self) =>
+        self.findIndex(x => x.url === item.url) === index
+      )
+      .slice(0, 5);
+
+    console.log(`  Valid product URLs: ${scoredUrls.length}`);
+
+    if (scoredUrls.length > 0) {
+      const topScore = scoredUrls[0].score;
+      const quality = topScore >= 80 ? 'high' : topScore >= 50 ? 'medium' : 'low';
+
+      console.log(`  Top URL: ${scoredUrls[0].url}`);
+      console.log(`  Top score: ${topScore} (${quality} quality)`);
+
+      return {
+        urls: scoredUrls.map(item => item.url),
+        quality,
+        fallbackSearch: false,
+      };
+    }
+
+    // No good URLs found
+    console.log(`  No high-quality URLs found, will use fallback`);
+    return {
+      urls: [],
+      quality: 'low',
+      fallbackSearch: true,
+    };
+
+  } catch (error) {
+    console.error(`Error extracting URLs:`, error);
+    return {
+      urls: [],
+      quality: 'low',
+      fallbackSearch: true,
+    };
+  }
+}
+
+/**
+ * Fetch and extract data from product URLs
+ */
 async function fetchBestProductData(
   urls: string[],
   storeKey: string,
   timeoutMs: number = 8000
 ): Promise<ExtractedProductData & { url: string }> {
-  // Always return something - default to first URL with low confidence
   const defaultResult: ExtractedProductData & { url: string } = {
-    url: urls[0],
+    url: urls[0] || '',
     price: null,
     originalPrice: null,
     currency: 'USD',
@@ -134,8 +257,6 @@ async function fetchBestProductData(
   if (urls.length === 0) return defaultResult;
 
   const results: (ExtractedProductData & { url: string })[] = [];
-
-  // Fetch data from up to 2 URLs in parallel with timeout
   const urlsToFetch = urls.slice(0, 2);
 
   try {
@@ -149,7 +270,7 @@ async function fetchBestProductData(
         return result;
       } catch (error) {
         clearTimeout(timeoutId);
-        console.log(`Fetch failed for ${url}:`, error);
+        console.log(`  Fetch failed for ${url}:`, error);
         return null;
       }
     };
@@ -157,7 +278,6 @@ async function fetchBestProductData(
     const fetchPromises = urlsToFetch.map(url => fetchWithTimeout(url));
     const fetched = await Promise.all(fetchPromises);
 
-    // Filter out null results and add valid ones
     for (const result of fetched) {
       if (result && (result.price !== null || result.availability !== 'check-online')) {
         results.push(result);
@@ -167,78 +287,114 @@ async function fetchBestProductData(
     console.error('Error in fetchBestProductData:', error);
   }
 
-  // If no extraction succeeded, return default with first URL
   if (results.length === 0) {
-    console.log(`No extraction succeeded, using fallback for ${urls[0]}`);
+    console.log(`  No extraction succeeded, using fallback`);
     return defaultResult;
   }
 
-  // Prioritize results with both price and availability
+  // Prioritize results
   const withBoth = results.find(r => r.price !== null && r.availability !== 'check-online');
   if (withBoth) return withBoth;
 
-  // Then prioritize results with in-stock availability
   const inStock = results.find(r => r.availability === 'in-stock' || r.availability === 'limited');
   if (inStock) return inStock;
 
-  // Then prioritize results with price
   const withPrice = results.find(r => r.price !== null);
   if (withPrice) return withPrice;
 
-  // Return first result
   return results[0];
 }
 
+/**
+ * Build search URL for fallback
+ */
+function buildSearchUrl(domain: string, materialName: string): string {
+  const encodedQuery = encodeURIComponent(materialName);
+
+  // Store-specific search URL formats
+  if (domain === 'homedepot.com') {
+    return `https://www.homedepot.com/s/${encodedQuery}`;
+  } else if (domain === 'lowes.com') {
+    return `https://www.lowes.com/search?searchTerm=${encodedQuery}`;
+  } else if (domain === 'acehardware.com') {
+    return `https://www.acehardware.com/search?query=${encodedQuery}`;
+  } else if (domain === 'menards.com') {
+    return `https://www.menards.com/main/search.html?search=${encodedQuery}`;
+  }
+
+  return `https://www.${domain}/search?q=${encodedQuery}`;
+}
+
+/**
+ * Main POST handler
+ */
 export async function POST(req: Request) {
   try {
     const {
       materialName,
       location,
       stores = ['home-depot', 'lowes', 'ace-hardware'],
-      validatePricing = true, // Enable multi-source price validation
+      validatePricing = true,
     } = await req.json();
 
     if (!materialName || !location) {
-      return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Missing fields: materialName and location required' },
+        { status: 400 }
+      );
     }
 
-    console.log(`\n========================================`);
-    console.log(`Searching for "${materialName}" near ${location}`);
-    console.log(`Stores to search: ${stores.join(', ')}`);
-    console.log(`Price validation: ${validatePricing ? 'enabled' : 'disabled'}`);
-    console.log(`========================================\n`);
+    console.log(`\n${'='.repeat(50)}`);
+    console.log(`SEARCH: "${materialName}" near ${location}`);
+    console.log(`Stores: ${stores.join(', ')}`);
+    console.log(`${'='.repeat(50)}`);
 
     const results: StoreResult[] = [];
+    const metadata = {
+      totalSearched: 0,
+      successfulSearches: 0,
+      highQualityResults: 0,
+      mediumQualityResults: 0,
+      fallbackResults: 0,
+    };
+
     let shoppingPrices: Awaited<ReturnType<typeof searchGoogleShopping>> | null = null;
 
-    // First, get aggregated pricing for validation (in parallel with first store search)
+    // Get aggregated pricing in background
     const shoppingPromise = validatePricing
       ? searchGoogleShopping(materialName)
       : Promise.resolve(null);
 
-    // Search each requested store
+    // Search each store
     for (let i = 0; i < stores.length; i++) {
       const storeKey = stores[i] as StoreKey;
       const config = STORE_CONFIGS[storeKey];
 
       if (!config) {
-        console.log(`Unknown store: ${storeKey}`);
+        console.log(`\nUnknown store: ${storeKey}`);
         continue;
       }
 
-      console.log(`\n===== ${config.name.toUpperCase()} SEARCH =====`);
+      metadata.totalSearched++;
+      console.log(`\n--- ${config.name.toUpperCase()} ---`);
 
       try {
-        // Use more specific search query for better results
         const searchQuery = `${materialName} site:${config.domain}`;
-        console.log(`Search query: ${searchQuery}`);
+        console.log(`Query: ${searchQuery}`);
 
         const searchResult = await webSearch(searchQuery);
 
-        // Check if search failed - still add a fallback result
-        if (searchResult.includes('Search API error') || searchResult.includes('No search results') || searchResult.includes('Search error') || searchResult.includes('Search failed')) {
-          console.log(`Search issue for ${config.name}, creating fallback`);
-          const searchUrl = `https://www.${config.domain}/search?q=${encodeURIComponent(materialName)}`;
+        // Check for search failures - always add fallback
+        if (
+          searchResult.includes('Search API error') ||
+          searchResult.includes('No search results') ||
+          searchResult.includes('Search error') ||
+          searchResult.includes('Search failed')
+        ) {
+          console.log(`Search failed, adding fallback`);
+          metadata.fallbackResults++;
+
+          const searchUrl = buildSearchUrl(config.domain, materialName);
           results.push({
             store: `${config.name} - ${location}`,
             retailer: storeKey,
@@ -250,34 +406,32 @@ export async function POST(req: Request) {
             link: searchUrl,
             notes: 'Search on store website for product availability',
             confidence: 'low',
+            linkQuality: 'search-fallback',
+            searchFallback: true,
           });
-          // Continue to next store but we've added a fallback
-          if (i < stores.length - 1) {
-            await sleep(1000);
-          }
+
+          if (i < stores.length - 1) await sleep(1000);
           continue;
         }
 
-        const { productUrls, anyUrls } = extractProductUrls(searchResult, config);
-        console.log(`${config.name} product URLs found:`, productUrls.length);
-        console.log(`${config.name} total URLs found:`, anyUrls.length);
+        metadata.successfulSearches++;
 
-        // Use product URLs if available, otherwise fall back to any store URLs
-        const urlsToUse = productUrls.length > 0 ? productUrls : anyUrls;
+        // Extract URLs with quality assessment
+        const urlData = extractProductUrls(searchResult, config, materialName);
 
-        if (urlsToUse.length > 0) {
-          console.log(`Using URLs: ${urlsToUse.slice(0, 3).join(', ')}`);
-
-          // Fetch and extract actual product data (always returns non-null with fallback)
-          const productData = await fetchBestProductData(urlsToUse, storeKey);
-
-          // Wait for shopping prices if this is the first store
-          if (i === 0 && validatePricing) {
-            shoppingPrices = await shoppingPromise;
-            console.log(`Shopping price range: $${shoppingPrices?.minPrice?.toFixed(2)} - $${shoppingPrices?.maxPrice?.toFixed(2)}`);
+        // Wait for shopping prices on first store
+        if (i === 0 && validatePricing) {
+          shoppingPrices = await shoppingPromise;
+          if (shoppingPrices?.minPrice) {
+            console.log(`Market range: $${shoppingPrices.minPrice.toFixed(2)} - $${shoppingPrices.maxPrice?.toFixed(2)}`);
           }
+        }
 
-          // Validate price against aggregated data
+        if (urlData.urls.length > 0 && !urlData.fallbackSearch) {
+          // We have good URLs - fetch product data
+          const productData = await fetchBestProductData(urlData.urls, storeKey);
+
+          // Validate price
           let priceData: { price: number | null; confidence: 'high' | 'medium' | 'low'; warning?: string } = {
             price: productData.price,
             confidence: productData.confidence,
@@ -292,8 +446,11 @@ export async function POST(req: Request) {
             };
           }
 
-          // Build result notes
+          // Build notes
           const notes: string[] = [];
+          if (urlData.quality === 'high') {
+            notes.push('Direct product link');
+          }
           if (productData.storeStock) {
             notes.push(productData.storeStock);
           }
@@ -318,18 +475,28 @@ export async function POST(req: Request) {
             phone: config.phone,
             link: productData.url,
             notes: notes.length > 0 ? notes.join(' | ') : undefined,
-            confidence: priceData.confidence as 'high' | 'medium' | 'low',
+            confidence: priceData.confidence,
             priceWarning: priceData.warning,
             sku: productData.sku || undefined,
             storeStock: productData.storeStock || undefined,
+            linkQuality: urlData.quality,
           };
 
-          console.log(`Result: $${storeResult.price} | ${storeResult.availability} | Confidence: ${storeResult.confidence}`);
+          if (urlData.quality === 'high') {
+            metadata.highQualityResults++;
+          } else {
+            metadata.mediumQualityResults++;
+          }
+
+          console.log(`Result: $${storeResult.price} | ${storeResult.availability} | ${urlData.quality} quality`);
           results.push(storeResult);
+
         } else {
-          // No URLs found, but search had results - create a generic search link
-          console.log(`No URLs extracted for ${config.name}, creating search fallback`);
-          const searchUrl = `https://www.${config.domain}/search?q=${encodeURIComponent(materialName)}`;
+          // No good URLs - use search fallback
+          console.log(`No quality URLs, using search fallback`);
+          metadata.fallbackResults++;
+
+          const searchUrl = buildSearchUrl(config.domain, materialName);
           results.push({
             store: `${config.name} - ${location}`,
             retailer: storeKey,
@@ -341,12 +508,17 @@ export async function POST(req: Request) {
             link: searchUrl,
             notes: 'Search on store website for product availability',
             confidence: 'low',
+            linkQuality: 'search-fallback',
+            searchFallback: true,
           });
         }
+
       } catch (error) {
         console.error(`Error searching ${config.name}:`, error);
-        // Still add a fallback result on error
-        const searchUrl = `https://www.${config.domain}/search?q=${encodeURIComponent(materialName)}`;
+        metadata.fallbackResults++;
+
+        // Always add fallback on error
+        const searchUrl = buildSearchUrl(config.domain, materialName);
         results.push({
           store: `${config.name} - ${location}`,
           retailer: storeKey,
@@ -358,19 +530,26 @@ export async function POST(req: Request) {
           link: searchUrl,
           notes: 'Search on store website for product availability',
           confidence: 'low',
+          linkQuality: 'search-fallback',
+          searchFallback: true,
         });
       }
 
-      // Add delay between stores to avoid rate limiting
+      // Rate limiting delay
       if (i < stores.length - 1) {
         await sleep(1500);
       }
     }
 
-    // Sort results: in-stock first, then by confidence, then by price
+    // Sort results: high quality first, then by availability, then by price
     results.sort((a, b) => {
+      // Quality priority
+      const qualityPriority: Record<string, number> = { high: 0, medium: 1, low: 2, 'search-fallback': 3 };
+      const qualityDiff = (qualityPriority[a.linkQuality || 'low'] || 2) - (qualityPriority[b.linkQuality || 'low'] || 2);
+      if (qualityDiff !== 0) return qualityDiff;
+
       // Availability priority
-      const availPriority = {
+      const availPriority: Record<string, number> = {
         'in-stock': 0,
         'limited': 1,
         'online-only': 2,
@@ -380,29 +559,29 @@ export async function POST(req: Request) {
       const availDiff = availPriority[a.availability] - availPriority[b.availability];
       if (availDiff !== 0) return availDiff;
 
-      // Confidence priority
-      const confPriority = { high: 0, medium: 1, low: 2 };
-      const confDiff = confPriority[a.confidence] - confPriority[b.confidence];
-      if (confDiff !== 0) return confDiff;
-
-      // Price (lower is better, but 0 means unknown)
+      // Price (lower is better, 0 means unknown)
       if (a.price && b.price) return a.price - b.price;
       if (a.price) return -1;
       if (b.price) return 1;
       return 0;
     });
 
-    console.log(`\n===== FINAL RESULTS =====`);
-    console.log('Total stores found:', results.length);
-    for (const r of results) {
-      console.log(`  ${r.retailer}: $${r.price} | ${r.availability} | ${r.confidence}`);
-    }
+    console.log(`\n${'='.repeat(50)}`);
+    console.log(`COMPLETE: ${results.length} results`);
+    console.log(`High quality: ${metadata.highQualityResults}`);
+    console.log(`Medium quality: ${metadata.mediumQualityResults}`);
+    console.log(`Fallback: ${metadata.fallbackResults}`);
+    console.log(`${'='.repeat(50)}\n`);
 
     return NextResponse.json({
       results,
       stores_searched: stores.length,
       query: materialName,
       location,
+      metadata: {
+        ...metadata,
+        timestamp: new Date().toISOString(),
+      },
       priceRange: shoppingPrices ? {
         min: shoppingPrices.minPrice,
         max: shoppingPrices.maxPrice,
@@ -412,7 +591,10 @@ export async function POST(req: Request) {
     });
 
   } catch (error: any) {
-    console.error('Error:', error);
-    return NextResponse.json({ error: error.message, results: [] }, { status: 500 });
+    console.error('Request Error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Internal server error', results: [] },
+      { status: 500 }
+    );
   }
 }
