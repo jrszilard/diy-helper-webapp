@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
+import { guestStorage } from '@/lib/guestStorage';
 import {
   FolderOpen,
   Trash2,
@@ -17,7 +18,8 @@ import {
   CheckCircle2,
   Clock,
   Package,
-  FlaskConical
+  FlaskConical,
+  User
 } from 'lucide-react';
 
 interface Project {
@@ -27,6 +29,8 @@ interface Project {
   created_at: string;
   category?: string;
   status?: string;
+  isGuest?: boolean; // Flag to identify guest projects
+  materials?: any[]; // For guest projects
 }
 
 interface ProjectsSidebarProps {
@@ -122,8 +126,28 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    if (user) loadProjects();
+    if (user) {
+      loadProjects();
+    } else {
+      // Load guest projects from localStorage
+      loadGuestProjects();
+    }
   }, [user]);
+
+  const loadGuestProjects = () => {
+    const guestProjects = guestStorage.getProjects();
+    const formattedProjects: Project[] = guestProjects.map(p => ({
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      created_at: p.createdAt,
+      category: categorizeProject(p.name),
+      status: 'research',
+      isGuest: true,
+      materials: p.materials
+    }));
+    setProjects(formattedProjects);
+  };
 
   const loadProjects = async () => {
     const { data } = await supabase
@@ -143,12 +167,18 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
     }
   };
 
-  const deleteProject = async (id: string, e: any) => {
+  const deleteProject = async (id: string, e: any, isGuest: boolean = false) => {
     e.stopPropagation();
     if (!confirm('Delete this project?')) return;
 
-    await supabase.from('projects').delete().eq('id', id);
-    loadProjects();
+    if (isGuest) {
+      guestStorage.deleteProject(id);
+      loadGuestProjects();
+    } else {
+      await supabase.from('projects').delete().eq('id', id);
+      loadProjects();
+    }
+
     if (selectedId === id) {
       setSelectedId(null);
       onSelectProject(null);
@@ -293,7 +323,13 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                       {project.description && (
                         <p className="text-sm text-[#7D6B5D] line-clamp-2 ml-6">{project.description}</p>
                       )}
-                      <div className="flex items-center gap-2 mt-2 ml-6">
+                      <div className="flex items-center gap-2 mt-2 ml-6 flex-wrap">
+                        {project.isGuest && (
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[#F5F0E6] text-[#7D6B5D]">
+                            <User className="w-3 h-3" />
+                            Local
+                          </span>
+                        )}
                         <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${statusStyle.bg} ${statusStyle.text}`}>
                           {statusStyle.icon}
                           {project.status?.replace('_', ' ') || 'Research'}
@@ -304,7 +340,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                       </div>
                     </div>
                     <button
-                      onClick={(e) => deleteProject(project.id, e)}
+                      onClick={(e) => deleteProject(project.id, e, project.isGuest)}
                       className="p-2 hover:bg-[#FDF3ED] active:bg-[#FADDD0] rounded-lg transition"
                       title="Delete project"
                     >
@@ -417,7 +453,13 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                           {project.description && (
                             <p className="text-xs text-[#7D6B5D] line-clamp-1 mt-0.5">{project.description}</p>
                           )}
-                          <div className="flex items-center gap-2 mt-1">
+                          <div className="flex items-center gap-1 mt-1 flex-wrap">
+                            {project.isGuest && (
+                              <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-[#F5F0E6] text-[#7D6B5D]">
+                                <User className="w-2.5 h-2.5" />
+                                Local
+                              </span>
+                            )}
                             <span className={`inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full ${statusStyle.bg} ${statusStyle.text}`}>
                               {statusStyle.icon}
                               {(project.status || 'research').replace('_', ' ')}
@@ -425,7 +467,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                           </div>
                         </div>
                         <button
-                          onClick={(e) => deleteProject(project.id, e)}
+                          onClick={(e) => deleteProject(project.id, e, project.isGuest)}
                           className="opacity-0 group-hover:opacity-100 p-1 hover:bg-[#FDF3ED] rounded transition"
                           title="Delete project"
                         >

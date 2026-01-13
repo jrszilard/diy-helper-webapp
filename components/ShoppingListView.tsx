@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { guestStorage } from '@/lib/guestStorage';
 import {
   ShoppingCart,
   DollarSign,
@@ -13,7 +14,8 @@ import {
   Trash2,
   Edit3,
   Download,
-  X
+  X,
+  User
 } from 'lucide-react';
 import MaterialsExport from './MaterialsExport';
 
@@ -66,14 +68,37 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
     if (project) loadItems();
   }, [project]);
 
-  const loadItems = async () => {
-    const { data } = await supabase
-      .from('shopping_list_items')
-      .select('*')
-      .eq('project_id', project.id)
-      .order('created_at', { ascending: true });
+  const isGuestProject = project?.isGuest === true;
 
-    if (data) setItems(data);
+  const loadItems = async () => {
+    if (isGuestProject) {
+      // Load from localStorage for guest projects
+      const guestProject = guestStorage.getProject(project.id);
+      if (guestProject) {
+        const formattedItems: ShoppingItem[] = guestProject.materials.map(m => ({
+          id: m.id,
+          project_id: project.id,
+          product_name: m.product_name,
+          quantity: m.quantity,
+          price: m.price,
+          category: m.category,
+          required: m.required,
+          purchased: m.purchased,
+          notes: m.notes,
+          created_at: guestProject.createdAt
+        }));
+        setItems(formattedItems);
+      }
+    } else {
+      // Load from Supabase for authenticated users
+      const { data } = await supabase
+        .from('shopping_list_items')
+        .select('*')
+        .eq('project_id', project.id)
+        .order('created_at', { ascending: true });
+
+      if (data) setItems(data);
+    }
   };
 
   const toggleItem = (itemId: string) => {
@@ -98,18 +123,23 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
       i.id === itemId ? { ...i, purchased: newPurchased } : i
     ));
 
-    // Update in database
-    const { error } = await supabase
-      .from('shopping_list_items')
-      .update({ purchased: newPurchased })
-      .eq('id', itemId);
+    if (isGuestProject) {
+      // Update in localStorage for guest projects
+      guestStorage.togglePurchased(project.id, itemId);
+    } else {
+      // Update in database for authenticated users
+      const { error } = await supabase
+        .from('shopping_list_items')
+        .update({ purchased: newPurchased })
+        .eq('id', itemId);
 
-    if (error) {
-      console.error('Error updating purchased status:', error);
-      // Revert on error
-      setItems(items.map(i =>
-        i.id === itemId ? { ...i, purchased: item.purchased } : i
-      ));
+      if (error) {
+        console.error('Error updating purchased status:', error);
+        // Revert on error
+        setItems(items.map(i =>
+          i.id === itemId ? { ...i, purchased: item.purchased } : i
+        ));
+      }
     }
   };
 
@@ -126,18 +156,23 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
     ));
     setEditingItem(null);
 
-    // Update in database
-    const { error } = await supabase
-      .from('shopping_list_items')
-      .update({ quantity: newQuantity })
-      .eq('id', itemId);
+    if (isGuestProject) {
+      // Update in localStorage for guest projects
+      guestStorage.updateMaterial(project.id, itemId, { quantity: newQuantity });
+    } else {
+      // Update in database for authenticated users
+      const { error } = await supabase
+        .from('shopping_list_items')
+        .update({ quantity: newQuantity })
+        .eq('id', itemId);
 
-    if (error) {
-      console.error('Error updating quantity:', error);
-      // Revert on error
-      setItems(items.map(i =>
-        i.id === itemId ? { ...i, quantity: oldItem.quantity } : i
-      ));
+      if (error) {
+        console.error('Error updating quantity:', error);
+        // Revert on error
+        setItems(items.map(i =>
+          i.id === itemId ? { ...i, quantity: oldItem.quantity } : i
+        ));
+      }
     }
   };
 
@@ -156,16 +191,21 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
       return newSet;
     });
 
-    // Delete from database
-    const { error } = await supabase
-      .from('shopping_list_items')
-      .delete()
-      .eq('id', itemId);
+    if (isGuestProject) {
+      // Delete from localStorage for guest projects
+      guestStorage.deleteMaterial(project.id, itemId);
+    } else {
+      // Delete from database for authenticated users
+      const { error } = await supabase
+        .from('shopping_list_items')
+        .delete()
+        .eq('id', itemId);
 
-    if (error) {
-      console.error('Error deleting item:', error);
-      // Revert on error
-      loadItems();
+      if (error) {
+        console.error('Error deleting item:', error);
+        // Revert on error
+        loadItems();
+      }
     }
   };
 
@@ -278,8 +318,21 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
         <div className="mb-6">
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-2xl font-bold mb-2 text-[#3E2723]">{project.name}</h2>
+              <div className="flex items-center gap-2 mb-2">
+                <h2 className="text-2xl font-bold text-[#3E2723]">{project.name}</h2>
+                {isGuestProject && (
+                  <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-[#F5F0E6] text-[#7D6B5D]">
+                    <User className="w-3 h-3" />
+                    Local Project
+                  </span>
+                )}
+              </div>
               <p className="text-[#7D6B5D] text-sm">{project.description}</p>
+              {isGuestProject && (
+                <p className="text-xs text-[#A89880] mt-1">
+                  Sign in to sync this project across devices
+                </p>
+              )}
             </div>
             {items.length > 0 && (
               <button
