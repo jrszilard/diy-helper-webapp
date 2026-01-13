@@ -2,7 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { ShoppingCart, DollarSign, Search, MapPin, TrendingDown, ExternalLink } from 'lucide-react';
+import { guestStorage } from '@/lib/guestStorage';
+import {
+  ShoppingCart,
+  DollarSign,
+  Search,
+  MapPin,
+  TrendingDown,
+  ExternalLink,
+  Check,
+  Trash2,
+  Edit3,
+  Download,
+  X,
+  User
+} from 'lucide-react';
+import MaterialsExport from './MaterialsExport';
 
 interface ShoppingItem {
   id: string;
@@ -12,6 +27,8 @@ interface ShoppingItem {
   price: number | null;
   category: string;
   required: boolean;
+  purchased?: boolean;
+  notes?: string;
   created_at: string;
 }
 
@@ -40,18 +57,48 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchPanel, setShowSearchPanel] = useState(false);
 
+  // Editing state
+  const [editingItem, setEditingItem] = useState<string | null>(null);
+  const [editQuantity, setEditQuantity] = useState<number>(1);
+
+  // Export modal state
+  const [showExportModal, setShowExportModal] = useState(false);
+
   useEffect(() => {
     if (project) loadItems();
   }, [project]);
 
+  const isGuestProject = project?.isGuest === true;
+
   const loadItems = async () => {
-    const { data } = await supabase
-      .from('shopping_list_items')
-      .select('*')
-      .eq('project_id', project.id)
-      .order('created_at', { ascending: true });
-    
-    if (data) setItems(data);
+    if (isGuestProject) {
+      // Load from localStorage for guest projects
+      const guestProject = guestStorage.getProject(project.id);
+      if (guestProject) {
+        const formattedItems: ShoppingItem[] = guestProject.materials.map(m => ({
+          id: m.id,
+          project_id: project.id,
+          product_name: m.product_name,
+          quantity: m.quantity,
+          price: m.price,
+          category: m.category,
+          required: m.required,
+          purchased: m.purchased,
+          notes: m.notes,
+          created_at: guestProject.createdAt
+        }));
+        setItems(formattedItems);
+      }
+    } else {
+      // Load from Supabase for authenticated users
+      const { data } = await supabase
+        .from('shopping_list_items')
+        .select('*')
+        .eq('project_id', project.id)
+        .order('created_at', { ascending: true });
+
+      if (data) setItems(data);
+    }
   };
 
   const toggleItem = (itemId: string) => {
@@ -64,64 +111,162 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
     setSelectedItems(newSelected);
   };
 
+  // Toggle purchased status
+  const togglePurchased = async (itemId: string) => {
+    const item = items.find(i => i.id === itemId);
+    if (!item) return;
+
+    const newPurchased = !item.purchased;
+
+    // Optimistic update
+    setItems(items.map(i =>
+      i.id === itemId ? { ...i, purchased: newPurchased } : i
+    ));
+
+    if (isGuestProject) {
+      // Update in localStorage for guest projects
+      guestStorage.togglePurchased(project.id, itemId);
+    } else {
+      // Update in database for authenticated users
+      const { error } = await supabase
+        .from('shopping_list_items')
+        .update({ purchased: newPurchased })
+        .eq('id', itemId);
+
+      if (error) {
+        console.error('Error updating purchased status:', error);
+        // Revert on error
+        setItems(items.map(i =>
+          i.id === itemId ? { ...i, purchased: item.purchased } : i
+        ));
+      }
+    }
+  };
+
+  // Update item quantity
+  const updateItemQuantity = async (itemId: string, newQuantity: number) => {
+    if (newQuantity < 1) return;
+
+    const oldItem = items.find(i => i.id === itemId);
+    if (!oldItem) return;
+
+    // Optimistic update
+    setItems(items.map(i =>
+      i.id === itemId ? { ...i, quantity: newQuantity } : i
+    ));
+    setEditingItem(null);
+
+    if (isGuestProject) {
+      // Update in localStorage for guest projects
+      guestStorage.updateMaterial(project.id, itemId, { quantity: newQuantity });
+    } else {
+      // Update in database for authenticated users
+      const { error } = await supabase
+        .from('shopping_list_items')
+        .update({ quantity: newQuantity })
+        .eq('id', itemId);
+
+      if (error) {
+        console.error('Error updating quantity:', error);
+        // Revert on error
+        setItems(items.map(i =>
+          i.id === itemId ? { ...i, quantity: oldItem.quantity } : i
+        ));
+      }
+    }
+  };
+
+  // Delete item
+  const deleteItem = async (itemId: string) => {
+    const item = items.find(i => i.id === itemId);
+    if (!item) return;
+
+    if (!confirm(`Remove "${item.product_name}" from the list?`)) return;
+
+    // Optimistic update
+    setItems(items.filter(i => i.id !== itemId));
+    setSelectedItems(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(itemId);
+      return newSet;
+    });
+
+    if (isGuestProject) {
+      // Delete from localStorage for guest projects
+      guestStorage.deleteMaterial(project.id, itemId);
+    } else {
+      // Delete from database for authenticated users
+      const { error } = await supabase
+        .from('shopping_list_items')
+        .delete()
+        .eq('id', itemId);
+
+      if (error) {
+        console.error('Error deleting item:', error);
+        // Revert on error
+        loadItems();
+      }
+    }
+  };
+
   const handleSearchStores = async () => {
     if (selectedItems.size === 0 || !location.trim()) {
       console.log('Cannot search: no items selected or location missing');
       return;
     }
-    
+
     console.log('Starting store search...');
     console.log('Selected items:', Array.from(selectedItems));
     console.log('Location:', location);
-    
+
     setIsSearching(true);
     const results: Record<string, StoreResult[]> = {};
-    
+
     try {
       const itemsArray = Array.from(selectedItems);
-      
+
       for (let i = 0; i < itemsArray.length; i++) {
         const itemId = itemsArray[i];
         const item = items.find(it => it.id === itemId);
-        
+
         if (!item) {
           console.log('Item not found for ID:', itemId);
           continue;
         }
-        
+
         console.log(`Searching ${i + 1}/${itemsArray.length}: ${item.product_name}`);
-        
+
         const requestBody = {
           materialName: item.product_name,
           location: location,
           quantity: item.quantity
         };
-        
+
         const response = await fetch('/api/search-stores', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(requestBody)
         });
-        
+
         console.log('Response status:', response.status);
-        
+
         if (!response.ok) {
           const errorText = await response.text();
           console.error('API error:', response.status, errorText);
           continue;
         }
-        
+
         const data = await response.json();
         console.log('Search results for', item.product_name, ':', data);
-        
+
         results[itemId] = data.results || [];
-        
+
         // Add 3 second delay between items to avoid rate limiting
         if (i < itemsArray.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 3000));
         }
       }
-      
+
       console.log('Search complete. Results:', results);
       setSearchResults(results);
     } catch (error) {
@@ -142,9 +287,14 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
   }
 
   const total = items.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
+  const purchasedTotal = items
+    .filter(item => item.purchased)
+    .reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
+  const remainingTotal = total - purchasedTotal;
   const selectedTotal = items
     .filter(item => selectedItems.has(item.id))
     .reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
+  const purchasedCount = items.filter(item => item.purchased).length;
 
   const groupedItems = items.reduce((acc, item) => {
     if (!acc[item.category]) acc[item.category] = [];
@@ -154,11 +304,47 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
 
   return (
     <div className={`${isMobile ? 'p-4' : 'p-6'}`}>
+      {/* Export Modal */}
+      {showExportModal && (
+        <MaterialsExport
+          projectName={project.name}
+          materials={items}
+          onClose={() => setShowExportModal(false)}
+        />
+      )}
+
       {/* Only show project header on desktop - mobile has header in overlay */}
       {!isMobile && (
         <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-2 text-[#3E2723]">{project.name}</h2>
-          <p className="text-[#7D6B5D] text-sm">{project.description}</p>
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <h2 className="text-2xl font-bold text-[#3E2723]">{project.name}</h2>
+                {isGuestProject && (
+                  <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-[#F5F0E6] text-[#7D6B5D]">
+                    <User className="w-3 h-3" />
+                    Local Project
+                  </span>
+                )}
+              </div>
+              <p className="text-[#7D6B5D] text-sm">{project.description}</p>
+              {isGuestProject && (
+                <p className="text-xs text-[#A89880] mt-1">
+                  Sign in to sync this project across devices
+                </p>
+              )}
+            </div>
+            {items.length > 0 && (
+              <button
+                onClick={() => setShowExportModal(true)}
+                className="flex items-center gap-2 px-3 py-2 text-[#5D7B93] hover:bg-[#E8F0F5] rounded-lg transition"
+                title="Export shopping list"
+              >
+                <Download className="w-5 h-5" />
+                <span className="hidden lg:inline">Export</span>
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -170,6 +356,26 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
         </div>
       ) : (
         <div>
+          {/* Progress bar */}
+          {items.length > 0 && (
+            <div className="mb-4">
+              <div className="flex items-center justify-between text-sm mb-2">
+                <span className="text-[#7D6B5D]">
+                  {purchasedCount} of {items.length} items purchased
+                </span>
+                <span className="text-[#4A7C59] font-medium">
+                  {Math.round((purchasedCount / items.length) * 100)}%
+                </span>
+              </div>
+              <div className="h-2 bg-[#E8DFD0] rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-[#4A7C59] rounded-full transition-all duration-300"
+                  style={{ width: `${(purchasedCount / items.length) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+
           <div className={`mb-4 ${isMobile ? 'space-y-3' : 'flex gap-2'}`}>
             <button
               onClick={() => setShowSearchPanel(!showSearchPanel)}
@@ -178,6 +384,18 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
               <Search className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />
               {showSearchPanel ? 'Hide Search' : 'Search Local Stores'}
             </button>
+
+            {/* Mobile export button */}
+            {isMobile && (
+              <button
+                onClick={() => setShowExportModal(true)}
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-[#E8F0F5] text-[#5D7B93] rounded-xl hover:bg-[#D4E4F0] transition w-full"
+              >
+                <Download className="w-5 h-5" />
+                Export List
+              </button>
+            )}
+
             {selectedItems.size > 0 && (
               <div className={`flex items-center justify-center gap-2 px-4 py-2 bg-[#E8F0F5] text-[#5D7B93] rounded-xl font-medium ${isMobile ? 'w-full' : ''}`}>
                 {selectedItems.size} item(s) selected
@@ -226,41 +444,119 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                   {categoryItems.map((item) => (
                     <div key={item.id}>
                       <div
-                        className={`${isMobile ? 'p-4' : 'p-4'} flex items-center gap-4 ${isMobile ? 'active:bg-[#F5F0E6]' : ''}`}
-                        onClick={isMobile ? () => toggleItem(item.id) : undefined}
+                        className={`${isMobile ? 'p-4' : 'p-4'} ${
+                          item.purchased ? 'bg-gray-50' : ''
+                        } ${isMobile ? 'active:bg-[#F5F0E6]' : ''}`}
                       >
-                        <input
-                          type="checkbox"
-                          checked={selectedItems.has(item.id)}
-                          onChange={() => toggleItem(item.id)}
-                          onClick={(e) => e.stopPropagation()}
-                          className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} text-[#C67B5C] rounded focus:ring-2 focus:ring-[#C67B5C] flex-shrink-0 accent-[#C67B5C]`}
-                        />
+                        <div className="flex items-center gap-3">
+                          {/* Purchase checkbox */}
+                          <button
+                            onClick={() => togglePurchased(item.id)}
+                            className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition flex-shrink-0 ${
+                              item.purchased
+                                ? 'bg-[#4A7C59] border-[#4A7C59] text-white'
+                                : 'border-[#D4C8B8] hover:border-[#4A7C59]'
+                            }`}
+                            title={item.purchased ? 'Mark as not purchased' : 'Mark as purchased'}
+                          >
+                            {item.purchased && <Check className="w-4 h-4" />}
+                          </button>
 
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`font-semibold text-[#3E2723] ${isMobile ? 'text-base' : ''}`}>{item.product_name}</span>
-                            {item.required && (
-                              <span className="text-xs bg-[#FADDD0] text-[#B8593B] px-2 py-0.5 rounded font-medium">
-                                Required
+                          {/* Selection checkbox for store search */}
+                          <input
+                            type="checkbox"
+                            checked={selectedItems.has(item.id)}
+                            onChange={() => toggleItem(item.id)}
+                            onClick={(e) => e.stopPropagation()}
+                            className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} text-[#C67B5C] rounded focus:ring-2 focus:ring-[#C67B5C] flex-shrink-0 accent-[#C67B5C]`}
+                            title="Select for store search"
+                          />
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={`font-semibold ${isMobile ? 'text-base' : ''} ${
+                                item.purchased ? 'line-through text-[#A89880]' : 'text-[#3E2723]'
+                              }`}>
+                                {item.product_name}
                               </span>
-                            )}
-                          </div>
-                          <div className={`${isMobile ? 'text-base' : 'text-sm'} text-[#7D6B5D]`}>Qty: {item.quantity}</div>
-                        </div>
+                              {item.required && !item.purchased && (
+                                <span className="text-xs bg-[#FADDD0] text-[#B8593B] px-2 py-0.5 rounded font-medium">
+                                  Required
+                                </span>
+                              )}
+                            </div>
 
-                        {item.price && item.price > 0 && (
-                          <div className="text-right flex-shrink-0">
-                            <div className={`font-bold text-[#4A7C59] ${isMobile ? 'text-lg' : ''}`}>${item.price.toFixed(2)}</div>
-                            {item.quantity > 1 && (
-                              <div className={`${isMobile ? 'text-sm' : 'text-xs'} text-[#7D6B5D]`}>
-                                ${(item.price * item.quantity).toFixed(2)} total
+                            {/* Editable quantity */}
+                            {editingItem === item.id ? (
+                              <div className="flex items-center gap-2 mt-1">
+                                <input
+                                  type="number"
+                                  value={editQuantity}
+                                  onChange={(e) => setEditQuantity(parseInt(e.target.value) || 1)}
+                                  min={1}
+                                  className="w-16 px-2 py-1 border border-[#D4C8B8] rounded text-sm text-[#3E2723]"
+                                  autoFocus
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      updateItemQuantity(item.id, editQuantity);
+                                    } else if (e.key === 'Escape') {
+                                      setEditingItem(null);
+                                    }
+                                  }}
+                                />
+                                <button
+                                  onClick={() => updateItemQuantity(item.id, editQuantity)}
+                                  className="text-[#4A7C59] text-sm font-medium hover:underline"
+                                >
+                                  Save
+                                </button>
+                                <button
+                                  onClick={() => setEditingItem(null)}
+                                  className="text-[#7D6B5D] text-sm hover:underline"
+                                >
+                                  Cancel
+                                </button>
                               </div>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setEditingItem(item.id);
+                                  setEditQuantity(item.quantity);
+                                }}
+                                className={`${isMobile ? 'text-base' : 'text-sm'} text-[#7D6B5D] hover:text-[#5D7B93] mt-1 flex items-center gap-1`}
+                              >
+                                Qty: {item.quantity}
+                                <Edit3 className="w-3 h-3" />
+                              </button>
                             )}
                           </div>
-                        )}
+
+                          {item.price && item.price > 0 && (
+                            <div className="text-right flex-shrink-0">
+                              <div className={`font-bold ${isMobile ? 'text-lg' : ''} ${
+                                item.purchased ? 'text-[#A89880]' : 'text-[#4A7C59]'
+                              }`}>
+                                ${item.price.toFixed(2)}
+                              </div>
+                              {item.quantity > 1 && (
+                                <div className={`${isMobile ? 'text-sm' : 'text-xs'} text-[#7D6B5D]`}>
+                                  ${(item.price * item.quantity).toFixed(2)} total
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Delete button */}
+                          <button
+                            onClick={() => deleteItem(item.id)}
+                            className="p-2 text-[#D4C8B8] hover:text-[#B8593B] transition rounded-lg hover:bg-[#FADDD0]"
+                            title="Remove item"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                      
+
                       {searchResults[item.id] && searchResults[item.id].length > 0 && (
                         <div className="px-4 pb-4 bg-[#F5F0E6]">
                           <div className="flex items-center gap-2 mb-2">
@@ -351,13 +647,25 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
               </div>
             )}
 
-            {total > 0 && (
+            {purchasedCount > 0 && purchasedTotal > 0 && (
+              <div className={`bg-[#F5F0E6] border border-[#D4C8B8] rounded-xl ${isMobile ? 'p-4' : 'p-4'} flex items-center justify-between`}>
+                <div className="flex items-center gap-2">
+                  <Check className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} text-[#7D6B5D]`} />
+                  <span className={`font-medium text-[#7D6B5D] ${isMobile ? 'text-base' : ''}`}>Purchased:</span>
+                </div>
+                <span className={`${isMobile ? 'text-xl' : 'text-xl'} font-bold text-[#7D6B5D] line-through`}>${purchasedTotal.toFixed(2)}</span>
+              </div>
+            )}
+
+            {remainingTotal > 0 && (
               <div className={`bg-[#E8F3EC] border border-[#B8D8C4] rounded-xl ${isMobile ? 'p-4' : 'p-4'} flex items-center justify-between`}>
                 <div className="flex items-center gap-2">
                   <DollarSign className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} text-[#4A7C59]`} />
-                  <span className={`font-bold text-[#3E2723] ${isMobile ? 'text-base' : ''}`}>Estimated Total:</span>
+                  <span className={`font-bold text-[#3E2723] ${isMobile ? 'text-base' : ''}`}>
+                    {purchasedCount > 0 ? 'Remaining:' : 'Estimated Total:'}
+                  </span>
                 </div>
-                <span className={`${isMobile ? 'text-2xl' : 'text-2xl'} font-bold text-[#4A7C59]`}>${total.toFixed(2)}</span>
+                <span className={`${isMobile ? 'text-2xl' : 'text-2xl'} font-bold text-[#4A7C59]`}>${remainingTotal.toFixed(2)}</span>
               </div>
             )}
           </div>

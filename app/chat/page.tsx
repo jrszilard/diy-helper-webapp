@@ -7,6 +7,7 @@ import ShoppingListView from '@/components/ShoppingListView';
 import Link from 'next/link';
 import { Home, Wrench, Menu, FolderOpen, ShoppingCart, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { guestStorage } from '@/lib/guestStorage';
 import AuthButton from '@/components/AuthButton';
 import InventoryPanel from '@/components/InventoryPanel';
 import { Package } from 'lucide-react';
@@ -37,6 +38,23 @@ export default function ChatPage() {
   const handleProjectLinked = (projectId: string) => {
     // When chat links to a project, update the selected project
     // This will show the shopping list sidebar
+
+    // First check if it's a guest project
+    const guestProject = guestStorage.getProject(projectId);
+    if (guestProject) {
+      // Format guest project for display
+      setSelectedProject({
+        id: guestProject.id,
+        name: guestProject.name,
+        description: guestProject.description,
+        created_at: guestProject.createdAt,
+        isGuest: true,
+        materials: guestProject.materials
+      });
+      return;
+    }
+
+    // Otherwise fetch from Supabase for authenticated users
     supabase
       .from('projects')
       .select('*')
@@ -61,23 +79,21 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen blueprint-bg-subtle">
-      {/* Desktop Projects Sidebar - hidden on mobile */}
-      {user && (
-        <div className="hidden md:block">
-          <ProjectsSidebar
-            user={user}
-            onSelectProject={handleSelectProject}
-          />
-        </div>
-      )}
+      {/* Desktop Projects Sidebar - hidden on mobile, shown for both guests and authenticated users */}
+      <div className="hidden md:block">
+        <ProjectsSidebar
+          user={user}
+          onSelectProject={handleSelectProject}
+        />
+      </div>
 
-      {/* Mobile Projects Overlay */}
-      {showMobileProjects && user && (
+      {/* Mobile Projects Overlay - shown for both guests and authenticated users */}
+      {showMobileProjects && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-[#3E2723] bg-opacity-50" onClick={closeMobilePanels} />
           <div className="absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-[#FDFBF7] shadow-xl animate-slide-in-left">
             <div className="flex items-center justify-between p-4 border-b border-[#D4C8B8] bg-[#5D7B93] text-white">
-              <h2 className="font-bold text-lg">My Projects</h2>
+              <h2 className="font-bold text-lg">{user ? 'My Projects' : 'Local Projects'}</h2>
               <button
                 onClick={() => setShowMobileProjects(false)}
                 className="p-2 hover:bg-[#4A6275] rounded-lg transition-colors"
@@ -122,16 +138,14 @@ export default function ChatPage() {
             <div className="flex items-center justify-between h-14 sm:h-16">
               {/* Left side: Menu button (mobile) + Logo */}
               <div className="flex items-center gap-2">
-                {/* Mobile Projects Menu Button */}
-                {user && (
-                  <button
-                    onClick={() => setShowMobileProjects(true)}
-                    className="md:hidden p-2 text-[#7D6B5D] hover:text-[#5D7B93] hover:bg-[#E8DFD0] rounded-lg transition"
-                    title="My Projects"
-                  >
-                    <Menu size={22} />
-                  </button>
-                )}
+                {/* Mobile Projects Menu Button - shown for both guests and authenticated users */}
+                <button
+                  onClick={() => setShowMobileProjects(true)}
+                  className="md:hidden p-2 text-[#7D6B5D] hover:text-[#5D7B93] hover:bg-[#E8DFD0] rounded-lg transition"
+                  title={user ? "My Projects" : "Local Projects"}
+                >
+                  <Menu size={22} />
+                </button>
 
                 <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
                   <div className="bg-gradient-to-br from-[#C67B5C] to-[#A65D3F] p-1.5 rounded-lg">

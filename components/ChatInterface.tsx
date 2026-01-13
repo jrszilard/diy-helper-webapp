@@ -2,10 +2,11 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { guestStorage, GuestProject, GuestMaterial } from '@/lib/guestStorage';
 import ReactMarkdown from 'react-markdown';
 import VideoResults from './VideoResults';
 import ProgressIndicator, { ProgressStep } from './ProgressIndicator';
-import { Package, X, Trash2, Search, FolderPlus } from 'lucide-react';
+import { Package, X, Trash2, Search, FolderPlus, ShoppingCart, Loader2 } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -100,6 +101,11 @@ export default function ChatInterface({
     existing: string[];
   } | null>(null);
 
+  // Guest projects state
+  const [guestProjects, setGuestProjects] = useState<GuestProject[]>([]);
+  const [isGuestMode, setIsGuestMode] = useState(false);
+  const [isAutoExtracting, setIsAutoExtracting] = useState(false);
+
   // Save messages to localStorage whenever they change
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -114,6 +120,11 @@ export default function ChatInterface({
   useEffect(() => {
     if (userId) {
       loadProjects();
+      setIsGuestMode(false);
+    } else {
+      // Load guest projects when not authenticated
+      setGuestProjects(guestStorage.getProjects());
+      setIsGuestMode(true);
     }
   }, [userId]);
 
@@ -384,9 +395,116 @@ export default function ChatInterface({
     }
   };
 
-  const saveToProject = async (targetProjectId: string) => {
+  // Check if message content contains materials-related content
+  const hasMaterialsContent = (content: string): boolean => {
+    const lowerContent = content.toLowerCase();
+    return (
+      lowerContent.includes('materials list') ||
+      lowerContent.includes('shopping list') ||
+      lowerContent.includes('items to purchase') ||
+      lowerContent.includes('you\'ll need') ||
+      lowerContent.includes('you will need') ||
+      lowerContent.includes('materials needed') ||
+      lowerContent.includes('supplies needed') ||
+      lowerContent.includes('required materials')
+    );
+  };
+
+  // Auto-extract materials when user clicks Save Materials
+  const handleAutoExtractMaterials = async () => {
+    const lastMessage = messages[messages.length - 1];
+    if (!lastMessage || lastMessage.role !== 'assistant') return;
+
+    // Check if materials data markers already exist
+    const existingMatch = lastMessage.content.match(
+      /---MATERIALS_DATA---([\s\S]*?)---END_MATERIALS_DATA---/
+    );
+
+    if (existingMatch) {
+      // Materials already extracted - use them
+      try {
+        const materialsData = JSON.parse(existingMatch[1]);
+        setExtractedMaterials(materialsData);
+        setShowSaveDialog(true);
+        return;
+      } catch (e) {
+        console.error('Failed to parse existing materials:', e);
+      }
+    }
+
+    // No markers - need to auto-extract
+    setIsAutoExtracting(true);
+    try {
+      const response = await fetch('/api/extract-materials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversationContext: messages,
+          userId: userId
+        })
+      });
+
+      const data = await response.json();
+      if (data.materials && data.materials.length > 0) {
+        setExtractedMaterials(data);
+        setShowSaveDialog(true);
+      } else {
+        // No materials found - show friendly message
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: "I couldn't find any specific materials in our conversation. Could you describe your project and what materials you need? Then I can help you create a shopping list."
+          }
+        ]);
+      }
+    } catch (error) {
+      console.error('Auto-extraction failed:', error);
+      // Fallback to old behavior
+      setInput("Create a materials list from our conversation");
+    } finally {
+      setIsAutoExtracting(false);
+    }
+  };
+
+  const saveToProject = async (targetProjectId: string, isGuestProject: boolean = false) => {
     if (!extractedMaterials) return;
 
+    if (isGuestProject || isGuestMode) {
+      // Save to localStorage for guests
+      const newMaterials = extractedMaterials.materials.map(mat => ({
+        product_name: mat.name,
+        quantity: parseInt(mat.quantity) || 1,
+        category: mat.category || 'general',
+        required: mat.required !== false,
+        price: mat.estimated_price ? parseFloat(mat.estimated_price) : null,
+      }));
+
+      const addedMaterials = guestStorage.addMaterials(targetProjectId, newMaterials);
+
+      if (addedMaterials.length > 0) {
+        setProjectId(targetProjectId);
+        setShowSaveDialog(false);
+        setExtractedMaterials(null);
+        setGuestProjects(guestStorage.getProjects());
+        onProjectLinked?.(targetProjectId);
+
+        // Build success message
+        let successMsg = `Saved ${addedMaterials.length} items to your project!`;
+        if (extractedMaterials.owned_items && extractedMaterials.owned_items.length > 0) {
+          successMsg += ` (${extractedMaterials.owned_items.length} items you already own were excluded)`;
+        }
+        successMsg += `\n\n**Tip:** Sign in to sync your projects across devices and unlock price comparison features.`;
+
+        setMessages(prev => [
+          ...prev,
+          { role: 'assistant', content: successMsg }
+        ]);
+      }
+      return;
+    }
+
+    // Authenticated user flow
     let currentUserId = userId;
     if (!currentUserId) {
       const { data: { user } } = await supabase.auth.getUser();
@@ -445,7 +563,27 @@ export default function ChatInterface({
 
   const createNewProjectAndSave = async () => {
     if (!extractedMaterials) return;
-    // Auto-fill the project name with the suggested description
+
+    // Check if user is logged in
+    let currentUserId = userId;
+    if (!currentUserId) {
+      const { data: { user } } = await supabase.auth.getUser();
+      currentUserId = user?.id;
+    }
+
+    if (!currentUserId) {
+      // Guest flow - create locally without showing dialog
+      const guestProject = guestStorage.saveProject({
+        name: extractedMaterials.project_description || 'My DIY Project',
+        description: `Created ${new Date().toLocaleDateString()}`,
+        materials: [],
+      });
+
+      await saveToProject(guestProject.id, true);
+      return;
+    }
+
+    // Authenticated flow - show dialog
     setNewProjectName(extractedMaterials.project_description);
     setShowCreateProjectDialog(true);
   };
@@ -569,13 +707,30 @@ export default function ChatInterface({
           {messages.length > 0 && !projectId && (
             <button
               onClick={() => {
-                if (!userId) {
-                  setShowAuthPrompt(true);
-                  return;
+                // Use guest-aware project creation flow
+                if (extractedMaterials) {
+                  createNewProjectAndSave();
+                } else {
+                  // No materials extracted yet, show create dialog for guest or auth
+                  if (!userId) {
+                    // Guest flow - create project locally
+                    const guestProject = guestStorage.saveProject({
+                      name: messages.find(m => m.role === 'user')?.content.slice(0, 50) || 'My DIY Project',
+                      description: `Created ${new Date().toLocaleDateString()}`,
+                      materials: [],
+                    });
+                    setProjectId(guestProject.id);
+                    setGuestProjects(guestStorage.getProjects());
+                    onProjectLinked?.(guestProject.id);
+                    setMessages(prev => [
+                      ...prev,
+                      { role: 'assistant', content: `Project saved! You can now save materials to this project.\n\n**Tip:** Sign in to sync across devices.` }
+                    ]);
+                  } else {
+                    setNewProjectName('');
+                    setShowCreateProjectDialog(true);
+                  }
                 }
-                // Create a simple project from the conversation
-                setNewProjectName('');
-                setShowCreateProjectDialog(true);
               }}
               className="flex items-center gap-2 px-4 py-2 bg-[#C67B5C] text-white rounded-lg hover:bg-[#A65D3F] transition-colors shadow-sm"
               title="Save this conversation to a new project"
@@ -792,29 +947,42 @@ export default function ChatInterface({
         </div>
       )}
 
-      {/* Manual "Save Materials" Button */}
-      {!showSaveDialog && messages.length > 0 && messages[messages.length - 1].role === 'assistant' &&
-        (messages[messages.length - 1].content.toLowerCase().includes('materials list') ||
-        messages[messages.length - 1].content.toLowerCase().includes('shopping list') ||
-        messages[messages.length - 1].content.toLowerCase().includes('items to purchase')) &&
-        !extractedMaterials && (
-        <div className="px-4 py-3 bg-[#FDF8F3] border-t border-[#E8D5CC]">
+      {/* Materials Detection Banner - Improved UX */}
+      {!showSaveDialog && messages.length > 0 &&
+       messages[messages.length - 1].role === 'assistant' &&
+       hasMaterialsContent(messages[messages.length - 1].content) &&
+       !extractedMaterials && (
+        <div className="px-4 py-3 bg-gradient-to-r from-emerald-50 to-teal-50 border-t border-emerald-200">
           <div className="flex items-center gap-3">
-            <div className="flex-1">
-              <p className="text-sm text-[#7D6B5D] font-medium">
-                To save these materials to your project, ask me to:
+            <div className="p-2 bg-emerald-100 rounded-lg flex-shrink-0">
+              <ShoppingCart className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-emerald-800 font-semibold">
+                Materials list detected!
               </p>
-              <p className="text-xs text-[#A89880] mt-1">
-                "Call the extract_materials_list tool" or "Save these to my shopping list"
+              <p className="text-xs text-emerald-600 mt-0.5">
+                Save to your project to track purchases and find local prices
               </p>
             </div>
             <button
-              onClick={() => {
-                setInput("Call the extract_materials_list tool to save these materials");
-              }}
-              className="bg-[#C67B5C] text-white px-4 py-2 rounded-lg hover:bg-[#A65D3F] text-sm font-medium whitespace-nowrap"
+              onClick={handleAutoExtractMaterials}
+              disabled={isAutoExtracting}
+              className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl hover:bg-emerald-700
+                         text-sm font-semibold whitespace-nowrap shadow-sm transition-all
+                         disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 flex-shrink-0"
             >
-              Save Materials
+              {isAutoExtracting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Package className="w-4 h-4" />
+                  Save Materials
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -839,18 +1007,42 @@ export default function ChatInterface({
               </p>
             )}
 
-            {projects.length > 0 && (
+            {/* Show authenticated user's projects */}
+            {!isGuestMode && projects.length > 0 && (
               <div className="mb-4">
                 <label className="block text-sm font-medium text-[#5C4D42] mb-2">
                   Select existing project:
                 </label>
                 <select
                   className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] bg-white"
-                  onChange={(e) => e.target.value && saveToProject(e.target.value)}
+                  onChange={(e) => e.target.value && saveToProject(e.target.value, false)}
                   defaultValue=""
                 >
                   <option value="">Choose a project...</option>
                   {projects.map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="text-center text-[#A89880] text-sm my-3">or</div>
+              </div>
+            )}
+
+            {/* Show guest projects */}
+            {isGuestMode && guestProjects.length > 0 && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-[#5C4D42] mb-2">
+                  Select existing project:
+                </label>
+                <select
+                  className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] bg-white"
+                  onChange={(e) => e.target.value && saveToProject(e.target.value, true)}
+                  defaultValue=""
+                >
+                  <option value="">Choose a project...</option>
+                  {guestProjects.map((project) => (
                     <option key={project.id} value={project.id}>
                       {project.name}
                     </option>
@@ -878,6 +1070,13 @@ export default function ChatInterface({
                 Skip for Now
               </button>
             </div>
+
+            {/* Guest mode notice */}
+            {isGuestMode && (
+              <p className="text-xs text-[#7D6B5D] mt-4 text-center">
+                Projects are saved locally. Sign in to sync across devices.
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -980,12 +1179,30 @@ export default function ChatInterface({
             </div>
             <button
               onClick={() => {
-                if (!userId) {
-                  setShowAuthPrompt(true);
-                  return;
+                // Use guest-aware project creation flow
+                if (extractedMaterials) {
+                  createNewProjectAndSave();
+                } else {
+                  // No materials extracted yet
+                  if (!userId) {
+                    // Guest flow - create project locally
+                    const guestProject = guestStorage.saveProject({
+                      name: messages.find(m => m.role === 'user')?.content.slice(0, 50) || 'My DIY Project',
+                      description: `Created ${new Date().toLocaleDateString()}`,
+                      materials: [],
+                    });
+                    setProjectId(guestProject.id);
+                    setGuestProjects(guestStorage.getProjects());
+                    onProjectLinked?.(guestProject.id);
+                    setMessages(prev => [
+                      ...prev,
+                      { role: 'assistant', content: `Project saved! You can now save materials to this project.\n\n**Tip:** Sign in to sync across devices.` }
+                    ]);
+                  } else {
+                    setNewProjectName('');
+                    setShowCreateProjectDialog(true);
+                  }
                 }
-                setNewProjectName('');
-                setShowCreateProjectDialog(true);
               }}
               className="flex-shrink-0 bg-white text-[#C67B5C] px-4 py-1.5 rounded-lg font-semibold text-sm hover:bg-[#FDF8F3] transition-colors shadow-sm"
             >
