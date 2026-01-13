@@ -707,13 +707,30 @@ export default function ChatInterface({
           {messages.length > 0 && !projectId && (
             <button
               onClick={() => {
-                if (!userId) {
-                  setShowAuthPrompt(true);
-                  return;
+                // Use guest-aware project creation flow
+                if (extractedMaterials) {
+                  createNewProjectAndSave();
+                } else {
+                  // No materials extracted yet, show create dialog for guest or auth
+                  if (!userId) {
+                    // Guest flow - create project locally
+                    const guestProject = guestStorage.saveProject({
+                      name: messages.find(m => m.role === 'user')?.content.slice(0, 50) || 'My DIY Project',
+                      description: `Created ${new Date().toLocaleDateString()}`,
+                      materials: [],
+                    });
+                    setProjectId(guestProject.id);
+                    setGuestProjects(guestStorage.getProjects());
+                    onProjectLinked?.(guestProject.id);
+                    setMessages(prev => [
+                      ...prev,
+                      { role: 'assistant', content: `Project saved! You can now save materials to this project.\n\n**Tip:** Sign in to sync across devices.` }
+                    ]);
+                  } else {
+                    setNewProjectName('');
+                    setShowCreateProjectDialog(true);
+                  }
                 }
-                // Create a simple project from the conversation
-                setNewProjectName('');
-                setShowCreateProjectDialog(true);
               }}
               className="flex items-center gap-2 px-4 py-2 bg-[#C67B5C] text-white rounded-lg hover:bg-[#A65D3F] transition-colors shadow-sm"
               title="Save this conversation to a new project"
@@ -1162,12 +1179,30 @@ export default function ChatInterface({
             </div>
             <button
               onClick={() => {
-                if (!userId) {
-                  setShowAuthPrompt(true);
-                  return;
+                // Use guest-aware project creation flow
+                if (extractedMaterials) {
+                  createNewProjectAndSave();
+                } else {
+                  // No materials extracted yet
+                  if (!userId) {
+                    // Guest flow - create project locally
+                    const guestProject = guestStorage.saveProject({
+                      name: messages.find(m => m.role === 'user')?.content.slice(0, 50) || 'My DIY Project',
+                      description: `Created ${new Date().toLocaleDateString()}`,
+                      materials: [],
+                    });
+                    setProjectId(guestProject.id);
+                    setGuestProjects(guestStorage.getProjects());
+                    onProjectLinked?.(guestProject.id);
+                    setMessages(prev => [
+                      ...prev,
+                      { role: 'assistant', content: `Project saved! You can now save materials to this project.\n\n**Tip:** Sign in to sync across devices.` }
+                    ]);
+                  } else {
+                    setNewProjectName('');
+                    setShowCreateProjectDialog(true);
+                  }
                 }
-                setNewProjectName('');
-                setShowCreateProjectDialog(true);
               }}
               className="flex-shrink-0 bg-white text-[#C67B5C] px-4 py-1.5 rounded-lg font-semibold text-sm hover:bg-[#FDF8F3] transition-colors shadow-sm"
             >
