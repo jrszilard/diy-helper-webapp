@@ -1,0 +1,730 @@
+/**
+ * Advanced Product Data Extraction
+ *
+ * Creative approaches to extract real-time pricing and inventory
+ * without using official retail APIs:
+ *
+ * 1. JSON-LD Structured Data - Schema.org data embedded for SEO
+ * 2. Meta Tags - OpenGraph and product meta tags
+ * 3. HTML Patterns - Common price/availability markup patterns
+ * 4. Google Shopping - Aggregated pricing from multiple sources
+ * 5. Multi-URL Validation - Cross-reference multiple results
+ */
+
+export interface ExtractedProductData {
+  price: number | null;
+  originalPrice: number | null;
+  currency: string;
+  availability: 'in-stock' | 'limited' | 'out-of-stock' | 'online-only' | 'check-online';
+  sku: string | null;
+  productName: string | null;
+  brand: string | null;
+  rating: number | null;
+  reviewCount: number | null;
+  storeStock: string | null; // e.g., "5 in stock at your store"
+  confidence: 'high' | 'medium' | 'low';
+  source: string; // Which extraction method found the data
+}
+
+/**
+ * Extract JSON-LD structured data from HTML
+ * Most e-commerce sites include Schema.org Product data for SEO
+ */
+export function extractJsonLd(html: string): Partial<ExtractedProductData> | null {
+  try {
+    // Find all JSON-LD script tags
+    const jsonLdRegex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+    const matches = html.matchAll(jsonLdRegex);
+
+    for (const match of matches) {
+      try {
+        const jsonStr = match[1].trim();
+        const data = JSON.parse(jsonStr);
+
+        // Handle arrays of JSON-LD objects
+        const items = Array.isArray(data) ? data : [data];
+
+        for (const item of items) {
+          // Look for Product type
+          if (item['@type'] === 'Product' ||
+              (Array.isArray(item['@type']) && item['@type'].includes('Product'))) {
+            return parseProductJsonLd(item);
+          }
+
+          // Check @graph for embedded products
+          if (item['@graph']) {
+            for (const graphItem of item['@graph']) {
+              if (graphItem['@type'] === 'Product') {
+                return parseProductJsonLd(graphItem);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // Continue to next JSON-LD block
+        continue;
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error('JSON-LD extraction error:', error);
+    return null;
+  }
+}
+
+function parseProductJsonLd(product: any): Partial<ExtractedProductData> {
+  const result: Partial<ExtractedProductData> = {
+    source: 'json-ld',
+    confidence: 'high',
+  };
+
+  // Extract name
+  result.productName = product.name || null;
+  result.brand = product.brand?.name || product.brand || null;
+  result.sku = product.sku || product.productID || product.mpn || null;
+
+  // Extract offer/price data
+  const offers = product.offers;
+  if (offers) {
+    const offer = Array.isArray(offers) ? offers[0] : offers;
+
+    // Price extraction
+    result.price = parseFloat(offer.price) || null;
+    result.currency = offer.priceCurrency || 'USD';
+
+    // Check for sale price vs original
+    if (offer.priceSpecification) {
+      const priceSpec = Array.isArray(offer.priceSpecification)
+        ? offer.priceSpecification[0]
+        : offer.priceSpecification;
+      if (priceSpec.price) {
+        result.price = parseFloat(priceSpec.price);
+      }
+    }
+
+    // Availability mapping
+    const availabilityUrl = offer.availability || '';
+    result.availability = mapSchemaAvailability(availabilityUrl);
+
+    // Stock level hints
+    if (offer.inventoryLevel) {
+      const level = offer.inventoryLevel.value || offer.inventoryLevel;
+      if (typeof level === 'number') {
+        result.storeStock = `${level} available`;
+        if (level === 0) {
+          result.availability = 'out-of-stock';
+        } else if (level < 5) {
+          result.availability = 'limited';
+        }
+      }
+    }
+  }
+
+  // Extract ratings
+  if (product.aggregateRating) {
+    result.rating = parseFloat(product.aggregateRating.ratingValue) || null;
+    result.reviewCount = parseInt(product.aggregateRating.reviewCount) || null;
+  }
+
+  return result;
+}
+
+function mapSchemaAvailability(url: string): ExtractedProductData['availability'] {
+  const lower = url.toLowerCase();
+  if (lower.includes('instock') || lower.includes('in_stock')) {
+    return 'in-stock';
+  } else if (lower.includes('outofstock') || lower.includes('out_of_stock')) {
+    return 'out-of-stock';
+  } else if (lower.includes('limitedavailability') || lower.includes('limited')) {
+    return 'limited';
+  } else if (lower.includes('onlineonly')) {
+    return 'online-only';
+  } else if (lower.includes('preorder') || lower.includes('backorder')) {
+    return 'limited';
+  }
+  return 'check-online';
+}
+
+/**
+ * Extract product data from meta tags
+ * OpenGraph, Twitter Cards, and product-specific meta tags
+ */
+export function extractMetaTags(html: string): Partial<ExtractedProductData> | null {
+  const result: Partial<ExtractedProductData> = {
+    source: 'meta-tags',
+    confidence: 'medium',
+  };
+
+  // Common meta tag patterns for product data
+  const metaPatterns = [
+    // Price patterns
+    { regex: /<meta[^>]*(?:property|name)=["'](?:og:price:amount|product:price:amount|twitter:data1)["'][^>]*content=["']([^"']+)["']/i, field: 'price' },
+    { regex: /<meta[^>]*content=["']([^"']+)["'][^>]*(?:property|name)=["'](?:og:price:amount|product:price:amount)["']/i, field: 'price' },
+    // Currency
+    { regex: /<meta[^>]*(?:property|name)=["'](?:og:price:currency|product:price:currency)["'][^>]*content=["']([^"']+)["']/i, field: 'currency' },
+    // Availability
+    { regex: /<meta[^>]*(?:property|name)=["'](?:og:availability|product:availability)["'][^>]*content=["']([^"']+)["']/i, field: 'availability' },
+    // Product name
+    { regex: /<meta[^>]*(?:property|name)=["']og:title["'][^>]*content=["']([^"']+)["']/i, field: 'productName' },
+    // SKU
+    { regex: /<meta[^>]*(?:property|name)=["'](?:product:sku|og:sku)["'][^>]*content=["']([^"']+)["']/i, field: 'sku' },
+  ];
+
+  let foundData = false;
+
+  for (const pattern of metaPatterns) {
+    const match = html.match(pattern.regex);
+    if (match && match[1]) {
+      foundData = true;
+      if (pattern.field === 'price') {
+        result.price = parseFloat(match[1].replace(/[^0-9.]/g, ''));
+      } else if (pattern.field === 'currency') {
+        result.currency = match[1];
+      } else if (pattern.field === 'availability') {
+        result.availability = mapMetaAvailability(match[1]);
+      } else if (pattern.field === 'productName') {
+        result.productName = match[1];
+      } else if (pattern.field === 'sku') {
+        result.sku = match[1];
+      }
+    }
+  }
+
+  return foundData ? result : null;
+}
+
+function mapMetaAvailability(value: string): ExtractedProductData['availability'] {
+  const lower = value.toLowerCase();
+  if (lower === 'instock' || lower === 'in stock' || lower === 'available') {
+    return 'in-stock';
+  } else if (lower === 'outofstock' || lower === 'out of stock' || lower === 'unavailable') {
+    return 'out-of-stock';
+  } else if (lower.includes('limited') || lower.includes('low')) {
+    return 'limited';
+  }
+  return 'check-online';
+}
+
+/**
+ * Extract pricing from common HTML patterns
+ * Fallback when structured data isn't available
+ */
+export function extractHtmlPatterns(html: string): Partial<ExtractedProductData> | null {
+  const result: Partial<ExtractedProductData> = {
+    source: 'html-patterns',
+    confidence: 'medium',
+  };
+
+  // Price extraction patterns (ordered by reliability)
+  const pricePatterns = [
+    // Data attributes (most reliable)
+    /data-price=["']?([\d.]+)["']?/i,
+    /data-product-price=["']?([\d.]+)["']?/i,
+    /data-current-price=["']?([\d.]+)["']?/i,
+    /data-analytics-price=["']?([\d.]+)["']?/i,
+
+    // Itemprop (Schema.org microdata)
+    /itemprop=["']price["'][^>]*content=["']?([\d.]+)["']?/i,
+    /<[^>]*itemprop=["']price["'][^>]*>\s*\$?([\d.]+)/i,
+
+    // Common price class patterns
+    /<[^>]*class=["'][^"']*(?:price|product-price|current-price|sale-price)[^"']*["'][^>]*>\s*\$?([\d,]+\.?\d*)/i,
+
+    // Home Depot specific
+    /price-format__main-price[^>]*>\s*\$?([\d,]+)/i,
+    /class=["'][^"']*price__dollars[^"']*["'][^>]*>\s*\$?([\d,]+)/i,
+
+    // Lowe's specific
+    /class=["'][^"']*art-pd-price[^"']*["'][^>]*>\s*\$?([\d,]+\.?\d*)/i,
+    /main-price[^>]*>\s*\$?([\d,]+\.?\d*)/i,
+
+    // Generic price patterns with $ sign
+    />\s*\$\s*([\d,]+\.?\d{0,2})\s*</,
+
+    // JSON in script with price
+    /"price"\s*:\s*([\d.]+)/,
+    /"salePrice"\s*:\s*([\d.]+)/,
+    /"currentPrice"\s*:\s*([\d.]+)/,
+  ];
+
+  for (const pattern of pricePatterns) {
+    const match = html.match(pattern);
+    if (match && match[1]) {
+      const price = parseFloat(match[1].replace(/,/g, ''));
+      if (price > 0 && price < 100000) { // Sanity check
+        result.price = price;
+        break;
+      }
+    }
+  }
+
+  // Availability extraction patterns
+  const availabilityPatterns = [
+    // In stock patterns
+    { pattern: /(?:class|id)=["'][^"']*(?:in-stock|instock|available)[^"']*["']/i, status: 'in-stock' as const },
+    { pattern: />(?:\s*In Stock\s*|\s*Available\s*)</i, status: 'in-stock' as const },
+    { pattern: /(?:add.to.cart|add-to-cart)["'][^>]*(?!disabled)/i, status: 'in-stock' as const },
+    { pattern: /available.for.(?:pickup|delivery)/i, status: 'in-stock' as const },
+    { pattern: /ready.in.(?:\d+|same)/i, status: 'in-stock' as const },
+
+    // Limited stock patterns
+    { pattern: /only.(\d+).left/i, status: 'limited' as const },
+    { pattern: /low.stock/i, status: 'limited' as const },
+    { pattern: /limited.availability/i, status: 'limited' as const },
+    { pattern: /(\d+).in.stock/i, status: 'limited' as const },
+
+    // Out of stock patterns
+    { pattern: /(?:class|id)=["'][^"']*(?:out-of-stock|outofstock|unavailable|sold-out)[^"']*["']/i, status: 'out-of-stock' as const },
+    { pattern: />(?:\s*Out of Stock\s*|\s*Sold Out\s*|\s*Unavailable\s*)</i, status: 'out-of-stock' as const },
+    { pattern: /currently.(?:unavailable|out.of.stock)/i, status: 'out-of-stock' as const },
+    { pattern: /add.to.cart["'][^>]*disabled/i, status: 'out-of-stock' as const },
+
+    // Online only
+    { pattern: /(?:ship.to.home|online.only|delivery.only)/i, status: 'online-only' as const },
+  ];
+
+  for (const { pattern, status } of availabilityPatterns) {
+    if (pattern.test(html)) {
+      result.availability = status;
+      break;
+    }
+  }
+
+  // Extract stock quantity if mentioned
+  const stockQuantityMatch = html.match(/(\d+)\s*(?:in stock|available|left|remaining)/i);
+  if (stockQuantityMatch) {
+    const qty = parseInt(stockQuantityMatch[1]);
+    result.storeStock = `${qty} available`;
+    if (qty === 0) {
+      result.availability = 'out-of-stock';
+    } else if (qty <= 3) {
+      result.availability = 'limited';
+    }
+  }
+
+  // SKU patterns
+  const skuPatterns = [
+    /(?:sku|item|model|product)[\s#:]*([A-Z0-9-]{5,})/i,
+    /data-sku=["']([^"']+)["']/i,
+    /"sku"\s*:\s*["']([^"']+)["']/,
+  ];
+
+  for (const pattern of skuPatterns) {
+    const match = html.match(pattern);
+    if (match && match[1]) {
+      result.sku = match[1];
+      break;
+    }
+  }
+
+  return result.price || result.availability !== 'check-online' ? result : null;
+}
+
+/**
+ * Store-specific extraction enhancements
+ */
+export function extractStoreSpecific(html: string, store: string): Partial<ExtractedProductData> | null {
+  const result: Partial<ExtractedProductData> = {
+    source: `store-specific-${store}`,
+    confidence: 'high',
+  };
+
+  switch (store) {
+    case 'home-depot':
+      return extractHomeDepot(html);
+    case 'lowes':
+      return extractLowes(html);
+    case 'ace-hardware':
+      return extractAceHardware(html);
+    case 'menards':
+      return extractMenards(html);
+    default:
+      return null;
+  }
+}
+
+function extractHomeDepot(html: string): Partial<ExtractedProductData> | null {
+  const result: Partial<ExtractedProductData> = {
+    source: 'home-depot-specific',
+    confidence: 'high',
+  };
+
+  // Home Depot embeds product data in window.__PRELOADED_STATE__ or similar
+  const preloadedStateMatch = html.match(/window\.__PRELOADED_STATE__\s*=\s*({[\s\S]*?});?\s*(?:<\/script>|window\.)/);
+  if (preloadedStateMatch) {
+    try {
+      // This is complex nested JSON, extract just the price
+      const priceMatch = preloadedStateMatch[1].match(/"price"\s*:\s*([\d.]+)/);
+      const availMatch = preloadedStateMatch[1].match(/"fulfillmentOptions"[\s\S]*?"available"\s*:\s*(true|false)/);
+
+      if (priceMatch) {
+        result.price = parseFloat(priceMatch[1]);
+      }
+      if (availMatch) {
+        result.availability = availMatch[1] === 'true' ? 'in-stock' : 'out-of-stock';
+      }
+    } catch (e) {
+      // Fall through to regex patterns
+    }
+  }
+
+  // Backup: Look for HD's price format
+  const hdPriceMatch = html.match(/\$\s*([\d,]+)\s*(?:<sup[^>]*>|\.)(\d{2})/);
+  if (hdPriceMatch && !result.price) {
+    result.price = parseFloat(`${hdPriceMatch[1].replace(/,/g, '')}.${hdPriceMatch[2]}`);
+  }
+
+  // Check for BOPIS (Buy Online Pick Up In Store) availability
+  if (/pickup.?(?:today|available|ready)/i.test(html)) {
+    result.availability = 'in-stock';
+    result.storeStock = 'Available for pickup';
+  } else if (/ship.to.store/i.test(html) && !result.availability) {
+    result.availability = 'online-only';
+  }
+
+  return result.price ? result : null;
+}
+
+function extractLowes(html: string): Partial<ExtractedProductData> | null {
+  const result: Partial<ExtractedProductData> = {
+    source: 'lowes-specific',
+    confidence: 'high',
+  };
+
+  // Lowe's uses data layer and structured pricing
+  const lowesDataMatch = html.match(/window\.digitalData\s*=\s*({[\s\S]*?});/);
+  if (lowesDataMatch) {
+    try {
+      const priceMatch = lowesDataMatch[1].match(/"price"\s*:\s*([\d.]+)/);
+      if (priceMatch) {
+        result.price = parseFloat(priceMatch[1]);
+      }
+    } catch (e) {
+      // Continue to backup patterns
+    }
+  }
+
+  // Lowe's price patterns
+  const lowesPricePatterns = [
+    /art-pd-price[^>]*>\s*\$\s*([\d,]+\.?\d*)/i,
+    /finalPrice["']\s*:\s*([\d.]+)/,
+    /class=["'][^"']*price[^"']*["'][^>]*>\s*\$\s*([\d,]+\.?\d*)/i,
+  ];
+
+  for (const pattern of lowesPricePatterns) {
+    const match = html.match(pattern);
+    if (match && match[1] && !result.price) {
+      result.price = parseFloat(match[1].replace(/,/g, ''));
+      break;
+    }
+  }
+
+  // Check availability indicators
+  if (/(?:in.stock|available).at.your.store/i.test(html)) {
+    result.availability = 'in-stock';
+  } else if (/check.other.stores/i.test(html)) {
+    result.availability = 'limited';
+  } else if (/out.of.stock|unavailable/i.test(html)) {
+    result.availability = 'out-of-stock';
+  }
+
+  return result.price ? result : null;
+}
+
+function extractAceHardware(html: string): Partial<ExtractedProductData> | null {
+  const result: Partial<ExtractedProductData> = {
+    source: 'ace-specific',
+    confidence: 'high',
+  };
+
+  // Ace Hardware patterns
+  const acePriceMatch = html.match(/class=["'][^"']*product-price[^"']*["'][^>]*>\s*\$\s*([\d,]+\.?\d*)/i);
+  if (acePriceMatch) {
+    result.price = parseFloat(acePriceMatch[1].replace(/,/g, ''));
+  }
+
+  // JSON price data
+  const aceJsonMatch = html.match(/"productPrice"\s*:\s*([\d.]+)/);
+  if (aceJsonMatch && !result.price) {
+    result.price = parseFloat(aceJsonMatch[1]);
+  }
+
+  // Ace availability - often shows local store stock
+  if (/available.at.(?:your|nearby)/i.test(html)) {
+    result.availability = 'in-stock';
+  } else if (/order.online/i.test(html)) {
+    result.availability = 'online-only';
+  }
+
+  return result.price ? result : null;
+}
+
+function extractMenards(html: string): Partial<ExtractedProductData> | null {
+  const result: Partial<ExtractedProductData> = {
+    source: 'menards-specific',
+    confidence: 'high',
+  };
+
+  // Menards price patterns
+  const menardsPriceMatch = html.match(/class=["'][^"']*price[^"']*["'][^>]*>\s*\$\s*([\d,]+\.?\d*)/i);
+  if (menardsPriceMatch) {
+    result.price = parseFloat(menardsPriceMatch[1].replace(/,/g, ''));
+  }
+
+  // Menards availability
+  if (/in.stock|available/i.test(html)) {
+    result.availability = 'in-stock';
+  }
+
+  return result.price ? result : null;
+}
+
+/**
+ * Master extraction function - tries all methods and merges results
+ */
+export function extractProductData(html: string, store?: string): ExtractedProductData {
+  const defaultResult: ExtractedProductData = {
+    price: null,
+    originalPrice: null,
+    currency: 'USD',
+    availability: 'check-online',
+    sku: null,
+    productName: null,
+    brand: null,
+    rating: null,
+    reviewCount: null,
+    storeStock: null,
+    confidence: 'low',
+    source: 'none',
+  };
+
+  // Try extraction methods in order of reliability
+  const methods = [
+    () => extractJsonLd(html),
+    () => store ? extractStoreSpecific(html, store) : null,
+    () => extractMetaTags(html),
+    () => extractHtmlPatterns(html),
+  ];
+
+  let result = { ...defaultResult };
+
+  for (const method of methods) {
+    const extracted = method();
+    if (extracted) {
+      // Merge results, preferring earlier (more reliable) extractions
+      result = {
+        ...result,
+        ...Object.fromEntries(
+          Object.entries(extracted).filter(([_, v]) => v !== null && v !== undefined)
+        ),
+      } as ExtractedProductData;
+
+      // If we have price and availability with high confidence, we're done
+      if (result.price && result.availability !== 'check-online' && result.confidence === 'high') {
+        break;
+      }
+    }
+  }
+
+  // Determine overall confidence
+  if (result.price && result.availability !== 'check-online') {
+    result.confidence = result.source.includes('json-ld') || result.source.includes('specific') ? 'high' : 'medium';
+  } else if (result.price) {
+    result.confidence = 'medium';
+  } else {
+    result.confidence = 'low';
+  }
+
+  return result;
+}
+
+/**
+ * Fetch and extract product data from a URL
+ */
+export async function fetchProductData(url: string, store?: string): Promise<ExtractedProductData & { url: string }> {
+  const defaultResult: ExtractedProductData & { url: string } = {
+    url,
+    price: null,
+    originalPrice: null,
+    currency: 'USD',
+    availability: 'check-online',
+    sku: null,
+    productName: null,
+    brand: null,
+    rating: null,
+    reviewCount: null,
+    storeStock: null,
+    confidence: 'low',
+    source: 'fetch-failed',
+  };
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'DNT': '1',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Cache-Control': 'no-cache',
+      },
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      console.error(`Failed to fetch ${url}: HTTP ${response.status}`);
+      return defaultResult;
+    }
+
+    const html = await response.text();
+    const extracted = extractProductData(html, store);
+
+    return {
+      ...extracted,
+      url,
+    };
+  } catch (error: any) {
+    console.error(`Error fetching product data from ${url}:`, error.message);
+    return defaultResult;
+  }
+}
+
+/**
+ * Search Google Shopping for price validation
+ * Returns aggregated pricing from multiple retailers
+ */
+export async function searchGoogleShopping(query: string, apiKey?: string): Promise<{
+  avgPrice: number | null;
+  minPrice: number | null;
+  maxPrice: number | null;
+  sources: Array<{ store: string; price: number }>;
+}> {
+  const result = {
+    avgPrice: null as number | null,
+    minPrice: null as number | null,
+    maxPrice: null as number | null,
+    sources: [] as Array<{ store: string; price: number }>,
+  };
+
+  // Use Brave Search to find Google Shopping-like results
+  if (!apiKey) {
+    apiKey = process.env.BRAVE_SEARCH_API_KEY;
+  }
+
+  if (!apiKey) {
+    return result;
+  }
+
+  try {
+    // Search for product with price-focused query
+    const searchQuery = `${query} price buy`;
+    const response = await fetch(
+      `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(searchQuery)}&count=15`,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'X-Subscription-Token': apiKey,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      return result;
+    }
+
+    const data = await response.json();
+
+    // Extract prices from search result snippets
+    const priceRegex = /\$\s*([\d,]+\.?\d{0,2})/g;
+    const prices: number[] = [];
+
+    if (data.web?.results) {
+      for (const item of data.web.results) {
+        const text = `${item.title} ${item.description}`;
+        let match;
+        while ((match = priceRegex.exec(text)) !== null) {
+          const price = parseFloat(match[1].replace(/,/g, ''));
+          if (price > 0.5 && price < 10000) { // Reasonable price range
+            prices.push(price);
+
+            // Try to identify the store
+            const url = item.url || '';
+            let store = 'Unknown';
+            if (url.includes('homedepot')) store = 'Home Depot';
+            else if (url.includes('lowes')) store = "Lowe's";
+            else if (url.includes('amazon')) store = 'Amazon';
+            else if (url.includes('walmart')) store = 'Walmart';
+            else if (url.includes('ace')) store = 'Ace Hardware';
+            else if (url.includes('menards')) store = 'Menards';
+
+            result.sources.push({ store, price });
+          }
+        }
+      }
+    }
+
+    if (prices.length > 0) {
+      result.minPrice = Math.min(...prices);
+      result.maxPrice = Math.max(...prices);
+      result.avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Google Shopping search error:', error);
+    return result;
+  }
+}
+
+/**
+ * Validate and reconcile prices from multiple sources
+ */
+export function validatePrices(
+  directPrice: number | null,
+  shoppingPrices: { avgPrice: number | null; minPrice: number | null; maxPrice: number | null }
+): { price: number | null; confidence: 'high' | 'medium' | 'low'; warning?: string } {
+  if (!directPrice && !shoppingPrices.avgPrice) {
+    return { price: null, confidence: 'low' };
+  }
+
+  if (!directPrice && shoppingPrices.avgPrice) {
+    return {
+      price: shoppingPrices.avgPrice,
+      confidence: 'medium',
+      warning: 'Price estimated from similar products',
+    };
+  }
+
+  if (directPrice && !shoppingPrices.avgPrice) {
+    return { price: directPrice, confidence: 'medium' };
+  }
+
+  // Both available - validate
+  const diff = Math.abs(directPrice! - shoppingPrices.avgPrice!) / shoppingPrices.avgPrice!;
+
+  if (diff < 0.15) {
+    // Within 15% - good match
+    return { price: directPrice, confidence: 'high' };
+  } else if (diff < 0.5) {
+    // Within 50% - might be sale or different size
+    return {
+      price: directPrice,
+      confidence: 'medium',
+      warning: `Price varies. Range: $${shoppingPrices.minPrice?.toFixed(2)} - $${shoppingPrices.maxPrice?.toFixed(2)}`,
+    };
+  } else {
+    // Large difference - flag it
+    return {
+      price: directPrice,
+      confidence: 'low',
+      warning: `Price may be incorrect. Typical range: $${shoppingPrices.minPrice?.toFixed(2)} - $${shoppingPrices.maxPrice?.toFixed(2)}`,
+    };
+  }
+}
