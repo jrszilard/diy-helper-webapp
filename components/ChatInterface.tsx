@@ -376,6 +376,10 @@ export default function ChatInterface({
                       setTimeout(() => setInventoryNotification(null), 5000);
                     }
                   }
+                  if (event.toolName === 'inventory_auth_required') {
+                    setInventoryNotification({ added: [], existing: [], authRequired: true } as any);
+                    setTimeout(() => setInventoryNotification(null), 5000);
+                  }
                   break;
 
                 case 'error':
@@ -701,9 +705,16 @@ export default function ChatInterface({
     <div className="flex flex-col h-full bg-[#F5F0E6]">
       {/* Inventory Update Notification Toast */}
       {inventoryNotification && (
-        <div className="fixed top-20 right-4 bg-[#4A7C59] text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-slide-in max-w-sm">
+        <div className={`fixed top-20 right-4 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-slide-in max-w-sm ${
+          (inventoryNotification as any).authRequired ? 'bg-[#B8593B]' : 'bg-[#4A7C59]'
+        }`}>
           <Package size={20} className="flex-shrink-0" />
           <div className="flex-1">
+            {(inventoryNotification as any).authRequired ? (
+              <p className="font-medium text-sm">
+                Sign in to save items to your inventory
+              </p>
+            ) : (<>
             {inventoryNotification.added.length > 0 && (
               <p className="font-medium text-sm">
                 Added to inventory: {inventoryNotification.added.join(', ')}
@@ -714,6 +725,7 @@ export default function ChatInterface({
                 Already in inventory: {inventoryNotification.existing.join(', ')}
               </p>
             )}
+            </>)}
           </div>
           <button
             onClick={() => setInventoryNotification(null)}

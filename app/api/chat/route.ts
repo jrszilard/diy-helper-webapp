@@ -520,7 +520,7 @@ If you cannot find specific local codes, provide the national code reference and
 
     if (!userId) {
       console.log('⚠️ No userId provided for detect_owned_items');
-      return "⚠️ User not logged in. Items noted but cannot be saved to inventory. Please sign in to save your tools.";
+      return "FAILED: User is NOT logged in. The items were NOT added to inventory. NOTHING was saved. You MUST tell the user that their items could not be saved because they are not signed in, and suggest they sign in to save their tools.";
     }
 
     if (!items || items.length === 0) {
@@ -1021,6 +1021,9 @@ export async function POST(req: NextRequest) {
                 console.log(`📤 Tool result for ${block.name}:`, result.substring(0, 200));
 
                 // Forward inventory updates to client as dedicated SSE events
+                if (block.name === 'detect_owned_items' && result.startsWith('FAILED:')) {
+                  sendEvent({ type: 'tool_result', toolName: 'inventory_auth_required', result: null });
+                }
                 const invMatch = result.match(/---INVENTORY_UPDATE---\n([\s\S]*?)\n---END_INVENTORY_UPDATE---/);
                 if (invMatch) {
                   try {
