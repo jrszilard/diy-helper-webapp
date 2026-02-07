@@ -74,7 +74,7 @@ export default function ChatInterface({
   onOpenInventory?: () => void;
   onRequestAuth?: () => void;
 }) {
-  const [messages, setMessages] = useState<Message[]>(() => loadMessagesFromStorage());
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [projectId, setProjectId] = useState<string | undefined>(initialProjectId);
@@ -106,8 +106,21 @@ export default function ChatInterface({
   const [isGuestMode, setIsGuestMode] = useState(false);
   const [isAutoExtracting, setIsAutoExtracting] = useState(false);
 
-  // Save messages to localStorage whenever they change
+  // Load messages from localStorage on mount (avoids hydration mismatch)
   useEffect(() => {
+    const saved = loadMessagesFromStorage();
+    if (saved.length > 0) {
+      setMessages(saved);
+    }
+  }, []);
+
+  // Save messages to localStorage whenever they change
+  const isInitialMount = useRef(true);
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
