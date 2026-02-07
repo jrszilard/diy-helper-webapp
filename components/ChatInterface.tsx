@@ -158,8 +158,13 @@ export default function ChatInterface({
   // Helper to get auth token for API calls
   const getAuthToken = async (): Promise<string | null> => {
     try {
+      // getSession returns the current session from storage
       const { data: { session } } = await supabase.auth.getSession();
-      return session?.access_token || null;
+      if (session?.access_token) return session.access_token;
+
+      // Fallback: refresh the session if getSession returned null
+      const { data: { session: refreshed } } = await supabase.auth.refreshSession();
+      return refreshed?.access_token || null;
     } catch {
       return null;
     }
@@ -360,6 +365,16 @@ export default function ChatInterface({
                   if (event.content) {
                     accumulatedContent += event.content;
                     setStreamingContent(accumulatedContent);
+                  }
+                  break;
+
+                case 'tool_result':
+                  if (event.toolName === 'inventory_update' && event.result) {
+                    const data = event.result;
+                    if (data.added?.length > 0 || data.existing?.length > 0) {
+                      setInventoryNotification(data);
+                      setTimeout(() => setInventoryNotification(null), 5000);
+                    }
                   }
                   break;
 
@@ -695,8 +710,8 @@ export default function ChatInterface({
               </p>
             )}
             {inventoryNotification.existing.length > 0 && (
-              <p className="text-[#B8E0C0] text-xs mt-1">
-                Already owned: {inventoryNotification.existing.join(', ')}
+              <p className="font-medium text-sm">
+                Already in inventory: {inventoryNotification.existing.join(', ')}
               </p>
             )}
           </div>

@@ -1020,6 +1020,14 @@ export async function POST(req: NextRequest) {
 
                 console.log(`📤 Tool result for ${block.name}:`, result.substring(0, 200));
 
+                // Forward inventory updates to client as dedicated SSE events
+                const invMatch = result.match(/---INVENTORY_UPDATE---\n([\s\S]*?)\n---END_INVENTORY_UPDATE---/);
+                if (invMatch) {
+                  try {
+                    sendEvent({ type: 'tool_result', toolName: 'inventory_update', result: JSON.parse(invMatch[1]) });
+                  } catch { /* ignore parse errors */ }
+                }
+
                 assistantContent.push({
                   type: 'tool_use',
                   id: block.id,
