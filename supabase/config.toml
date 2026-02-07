@@ -1,0 +1,14 @@
+[project]
+project_id = ""
+
+[api]
+enabled = true
+port = 54321
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://*.vercel.app/**"]
+
+[db]
+port = 54322

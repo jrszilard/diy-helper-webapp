@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { webSearch } from '@/lib/search';
 import {
   fetchProductData,
@@ -6,6 +6,9 @@ import {
   validatePrices,
   ExtractedProductData,
 } from '@/lib/product-extractor';
+import { handleCorsOptions, applyCorsHeaders } from '@/lib/cors';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { SearchStoresRequestSchema, parseRequestBody } from '@/lib/validation';
 
 // Helper function to add delay
 function sleep(ms: number) {
@@ -328,21 +331,40 @@ function buildSearchUrl(domain: string, materialName: string): string {
 /**
  * Main POST handler
  */
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    // Rate limiting (per-IP, no auth required for this endpoint)
+    const rateLimitResult = checkRateLimit(req, null, 'searchStores');
+    if (!rateLimitResult.allowed) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'Retry-After': String(rateLimitResult.retryAfter),
+          },
+        }
+      ));
+    }
+
+    const body = await req.json();
+
+    // Validate request body
+    const parsed = parseRequestBody(SearchStoresRequestSchema, body);
+    if (!parsed.success) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: parsed.error }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
     const {
       materialName,
       location,
-      stores = ['home-depot', 'lowes', 'ace-hardware'],
-      validatePricing = true,
-    } = await req.json();
-
-    if (!materialName || !location) {
-      return NextResponse.json(
-        { error: 'Missing fields: materialName and location required' },
-        { status: 400 }
-      );
-    }
+      stores,
+      validatePricing,
+    } = parsed.data;
 
     console.log(`\n${'='.repeat(50)}`);
     console.log(`SEARCH: "${materialName}" near ${location}`);
@@ -573,7 +595,7 @@ export async function POST(req: Request) {
     console.log(`Fallback: ${metadata.fallbackResults}`);
     console.log(`${'='.repeat(50)}\n`);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       results,
       stores_searched: stores.length,
       query: materialName,
@@ -590,11 +612,17 @@ export async function POST(req: Request) {
       } : null,
     });
 
+    return applyCorsHeaders(req, response);
+
   } catch (error: any) {
     console.error('Request Error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Internal server error', results: [] },
-      { status: 500 }
-    );
+    return applyCorsHeaders(req, new Response(
+      JSON.stringify({ error: error.message || 'Internal server error', results: [] }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    ));
   }
+}
+
+export async function OPTIONS(req: NextRequest) {
+  return handleCorsOptions(req);
 }

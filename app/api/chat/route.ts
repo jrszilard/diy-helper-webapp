@@ -1,13 +1,10 @@
 import { NextRequest } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { createClient } from '@supabase/supabase-js';
 import { webSearch, webFetch } from '@/lib/search';
-
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-);
+import { getAuthFromRequest, AuthResult } from '@/lib/auth';
+import { handleCorsOptions, applyCorsHeaders } from '@/lib/cors';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { ChatRequestSchema, parseRequestBody } from '@/lib/validation';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
@@ -409,7 +406,7 @@ const tools = [
   }
 ];
 
-async function executeTool(toolName: string, toolInput: any, requestBody?: any): Promise<string> {
+async function executeTool(toolName: string, toolInput: any, auth: AuthResult): Promise<string> {
   console.log(`🔧 Executing tool: ${toolName}`, JSON.stringify(toolInput, null, 2));
 
   if (toolName === "search_building_codes") {
@@ -512,8 +509,7 @@ If you cannot find specific local codes, provide the national code reference and
   if (toolName === "detect_owned_items") {
     const { items, source_context } = toolInput;
 
-    // Get user ID from request context
-    const userId = requestBody?.userId;
+    const userId = auth.userId;
 
     console.log('🔧 detect_owned_items called:', {
       items,
@@ -540,7 +536,7 @@ If you cannot find specific local codes, provide the national code reference and
         console.log(`📦 Processing item: ${item.name}`);
 
         // First, check if item already exists (case-insensitive)
-        const { data: existingData } = await supabase
+        const { data: existingData } = await auth.supabaseClient
           .from('user_inventory')
           .select('id, item_name')
           .eq('user_id', userId)
@@ -553,7 +549,7 @@ If you cannot find specific local codes, provide the national code reference and
         }
 
         // Insert new item
-        const { data, error } = await supabase
+        const { data, error } = await auth.supabaseClient
           .from('user_inventory')
           .insert({
             user_id: userId,
@@ -610,7 +606,7 @@ If you cannot find specific local codes, provide the national code reference and
 
   if (toolName === "check_user_inventory") {
     const { categories } = toolInput;
-    const userId = requestBody?.userId;
+    const userId = auth.userId;
 
     console.log('🔍 check_user_inventory called:', { categories, userId, hasUserId: !!userId });
 
@@ -619,7 +615,7 @@ If you cannot find specific local codes, provide the national code reference and
     }
 
     try {
-      let query = supabase
+      let query = auth.supabaseClient
         .from('user_inventory')
         .select('*')
         .eq('user_id', userId)
@@ -690,7 +686,7 @@ If you cannot find specific local codes, provide the national code reference and
 
   if (toolName === "extract_materials_list") {
     const { project_description, materials } = toolInput;
-    const userId = requestBody?.userId;
+    const userId = auth.userId;
 
     console.log('📝 extract_materials_list called:', {
       project_description,
@@ -707,7 +703,7 @@ If you cannot find specific local codes, provide the national code reference and
     let inventoryItems: any[] = [];
     if (userId) {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await auth.supabaseClient
           .from('user_inventory')
           .select('item_name, category, quantity')
           .eq('user_id', userId);
@@ -908,32 +904,53 @@ export async function POST(req: NextRequest) {
   try {
     if (!process.env.ANTHROPIC_API_KEY) {
       console.error('ANTHROPIC_API_KEY not set');
-      return new Response(
+      return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'API configuration error' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
+      ));
+    }
+
+    // Auth: extract user from JWT (replaces body.userId)
+    const auth = await getAuthFromRequest(req);
+
+    // Rate limiting
+    const rateLimitResult = checkRateLimit(req, auth.userId, 'chat');
+    if (!rateLimitResult.allowed) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'Retry-After': String(rateLimitResult.retryAfter),
+          },
+        }
+      ));
     }
 
     const body = await req.json();
-    const { message, history = [], userId, streaming = true } = body;
+
+    // Validate request body
+    const parsed = parseRequestBody(ChatRequestSchema, body);
+    if (!parsed.success) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: parsed.error }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
+    const { message, history, streaming } = parsed.data;
 
     console.log('📨 Received request:', {
       messageLength: message?.length,
       historyLength: history?.length,
-      userId: userId || 'not provided',
+      userId: auth.userId || 'guest',
       streaming
     });
 
-    if (!message) {
-      return new Response(
-        JSON.stringify({ error: 'Message is required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
     // If not streaming, use the old behavior
     if (!streaming) {
-      return handleNonStreamingRequest(body, message, history, userId);
+      return handleNonStreamingRequest(auth, message, history);
     }
 
     // Streaming response using Server-Sent Events
@@ -999,7 +1016,7 @@ export async function POST(req: NextRequest) {
                 console.log(`🔧 Tool called: ${block.name}`, JSON.stringify(block.input).substring(0, 200));
 
                 // Execute tool
-                const result = await executeTool(block.name, block.input, body);
+                const result = await executeTool(block.name, block.input, auth);
 
                 console.log(`📤 Tool result for ${block.name}:`, result.substring(0, 200));
 
@@ -1090,28 +1107,28 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    return new Response(stream, {
+    return applyCorsHeaders(req, new Response(stream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive'
       }
-    });
+    }));
 
   } catch (error: any) {
     console.error('❌ Chat API error:', error);
-    return new Response(
+    return applyCorsHeaders(req, new Response(
       JSON.stringify({
         error: 'Failed to process message',
         details: error.message
       }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    ));
   }
 }
 
 // Handle non-streaming requests (backward compatibility)
-async function handleNonStreamingRequest(body: any, message: string, history: any[], userId?: string) {
+async function handleNonStreamingRequest(auth: AuthResult, message: string, history: any[]) {
   const messages = [
     ...history,
     { role: 'user' as const, content: message }
@@ -1137,7 +1154,7 @@ async function handleNonStreamingRequest(body: any, message: string, history: an
 
     for (const block of response.content) {
       if (block.type === 'tool_use') {
-        const result = await executeTool(block.name, block.input, body);
+        const result = await executeTool(block.name, block.input, auth);
 
         assistantContent.push({
           type: 'tool_use',
@@ -1206,14 +1223,7 @@ async function handleNonStreamingRequest(body: any, message: string, history: an
 }
 
 export async function OPTIONS(req: NextRequest) {
-  return new Response(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  });
+  return handleCorsOptions(req);
 }
 
 export const runtime = 'nodejs';

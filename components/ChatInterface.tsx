@@ -142,6 +142,16 @@ export default function ChatInterface({
     }
   }, [hasProcessedInitialMessage, isLoading]);
 
+  // Helper to get auth token for API calls
+  const getAuthToken = async (): Promise<string | null> => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      return session?.access_token || null;
+    } catch {
+      return null;
+    }
+  };
+
   // Detect inventory updates when messages change
   useEffect(() => {
     if (messages.length > 0) {
@@ -276,14 +286,19 @@ export default function ChatInterface({
     setShowGoogleFallback(false);
 
     try {
+      const token = await getAuthToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           message: messageContent,
           history: messages,
           project_id: projectId,
-          userId: userId,
           streaming: true
         })
       });
@@ -435,12 +450,17 @@ export default function ChatInterface({
     // No markers - need to auto-extract
     setIsAutoExtracting(true);
     try {
+      const extractToken = await getAuthToken();
+      const extractHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (extractToken) {
+        extractHeaders['Authorization'] = `Bearer ${extractToken}`;
+      }
+
       const response = await fetch('/api/extract-materials', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: extractHeaders,
         body: JSON.stringify({
-          conversationContext: messages,
-          userId: userId
+          conversationContext: messages
         })
       });
 

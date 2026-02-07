@@ -1,13 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { handleCorsOptions, applyCorsHeaders } from '@/lib/cors';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { ExtractMaterialsRequestSchema, parseRequestBody } from '@/lib/validation';
 
 export async function POST(req: NextRequest) {
   try {
-    const { conversationContext } = await req.json();
-
-    if (!conversationContext || !Array.isArray(conversationContext)) {
-      return NextResponse.json({ error: 'Missing conversation context' }, { status: 400 });
+    // Rate limiting (per-IP, 10/min)
+    const rateLimitResult = checkRateLimit(req, null, 'extractMaterials');
+    if (!rateLimitResult.allowed) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'Retry-After': String(rateLimitResult.retryAfter),
+          },
+        }
+      ));
     }
+
+    const body = await req.json();
+
+    // Validate request body
+    const parsed = parseRequestBody(ExtractMaterialsRequestSchema, body);
+    if (!parsed.success) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: parsed.error }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
+    const { conversationContext } = parsed.data;
 
     const anthropic = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY || '',
@@ -80,7 +105,7 @@ Important:
               );
             }
 
-            return NextResponse.json(materials);
+            return applyCorsHeaders(req, NextResponse.json(materials));
           }
         } catch (parseError) {
           console.error('JSON parse error:', parseError);
@@ -88,9 +113,13 @@ Important:
       }
     }
 
-    return NextResponse.json({ error: 'Failed to extract materials from conversation' }, { status: 500 });
+    return applyCorsHeaders(req, NextResponse.json({ error: 'Failed to extract materials from conversation' }, { status: 500 }));
   } catch (error) {
     console.error('Extract materials error:', error);
-    return NextResponse.json({ error: 'Failed to extract materials' }, { status: 500 });
+    return applyCorsHeaders(req, NextResponse.json({ error: 'Failed to extract materials' }, { status: 500 }));
   }
+}
+
+export async function OPTIONS(req: NextRequest) {
+  return handleCorsOptions(req);
 }
