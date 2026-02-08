@@ -164,10 +164,11 @@ export const guestStorage = {
   },
 
   // Migrate guest projects to authenticated user account
-  async migrateToUser(userId: string, supabase: SupabaseClient): Promise<{ migrated: number; failed: number }> {
+  async migrateToUser(userId: string, supabase: SupabaseClient): Promise<{ migrated: number; failed: number; projectNames: string[] }> {
     const guestProjects = this.getProjects();
     let migrated = 0;
     let failed = 0;
+    const projectNames: string[] = [];
 
     for (const project of guestProjects) {
       try {
@@ -208,10 +209,15 @@ export const guestStorage = {
 
           if (materialsError) {
             console.error('Failed to migrate materials for project:', project.name, materialsError);
+            // Rollback: delete the project if materials failed
+            await supabase.from('projects').delete().eq('id', newProject.id);
+            failed++;
+            continue;
           }
         }
 
         migrated++;
+        projectNames.push(project.name);
       } catch (error) {
         console.error('Error migrating project:', project.name, error);
         failed++;
@@ -223,7 +229,7 @@ export const guestStorage = {
       localStorage.removeItem(GUEST_PROJECTS_KEY);
     }
 
-    return { migrated, failed };
+    return { migrated, failed, projectNames };
   },
 
   // Check if there are any guest projects

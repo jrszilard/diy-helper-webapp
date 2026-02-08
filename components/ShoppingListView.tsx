@@ -505,6 +505,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                                 : 'border-[#D4C8B8] hover:border-[#4A7C59]'
                             }`}
                             title={item.purchased ? 'Mark as not purchased' : 'Mark as purchased'}
+                            aria-label={item.purchased ? 'Mark as not purchased' : 'Mark as purchased'}
                           >
                             {item.purchased && <Check className="w-4 h-4" />}
                           </button>
@@ -517,6 +518,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                             onClick={(e) => e.stopPropagation()}
                             className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} text-[#C67B5C] rounded focus:ring-2 focus:ring-[#C67B5C] flex-shrink-0 accent-[#C67B5C]`}
                             title="Select for store search"
+                            aria-label="Select item for store search"
                           />
 
                           <div className="flex-1 min-w-0">
@@ -598,6 +600,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                             onClick={() => deleteItem(item.id)}
                             className="p-2 text-[#D4C8B8] hover:text-[#B8593B] transition rounded-lg hover:bg-[#FADDD0]"
                             title="Remove item"
+                            aria-label="Remove item from list"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

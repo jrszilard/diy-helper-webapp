@@ -287,12 +287,15 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 border border-[#D4C8B8] rounded-lg text-sm focus:ring-2 focus:ring-[#C67B5C] focus:border-[#C67B5C] text-[#3E2723] placeholder-[#A89880] bg-white"
+              aria-label="Search projects"
             />
           </div>
 
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-2 text-sm font-medium ${hasActiveFilters ? 'text-[#5D7B93]' : 'text-[#7D6B5D]'}`}
+            aria-label="Toggle filters"
+            aria-expanded={showFilters}
           >
             <Filter className="w-4 h-4" />
             Filters
@@ -416,6 +419,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                           onClick={(e) => startEditing(project, e)}
                           className="p-2 hover:bg-[#E8F0F5] active:bg-[#D4E4ED] rounded-lg transition"
                           title="Edit project"
+                          aria-label="Edit project"
                         >
                           <Edit2 className="w-5 h-5 text-[#5D7B93]" />
                         </button>
@@ -424,6 +428,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                         onClick={(e) => deleteProject(project.id, e, project.isGuest)}
                         className="p-2 hover:bg-[#FDF3ED] active:bg-[#FADDD0] rounded-lg transition"
                         title="Delete project"
+                        aria-label="Delete project"
                       >
                         <Trash2 className="w-5 h-5 text-[#B8593B]" />
                       </button>
@@ -456,6 +461,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-3 py-1.5 border border-[#D4C8B8] rounded-lg text-sm focus:ring-2 focus:ring-[#C67B5C] focus:border-[#C67B5C] text-[#3E2723] placeholder-[#A89880] bg-white"
+            aria-label="Search projects"
           />
         </div>
       </div>
@@ -465,6 +471,8 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
         <button
           onClick={() => setShowFilters(!showFilters)}
           className={`flex items-center gap-1 text-xs font-medium ${hasActiveFilters ? 'text-[#5D7B93]' : 'text-[#7D6B5D]'}`}
+          aria-label="Toggle filters"
+          aria-expanded={showFilters}
         >
           <Filter className="w-3 h-3" />
           Filters
@@ -597,6 +605,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                               onClick={(e) => startEditing(project, e)}
                               className="p-1 hover:bg-[#E8F0F5] rounded transition"
                               title="Edit project"
+                              aria-label="Edit project"
                             >
                               <Edit2 className="w-4 h-4 text-[#5D7B93]" />
                             </button>
@@ -605,6 +614,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                             onClick={(e) => deleteProject(project.id, e, project.isGuest)}
                             className="p-1 hover:bg-[#FDF3ED] rounded transition"
                             title="Delete project"
+                            aria-label="Delete project"
                           >
                             <Trash2 className="w-4 h-4 text-[#B8593B]" />
                           </button>

@@ -14,15 +14,35 @@ const anthropic = new Anthropic({
 });
 
 // Progress event types
-interface StreamEvent {
-  type: 'progress' | 'text' | 'tool_start' | 'tool_result' | 'done' | 'error';
-  step?: string;
-  message?: string;
-  icon?: string;
-  content?: string;
-  toolName?: string;
-  result?: any;
+interface ProgressEvent {
+  type: 'progress';
+  step: string;
+  message: string;
+  icon: string;
 }
+
+interface TextEvent {
+  type: 'text';
+  content: string;
+}
+
+interface ToolResultEvent {
+  type: 'tool_result';
+  toolName: string;
+  result: any;
+}
+
+interface DoneEvent {
+  type: 'done';
+  conversationId?: string | null;
+}
+
+interface ErrorEvent {
+  type: 'error';
+  content: string;
+}
+
+type StreamEvent = ProgressEvent | TextEvent | ToolResultEvent | DoneEvent | ErrorEvent;
 
 // Progress messages for each tool
 const progressMessages: Record<string, { message: string; icon: string }> = {
@@ -1210,7 +1230,7 @@ export async function POST(req: NextRequest) {
             }
           }
 
-          sendEvent({ type: 'done', conversationId: responseConversationId } as any);
+          sendEvent({ type: 'done', conversationId: responseConversationId });
           controller.close();
 
         } catch (error: any) {

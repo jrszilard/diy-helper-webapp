@@ -93,6 +93,7 @@ export default function AuthButton({
       <button
         onClick={handleSignOut}
         className="flex items-center gap-2 text-[#3E2723] hover:text-[#C67B5C] transition"
+        aria-label="Sign out"
       >
         <User className="w-5 h-5" />
         <span className="hidden sm:inline">{user.email}</span>
@@ -120,6 +121,7 @@ export default function AuthButton({
               <button
                 onClick={() => setShowAuth(false)}
                 className="p-1 hover:bg-[#E8DFD0] rounded-lg transition"
+                aria-label="Close sign in dialog"
               >
                 <X className="w-5 h-5 text-[#7D6B5D]" />
               </button>

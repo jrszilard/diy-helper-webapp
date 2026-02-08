@@ -247,6 +247,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
           <button
             onClick={onClose}
             className="p-2 hover:bg-[#A65D3F] active:bg-[#8B4D33] rounded-lg transition-colors"
+            aria-label="Close inventory panel"
           >
             <X size={24} />
           </button>
@@ -262,6 +263,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-[#D4C8B8] rounded-lg text-[#3E2723] bg-white focus:outline-none focus:ring-2 focus:ring-[#C67B5C] placeholder-[#A89880]"
+              aria-label="Search inventory"
             />
           </div>
 
@@ -273,6 +275,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                   ? 'bg-[#C67B5C] text-white'
                   : 'bg-[#F5F0E6] text-[#5C4D42] hover:bg-[#E8DFD0]'
               }`}
+              aria-label="Show all categories"
             >
               All
             </button>
@@ -287,6 +290,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                     ? 'bg-[#C67B5C] text-white'
                     : 'bg-[#F5F0E6] text-[#5C4D42] hover:bg-[#E8DFD0]'
                 }`}
+                aria-label={`Filter by ${cat.label}`}
               >
                 <cat.icon size={14} />
                 {cat.label}
@@ -302,7 +306,9 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
               {editingItem ? 'Edit Item' : 'Add New Item'}
             </h3>
             <div className="space-y-3">
+              <label htmlFor="inventory-item-name" className="sr-only">Item name</label>
               <input
+                id="inventory-item-name"
                 type="text"
                 placeholder="Item name (e.g., Cordless Drill)"
                 value={formData.item_name}
@@ -311,7 +317,9 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
               />
 
               <div className="flex gap-2">
+                <label htmlFor="inventory-category" className="sr-only">Category</label>
                 <select
+                  id="inventory-category"
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   className="flex-1 p-2 border border-[#D4C8B8] rounded-lg text-[#3E2723] bg-white focus:outline-none focus:ring-2 focus:ring-[#C67B5C]"
@@ -321,7 +329,9 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                   ))}
                 </select>
 
+                <label htmlFor="inventory-quantity" className="sr-only">Quantity</label>
                 <input
+                  id="inventory-quantity"
                   type="number"
                   min="1"
                   value={formData.quantity}
@@ -331,7 +341,9 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                 />
               </div>
 
+              <label htmlFor="inventory-condition" className="sr-only">Condition</label>
               <select
+                id="inventory-condition"
                 value={formData.condition}
                 onChange={(e) => setFormData({ ...formData, condition: e.target.value })}
                 className="w-full p-2 border border-[#D4C8B8] rounded-lg text-[#3E2723] bg-white focus:outline-none focus:ring-2 focus:ring-[#C67B5C]"
@@ -341,7 +353,9 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                 ))}
               </select>
 
+              <label htmlFor="inventory-notes" className="sr-only">Notes</label>
               <textarea
+                id="inventory-notes"
                 placeholder="Notes (optional)"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
@@ -447,12 +461,14 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                             <button
                               onClick={() => startEdit(item)}
                               className="p-2 text-[#7D6B5D] hover:text-[#5D7B93] active:text-[#4A6275] hover:bg-[#E8F0F5] active:bg-[#D4E4ED] rounded-lg"
+                              aria-label="Edit item"
                             >
                               <Edit2 size={18} />
                             </button>
                             <button
                               onClick={() => handleDeleteItem(item.id)}
                               className="p-2 text-[#7D6B5D] hover:text-[#B8593B] active:text-[#9A4830] hover:bg-[#FADDD0] active:bg-[#F5C9B8] rounded-lg"
+                              aria-label="Delete item"
                             >
                               <Trash2 size={18} />
                             </button>

@@ -12,7 +12,7 @@ export const ChatRequestSchema = z.object({
     .max(500, 'History too long')
     .default([]),
   streaming: z.boolean().default(true),
-  project_id: z.string().optional(),
+  project_id: z.string().uuid().optional(),
   conversationId: z.string().uuid().optional(),
 });
 
@@ -48,8 +48,13 @@ export const AddMessageSchema = z.object({
   metadata: z.record(z.string(), z.any()).optional(),
 });
 
+export const UpdateConversationSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(200, 'Title too long'),
+});
+
 export type CreateConversation = z.infer<typeof CreateConversationSchema>;
 export type AddMessage = z.infer<typeof AddMessageSchema>;
+export type UpdateConversation = z.infer<typeof UpdateConversationSchema>;
 
 export type ChatRequest = z.infer<typeof ChatRequestSchema>;
 export type SearchStoresRequest = z.infer<typeof SearchStoresRequestSchema>;

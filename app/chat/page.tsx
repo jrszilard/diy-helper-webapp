@@ -18,6 +18,7 @@ export default function ChatPage() {
 
   const [showInventory, setShowInventory] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [migrationToast, setMigrationToast] = useState<string | null>(null);
 
   // Mobile panel states
   const [showMobileProjects, setShowMobileProjects] = useState(false);
@@ -28,8 +29,29 @@ export default function ChatPage() {
       setUser(user);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const newUser = session?.user ?? null;
+      setUser(newUser);
+
+      // Trigger guest-to-auth migration when user signs in
+      if (newUser && _event === 'SIGNED_IN') {
+        if (guestStorage.hasProjects()) {
+          try {
+            const result = await guestStorage.migrateToUser(newUser.id, supabase);
+            if (result.migrated > 0) {
+              setMigrationToast(
+                `Migrated ${result.migrated} project${result.migrated > 1 ? 's' : ''} to your account`
+              );
+              setTimeout(() => setMigrationToast(null), 5000);
+            }
+            if (result.failed > 0) {
+              console.error(`Failed to migrate ${result.failed} project(s)`);
+            }
+          } catch (err) {
+            console.error('Migration error:', err);
+          }
+        }
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -79,6 +101,21 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen blueprint-bg-subtle">
+      {/* Migration Toast */}
+      {migrationToast && (
+        <div className="fixed top-20 right-4 bg-[#4A7C59] text-white px-4 py-3 rounded-lg shadow-lg z-[60] flex items-center gap-3 animate-slide-in max-w-sm">
+          <Package size={20} className="flex-shrink-0" />
+          <p className="font-medium text-sm">{migrationToast}</p>
+          <button
+            onClick={() => setMigrationToast(null)}
+            className="ml-2 hover:bg-[#2D5A3B] p-1 rounded flex-shrink-0"
+            aria-label="Dismiss migration notification"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
       {/* Desktop Projects Sidebar - hidden on mobile, shown for both guests and authenticated users */}
       <div className="hidden md:block">
         <ProjectsSidebar
