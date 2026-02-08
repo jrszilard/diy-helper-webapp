@@ -9,7 +9,7 @@ export default function AuthButton({
   externalShowAuth,
   onAuthToggle
 }: {
-  user: any;
+  user: { id: string; email?: string } | null;
   externalShowAuth?: boolean;
   onAuthToggle?: (show: boolean) => void;
 }) {

@@ -42,9 +42,10 @@ export async function GET(
       JSON.stringify({ messages }),
       { headers: { 'Content-Type': 'application/json' } }
     ));
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return applyCorsHeaders(req, new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: message }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     ));
   }
@@ -93,9 +94,10 @@ export async function POST(
       JSON.stringify(message),
       { status: 201, headers: { 'Content-Type': 'application/json' } }
     ));
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return applyCorsHeaders(req, new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: message }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     ));
   }

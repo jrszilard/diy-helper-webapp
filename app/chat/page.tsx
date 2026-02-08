@@ -11,10 +11,12 @@ import { guestStorage } from '@/lib/guestStorage';
 import AuthButton from '@/components/AuthButton';
 import InventoryPanel from '@/components/InventoryPanel';
 import { Package } from 'lucide-react';
+import { Project } from '@/types';
+import type { User } from '@supabase/supabase-js';
 
 export default function ChatPage() {
-  const [user, setUser] = useState<any>(null);
-  const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const [showInventory, setShowInventory] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -88,7 +90,7 @@ export default function ChatPage() {
   };
 
   // Handle project selection from sidebar
-  const handleSelectProject = (project: any) => {
+  const handleSelectProject = (project: Project | null) => {
     setSelectedProject(project);
     setShowMobileProjects(false); // Close mobile panel after selection
   };
@@ -250,7 +252,7 @@ export default function ChatPage() {
         <div className="flex-1 overflow-hidden flex">
           <div className="flex-1 overflow-hidden">
             <ChatInterface
-              userId={user?.id}
+              userId={user?.id ?? ''}
               projectId={selectedProject?.id}
               onProjectLinked={handleProjectLinked}
               onRequestAuth={() => setShowAuthModal(true)}
@@ -267,7 +269,7 @@ export default function ChatPage() {
       </div>
 
       <InventoryPanel
-        userId={user?.id}
+        userId={user?.id ?? ''}
         isOpen={showInventory}
         onClose={() => setShowInventory(false)}
       />

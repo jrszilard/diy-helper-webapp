@@ -2,7 +2,9 @@ import { pruning } from '@/lib/config';
 
 interface Message {
   role: 'user' | 'assistant';
-  content: string | any[];
+  // Content is either a plain string or an array of Anthropic content blocks (tool_use, tool_result, text, etc.)
+  // Using generic record type since this passes through from client to Anthropic API
+  content: string | Array<Record<string, unknown>>;
 }
 
 /**

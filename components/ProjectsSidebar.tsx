@@ -22,21 +22,11 @@ import {
   FlaskConical,
   User
 } from 'lucide-react';
-
-interface Project {
-  id: string;
-  name: string;
-  description?: string;
-  created_at: string;
-  category?: string;
-  status?: string;
-  isGuest?: boolean; // Flag to identify guest projects
-  materials?: any[]; // For guest projects
-}
+import { Project } from '@/types';
 
 interface ProjectsSidebarProps {
-  user: any;
-  onSelectProject: (project: any) => void;
+  user: { id: string; email?: string } | null;
+  onSelectProject: (project: Project | null) => void;
   isMobile?: boolean;
 }
 
@@ -154,6 +144,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
   };
 
   const loadProjects = async () => {
+    if (!user) return;
     const { data } = await supabase
       .from('projects')
       .select('*')
@@ -171,7 +162,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
     }
   };
 
-  const deleteProject = async (id: string, e: any, isGuest: boolean = false) => {
+  const deleteProject = async (id: string, e: React.MouseEvent, isGuest: boolean = false) => {
     e.stopPropagation();
     if (!confirm('Delete this project?')) return;
 
@@ -189,7 +180,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
     }
   };
 
-  const updateProjectStatus = async (id: string, status: string, e: any) => {
+  const updateProjectStatus = async (id: string, status: string, e: React.MouseEvent) => {
     e.stopPropagation();
     await supabase
       .from('projects')
@@ -205,14 +196,14 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
     setEditDescription(project.description || '');
   };
 
-  const cancelEditing = (e: React.MouseEvent) => {
+  const cancelEditing = (e: React.SyntheticEvent) => {
     e.stopPropagation();
     setEditingProject(null);
     setEditName('');
     setEditDescription('');
   };
 
-  const saveEditing = async (id: string, e: React.MouseEvent) => {
+  const saveEditing = async (id: string, e: React.SyntheticEvent) => {
     e.stopPropagation();
     if (!editName.trim()) return;
 
@@ -230,7 +221,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
     setEditingProject(null);
   };
 
-  const selectProject = (project: any) => {
+  const selectProject = (project: Project) => {
     setSelectedId(project.id);
     onSelectProject(project);
   };
@@ -546,8 +537,8 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                                 className="w-full px-2 py-1 text-sm border border-[#D4C8B8] rounded focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] bg-white"
                                 autoFocus
                                 onKeyDown={(e) => {
-                                  if (e.key === 'Enter') saveEditing(project.id, e as any);
-                                  if (e.key === 'Escape') cancelEditing(e as any);
+                                  if (e.key === 'Enter') saveEditing(project.id, e);
+                                  if (e.key === 'Escape') cancelEditing(e);
                                 }}
                               />
                               <input
@@ -557,8 +548,8 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                                 placeholder="Description (optional)"
                                 className="w-full px-2 py-1 text-xs border border-[#D4C8B8] rounded focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] placeholder-[#A89880] bg-white"
                                 onKeyDown={(e) => {
-                                  if (e.key === 'Enter') saveEditing(project.id, e as any);
-                                  if (e.key === 'Escape') cancelEditing(e as any);
+                                  if (e.key === 'Enter') saveEditing(project.id, e);
+                                  if (e.key === 'Escape') cancelEditing(e);
                                 }}
                               />
                               <div className="flex gap-1">

@@ -72,7 +72,8 @@ export function extractJsonLd(html: string): Partial<ExtractedProductData> | nul
   }
 }
 
-function parseProductJsonLd(product: any): Partial<ExtractedProductData> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON-LD from external sites has unpredictable shape
+function parseProductJsonLd(product: Record<string, any>): Partial<ExtractedProductData> {
   const result: Partial<ExtractedProductData> = {
     source: 'json-ld',
     confidence: 'high',
@@ -590,8 +591,9 @@ export async function fetchProductData(url: string, store?: string): Promise<Ext
       ...extracted,
       url,
     };
-  } catch (error: any) {
-    console.error(`Error fetching product data from ${url}:`, error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error(`Error fetching product data from ${url}:`, message);
     return defaultResult;
   }
 }

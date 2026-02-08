@@ -98,7 +98,7 @@ export default function ChatInterface({
   const [projectId, setProjectId] = useState<string | undefined>(initialProjectId);
   const [extractedMaterials, setExtractedMaterials] = useState<ExtractedMaterials | null>(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>([]);
   const [newProjectName, setNewProjectName] = useState('');
   const [showCreateProjectDialog, setShowCreateProjectDialog] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
@@ -120,6 +120,7 @@ export default function ChatInterface({
   const [inventoryNotification, setInventoryNotification] = useState<{
     added: string[];
     existing: string[];
+    authRequired?: boolean;
   } | null>(null);
 
   // Guest projects state
@@ -338,7 +339,7 @@ export default function ChatInterface({
                     }
                   }
                   if (event.toolName === 'inventory_auth_required') {
-                    setInventoryNotification({ added: [], existing: [], authRequired: true } as any);
+                    setInventoryNotification({ added: [], existing: [], authRequired: true });
                     setTimeout(() => setInventoryNotification(null), 5000);
                   }
                   break;
@@ -562,9 +563,10 @@ export default function ChatInterface({
       successMsg += ` The shopping list should now appear on the right.`;
 
       setMessages(prev => [...prev, { role: 'assistant', content: successMsg }]);
-    } catch (err: any) {
-      console.error('Error:', err);
-      alert('An error occurred while saving materials: ' + err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      console.error('Error:', message);
+      alert('An error occurred while saving materials: ' + message);
     }
   };
 
@@ -643,8 +645,8 @@ export default function ChatInterface({
           { role: 'assistant', content: `Created project "${newProjectName.trim()}"! Your conversation is now linked to this project.` }
         ]);
       }
-    } catch (err: any) {
-      console.error('Error creating project:', err);
+    } catch (err: unknown) {
+      console.error('Error creating project:', err instanceof Error ? err.message : err);
       alert('An error occurred while creating project.');
     }
   };
@@ -670,11 +672,11 @@ export default function ChatInterface({
       {/* Inventory Update Notification Toast */}
       {inventoryNotification && (
         <div className={`fixed top-20 right-4 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-slide-in max-w-sm ${
-          (inventoryNotification as any).authRequired ? 'bg-[#B8593B]' : 'bg-[#4A7C59]'
+          inventoryNotification.authRequired ? 'bg-[#B8593B]' : 'bg-[#4A7C59]'
         }`}>
           <Package size={20} className="flex-shrink-0" />
           <div className="flex-1">
-            {(inventoryNotification as any).authRequired ? (
+            {inventoryNotification.authRequired ? (
               <p className="font-medium text-sm">
                 Sign in to save items to your inventory
               </p>

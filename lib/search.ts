@@ -6,13 +6,10 @@ export async function webSearch(query: string, retries: number = 2): Promise<str
     return "Web search not configured. Please add BRAVE_SEARCH_API_KEY to environment variables.";
   }
 
-  console.log('Searching for:', query);
-
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       if (attempt > 0) {
-        console.log(`Retry attempt ${attempt} for query: ${query}`);
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
       }
 
       const response = await fetch(
@@ -29,7 +26,7 @@ export async function webSearch(query: string, retries: number = 2): Promise<str
       if (!response.ok) {
         console.error('Brave API error:', response.status, response.statusText);
         if (attempt < retries && response.status >= 500) {
-          continue; // Retry on server errors
+          continue;
         }
         return `Search API error: ${response.status}`;
       }
@@ -38,16 +35,13 @@ export async function webSearch(query: string, retries: number = 2): Promise<str
 
       if (!data.web || !data.web.results || data.web.results.length === 0) {
         if (attempt < retries) {
-          continue; // Retry if no results
+          continue;
         }
         return "No search results found";
       }
 
-      console.log('Found', data.web.results.length, 'results');
-
       let results = `Search results for "${query}":\n\n`;
 
-      // Return more results for better URL coverage
       for (const result of data.web.results.slice(0, 12)) {
         results += `**${result.title}**\n`;
         results += `${result.description}\n`;
@@ -58,7 +52,7 @@ export async function webSearch(query: string, retries: number = 2): Promise<str
     } catch (error) {
       console.error('Search error:', error);
       if (attempt < retries) {
-        continue; // Retry on network errors
+        continue;
       }
       return `Search error: ${error}`;
     }
@@ -68,12 +62,10 @@ export async function webSearch(query: string, retries: number = 2): Promise<str
 }
 
 export async function webFetch(url: string): Promise<string> {
-  console.log('Fetching:', url);
-  
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
-    
+
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -86,26 +78,16 @@ export async function webFetch(url: string): Promise<string> {
       },
       signal: controller.signal
     });
-    
+
     clearTimeout(timeoutId);
-    
-    console.log('Response status:', response.status, response.statusText);
-    
+
     if (!response.ok) {
-      console.error('Fetch failed - HTTP', response.status);
+      console.error('Fetch failed:', response.status);
       return `Error fetching URL: HTTP ${response.status}`;
     }
 
     const html = await response.text();
-    
-    console.log('Raw HTML length:', html.length, 'characters');
-    console.log('First 500 chars of HTML:', html.substring(0, 500));
-    
-    if (html.length < 1000) {
-      console.warn('Very short response - might be blocked or redirected');
-      console.log('Full response:', html);
-    }
-    
+
     const text = html
       .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
@@ -116,23 +98,16 @@ export async function webFetch(url: string): Promise<string> {
       .replace(/&gt;/g, '>')
       .replace(/\s+/g, ' ')
       .trim();
-    
-    console.log('Extracted text length:', text.length, 'characters');
-    
-    if (text.length < 500) {
-      console.log('Full extracted text:', text);
-    } else {
-      console.log('First 500 chars of extracted text:', text.substring(0, 500));
-    }
-    
+
     return text.substring(0, 15000);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Fetch error:', error);
-    
-    if (error.name === 'AbortError') {
+
+    if (error instanceof Error && error.name === 'AbortError') {
       return 'Error fetching URL: Request timeout';
     }
-    
-    return `Error fetching URL: ${error.message}`;
+
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return `Error fetching URL: ${message}`;
   }
 }

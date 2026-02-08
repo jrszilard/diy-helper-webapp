@@ -88,7 +88,7 @@ export default function ConversationList({
 
       if (response.ok) {
         const data = await response.json();
-        const messages: Message[] = (data.messages || []).map((msg: any) => ({
+        const messages: Message[] = (data.messages || []).map((msg: { role: string; content: string }) => ({
           role: msg.role,
           content: msg.content,
         }));

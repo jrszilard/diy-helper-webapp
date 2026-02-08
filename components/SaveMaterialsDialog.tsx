@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { GuestProject } from '@/lib/guestStorage';
 
 interface ExtractedMaterials {
   project_description: string;
@@ -25,8 +26,8 @@ interface SaveMaterialsDialogProps {
   showCreateProjectDialog: boolean;
   showAuthPrompt: boolean;
   extractedMaterials: ExtractedMaterials | null;
-  projects: any[];
-  guestProjects: any[];
+  projects: Array<{ id: string; name: string }>;
+  guestProjects: GuestProject[];
   isGuestMode: boolean;
   newProjectName: string;
   onNewProjectNameChange: (name: string) => void;
@@ -133,7 +134,7 @@ export default function SaveMaterialsDialog({
                   defaultValue=""
                 >
                   <option value="">Choose a project...</option>
-                  {guestProjects.map((project: any) => (
+                  {guestProjects.map((project) => (
                     <option key={project.id} value={project.id}>
                       {project.name}
                     </option>

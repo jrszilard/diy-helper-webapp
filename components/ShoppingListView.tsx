@@ -62,8 +62,15 @@ interface SearchResultWithMeta {
   } | null;
 }
 
+interface ShoppingProject {
+  id: string;
+  name: string;
+  description?: string;
+  isGuest?: boolean;
+}
+
 interface ShoppingListViewProps {
-  project: any;
+  project: ShoppingProject | null;
   isMobile?: boolean;
 }
 
@@ -92,6 +99,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
   const isGuestProject = project?.isGuest === true;
 
   const loadItems = async () => {
+    if (!project) return;
     if (isGuestProject) {
       // Load from localStorage for guest projects
       const guestProject = guestStorage.getProject(project.id);
@@ -232,13 +240,8 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
 
   const handleSearchStores = async () => {
     if (selectedItems.size === 0 || !location.trim()) {
-      console.log('Cannot search: no items selected or location missing');
       return;
     }
-
-    console.log('Starting store search...');
-    console.log('Selected items:', Array.from(selectedItems));
-    console.log('Location:', location);
 
     setIsSearching(true);
     setSearchError(null);
@@ -252,11 +255,8 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
         const item = items.find(it => it.id === itemId);
 
         if (!item) {
-          console.log('Item not found for ID:', itemId);
           continue;
         }
-
-        console.log(`Searching ${i + 1}/${itemsArray.length}: ${item.product_name}`);
 
         const requestBody = {
           materialName: item.product_name,
@@ -271,8 +271,6 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
           body: JSON.stringify(requestBody)
         });
 
-        console.log('Response status:', response.status);
-
         if (!response.ok) {
           const errorText = await response.text();
           console.error('API error:', response.status, errorText);
@@ -280,7 +278,6 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
         }
 
         const data = await response.json();
-        console.log('Search results for', item.product_name, ':', data);
 
         results[itemId] = {
           results: data.results || [],
@@ -293,11 +290,11 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
         }
       }
 
-      console.log('Search complete. Results:', results);
       setSearchResults(results);
-    } catch (error) {
-      console.error('Error searching stores:', error);
-      setSearchError('Error searching stores: ' + (error as Error).message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error searching stores:', message);
+      setSearchError('Error searching stores: ' + message);
     } finally {
       setIsSearching(false);
     }

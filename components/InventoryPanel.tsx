@@ -132,8 +132,9 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
       });
       setShowAddForm(false);
       loadInventory();
-    } catch (err: any) {
-      if (err.code === '23505') {
+    } catch (err: unknown) {
+      const pgError = err as { code?: string };
+      if (pgError.code === '23505') {
         alert('This item is already in your inventory!');
       } else {
         console.error('Error adding item:', err);

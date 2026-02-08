@@ -114,7 +114,6 @@ function scoreUrl(url: string, config: typeof STORE_CONFIGS[StoreKey]): number {
       const regex = new RegExp(pattern.pattern);
       if (regex.test(url)) {
         score += pattern.weight;
-        console.log(`    Pattern match: ${pattern.type} (+${pattern.weight})`);
         // Only apply highest matching pattern
         break;
       }
@@ -160,8 +159,6 @@ function extractProductUrls(
   config: typeof STORE_CONFIGS[StoreKey],
   materialName: string
 ): { urls: string[]; quality: 'high' | 'medium' | 'low'; fallbackSearch: boolean } {
-  console.log(`\n  Extracting URLs for ${config.domain}`);
-
   try {
     const escapedDomain = config.domain.replace(/\./g, '\\.');
     const urlRegex = new RegExp(
@@ -170,7 +167,6 @@ function extractProductUrls(
     );
 
     const matches = searchResults.match(urlRegex) || [];
-    console.log(`  Found ${matches.length} raw URLs`);
 
     // Clean URLs
     const cleanedUrls = matches
@@ -183,7 +179,6 @@ function extractProductUrls(
 
     // Remove duplicates before scoring
     const uniqueUrls = [...new Set(cleanedUrls)];
-    console.log(`  After dedup: ${uniqueUrls.length} URLs`);
 
     // Score and filter URLs
     const scoredUrls = uniqueUrls
@@ -200,14 +195,9 @@ function extractProductUrls(
       )
       .slice(0, 5);
 
-    console.log(`  Valid product URLs: ${scoredUrls.length}`);
-
     if (scoredUrls.length > 0) {
       const topScore = scoredUrls[0].score;
       const quality = topScore >= 80 ? 'high' : topScore >= 50 ? 'medium' : 'low';
-
-      console.log(`  Top URL: ${scoredUrls[0].url}`);
-      console.log(`  Top score: ${topScore} (${quality} quality)`);
 
       return {
         urls: scoredUrls.map(item => item.url),
@@ -216,8 +206,6 @@ function extractProductUrls(
       };
     }
 
-    // No good URLs found
-    console.log(`  No high-quality URLs found, will use fallback`);
     return {
       urls: [],
       quality: 'low',
@@ -274,7 +262,7 @@ async function fetchBestProductData(
         return result;
       } catch (error) {
         clearTimeout(timeoutId);
-        console.log(`  Fetch failed for ${url}:`, error);
+        console.error('Product fetch failed:', error);
         return null;
       }
     };
@@ -292,7 +280,6 @@ async function fetchBestProductData(
   }
 
   if (results.length === 0) {
-    console.log(`  No extraction succeeded, using fallback`);
     return defaultResult;
   }
 
@@ -367,11 +354,6 @@ export async function POST(req: NextRequest) {
       validatePricing,
     } = parsed.data;
 
-    console.log(`\n${'='.repeat(50)}`);
-    console.log(`SEARCH: "${materialName}" near ${location}`);
-    console.log(`Stores: ${stores.join(', ')}`);
-    console.log(`${'='.repeat(50)}`);
-
     const results: StoreResult[] = [];
     const metadata = {
       totalSearched: 0,
@@ -391,18 +373,13 @@ export async function POST(req: NextRequest) {
     // Search stores in parallel (concurrency controlled by config)
     const validStores = stores
       .map(s => ({ key: s as StoreKey, cfg: STORE_CONFIGS[s as StoreKey] }))
-      .filter(s => {
-        if (!s.cfg) { console.log(`\nUnknown store: ${s.key}`); return false; }
-        return true;
-      });
+      .filter(s => !!s.cfg);
 
     // Process stores in concurrent chunks
     async function searchOneStore(storeKey: StoreKey, storeCfg: typeof STORE_CONFIGS[StoreKey]): Promise<StoreResult> {
       metadata.totalSearched++;
-      console.log(`\n--- ${storeCfg.name.toUpperCase()} ---`);
 
       const searchQuery = `${materialName} site:${storeCfg.domain}`;
-      console.log(`Query: ${searchQuery}`);
 
       const searchResult = await webSearch(searchQuery);
 
@@ -413,7 +390,6 @@ export async function POST(req: NextRequest) {
         searchResult.includes('Search error') ||
         searchResult.includes('Search failed')
       ) {
-        console.log(`Search failed, adding fallback`);
         metadata.fallbackResults++;
         return {
           store: `${storeCfg.name} - ${location}`,
@@ -475,12 +451,9 @@ export async function POST(req: NextRequest) {
           linkQuality: urlData.quality,
         };
 
-        console.log(`Result: $${storeResult.price} | ${storeResult.availability} | ${urlData.quality} quality`);
         return storeResult;
       }
 
-      // No good URLs - fallback
-      console.log(`No quality URLs, using search fallback`);
       metadata.fallbackResults++;
       return {
         store: `${storeCfg.name} - ${location}`,
@@ -506,9 +479,7 @@ export async function POST(req: NextRequest) {
       // Wait for shopping prices before first chunk
       if (i === 0 && validatePricing) {
         shoppingPrices = await shoppingPromise;
-        if (shoppingPrices?.minPrice) {
-          console.log(`Market range: $${shoppingPrices.minPrice.toFixed(2)} - $${shoppingPrices.maxPrice?.toFixed(2)}`);
-        }
+        // shoppingPrices ready for validation
       }
 
       const chunkResults = await Promise.allSettled(
@@ -555,13 +526,6 @@ export async function POST(req: NextRequest) {
       return 0;
     });
 
-    console.log(`\n${'='.repeat(50)}`);
-    console.log(`COMPLETE: ${results.length} results`);
-    console.log(`High quality: ${metadata.highQualityResults}`);
-    console.log(`Medium quality: ${metadata.mediumQualityResults}`);
-    console.log(`Fallback: ${metadata.fallbackResults}`);
-    console.log(`${'='.repeat(50)}\n`);
-
     const response = NextResponse.json({
       results,
       stores_searched: stores.length,
@@ -581,10 +545,11 @@ export async function POST(req: NextRequest) {
 
     return applyCorsHeaders(req, response);
 
-  } catch (error: any) {
-    console.error('Request Error:', error);
+  } catch (error: unknown) {
+    console.error('Store search request error:', error);
+    const message = error instanceof Error ? error.message : 'Internal server error';
     return applyCorsHeaders(req, new Response(
-      JSON.stringify({ error: error.message || 'Internal server error', results: [] }),
+      JSON.stringify({ error: message, results: [] }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     ));
   }

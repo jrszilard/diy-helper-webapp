@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import VideoResults from './VideoResults';
 import ProgressIndicator, { ProgressStep } from './ProgressIndicator';
 import { RefreshCw } from 'lucide-react';
+import { ExtractedMaterials, Video } from '@/types';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -41,7 +42,7 @@ export function cleanMessageContent(content: string): string {
   return result.trim();
 }
 
-export function extractMaterialsData(content: string): any | null {
+export function extractMaterialsData(content: string): ExtractedMaterials | null {
   const match = content.match(MATERIALS_PATTERN);
   if (match && match[1]) {
     try {
@@ -53,7 +54,7 @@ export function extractMaterialsData(content: string): any | null {
   return null;
 }
 
-export function parseVideoResults(content: string): { found: boolean; videos?: any[]; query?: string } {
+export function parseVideoResults(content: string): { found: boolean; videos?: Video[]; query?: string } {
   try {
     const jsonMatch = content.match(VIDEO_PATTERN);
     if (jsonMatch) {
@@ -84,39 +85,39 @@ export function detectInventoryUpdate(content: string): { added: string[]; exist
 }
 
 const MarkdownComponents = (role: 'user' | 'assistant') => ({
-  p: ({ children }: any) => (
+  p: ({ children }: { children?: React.ReactNode }) => (
     <p className={`mb-2 ${role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>{children}</p>
   ),
-  ul: ({ children }: any) => (
+  ul: ({ children }: { children?: React.ReactNode }) => (
     <ul className={`list-disc ml-4 mb-2 ${role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>{children}</ul>
   ),
-  ol: ({ children }: any) => (
+  ol: ({ children }: { children?: React.ReactNode }) => (
     <ol className={`list-decimal ml-4 mb-2 ${role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>{children}</ol>
   ),
-  li: ({ children }: any) => (
+  li: ({ children }: { children?: React.ReactNode }) => (
     <li className={role === 'user' ? 'text-white' : 'text-[#3E2723]'}>{children}</li>
   ),
-  h1: ({ children }: any) => (
+  h1: ({ children }: { children?: React.ReactNode }) => (
     <h1 className={`text-xl font-bold mb-2 ${role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>{children}</h1>
   ),
-  h2: ({ children }: any) => (
+  h2: ({ children }: { children?: React.ReactNode }) => (
     <h2 className={`text-lg font-bold mb-2 ${role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>{children}</h2>
   ),
-  h3: ({ children }: any) => (
+  h3: ({ children }: { children?: React.ReactNode }) => (
     <h3 className={`text-md font-bold mb-2 ${role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>{children}</h3>
   ),
-  strong: ({ children }: any) => (
+  strong: ({ children }: { children?: React.ReactNode }) => (
     <strong className={`font-bold ${role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>{children}</strong>
   ),
-  em: ({ children }: any) => (
+  em: ({ children }: { children?: React.ReactNode }) => (
     <em className={`italic ${role === 'user' ? 'text-white' : 'text-[#5C4D42]'}`}>{children}</em>
   ),
-  code: ({ children }: any) => (
+  code: ({ children }: { children?: React.ReactNode }) => (
     <code className={`px-1 py-0.5 rounded text-sm ${
       role === 'user' ? 'bg-[#A65D3F] text-white' : 'bg-[#E8DFD0] text-[#3E2723]'
     }`}>{children}</code>
   ),
-  a: ({ children, href }: any) => (
+  a: ({ children, href }: { children?: React.ReactNode; href?: string }) => (
     <a
       href={href}
       className={`underline ${role === 'user' ? 'text-white hover:text-[#FFE0D0]' : 'text-[#5D7B93] hover:text-[#4A6275]'}`}
@@ -124,12 +125,12 @@ const MarkdownComponents = (role: 'user' | 'assistant') => ({
       rel="noopener noreferrer"
     >{children}</a>
   ),
-  blockquote: ({ children }: any) => (
+  blockquote: ({ children }: { children?: React.ReactNode }) => (
     <blockquote className={`border-l-4 pl-4 italic ${
       role === 'user' ? 'border-[#A65D3F] text-white' : 'border-[#C67B5C] text-[#5C4D42]'
     }`}>{children}</blockquote>
   ),
-  del: ({ children }: any) => (
+  del: ({ children }: { children?: React.ReactNode }) => (
     <del className="text-[#A89880] line-through">{children}</del>
   ),
 });
