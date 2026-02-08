@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { 
-  Wrench, 
-  Zap, 
-  Ruler, 
-  Shield, 
-  Lightbulb, 
-  Droplets, 
+import {
+  Wrench,
+  Zap,
+  Ruler,
+  Shield,
+  Lightbulb,
+  Droplets,
   Paintbrush,
   Package,
   Plus,
@@ -18,6 +18,7 @@ import {
   Check,
   Search
 } from 'lucide-react';
+import { InventorySkeleton } from './SkeletonLoader';
 
 interface InventoryItem {
   id: string;
@@ -372,9 +373,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
         {/* Inventory List */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="p-8 text-center text-[#5C4D42]">
-              Loading inventory...
-            </div>
+            <InventorySkeleton />
           ) : !userId ? (
             <div className="p-8 text-center">
               <Package className="mx-auto text-[#D4C8B8] mb-4" size={48} />

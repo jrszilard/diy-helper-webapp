@@ -3,6 +3,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { handleCorsOptions, applyCorsHeaders } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { ExtractMaterialsRequestSchema, parseRequestBody } from '@/lib/validation';
+import { anthropic as anthropicConfig } from '@/lib/config';
 
 export async function POST(req: NextRequest) {
   try {
@@ -69,7 +70,7 @@ Important:
 - If no materials are found, return an empty materials array`;
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: anthropicConfig.model,
       max_tokens: 2000,
       messages: [{ role: 'user', content: extractionPrompt }]
     });

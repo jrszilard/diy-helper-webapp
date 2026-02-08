@@ -9,6 +9,7 @@ import {
 import { handleCorsOptions, applyCorsHeaders } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { SearchStoresRequestSchema, parseRequestBody } from '@/lib/validation';
+import { storeSearch as storeSearchConfig } from '@/lib/config';
 
 // Helper function to add delay
 function sleep(ms: number) {
@@ -387,179 +388,145 @@ export async function POST(req: NextRequest) {
       ? searchGoogleShopping(materialName)
       : Promise.resolve(null);
 
-    // Search each store
-    for (let i = 0; i < stores.length; i++) {
-      const storeKey = stores[i] as StoreKey;
-      const config = STORE_CONFIGS[storeKey];
+    // Search stores in parallel (concurrency controlled by config)
+    const validStores = stores
+      .map(s => ({ key: s as StoreKey, cfg: STORE_CONFIGS[s as StoreKey] }))
+      .filter(s => {
+        if (!s.cfg) { console.log(`\nUnknown store: ${s.key}`); return false; }
+        return true;
+      });
 
-      if (!config) {
-        console.log(`\nUnknown store: ${storeKey}`);
-        continue;
-      }
-
+    // Process stores in concurrent chunks
+    async function searchOneStore(storeKey: StoreKey, storeCfg: typeof STORE_CONFIGS[StoreKey]): Promise<StoreResult> {
       metadata.totalSearched++;
-      console.log(`\n--- ${config.name.toUpperCase()} ---`);
+      console.log(`\n--- ${storeCfg.name.toUpperCase()} ---`);
 
-      try {
-        const searchQuery = `${materialName} site:${config.domain}`;
-        console.log(`Query: ${searchQuery}`);
+      const searchQuery = `${materialName} site:${storeCfg.domain}`;
+      console.log(`Query: ${searchQuery}`);
 
-        const searchResult = await webSearch(searchQuery);
+      const searchResult = await webSearch(searchQuery);
 
-        // Check for search failures - always add fallback
-        if (
-          searchResult.includes('Search API error') ||
-          searchResult.includes('No search results') ||
-          searchResult.includes('Search error') ||
-          searchResult.includes('Search failed')
-        ) {
-          console.log(`Search failed, adding fallback`);
-          metadata.fallbackResults++;
-
-          const searchUrl = buildSearchUrl(config.domain, materialName);
-          results.push({
-            store: `${config.name} - ${location}`,
-            retailer: storeKey,
-            price: 0,
-            availability: 'check-online',
-            distance: 'Search by ZIP on website',
-            address: 'Multiple locations - check website',
-            phone: config.phone,
-            link: searchUrl,
-            notes: 'Search on store website for product availability',
-            confidence: 'low',
-            linkQuality: 'search-fallback',
-            searchFallback: true,
-          });
-
-          if (i < stores.length - 1) await sleep(1000);
-          continue;
-        }
-
-        metadata.successfulSearches++;
-
-        // Extract URLs with quality assessment
-        const urlData = extractProductUrls(searchResult, config, materialName);
-
-        // Wait for shopping prices on first store
-        if (i === 0 && validatePricing) {
-          shoppingPrices = await shoppingPromise;
-          if (shoppingPrices?.minPrice) {
-            console.log(`Market range: $${shoppingPrices.minPrice.toFixed(2)} - $${shoppingPrices.maxPrice?.toFixed(2)}`);
-          }
-        }
-
-        if (urlData.urls.length > 0 && !urlData.fallbackSearch) {
-          // We have good URLs - fetch product data
-          const productData = await fetchBestProductData(urlData.urls, storeKey);
-
-          // Validate price
-          let priceData: { price: number | null; confidence: 'high' | 'medium' | 'low'; warning?: string } = {
-            price: productData.price,
-            confidence: productData.confidence,
-          };
-
-          if (productData.price && shoppingPrices) {
-            const validated = validatePrices(productData.price, shoppingPrices);
-            priceData = {
-              price: validated.price,
-              confidence: validated.confidence,
-              warning: validated.warning,
-            };
-          }
-
-          // Build notes
-          const notes: string[] = [];
-          if (urlData.quality === 'high') {
-            notes.push('Direct product link');
-          }
-          if (productData.storeStock) {
-            notes.push(productData.storeStock);
-          }
-          if (productData.rating && productData.reviewCount) {
-            notes.push(`${productData.rating}★ (${productData.reviewCount} reviews)`);
-          }
-          if (priceData.warning) {
-            notes.push(priceData.warning);
-          }
-          if (productData.confidence === 'low' && !productData.price) {
-            notes.push('Click to verify price and availability');
-          }
-
-          const storeResult: StoreResult = {
-            store: `${config.name} - ${location}`,
-            retailer: storeKey,
-            price: priceData.price || 0,
-            originalPrice: productData.originalPrice || undefined,
-            availability: productData.availability,
-            distance: 'Search by ZIP on website',
-            address: 'Multiple locations - check website',
-            phone: config.phone,
-            link: productData.url,
-            notes: notes.length > 0 ? notes.join(' | ') : undefined,
-            confidence: priceData.confidence,
-            priceWarning: priceData.warning,
-            sku: productData.sku || undefined,
-            storeStock: productData.storeStock || undefined,
-            linkQuality: urlData.quality,
-          };
-
-          if (urlData.quality === 'high') {
-            metadata.highQualityResults++;
-          } else {
-            metadata.mediumQualityResults++;
-          }
-
-          console.log(`Result: $${storeResult.price} | ${storeResult.availability} | ${urlData.quality} quality`);
-          results.push(storeResult);
-
-        } else {
-          // No good URLs - use search fallback
-          console.log(`No quality URLs, using search fallback`);
-          metadata.fallbackResults++;
-
-          const searchUrl = buildSearchUrl(config.domain, materialName);
-          results.push({
-            store: `${config.name} - ${location}`,
-            retailer: storeKey,
-            price: 0,
-            availability: 'check-online',
-            distance: 'Search by ZIP on website',
-            address: 'Multiple locations - check website',
-            phone: config.phone,
-            link: searchUrl,
-            notes: 'Search on store website for product availability',
-            confidence: 'low',
-            linkQuality: 'search-fallback',
-            searchFallback: true,
-          });
-        }
-
-      } catch (error) {
-        console.error(`Error searching ${config.name}:`, error);
+      // Check for search failures
+      if (
+        searchResult.includes('Search API error') ||
+        searchResult.includes('No search results') ||
+        searchResult.includes('Search error') ||
+        searchResult.includes('Search failed')
+      ) {
+        console.log(`Search failed, adding fallback`);
         metadata.fallbackResults++;
-
-        // Always add fallback on error
-        const searchUrl = buildSearchUrl(config.domain, materialName);
-        results.push({
-          store: `${config.name} - ${location}`,
+        return {
+          store: `${storeCfg.name} - ${location}`,
           retailer: storeKey,
           price: 0,
           availability: 'check-online',
           distance: 'Search by ZIP on website',
           address: 'Multiple locations - check website',
-          phone: config.phone,
-          link: searchUrl,
+          phone: storeCfg.phone,
+          link: buildSearchUrl(storeCfg.domain, materialName),
           notes: 'Search on store website for product availability',
           confidence: 'low',
           linkQuality: 'search-fallback',
           searchFallback: true,
-        });
+        };
       }
 
-      // Rate limiting delay
-      if (i < stores.length - 1) {
-        await sleep(1500);
+      metadata.successfulSearches++;
+      const urlData = extractProductUrls(searchResult, storeCfg, materialName);
+
+      if (urlData.urls.length > 0 && !urlData.fallbackSearch) {
+        const productData = await fetchBestProductData(urlData.urls, storeKey);
+
+        let priceData: { price: number | null; confidence: 'high' | 'medium' | 'low'; warning?: string } = {
+          price: productData.price,
+          confidence: productData.confidence,
+        };
+
+        if (productData.price && shoppingPrices) {
+          const validated = validatePrices(productData.price, shoppingPrices);
+          priceData = { price: validated.price, confidence: validated.confidence, warning: validated.warning };
+        }
+
+        const notes: string[] = [];
+        if (urlData.quality === 'high') notes.push('Direct product link');
+        if (productData.storeStock) notes.push(productData.storeStock);
+        if (productData.rating && productData.reviewCount) notes.push(`${productData.rating}★ (${productData.reviewCount} reviews)`);
+        if (priceData.warning) notes.push(priceData.warning);
+        if (productData.confidence === 'low' && !productData.price) notes.push('Click to verify price and availability');
+
+        if (urlData.quality === 'high') metadata.highQualityResults++;
+        else metadata.mediumQualityResults++;
+
+        const storeResult: StoreResult = {
+          store: `${storeCfg.name} - ${location}`,
+          retailer: storeKey,
+          price: priceData.price || 0,
+          originalPrice: productData.originalPrice || undefined,
+          availability: productData.availability,
+          distance: 'Search by ZIP on website',
+          address: 'Multiple locations - check website',
+          phone: storeCfg.phone,
+          link: productData.url,
+          notes: notes.length > 0 ? notes.join(' | ') : undefined,
+          confidence: priceData.confidence,
+          priceWarning: priceData.warning,
+          sku: productData.sku || undefined,
+          storeStock: productData.storeStock || undefined,
+          linkQuality: urlData.quality,
+        };
+
+        console.log(`Result: $${storeResult.price} | ${storeResult.availability} | ${urlData.quality} quality`);
+        return storeResult;
+      }
+
+      // No good URLs - fallback
+      console.log(`No quality URLs, using search fallback`);
+      metadata.fallbackResults++;
+      return {
+        store: `${storeCfg.name} - ${location}`,
+        retailer: storeKey,
+        price: 0,
+        availability: 'check-online',
+        distance: 'Search by ZIP on website',
+        address: 'Multiple locations - check website',
+        phone: storeCfg.phone,
+        link: buildSearchUrl(storeCfg.domain, materialName),
+        notes: 'Search on store website for product availability',
+        confidence: 'low',
+        linkQuality: 'search-fallback',
+        searchFallback: true,
+      };
+    }
+
+    // Run searches in parallel chunks with configurable concurrency
+    const concurrency = storeSearchConfig.concurrency;
+    for (let i = 0; i < validStores.length; i += concurrency) {
+      const chunk = validStores.slice(i, i + concurrency);
+
+      // Wait for shopping prices before first chunk
+      if (i === 0 && validatePricing) {
+        shoppingPrices = await shoppingPromise;
+        if (shoppingPrices?.minPrice) {
+          console.log(`Market range: $${shoppingPrices.minPrice.toFixed(2)} - $${shoppingPrices.maxPrice?.toFixed(2)}`);
+        }
+      }
+
+      const chunkResults = await Promise.allSettled(
+        chunk.map(s => searchOneStore(s.key, s.cfg))
+      );
+
+      for (const result of chunkResults) {
+        if (result.status === 'fulfilled') {
+          results.push(result.value);
+        } else {
+          console.error('Store search failed:', result.reason);
+          metadata.fallbackResults++;
+        }
+      }
+
+      // Small delay between concurrency chunks (not between individual stores)
+      if (i + concurrency < validStores.length) {
+        await sleep(storeSearchConfig.chunkDelayMs);
       }
     }
 

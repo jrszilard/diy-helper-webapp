@@ -15,9 +15,12 @@ import {
   Edit3,
   Download,
   X,
-  User
+  User,
+  RefreshCw,
+  AlertCircle
 } from 'lucide-react';
 import MaterialsExport from './MaterialsExport';
+import { ShoppingSearchSkeleton } from './SkeletonLoader';
 
 interface ShoppingItem {
   id: string;
@@ -78,6 +81,9 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
 
   // Export modal state
   const [showExportModal, setShowExportModal] = useState(false);
+
+  // Error state for store search
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   useEffect(() => {
     if (project) loadItems();
@@ -235,6 +241,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
     console.log('Location:', location);
 
     setIsSearching(true);
+    setSearchError(null);
     const results: Record<string, SearchResultWithMeta> = {};
 
     try {
@@ -280,9 +287,9 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
           priceRange: data.priceRange || null
         };
 
-        // Add 3 second delay between items to avoid rate limiting
+        // Short delay between items (server rate limiting handles protection)
         if (i < itemsArray.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 3000));
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
       }
 
@@ -290,7 +297,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
       setSearchResults(results);
     } catch (error) {
       console.error('Error searching stores:', error);
-      alert('Error searching stores: ' + (error as Error).message);
+      setSearchError('Error searching stores: ' + (error as Error).message);
     } finally {
       setIsSearching(false);
     }
@@ -449,6 +456,27 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
               <p className={`${isMobile ? 'text-base' : 'text-sm'} text-[#7D6B5D]`}>
                 Select items below with checkboxes, then search to find products at nearby stores
               </p>
+
+              {/* Search error banner with retry */}
+              {searchError && (
+                <div className="mt-3 p-3 bg-[#FADDD0] border border-[#E8A990] rounded-xl flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 text-[#B8593B] flex-shrink-0" />
+                  <p className="text-sm text-[#B8593B] flex-1">{searchError}</p>
+                  <button
+                    onClick={() => {
+                      setSearchError(null);
+                      handleSearchStores();
+                    }}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-[#B8593B] text-white rounded-lg hover:bg-[#9A4830] text-sm font-medium flex-shrink-0"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Retry
+                  </button>
+                </div>
+              )}
+
+              {/* Skeleton loader during search */}
+              {isSearching && <ShoppingSearchSkeleton />}
             </div>
           )}
 

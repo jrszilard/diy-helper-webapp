@@ -1,16 +1,10 @@
 import { NextRequest } from 'next/server';
-
-const ALLOWED_ORIGINS = [
-  'http://localhost:3000',
-  'https://localhost:3000',
-];
-
-const VERCEL_ORIGIN_REGEX = /^https:\/\/[a-z0-9-]+\.vercel\.app$/;
+import { cors as corsConfig } from '@/lib/config';
 
 function isOriginAllowed(origin: string | null): boolean {
   if (!origin) return false;
-  if (ALLOWED_ORIGINS.includes(origin)) return true;
-  if (VERCEL_ORIGIN_REGEX.test(origin)) return true;
+  if (corsConfig.allowedOrigins.includes(origin)) return true;
+  if (corsConfig.vercelRegex.test(origin)) return true;
   return false;
 }
 

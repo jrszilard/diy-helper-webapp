@@ -6,6 +6,7 @@ import { guestStorage } from '@/lib/guestStorage';
 import {
   FolderOpen,
   Trash2,
+  Edit2,
   Search,
   Filter,
   ChevronDown,
@@ -124,6 +125,9 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [editingProject, setEditingProject] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -192,6 +196,38 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
       .update({ status })
       .eq('id', id);
     loadProjects();
+  };
+
+  const startEditing = (project: Project, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingProject(project.id);
+    setEditName(project.name);
+    setEditDescription(project.description || '');
+  };
+
+  const cancelEditing = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingProject(null);
+    setEditName('');
+    setEditDescription('');
+  };
+
+  const saveEditing = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!editName.trim()) return;
+
+    if (projects.find(p => p.id === id)?.isGuest) {
+      // Guest project - update in localStorage
+      guestStorage.updateProject(id, { name: editName.trim(), description: editDescription.trim() });
+      loadGuestProjects();
+    } else {
+      await supabase
+        .from('projects')
+        .update({ name: editName.trim(), description: editDescription.trim() })
+        .eq('id', id);
+      loadProjects();
+    }
+    setEditingProject(null);
   };
 
   const selectProject = (project: any) => {
@@ -314,14 +350,49 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[#5D7B93]">
-                          {getCategoryIcon(project.category || 'other')}
-                        </span>
-                        <span className="font-semibold text-base truncate text-[#3E2723]">{project.name}</span>
-                      </div>
-                      {project.description && (
-                        <p className="text-sm text-[#7D6B5D] line-clamp-2 ml-6">{project.description}</p>
+                      {editingProject === project.id ? (
+                        <div className="space-y-2 ml-6" onClick={e => e.stopPropagation()}>
+                          <input
+                            type="text"
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg text-sm focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] bg-white"
+                            autoFocus
+                          />
+                          <input
+                            type="text"
+                            value={editDescription}
+                            onChange={(e) => setEditDescription(e.target.value)}
+                            placeholder="Description (optional)"
+                            className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg text-xs focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] placeholder-[#A89880] bg-white"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={(e) => saveEditing(project.id, e)}
+                              className="px-3 py-1.5 text-sm bg-[#4A7C59] text-white rounded-lg hover:bg-[#2D5A3B]"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={cancelEditing}
+                              className="px-3 py-1.5 text-sm bg-[#E8DFD0] text-[#5C4D42] rounded-lg hover:bg-[#D4C8B8]"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[#5D7B93]">
+                              {getCategoryIcon(project.category || 'other')}
+                            </span>
+                            <span className="font-semibold text-base truncate text-[#3E2723]">{project.name}</span>
+                          </div>
+                          {project.description && (
+                            <p className="text-sm text-[#7D6B5D] line-clamp-2 ml-6">{project.description}</p>
+                          )}
+                        </>
                       )}
                       <div className="flex items-center gap-2 mt-2 ml-6 flex-wrap">
                         {project.isGuest && (
@@ -339,13 +410,24 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                         </span>
                       </div>
                     </div>
-                    <button
-                      onClick={(e) => deleteProject(project.id, e, project.isGuest)}
-                      className="p-2 hover:bg-[#FDF3ED] active:bg-[#FADDD0] rounded-lg transition"
-                      title="Delete project"
-                    >
-                      <Trash2 className="w-5 h-5 text-[#B8593B]" />
-                    </button>
+                    <div className="flex gap-1">
+                      {editingProject !== project.id && (
+                        <button
+                          onClick={(e) => startEditing(project, e)}
+                          className="p-2 hover:bg-[#E8F0F5] active:bg-[#D4E4ED] rounded-lg transition"
+                          title="Edit project"
+                        >
+                          <Edit2 className="w-5 h-5 text-[#5D7B93]" />
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => deleteProject(project.id, e, project.isGuest)}
+                        className="p-2 hover:bg-[#FDF3ED] active:bg-[#FADDD0] rounded-lg transition"
+                        title="Delete project"
+                      >
+                        <Trash2 className="w-5 h-5 text-[#B8593B]" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -447,11 +529,54 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <span className="font-semibold text-sm text-[#3E2723] block truncate">
-                            {project.name}
-                          </span>
-                          {project.description && (
-                            <p className="text-xs text-[#7D6B5D] line-clamp-1 mt-0.5">{project.description}</p>
+                          {editingProject === project.id ? (
+                            <div className="space-y-1" onClick={e => e.stopPropagation()}>
+                              <input
+                                type="text"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                className="w-full px-2 py-1 text-sm border border-[#D4C8B8] rounded focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] bg-white"
+                                autoFocus
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') saveEditing(project.id, e as any);
+                                  if (e.key === 'Escape') cancelEditing(e as any);
+                                }}
+                              />
+                              <input
+                                type="text"
+                                value={editDescription}
+                                onChange={(e) => setEditDescription(e.target.value)}
+                                placeholder="Description (optional)"
+                                className="w-full px-2 py-1 text-xs border border-[#D4C8B8] rounded focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] placeholder-[#A89880] bg-white"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') saveEditing(project.id, e as any);
+                                  if (e.key === 'Escape') cancelEditing(e as any);
+                                }}
+                              />
+                              <div className="flex gap-1">
+                                <button
+                                  onClick={(e) => saveEditing(project.id, e)}
+                                  className="px-2 py-0.5 text-xs bg-[#4A7C59] text-white rounded hover:bg-[#2D5A3B]"
+                                >
+                                  Save
+                                </button>
+                                <button
+                                  onClick={cancelEditing}
+                                  className="px-2 py-0.5 text-xs bg-[#E8DFD0] text-[#5C4D42] rounded hover:bg-[#D4C8B8]"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <span className="font-semibold text-sm text-[#3E2723] block truncate">
+                                {project.name}
+                              </span>
+                              {project.description && (
+                                <p className="text-xs text-[#7D6B5D] line-clamp-1 mt-0.5">{project.description}</p>
+                              )}
+                            </>
                           )}
                           <div className="flex items-center gap-1 mt-1 flex-wrap">
                             {project.isGuest && (
@@ -466,13 +591,24 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
                             </span>
                           </div>
                         </div>
-                        <button
-                          onClick={(e) => deleteProject(project.id, e, project.isGuest)}
-                          className="opacity-0 group-hover:opacity-100 p-1 hover:bg-[#FDF3ED] rounded transition"
-                          title="Delete project"
-                        >
-                          <Trash2 className="w-4 h-4 text-[#B8593B]" />
-                        </button>
+                        <div className="opacity-0 group-hover:opacity-100 flex gap-0.5 transition">
+                          {editingProject !== project.id && (
+                            <button
+                              onClick={(e) => startEditing(project, e)}
+                              className="p-1 hover:bg-[#E8F0F5] rounded transition"
+                              title="Edit project"
+                            >
+                              <Edit2 className="w-4 h-4 text-[#5D7B93]" />
+                            </button>
+                          )}
+                          <button
+                            onClick={(e) => deleteProject(project.id, e, project.isGuest)}
+                            className="p-1 hover:bg-[#FDF3ED] rounded transition"
+                            title="Delete project"
+                          >
+                            <Trash2 className="w-4 h-4 text-[#B8593B]" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );

@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { rateLimits } from '@/lib/config';
 
 interface TokenBucket {
   tokens: number;
@@ -16,11 +17,7 @@ export interface RateLimitResult {
   retryAfter: number | null;
 }
 
-const ENDPOINT_LIMITS: Record<string, RateLimitConfig> = {
-  chat: { maxTokens: 10, refillRate: 10 / 60 },           // 10 per minute
-  searchStores: { maxTokens: 20, refillRate: 20 / 60 },    // 20 per minute
-  extractMaterials: { maxTokens: 10, refillRate: 10 / 60 }, // 10 per minute
-};
+const ENDPOINT_LIMITS: Record<string, RateLimitConfig> = rateLimits;
 
 const buckets = new Map<string, TokenBucket>();
 

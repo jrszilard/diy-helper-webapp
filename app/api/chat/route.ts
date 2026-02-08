@@ -5,6 +5,9 @@ import { getAuthFromRequest, AuthResult } from '@/lib/auth';
 import { handleCorsOptions, applyCorsHeaders } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { ChatRequestSchema, parseRequestBody } from '@/lib/validation';
+import config from '@/lib/config';
+import { pruneConversation } from '@/lib/conversation-pruner';
+import { createConversation, addMessage, generateTitle } from '@/lib/chat-history';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
@@ -410,7 +413,13 @@ async function executeTool(toolName: string, toolInput: any, auth: AuthResult): 
   console.log(`🔧 Executing tool: ${toolName}`, JSON.stringify(toolInput, null, 2));
 
   if (toolName === "search_building_codes") {
-    return "**Building Code Results:**\n\nKitchen countertop receptacles must be installed so that no point along the wall line is more than 24 inches from a receptacle outlet (NEC 210.52(C)(1)).\n\nGFCI protection is required for all 125-volt, 15- and 20-ampere receptacles in garages (NEC 210.8(A)(2)).\n\nSource: National Electrical Code 2023";
+    const { query } = toolInput;
+    try {
+      const results = await webSearch(`national building code ${query} NEC IRC IBC requirements`);
+      return `**Building Code Search Results:**\n\n${results}\n\n**Disclaimer:** Always verify these requirements with your local building department, as local amendments may apply.`;
+    } catch (err: any) {
+      return `Error searching building codes: ${err.message}. Please try again.`;
+    }
   }
 
   if (toolName === "search_products") {
@@ -431,20 +440,20 @@ async function executeTool(toolName: string, toolInput: any, auth: AuthResult): 
   if (toolName === "search_local_codes") {
     const { query, city, state } = toolInput;
 
-    return `Please search for local building codes for ${city}, ${state} regarding: ${query}
+    try {
+      const [officialResults, permitResults] = await Promise.all([
+        webSearch(`${city} ${state} building code ${query} site:gov OR site:municode.com OR site:ecode360.com`),
+        webSearch(`${city} ${state} permit requirements ${query}`),
+      ]);
 
-Follow this process:
-1. Use web_search to find: "${city} ${state} building code ${query}"
-2. Prioritize official sources (.gov, municode.com, ecode360.com)
-3. Use web_fetch on the most authoritative source you find
-4. Extract and summarize:
-   - Specific requirements (measurements, specifications)
-   - Permit requirements if applicable
-   - Any local amendments that differ from national codes
-   - The official source URL
-5. Always conclude with: "Verify these requirements with ${city} Building Department before starting work."
-
-If you cannot find specific local codes, provide the national code reference and explain that local amendments may apply.`;
+      let response = `**Local Building Code Results for ${city}, ${state}:**\n\n`;
+      response += `### Official / Municipal Sources\n${officialResults}\n\n`;
+      response += `### Permit & General Requirements\n${permitResults}\n\n`;
+      response += `**Important:** Verify these requirements with the ${city} Building Department before starting work.`;
+      return response;
+    } catch (err: any) {
+      return `Error searching local codes for ${city}, ${state}: ${err.message}. Please try again.`;
+    }
   }
 
   if (toolName === "search_project_videos") {
@@ -548,12 +557,20 @@ If you cannot find specific local codes, provide the national code reference and
           continue;
         }
 
+        // Normalize to Title Case before inserting
+        const normalizedName = item.name
+          .trim()
+          .replace(/\s+/g, ' ')
+          .split(' ')
+          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          .join(' ');
+
         // Insert new item
         const { data, error } = await auth.supabaseClient
           .from('user_inventory')
           .insert({
             user_id: userId,
-            item_name: item.name,
+            item_name: normalizedName,
             category: item.category || 'general',
             quantity: item.quantity || 1,
             condition: item.condition || 'good',
@@ -719,6 +736,23 @@ If you cannot find specific local codes, provide the national code reference and
       }
     }
 
+    // Common tool/material alias groups for fuzzy matching
+    const ALIAS_GROUPS: string[][] = [
+      ['drill', 'cordless drill', 'power drill', 'drill driver', 'impact driver'],
+      ['saw', 'circular saw', 'miter saw', 'mitre saw', 'table saw', 'reciprocating saw', 'jigsaw'],
+      ['sander', 'orbital sander', 'belt sander', 'palm sander', 'random orbit sander'],
+      ['hammer', 'claw hammer', 'framing hammer', 'ball peen hammer'],
+      ['screwdriver', 'screwdriver set', 'phillips screwdriver', 'flathead screwdriver'],
+      ['wrench', 'adjustable wrench', 'pipe wrench', 'socket wrench', 'crescent wrench'],
+      ['pliers', 'needle nose pliers', 'channel lock pliers', 'slip joint pliers', 'lineman pliers'],
+      ['tape measure', 'measuring tape', 'tape'],
+      ['level', 'spirit level', 'laser level', 'torpedo level'],
+      ['safety glasses', 'safety goggles', 'protective eyewear', 'eye protection'],
+      ['wire strippers', 'wire stripper', 'wire cutter', 'wire cutters'],
+      ['stud finder', 'stud sensor', 'wall scanner'],
+      ['voltage tester', 'circuit tester', 'non-contact voltage tester', 'multimeter'],
+    ];
+
     // Function to check if user has a similar item
     const findOwnedItem = (materialName: string): string | null => {
       const normalizedName = materialName.toLowerCase().trim();
@@ -731,12 +765,22 @@ If you cannot find specific local codes, provide the national code reference and
           return invItem.item_name;
         }
 
-        // Check if one contains the other
+        // Contains match
         if (normalizedName.includes(invName) || invName.includes(normalizedName)) {
           return invItem.item_name;
         }
 
-        // Check for key word matches (at least 2 common words or 1 significant word)
+        // Alias group match: if both the material and inventory item
+        // belong to the same alias group, they match
+        for (const group of ALIAS_GROUPS) {
+          const materialInGroup = group.some(alias => normalizedName.includes(alias) || alias.includes(normalizedName));
+          const invInGroup = group.some(alias => invName.includes(alias) || alias.includes(invName));
+          if (materialInGroup && invInGroup) {
+            return invItem.item_name;
+          }
+        }
+
+        // Word overlap fallback (existing logic)
         const materialWords = normalizedName.split(/\s+/).filter((w: string) => w.length > 2);
         const invWords = invName.split(/\s+/).filter((w: string) => w.length > 2);
 
@@ -748,7 +792,6 @@ If you cannot find specific local codes, provide the national code reference and
           )
         );
 
-        // Match if we have 2+ common words, or 1 significant word (5+ chars)
         if (commonWords.length >= 2 ||
             (commonWords.length === 1 && commonWords[0].length >= 5)) {
           return invItem.item_name;
@@ -847,38 +890,67 @@ If you cannot find specific local codes, provide the national code reference and
   }
 
   if (toolName === "search_local_stores") {
-    const { material_name, city, state, radius_miles = 25 } = toolInput;
+    const { material_name, city, state } = toolInput;
 
-    return `YOU MUST use web_search and web_fetch tools to find REAL products. DO NOT make up information.
+    try {
+      const stores = ['Home Depot', "Lowe's", 'Ace Hardware'];
+      const storeSearches = stores.map(store =>
+        webSearch(`${store} ${material_name} ${city} ${state} price availability`)
+      );
+      const locationSearch = webSearch(`hardware stores near ${city} ${state} hours`);
 
-Step 1: Call web_search with query: "site:homedepot.com ${material_name}"
-Step 2: Call web_search with query: "site:lowes.com ${material_name}"
-Step 3: Call web_search with query: "site:acehardware.com ${material_name}"
+      const [storeResults, locationResults] = await Promise.all([
+        Promise.allSettled(storeSearches),
+        locationSearch,
+      ]);
 
-Step 4: For each product URL found in search results, call web_fetch to get the actual price and details
+      let response = `**Store Search Results for "${material_name}" near ${city}, ${state}:**\n\n`;
 
-Step 5: Search for store locations:
-- Call web_search with: "Home Depot ${city} ${state} store location"
-- Call web_search with: "Lowes ${city} ${state} store location"
+      stores.forEach((store, i) => {
+        const result = storeResults[i];
+        if (result.status === 'fulfilled') {
+          response += `### ${store}\n${result.value}\n\n`;
+        } else {
+          response += `### ${store}\nSearch unavailable. Visit the store website directly.\n\n`;
+        }
+      });
 
-CRITICAL RULES:
-- ONLY return products you found via web_search
-- ONLY include URLs that were in the search results
-- If web_search returns no results for a store, DO NOT include that store
-- DO NOT make up prices, URLs, or availability
-- You MUST call web_search at least 3 times before responding
-
-Return results ONLY after you have called web_search multiple times.`;
+      response += `### Nearby Store Locations\n${locationResults}\n`;
+      return response;
+    } catch (err: any) {
+      return `Error searching stores: ${err.message}. Please try again.`;
+    }
   }
 
   if (toolName === "compare_store_prices") {
-    const { material_name, location } = toolInput;
-    return `To compare prices, use web_search to search each store:
-1. web_search: "site:homedepot.com ${material_name} price"
-2. web_search: "site:lowes.com ${material_name} price"
-3. web_search: "site:acehardware.com ${material_name} price"
+    const { material_name, stores: requestedStores, location } = toolInput;
 
-Then compile the results with actual prices found.`;
+    try {
+      const storeList = requestedStores && requestedStores.length > 0
+        ? requestedStores
+        : ['Home Depot', "Lowe's", 'Ace Hardware'];
+
+      const searches = storeList.map((store: string) =>
+        webSearch(`${store} ${material_name} price ${location}`)
+      );
+
+      const results = await Promise.allSettled(searches);
+
+      let response = `**Price Comparison for "${material_name}" near ${location}:**\n\n`;
+
+      storeList.forEach((store: string, i: number) => {
+        const result = results[i];
+        if (result.status === 'fulfilled') {
+          response += `### ${store}\n${result.value}\n\n`;
+        } else {
+          response += `### ${store}\nPrice search unavailable.\n\n`;
+        }
+      });
+
+      return response;
+    } catch (err: any) {
+      return `Error comparing prices: ${err.message}. Please try again.`;
+    }
   }
 
   if (toolName === "web_search") {
@@ -939,18 +1011,23 @@ export async function POST(req: NextRequest) {
       ));
     }
 
-    const { message, history, streaming } = parsed.data;
+    const { message, history, streaming, conversationId: existingConversationId } = parsed.data;
+
+    // Prune conversation history to stay within token limits
+    const prunedHistory = pruneConversation(history);
 
     console.log('📨 Received request:', {
       messageLength: message?.length,
       historyLength: history?.length,
+      prunedHistoryLength: prunedHistory.length,
       userId: auth.userId || 'guest',
-      streaming
+      streaming,
+      conversationId: existingConversationId
     });
 
     // If not streaming, use the old behavior
     if (!streaming) {
-      return handleNonStreamingRequest(auth, message, history);
+      return handleNonStreamingRequest(auth, message, prunedHistory);
     }
 
     // Streaming response using Server-Sent Events
@@ -973,14 +1050,14 @@ export async function POST(req: NextRequest) {
           });
 
           const messages = [
-            ...history,
+            ...prunedHistory,
             { role: 'user' as const, content: message }
           ];
 
           // First API call
           let response = await anthropic.messages.create({
-            model: 'claude-sonnet-4-5-20250929',
-            max_tokens: 4096,
+            model: config.anthropic.model,
+            max_tokens: config.anthropic.maxTokens,
             system: systemPrompt,
             tools: tools as any,
             messages
@@ -1075,8 +1152,8 @@ export async function POST(req: NextRequest) {
 
             // Continue conversation with tool results
             response = await anthropic.messages.create({
-              model: 'claude-sonnet-4-5-20250929',
-              max_tokens: 4096,
+              model: config.anthropic.model,
+              max_tokens: config.anthropic.maxTokens,
               system: systemPrompt,
               tools: tools as any,
               messages
@@ -1093,17 +1170,47 @@ export async function POST(req: NextRequest) {
           for (const block of response.content) {
             if (block.type === 'text') {
               const text = block.text;
-              const chunkSize = 50; // Characters per chunk
 
-              for (let i = 0; i < text.length; i += chunkSize) {
-                sendEvent({ type: 'text', content: text.slice(i, i + chunkSize) });
-                // Small delay for visual streaming effect
-                await new Promise(resolve => setTimeout(resolve, 15));
+              for (let i = 0; i < text.length; i += config.streaming.chunkSize) {
+                sendEvent({ type: 'text', content: text.slice(i, i + config.streaming.chunkSize) });
+                await new Promise(resolve => setTimeout(resolve, config.streaming.chunkDelayMs));
               }
             }
           }
 
-          sendEvent({ type: 'done' });
+          // Persist chat history for authenticated users
+          let responseConversationId = existingConversationId || null;
+          if (auth.userId) {
+            try {
+              // Collect final assistant text
+              let assistantText = '';
+              for (const block of response.content) {
+                if (block.type === 'text') assistantText += block.text;
+              }
+
+              if (!responseConversationId) {
+                // Create conversation on first exchange
+                const conv = await createConversation(
+                  auth.supabaseClient,
+                  auth.userId,
+                  generateTitle(message),
+                  parsed.data.project_id
+                );
+                responseConversationId = conv.id;
+              }
+
+              // Save both messages (responseConversationId is guaranteed non-null after the check above)
+              const convId = responseConversationId!;
+              await addMessage(auth.supabaseClient, convId, 'user', message);
+              if (assistantText) {
+                await addMessage(auth.supabaseClient, convId, 'assistant', assistantText);
+              }
+            } catch (persistErr) {
+              console.error('Error persisting chat:', persistErr);
+            }
+          }
+
+          sendEvent({ type: 'done', conversationId: responseConversationId } as any);
           controller.close();
 
         } catch (error: any) {
@@ -1146,8 +1253,8 @@ async function handleNonStreamingRequest(auth: AuthResult, message: string, hist
   ];
 
   let response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-5-20250929',
-    max_tokens: 4096,
+    model: config.anthropic.model,
+    max_tokens: config.anthropic.maxTokens,
     system: systemPrompt,
     tools: tools as any,
     messages
@@ -1198,8 +1305,8 @@ async function handleNonStreamingRequest(auth: AuthResult, message: string, hist
     });
 
     response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 4096,
+      model: config.anthropic.model,
+      max_tokens: config.anthropic.maxTokens,
       system: systemPrompt,
       tools: tools as any,
       messages

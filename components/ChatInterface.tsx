@@ -6,7 +6,7 @@ import { guestStorage, GuestProject, GuestMaterial } from '@/lib/guestStorage';
 import ReactMarkdown from 'react-markdown';
 import VideoResults from './VideoResults';
 import ProgressIndicator, { ProgressStep } from './ProgressIndicator';
-import { Package, X, Trash2, Search, FolderPlus, ShoppingCart, Loader2 } from 'lucide-react';
+import { Package, X, Trash2, Search, FolderPlus, ShoppingCart, Loader2, RefreshCw } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -85,6 +85,8 @@ export default function ChatInterface({
   const [showCreateProjectDialog, setShowCreateProjectDialog] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [hasProcessedInitialMessage, setHasProcessedInitialMessage] = useState(false);
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+  const [failedMessage, setFailedMessage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Streaming state
@@ -295,6 +297,7 @@ export default function ChatInterface({
     if (!messageContent.trim()) return;
 
     setLastQuery(messageContent);
+    setFailedMessage(null);
     setMessages(prev => [...prev, { role: 'user', content: messageContent }]);
     setIsLoading(true);
     setIsStreaming(true);
@@ -317,7 +320,8 @@ export default function ChatInterface({
           message: messageContent,
           history: messages,
           project_id: projectId,
-          streaming: true
+          streaming: true,
+          conversationId
         })
       });
 
@@ -400,6 +404,10 @@ export default function ChatInterface({
 
                     setMessages(prev => [...prev, { role: 'assistant', content: accumulatedContent }]);
                   }
+                  // Capture conversationId from server for persistence
+                  if (event.conversationId) {
+                    setConversationId(event.conversationId);
+                  }
                   setStreamingContent('');
                   setIsStreaming(false);
                   break;
@@ -412,6 +420,7 @@ export default function ChatInterface({
       }
     } catch (error) {
       console.error('Error:', error);
+      setFailedMessage(messageContent);
       setMessages(prev => [
         ...prev,
         { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }
@@ -433,6 +442,25 @@ export default function ChatInterface({
     const userMessage = input;
     setInput('');
     await sendMessageWithContent(userMessage);
+  };
+
+  const handleRetry = () => {
+    if (!failedMessage) return;
+    // Remove the error message from the end
+    setMessages(prev => {
+      const newMessages = [...prev];
+      // Remove the last assistant error message and the failed user message
+      if (newMessages.length >= 2 &&
+          newMessages[newMessages.length - 1].role === 'assistant' &&
+          newMessages[newMessages.length - 2].role === 'user') {
+        newMessages.splice(-2, 2);
+      }
+      return newMessages;
+    });
+    const retryContent = failedMessage;
+    setFailedMessage(null);
+    // Re-send after state updates
+    setTimeout(() => sendMessageWithContent(retryContent), 50);
   };
 
   const handleGoogleSearch = () => {
@@ -753,6 +781,8 @@ export default function ChatInterface({
               onClick={() => {
                 if (confirm('Clear chat history? This cannot be undone.')) {
                   setMessages([]);
+                  setConversationId(undefined);
+                  setFailedMessage(null);
                   localStorage.removeItem(CHAT_STORAGE_KEY);
                 }
               }}
@@ -948,6 +978,16 @@ export default function ChatInterface({
                       {cleanMessageContent(msg.content)}
                     </ReactMarkdown>
                   </div>
+                  {/* Retry button on error messages */}
+                  {failedMessage && idx === messages.length - 1 && msg.role === 'assistant' && (
+                    <button
+                      onClick={handleRetry}
+                      className="mt-2 flex items-center gap-2 px-3 py-1.5 text-sm text-[#B8593B] hover:bg-[#FADDD0] rounded-lg transition-colors"
+                    >
+                      <RefreshCw size={14} />
+                      Retry
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
