@@ -362,6 +362,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                 onClick={() => setShowExportModal(true)}
                 className="flex items-center gap-2 px-3 py-2 text-[#5D7B93] hover:bg-[#E8F0F5] rounded-lg transition"
                 title="Export shopping list"
+                aria-label="Export shopping list"
               >
                 <Download className="w-5 h-5" />
                 <span className="hidden lg:inline">Export</span>

@@ -141,7 +141,7 @@ export default function ChatInterface({
     }
   }, []);
 
-  // Debounced save messages to localStorage
+  // Debounced save messages to localStorage (cap at 50 most recent)
   const isInitialMount = useRef(true);
   useEffect(() => {
     if (isInitialMount.current) {
@@ -151,7 +151,8 @@ export default function ChatInterface({
     const timer = setTimeout(() => {
       if (typeof window !== 'undefined') {
         try {
-          localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+          const toStore = messages.length > 50 ? messages.slice(-50) : messages;
+          localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(toStore));
         } catch (e) {
           console.error('Error saving chat history:', e);
         }
@@ -342,6 +343,11 @@ export default function ChatInterface({
                     setInventoryNotification({ added: [], existing: [], authRequired: true });
                     setTimeout(() => setInventoryNotification(null), 5000);
                   }
+                  break;
+
+                case 'warning':
+                  accumulatedContent += `\n\n> **Note:** ${event.content}`;
+                  setStreamingContent(accumulatedContent);
                   break;
 
                 case 'error':

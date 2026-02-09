@@ -34,8 +34,9 @@ export async function GET(
 
   if (error) {
     const status = error.code === 'PGRST116' ? 404 : 500;
+    if (status === 500) console.error('Error fetching conversation:', error);
     return applyCorsHeaders(req, new Response(
-      JSON.stringify({ error: status === 404 ? 'Conversation not found' : error.message }),
+      JSON.stringify({ error: status === 404 ? 'Conversation not found' : 'Internal server error' }),
       { status, headers: { 'Content-Type': 'application/json' } }
     ));
   }
@@ -69,10 +70,18 @@ export async function DELETE(
   const { id } = await params;
 
   // Delete messages first (cascade), then conversation
-  await auth.supabaseClient
+  const { error: messagesError } = await auth.supabaseClient
     .from('conversation_messages')
     .delete()
     .eq('conversation_id', id);
+
+  if (messagesError) {
+    console.error('Error deleting conversation messages:', messagesError);
+    return applyCorsHeaders(req, new Response(
+      JSON.stringify({ error: 'Internal server error' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    ));
+  }
 
   const { error } = await auth.supabaseClient
     .from('conversations')
@@ -80,8 +89,9 @@ export async function DELETE(
     .eq('id', id);
 
   if (error) {
+    console.error('Error deleting conversation:', error);
     return applyCorsHeaders(req, new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     ));
   }
@@ -131,8 +141,9 @@ export async function PATCH(
 
   if (error) {
     const status = error.code === 'PGRST116' ? 404 : 500;
+    if (status === 500) console.error('Error updating conversation:', error);
     return applyCorsHeaders(req, new Response(
-      JSON.stringify({ error: status === 404 ? 'Conversation not found' : error.message }),
+      JSON.stringify({ error: status === 404 ? 'Conversation not found' : 'Internal server error' }),
       { status, headers: { 'Content-Type': 'application/json' } }
     ));
   }

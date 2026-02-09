@@ -170,6 +170,14 @@ export async function POST(req: NextRequest) {
             });
           }
 
+          // Warn user if tool loop hit the limit
+          if (loopCount >= maxLoops && response.stop_reason === 'tool_use') {
+            sendEvent({
+              type: 'warning',
+              content: 'This response required more tool calls than allowed in a single turn. The answer below may be incomplete — try asking a follow-up to continue.'
+            });
+          }
+
           // Stream final response in chunks
           for (const block of response.content) {
             if (block.type === 'text') {
@@ -310,6 +318,11 @@ async function handleNonStreamingRequest(
     });
   }
 
+  // Warn if tool loop hit the limit
+  const toolLoopWarning = loopCount >= maxLoops && response.stop_reason === 'tool_use'
+    ? '\n\n> **Note:** This response required more tool calls than allowed in a single turn and may be incomplete. Try asking a follow-up to continue.'
+    : '';
+
   let finalResponse = '';
   const finalContent: Anthropic.ContentBlock[] = [];
 
@@ -327,7 +340,7 @@ async function handleNonStreamingRequest(
 
   return new Response(
     JSON.stringify({
-      response: finalResponse,
+      response: finalResponse + toolLoopWarning,
       history: messages
     }),
     { headers: { 'Content-Type': 'application/json' } }

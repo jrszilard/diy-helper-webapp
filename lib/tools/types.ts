@@ -28,7 +28,12 @@ export interface ErrorEvent {
   content: string;
 }
 
-export type StreamEvent = ProgressEvent | TextEvent | ToolResultEvent | DoneEvent | ErrorEvent;
+export interface WarningEvent {
+  type: 'warning';
+  content: string;
+}
+
+export type StreamEvent = ProgressEvent | TextEvent | ToolResultEvent | DoneEvent | ErrorEvent | WarningEvent;
 
 // Tool name union type
 export type ToolName =

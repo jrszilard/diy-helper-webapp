@@ -213,23 +213,23 @@ async function handleDetectOwnedItems(input: Record<string, unknown>, auth: Auth
 
   for (const item of items) {
     try {
-      const { data: existingData } = await auth.supabaseClient
-        .from('user_inventory')
-        .select('id, item_name')
-        .eq('user_id', userId)
-        .ilike('item_name', item.name);
-
-      if (existingData && existingData.length > 0) {
-        existingItems.push(item.name);
-        continue;
-      }
-
       const normalizedName = item.name
         .trim()
         .replace(/\s+/g, ' ')
         .split(' ')
         .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
         .join(' ');
+
+      const { data: existingData } = await auth.supabaseClient
+        .from('user_inventory')
+        .select('id, item_name')
+        .eq('user_id', userId)
+        .ilike('item_name', normalizedName);
+
+      if (existingData && existingData.length > 0) {
+        existingItems.push(item.name);
+        continue;
+      }
 
       const { error } = await auth.supabaseClient
         .from('user_inventory')

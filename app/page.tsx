@@ -202,6 +202,7 @@ export default function LandingPage() {
                   <button
                     type="submit"
                     disabled={!chatInput.trim()}
+                    aria-label="Send message"
                     className={`absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-xl transition-all duration-200 ${
                       chatInput.trim()
                         ? 'bg-gradient-to-r from-[#C67B5C] to-[#A65D3F] text-white shadow-lg shadow-[#C67B5C]/30 hover:shadow-xl hover:shadow-[#C67B5C]/40 hover:scale-105'

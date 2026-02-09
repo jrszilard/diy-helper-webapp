@@ -43,9 +43,9 @@ export async function GET(
       { headers: { 'Content-Type': 'application/json' } }
     ));
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error fetching messages:', error);
     return applyCorsHeaders(req, new Response(
-      JSON.stringify({ error: message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     ));
   }
@@ -95,9 +95,9 @@ export async function POST(
       { status: 201, headers: { 'Content-Type': 'application/json' } }
     ));
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error adding message:', error);
     return applyCorsHeaders(req, new Response(
-      JSON.stringify({ error: message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     ));
   }

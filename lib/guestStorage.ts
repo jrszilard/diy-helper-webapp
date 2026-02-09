@@ -164,7 +164,7 @@ export const guestStorage = {
   },
 
   // Migrate guest projects to authenticated user account
-  async migrateToUser(userId: string, supabase: SupabaseClient): Promise<{ migrated: number; failed: number; projectNames: string[] }> {
+  async migrateToUser(userId: string, supabase: SupabaseClient): Promise<{ migrated: number; failed: number; partialMigration: boolean; projectNames: string[] }> {
     const guestProjects = this.getProjects();
     let migrated = 0;
     let failed = 0;
@@ -224,12 +224,12 @@ export const guestStorage = {
       }
     }
 
-    // Clear guest storage after successful migration
-    if (migrated > 0) {
+    // Only clear guest storage when ALL projects migrated successfully
+    if (migrated > 0 && failed === 0) {
       localStorage.removeItem(GUEST_PROJECTS_KEY);
     }
 
-    return { migrated, failed, projectNames };
+    return { migrated, failed, partialMigration: migrated > 0 && failed > 0, projectNames };
   },
 
   // Check if there are any guest projects

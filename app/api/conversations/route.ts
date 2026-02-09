@@ -29,8 +29,9 @@ export async function GET(req: NextRequest) {
     .limit(50);
 
   if (error) {
+    console.error('Error fetching conversations:', error);
     return applyCorsHeaders(req, new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     ));
   }
@@ -84,9 +85,9 @@ export async function POST(req: NextRequest) {
       { status: 201, headers: { 'Content-Type': 'application/json' } }
     ));
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error creating conversation:', error);
     return applyCorsHeaders(req, new Response(
-      JSON.stringify({ error: message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     ));
   }

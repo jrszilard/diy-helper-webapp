@@ -41,9 +41,10 @@ export default function ChatPage() {
           try {
             const result = await guestStorage.migrateToUser(newUser.id, supabase);
             if (result.migrated > 0) {
-              setMigrationToast(
-                `Migrated ${result.migrated} project${result.migrated > 1 ? 's' : ''} to your account`
-              );
+              const msg = result.partialMigration
+                ? `Migrated ${result.migrated} project${result.migrated > 1 ? 's' : ''}, but ${result.failed} failed. Local copies preserved.`
+                : `Migrated ${result.migrated} project${result.migrated > 1 ? 's' : ''} to your account`;
+              setMigrationToast(msg);
               setTimeout(() => setMigrationToast(null), 5000);
             }
             if (result.failed > 0) {
@@ -130,12 +131,13 @@ export default function ChatPage() {
       {showMobileProjects && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-[#3E2723] bg-opacity-50" onClick={closeMobilePanels} />
-          <div className="absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-[#FDFBF7] shadow-xl animate-slide-in-left">
+          <div className="absolute left-0 top-0 bottom-0 w-[85vw] max-w-80 bg-[#FDFBF7] shadow-xl animate-slide-in-left">
             <div className="flex items-center justify-between p-4 border-b border-[#D4C8B8] bg-[#5D7B93] text-white">
               <h2 className="font-bold text-lg">{user ? 'My Projects' : 'Local Projects'}</h2>
               <button
                 onClick={() => setShowMobileProjects(false)}
                 className="p-2 hover:bg-[#4A6275] rounded-lg transition-colors"
+                aria-label="Close projects panel"
               >
                 <X size={20} />
               </button>
@@ -162,6 +164,7 @@ export default function ChatPage() {
               <button
                 onClick={() => setShowMobileShopping(false)}
                 className="p-2 hover:bg-[#2D5A3B] rounded-lg transition-colors"
+                aria-label="Close shopping list"
               >
                 <X size={20} />
               </button>
@@ -182,6 +185,7 @@ export default function ChatPage() {
                   onClick={() => setShowMobileProjects(true)}
                   className="md:hidden p-2 text-[#7D6B5D] hover:text-[#5D7B93] hover:bg-[#E8DFD0] rounded-lg transition"
                   title={user ? "My Projects" : "Local Projects"}
+                  aria-label={user ? "My Projects" : "Local Projects"}
                 >
                   <Menu size={22} />
                 </button>
@@ -202,6 +206,7 @@ export default function ChatPage() {
                     onClick={() => setShowMobileShopping(true)}
                     className="md:hidden relative p-2 text-[#7D6B5D] hover:text-[#4A7C59] hover:bg-[#E8DFD0] rounded-lg transition"
                     title="Shopping List"
+                    aria-label="Shopping List"
                   >
                     <ShoppingCart size={22} />
                     <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#4A7C59] text-white text-xs rounded-full flex items-center justify-center font-medium">
