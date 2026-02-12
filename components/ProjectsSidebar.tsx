@@ -26,6 +26,7 @@ interface ProjectsSidebarProps {
   user: { id: string; email?: string } | null;
   onSelectProject: (project: Project | null) => void;
   isMobile?: boolean;
+  refreshTrigger?: number;
 }
 
 // Auto-categorize based on project name
@@ -86,7 +87,7 @@ const categoryOptions = [
   { value: 'other', label: 'Other' }
 ];
 
-export default function ProjectsSidebar({ user, onSelectProject, isMobile = false }: ProjectsSidebarProps) {
+export default function ProjectsSidebar({ user, onSelectProject, isMobile = false, refreshTrigger = 0 }: ProjectsSidebarProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -100,7 +101,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
   useEffect(() => {
     if (user) loadProjects();
     else loadGuestProjects();
-  }, [user]);
+  }, [user, refreshTrigger]);
 
   const loadGuestProjects = () => {
     const guestProjects = guestStorage.getProjects();

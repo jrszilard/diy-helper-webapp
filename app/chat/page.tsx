@@ -17,6 +17,7 @@ import type { User } from '@supabase/supabase-js';
 export default function ChatPage() {
   const [user, setUser] = useState<User | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [projectRefreshTrigger, setProjectRefreshTrigger] = useState(0);
 
   const [showInventory, setShowInventory] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -61,8 +62,8 @@ export default function ChatPage() {
   }, []);
 
   const handleProjectLinked = (projectId: string) => {
-    // When chat links to a project, update the selected project
-    // This will show the shopping list sidebar
+    // When chat links to a project, update the selected project + refresh sidebar
+    setProjectRefreshTrigger(prev => prev + 1);
 
     // First check if it's a guest project
     const guestProject = guestStorage.getProject(projectId);
@@ -124,6 +125,7 @@ export default function ChatPage() {
         <ProjectsSidebar
           user={user}
           onSelectProject={handleSelectProject}
+          refreshTrigger={projectRefreshTrigger}
         />
       </div>
 
@@ -146,6 +148,7 @@ export default function ChatPage() {
               user={user}
               onSelectProject={handleSelectProject}
               isMobile={true}
+              refreshTrigger={projectRefreshTrigger}
             />
           </div>
         </div>

@@ -364,10 +364,16 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                             aria-label={item.purchased ? 'Mark as not purchased' : 'Mark as purchased'}>
                             {item.purchased && <Check className="w-4 h-4" />}
                           </button>
-                          <input type="checkbox" checked={selectedItems.has(item.id)} onChange={() => toggleItem(item.id)}
-                            onClick={(e) => e.stopPropagation()}
-                            className={`${isMobile ? 'w-5 h-5' : 'w-4 h-4'} text-[#C67B5C] rounded focus:ring-2 focus:ring-[#C67B5C] flex-shrink-0 accent-[#C67B5C]`}
-                            title="Select for store search" aria-label="Select item for store search" />
+                          <button onClick={(e) => { e.stopPropagation(); toggleItem(item.id); }}
+                            className={`w-6 h-6 rounded-lg flex items-center justify-center transition flex-shrink-0 ${
+                              selectedItems.has(item.id)
+                                ? 'bg-[#C67B5C] text-white'
+                                : 'border-2 border-[#D4C8B8] text-[#D4C8B8] hover:border-[#C67B5C] hover:text-[#C67B5C]'
+                            }`}
+                            title={selectedItems.has(item.id) ? 'Deselect from store search' : 'Select for store search'}
+                            aria-label={selectedItems.has(item.id) ? 'Deselect from store search' : 'Select for store search'}>
+                            <Search className="w-3.5 h-3.5" />
+                          </button>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className={`font-semibold ${isMobile ? 'text-base' : ''} ${item.purchased ? 'line-through text-[#A89880]' : 'text-[#3E2723]'}`}>
