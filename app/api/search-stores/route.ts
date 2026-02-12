@@ -12,77 +12,19 @@ import { SearchStoresRequestSchema, parseRequestBody } from '@/lib/validation';
 import { storeSearch as storeSearchConfig } from '@/lib/config';
 import { withRetry } from '@/lib/api-retry';
 import { logger } from '@/lib/logger';
+import {
+  STORE_CONFIGS,
+  type StoreKey,
+  type StoreConfig,
+  getCachedResult,
+  setCachedResult,
+  buildCacheKey,
+} from '@/lib/store-patterns';
 
 // Helper function to add delay
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-/**
- * Enhanced Store Configuration with URL Scoring
- *
- * - urlPatterns: Array of objects with pattern, weight, and type for intelligent URL ranking
- * - minProductPathScore: Threshold to consider a URL a valid product link
- */
-const STORE_CONFIGS = {
-  'home-depot': {
-    name: 'Home Depot',
-    domain: 'homedepot.com',
-    phone: '1-800-466-3337',
-    productPathPatterns: ['/p/'],
-    excludePatterns: ['/b/', '/c/', '/s/', '/search', '/deals', '/offers'],
-    urlPatterns: [
-      { pattern: '/p/[A-Za-z0-9-]+/[0-9]+', weight: 100, type: 'direct-product' },
-      { pattern: '/p/', weight: 80, type: 'product-page' },
-      { pattern: '/search\\?', weight: 10, type: 'search-query' },
-      { pattern: '/b/', weight: 0, type: 'category' },
-    ],
-    minProductPathScore: 50,
-  },
-  'lowes': {
-    name: "Lowe's",
-    domain: 'lowes.com',
-    phone: '1-800-445-6937',
-    productPathPatterns: ['/pd/'],
-    excludePatterns: ['/pl/', '/ppl/', '/new', '/deals', '/browse', '/search'],
-    urlPatterns: [
-      { pattern: '/pd/[A-Za-z0-9-]+/[0-9]+', weight: 100, type: 'direct-product' },
-      { pattern: '/pd/', weight: 80, type: 'product-page' },
-      { pattern: '/search\\?', weight: 10, type: 'search-query' },
-    ],
-    minProductPathScore: 50,
-  },
-  'ace-hardware': {
-    name: 'Ace Hardware',
-    domain: 'acehardware.com',
-    phone: '1-888-827-4223',
-    productPathPatterns: ['/product/', '/p/'],
-    excludePatterns: ['/category/', '/search', '/deals', '/specials'],
-    urlPatterns: [
-      { pattern: '/departments/[^/]+/[^/]+/[^/]+/[0-9]+', weight: 100, type: 'direct-product' },
-      { pattern: '/product/[0-9]+', weight: 90, type: 'product-id' },
-      { pattern: '/product/', weight: 80, type: 'product-page' },
-      { pattern: '/p/', weight: 70, type: 'short-product' },
-      { pattern: '/search', weight: 10, type: 'search-query' },
-    ],
-    minProductPathScore: 50,
-  },
-  'menards': {
-    name: 'Menards',
-    domain: 'menards.com',
-    phone: '1-800-871-2800',
-    productPathPatterns: ['/main/p-'],
-    excludePatterns: ['/main/store', '/main/search', '/specials'],
-    urlPatterns: [
-      { pattern: '/main/p-[0-9]+', weight: 100, type: 'direct-product' },
-      { pattern: '/main/p-', weight: 80, type: 'product-page' },
-      { pattern: '/main/search', weight: 10, type: 'search-query' },
-    ],
-    minProductPathScore: 50,
-  },
-};
-
-type StoreKey = keyof typeof STORE_CONFIGS;
 
 interface StoreResult {
   store: string;
@@ -107,7 +49,7 @@ interface StoreResult {
  * URL Scoring System
  * Scores each URL to rank better product URLs higher than search results.
  */
-function scoreUrl(url: string, config: typeof STORE_CONFIGS[StoreKey]): number {
+function scoreUrl(url: string, config: StoreConfig): number {
   let score = 0;
 
   try {
@@ -158,7 +100,7 @@ function scoreUrl(url: string, config: typeof STORE_CONFIGS[StoreKey]): number {
  */
 function extractProductUrls(
   searchResults: string,
-  config: typeof STORE_CONFIGS[StoreKey],
+  config: StoreConfig,
   materialName: string
 ): { urls: string[]; quality: 'high' | 'medium' | 'low'; fallbackSearch: boolean } {
   try {
@@ -380,12 +322,24 @@ export async function POST(req: NextRequest) {
 
     // Search stores in parallel (concurrency controlled by config)
     const validStores = stores
-      .map(s => ({ key: s as StoreKey, cfg: STORE_CONFIGS[s as StoreKey] }))
-      .filter(s => !!s.cfg);
+      .map(s => ({ key: s as StoreKey, cfg: STORE_CONFIGS[s] }))
+      .filter((s): s is { key: StoreKey; cfg: StoreConfig } => !!s.cfg);
 
     // Process stores in concurrent chunks
-    async function searchOneStore(storeKey: StoreKey, storeCfg: typeof STORE_CONFIGS[StoreKey]): Promise<StoreResult> {
+    async function searchOneStore(storeKey: StoreKey, storeCfg: StoreConfig): Promise<StoreResult> {
       metadata.totalSearched++;
+
+      // Check cache first
+      const cacheKey = buildCacheKey(storeKey, materialName, location);
+      const cached = getCachedResult<StoreResult>(cacheKey);
+      if (cached) {
+        logger.info('Cache hit for store search', { requestId, store: storeKey, material: materialName });
+        if (cached.linkQuality === 'high') metadata.highQualityResults++;
+        else if (cached.linkQuality === 'medium') metadata.mediumQualityResults++;
+        else metadata.fallbackResults++;
+        metadata.successfulSearches++;
+        return cached;
+      }
 
       const searchQuery = `${materialName} site:${storeCfg.domain}`;
 
@@ -462,6 +416,7 @@ export async function POST(req: NextRequest) {
           linkQuality: urlData.quality,
         };
 
+        setCachedResult(cacheKey, storeResult);
         return storeResult;
       }
 
