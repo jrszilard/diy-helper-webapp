@@ -1,12 +1,14 @@
 'use client';
 
-import React from 'react';
-import { Search, Package, ShoppingCart, Loader2 } from 'lucide-react';
+import React, { useRef, useState, useCallback } from 'react';
+import { Search, Package, ShoppingCart, Loader2, Camera } from 'lucide-react';
+import ImagePreview from './ImagePreview';
+import { processImage, isValidImageType, type ProcessedImage } from '@/lib/image-utils';
 
 interface ChatInputProps {
   input: string;
   onInputChange: (value: string) => void;
-  onSend: () => void;
+  onSend: (image?: ProcessedImage) => void;
   isLoading: boolean;
   showGoogleFallback: boolean;
   onGoogleSearch: () => void;
@@ -27,6 +29,68 @@ const ChatInput = React.memo(function ChatInput({
   isAutoExtracting,
   onAutoExtractMaterials,
 }: ChatInputProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [processedImage, setProcessedImage] = useState<ProcessedImage | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const handleImageSelect = useCallback(async (file: File) => {
+    setImageError(null);
+    if (!isValidImageType(file)) {
+      setImageError('Please use JPEG, PNG, WebP, or GIF images.');
+      return;
+    }
+    try {
+      const preview = URL.createObjectURL(file);
+      setImagePreview(preview);
+      const processed = await processImage(file);
+      setProcessedImage(processed);
+    } catch (err) {
+      setImageError(err instanceof Error ? err.message : 'Failed to process image');
+      setImagePreview(null);
+      setProcessedImage(null);
+    }
+  }, []);
+
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleImageSelect(file);
+    // Reset input so same file can be selected again
+    e.target.value = '';
+  }, [handleImageSelect]);
+
+  const handleRemoveImage = useCallback(() => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImagePreview(null);
+    setProcessedImage(null);
+    setImageError(null);
+  }, [imagePreview]);
+
+  const handleSend = useCallback(() => {
+    onSend(processedImage || undefined);
+    handleRemoveImage();
+  }, [onSend, processedImage, handleRemoveImage]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      handleImageSelect(file);
+    }
+  }, [handleImageSelect]);
+
   return (
     <>
       {/* Google Search Fallback */}
@@ -84,20 +148,51 @@ const ChatInput = React.memo(function ChatInput({
       )}
 
       {/* Input */}
-      <div className="bg-[#FDFBF7] border-t border-[#D4C8B8] p-4">
+      <div
+        className={`bg-[#FDFBF7] border-t border-[#D4C8B8] p-4 ${isDragOver ? 'ring-2 ring-[#C67B5C] ring-inset bg-[#FDF3ED]' : ''}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {/* Image preview */}
+        {imagePreview && (
+          <div className="mb-2">
+            <ImagePreview src={imagePreview} onRemove={handleRemoveImage} disabled={isLoading} />
+          </div>
+        )}
+        {imageError && (
+          <p className="text-xs text-[#B8593B] mb-2">{imageError}</p>
+        )}
+
         <div className="flex gap-2">
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isLoading}
+            className="p-2 text-[#7D6B5D] hover:text-[#C67B5C] hover:bg-[#FDF3ED] rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Attach image"
+            title="Attach a photo for analysis"
+          >
+            <Camera size={20} />
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            onChange={handleFileChange}
+            className="hidden"
+          />
           <input
             type="text"
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && !isLoading && onSend()}
-            placeholder="Ask me anything about your DIY project..."
+            onKeyPress={(e) => e.key === 'Enter' && !isLoading && handleSend()}
+            placeholder={imagePreview ? 'Describe what you want to know about this image...' : 'Ask me anything about your DIY project...'}
             className="flex-1 px-4 py-2 border border-[#D4C8B8] rounded-lg focus:ring-2 focus:ring-[#C67B5C] focus:border-[#C67B5C] text-[#3E2723] placeholder-[#A89880] bg-white"
             disabled={isLoading}
           />
           <button
-            onClick={onSend}
-            disabled={isLoading || !input.trim()}
+            onClick={handleSend}
+            disabled={isLoading || (!input.trim() && !processedImage)}
             className="bg-[#C67B5C] text-white px-6 py-2 rounded-lg hover:bg-[#A65D3F] disabled:bg-[#D4C8B8] disabled:cursor-not-allowed"
           >
             Send

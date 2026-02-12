@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { extractMaterialsData, detectInventoryUpdate } from '@/components/ChatMessages';
 import { ProgressStep } from '@/components/ProgressIndicator';
 import { classifyError, getUserMessage } from '@/lib/api-retry';
+import type { ProcessedImage } from '@/lib/image-utils';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -189,12 +190,13 @@ export function useChat(options: UseChatOptions = {}) {
     }
   };
 
-  const sendMessageWithContent = useCallback(async (messageContent: string) => {
-    if (!messageContent.trim()) return;
+  const sendMessageWithContent = useCallback(async (messageContent: string, image?: ProcessedImage) => {
+    if (!messageContent.trim() && !image) return;
+    const displayContent = messageContent.trim() || (image ? 'What can you tell me about this image?' : '');
 
-    setLastQuery(messageContent);
+    setLastQuery(displayContent);
     setFailedMessage(null);
-    setMessages(prev => [...prev, { role: 'user', content: messageContent }]);
+    setMessages(prev => [...prev, { role: 'user', content: displayContent }]);
     setIsLoading(true);
     setIsStreaming(true);
     setStreamingContent('');
@@ -207,16 +209,21 @@ export function useChat(options: UseChatOptions = {}) {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
+      const body: Record<string, unknown> = {
+        message: displayContent,
+        history: messages,
+        project_id: options.projectId,
+        streaming: true,
+        conversationId,
+      };
+      if (image) {
+        body.image = { base64: image.base64, mediaType: image.mediaType };
+      }
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          message: messageContent,
-          history: messages,
-          project_id: options.projectId,
-          streaming: true,
-          conversationId
-        })
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -319,11 +326,11 @@ export function useChat(options: UseChatOptions = {}) {
     }
   }, [messages, options.projectId, conversationId]);
 
-  const sendMessage = useCallback(async () => {
-    if (!input.trim()) return;
+  const sendMessage = useCallback(async (image?: ProcessedImage) => {
+    if (!input.trim() && !image) return;
     const userMessage = input;
     setInput('');
-    await sendMessageWithContent(userMessage);
+    await sendMessageWithContent(userMessage, image);
   }, [input, sendMessageWithContent]);
 
   const handleRetry = useCallback(() => {

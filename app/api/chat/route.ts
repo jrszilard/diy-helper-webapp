@@ -72,14 +72,28 @@ export async function POST(req: NextRequest) {
       ));
     }
 
-    const { message, history, streaming, conversationId: existingConversationId } = parsed.data;
+    const { message, history, streaming, conversationId: existingConversationId, image } = parsed.data;
 
-    logger.info('Chat request', { requestId, streaming, historyLength: history.length, hasConversationId: !!existingConversationId });
+    logger.info('Chat request', { requestId, streaming, historyLength: history.length, hasConversationId: !!existingConversationId, hasImage: !!image });
 
     const prunedHistory = pruneConversation(history);
 
+    // Build user message content (text-only or multi-modal with image)
+    const userContent: Anthropic.ContentBlockParam[] = [];
+    if (image) {
+      userContent.push({
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: image.mediaType,
+          data: image.base64,
+        },
+      });
+    }
+    userContent.push({ type: 'text', text: message });
+
     if (!streaming) {
-      return handleNonStreamingRequest(auth, message, prunedHistory);
+      return handleNonStreamingRequest(auth, message, prunedHistory, image ? userContent : undefined);
     }
 
     const stream = new ReadableStream({
@@ -96,13 +110,13 @@ export async function POST(req: NextRequest) {
           sendEvent({
             type: 'progress',
             step: 'thinking',
-            message: 'Analyzing your question...',
+            message: image ? 'Analyzing your image...' : 'Analyzing your question...',
             icon: '🤔'
           });
 
           const messages: Anthropic.MessageParam[] = [
             ...(prunedHistory as Anthropic.MessageParam[]),
-            { role: 'user' as const, content: message }
+            { role: 'user' as const, content: image ? userContent : message }
           ];
 
           const apiStart = Date.now();
@@ -306,11 +320,12 @@ export async function POST(req: NextRequest) {
 async function handleNonStreamingRequest(
   auth: Awaited<ReturnType<typeof getAuthFromRequest>>,
   message: string,
-  history: Array<{ role: string; content: string | Array<Record<string, unknown>> }>
+  history: Array<{ role: string; content: string | Array<Record<string, unknown>> }>,
+  multiModalContent?: Anthropic.ContentBlockParam[]
 ) {
   const messages: Anthropic.MessageParam[] = [
     ...(history as Anthropic.MessageParam[]),
-    { role: 'user' as const, content: message }
+    { role: 'user' as const, content: multiModalContent || message }
   ];
 
   let response = await withRetry(

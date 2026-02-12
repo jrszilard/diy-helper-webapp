@@ -14,6 +14,10 @@ export const ChatRequestSchema = z.object({
   streaming: z.boolean().default(true),
   project_id: z.string().uuid().optional(),
   conversationId: z.string().uuid().optional(),
+  image: z.object({
+    base64: z.string().max(8_000_000, 'Image too large'),
+    mediaType: z.enum(['image/jpeg', 'image/png', 'image/webp', 'image/gif']),
+  }).optional(),
 });
 
 export const SearchStoresRequestSchema = z.object({
