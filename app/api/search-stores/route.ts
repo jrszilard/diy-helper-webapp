@@ -41,6 +41,7 @@ interface StoreResult {
   priceWarning?: string;
   sku?: string;
   storeStock?: string;
+  productName?: string;
   linkQuality?: 'high' | 'medium' | 'low' | 'search-fallback';
   searchFallback?: boolean;
 }
@@ -405,6 +406,7 @@ export async function POST(req: NextRequest) {
           priceWarning: priceData.warning,
           sku: productData.sku || undefined,
           storeStock: productData.storeStock || undefined,
+          productName: productData.productName || undefined,
           linkQuality: urlData.quality,
         };
 

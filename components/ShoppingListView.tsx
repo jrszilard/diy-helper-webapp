@@ -192,6 +192,12 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
       syncedPriceItemsRef.current.add(itemId);
       const roundedBest = Math.round(bestResult.price * 100) / 100;
       const currentPrice = item.price != null ? Math.round(item.price * 100) / 100 : null;
+      // Skip auto-sync if price differs by >5x — likely a quantity mismatch
+      // (e.g., store returns 250ft roll price but list has 25ft qty)
+      if (currentPrice != null && currentPrice > 0) {
+        const ratio = roundedBest / currentPrice;
+        if (ratio > 5 || ratio < 0.2) continue;
+      }
       if (currentPrice !== roundedBest) {
         updateItemPrice(itemId, bestResult.price);
         updatedNames.push(item.product_name);
@@ -501,6 +507,11 @@ function StoreSearchResults({ results, priceRange }: {
                       </span>
                     )}
                   </div>
+                  {result.productName && (
+                    <div className="text-xs text-[#5D7B93] font-medium truncate max-w-[200px]" title={result.productName}>
+                      {result.productName}
+                    </div>
+                  )}
                   {result.sku && <div className="text-xs text-[#9B8B7D]">SKU: {result.sku}</div>}
                   <div className="text-xs text-[#7D6B5D]">{result.distance}</div>
                 </div>

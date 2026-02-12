@@ -17,6 +17,7 @@ interface StoreResult {
   priceWarning?: string;
   sku?: string;
   storeStock?: string;
+  productName?: string;
 }
 
 interface SearchResultWithMeta {
