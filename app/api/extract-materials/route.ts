@@ -5,8 +5,11 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { ExtractMaterialsRequestSchema, parseRequestBody } from '@/lib/validation';
 import { anthropic as anthropicConfig } from '@/lib/config';
 import { withRetry } from '@/lib/api-retry';
+import { logger } from '@/lib/logger';
 
 export async function POST(req: NextRequest) {
+  const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
+
   try {
     // Rate limiting (per-IP, 10/min)
     const rateLimitResult = checkRateLimit(req, null, 'extractMaterials');
@@ -35,6 +38,9 @@ export async function POST(req: NextRequest) {
     }
 
     const { conversationContext } = parsed.data;
+    const startTime = Date.now();
+
+    logger.info('Extract materials request', { requestId, messageCount: conversationContext.length });
 
     const anthropic = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY || '',
@@ -110,17 +116,19 @@ Important:
               );
             }
 
+            logger.info('Materials extracted', { requestId, duration: Date.now() - startTime, materialCount: materials.materials.length });
             return applyCorsHeaders(req, NextResponse.json(materials));
           }
         } catch (parseError) {
-          console.error('JSON parse error:', parseError);
+          logger.error('JSON parse error in materials extraction', parseError, { requestId });
         }
       }
     }
 
+    logger.warn('Failed to extract materials from response', { requestId, duration: Date.now() - startTime });
     return applyCorsHeaders(req, NextResponse.json({ error: 'Failed to extract materials from conversation' }, { status: 500 }));
   } catch (error) {
-    console.error('Extract materials error:', error);
+    logger.error('Extract materials error', error, { requestId });
     return applyCorsHeaders(req, NextResponse.json({ error: 'Failed to extract materials' }, { status: 500 }));
   }
 }

@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(_request: NextRequest) {
+export function middleware(request: NextRequest) {
   const response = NextResponse.next();
+
+  // Generate request ID for correlation
+  const requestId = crypto.randomUUID();
+  response.headers.set('x-request-id', requestId);
+  // Forward to API routes via request header
+  request.headers.set('x-request-id', requestId);
 
   const isDev = process.env.NODE_ENV === 'development';
   const scriptSrc = isDev

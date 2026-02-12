@@ -11,6 +11,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { SearchStoresRequestSchema, parseRequestBody } from '@/lib/validation';
 import { storeSearch as storeSearchConfig } from '@/lib/config';
 import { withRetry } from '@/lib/api-retry';
+import { logger } from '@/lib/logger';
 
 // Helper function to add delay
 function sleep(ms: number) {
@@ -145,7 +146,7 @@ function scoreUrl(url: string, config: typeof STORE_CONFIGS[StoreKey]): number {
     }
 
   } catch (error) {
-    console.error(`Error scoring URL ${url}:`, error);
+    logger.error('Error scoring URL', error, { url });
     return 0;
   }
 
@@ -214,7 +215,7 @@ function extractProductUrls(
     };
 
   } catch (error) {
-    console.error(`Error extracting URLs:`, error);
+    logger.error('Error extracting URLs', error);
     return {
       urls: [],
       quality: 'low',
@@ -263,7 +264,7 @@ async function fetchBestProductData(
         return result;
       } catch (error) {
         clearTimeout(timeoutId);
-        console.error('Product fetch failed:', error);
+        logger.error('Product fetch failed', error, { url });
         return null;
       }
     };
@@ -277,7 +278,7 @@ async function fetchBestProductData(
       }
     }
   } catch (error) {
-    console.error('Error in fetchBestProductData:', error);
+    logger.error('Error in fetchBestProductData', error);
   }
 
   if (results.length === 0) {
@@ -321,6 +322,9 @@ function buildSearchUrl(domain: string, materialName: string): string {
  * Main POST handler
  */
 export async function POST(req: NextRequest) {
+  const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
+  const startTime = Date.now();
+
   try {
     // Rate limiting (per-IP, no auth required for this endpoint)
     const rateLimitResult = checkRateLimit(req, null, 'searchStores');
@@ -354,6 +358,8 @@ export async function POST(req: NextRequest) {
       stores,
       validatePricing,
     } = parsed.data;
+
+    logger.info('Store search request', { requestId, material: materialName, location, storeCount: stores.length });
 
     const results: StoreResult[] = [];
     const warnings: string[] = [];
@@ -496,7 +502,7 @@ export async function POST(req: NextRequest) {
         if (result.status === 'fulfilled') {
           results.push(result.value);
         } else {
-          console.error('Store search failed:', result.reason);
+          logger.error('Store search failed', result.reason, { requestId });
           metadata.fallbackResults++;
           const failedStore = chunk[j];
           if (failedStore) {
@@ -536,6 +542,15 @@ export async function POST(req: NextRequest) {
       return 0;
     });
 
+    logger.info('Store search complete', {
+      requestId,
+      duration: Date.now() - startTime,
+      resultsCount: results.length,
+      highQuality: metadata.highQualityResults,
+      fallbacks: metadata.fallbackResults,
+      warningCount: warnings.length,
+    });
+
     const response = NextResponse.json({
       results,
       warnings: warnings.length > 0 ? warnings : undefined,
@@ -557,7 +572,7 @@ export async function POST(req: NextRequest) {
     return applyCorsHeaders(req, response);
 
   } catch (error: unknown) {
-    console.error('Store search request error:', error);
+    logger.error('Store search request error', error, { requestId, duration: Date.now() - startTime });
     const message = error instanceof Error ? error.message : 'Internal server error';
     return applyCorsHeaders(req, new Response(
       JSON.stringify({ error: message, results: [] }),

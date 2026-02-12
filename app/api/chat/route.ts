@@ -12,6 +12,7 @@ import { tools, progressMessages } from '@/lib/tools/definitions';
 import { executeTool } from '@/lib/tools/executor';
 import { StreamEvent } from '@/lib/tools/types';
 import { withRetry } from '@/lib/api-retry';
+import { logger } from '@/lib/logger';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
@@ -32,10 +33,12 @@ const shouldRetryAnthropic = (error: unknown): boolean => {
 
 export async function POST(req: NextRequest) {
   const encoder = new TextEncoder();
+  const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
+  const startTime = Date.now();
 
   try {
     if (!process.env.ANTHROPIC_API_KEY) {
-      console.error('ANTHROPIC_API_KEY not set');
+      logger.error('ANTHROPIC_API_KEY not set', undefined, { requestId });
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'API configuration error' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
@@ -46,6 +49,7 @@ export async function POST(req: NextRequest) {
 
     const rateLimitResult = checkRateLimit(req, auth.userId, 'chat');
     if (!rateLimitResult.allowed) {
+      logger.warn('Rate limited', { requestId, userId: auth.userId });
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),
         {
@@ -70,6 +74,8 @@ export async function POST(req: NextRequest) {
 
     const { message, history, streaming, conversationId: existingConversationId } = parsed.data;
 
+    logger.info('Chat request', { requestId, streaming, historyLength: history.length, hasConversationId: !!existingConversationId });
+
     const prunedHistory = pruneConversation(history);
 
     if (!streaming) {
@@ -82,7 +88,7 @@ export async function POST(req: NextRequest) {
           try {
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
           } catch (e) {
-            console.error('Error sending SSE event:', e);
+            logger.error('Error sending SSE event', e, { requestId });
           }
         };
 
@@ -99,6 +105,7 @@ export async function POST(req: NextRequest) {
             { role: 'user' as const, content: message }
           ];
 
+          const apiStart = Date.now();
           let response = await withRetry(
             () => anthropic.messages.create({
               model: config.anthropic.model,
@@ -109,6 +116,7 @@ export async function POST(req: NextRequest) {
             }),
             { maxRetries: 2, baseDelayMs: 1000, shouldRetry: shouldRetryAnthropic }
           );
+          logger.info('Anthropic API call', { requestId, duration: Date.now() - apiStart, stopReason: response.stop_reason });
 
           let loopCount = 0;
           const maxLoops = 10;
@@ -132,7 +140,9 @@ export async function POST(req: NextRequest) {
                   icon: progress.icon
                 });
 
+                const toolStart = Date.now();
                 const result = await executeTool(block.name, block.input as Record<string, unknown>, auth);
+                logger.info('Tool executed', { requestId, tool: block.name, duration: Date.now() - toolStart });
 
                 // Forward inventory updates to client as dedicated SSE events
                 if (block.name === 'detect_owned_items' && result.startsWith('FAILED:')) {
@@ -178,6 +188,7 @@ export async function POST(req: NextRequest) {
               icon: '✨'
             });
 
+            const followUpStart = Date.now();
             response = await withRetry(
               () => anthropic.messages.create({
                 model: config.anthropic.model,
@@ -188,6 +199,7 @@ export async function POST(req: NextRequest) {
               }),
               { maxRetries: 2, baseDelayMs: 1000, shouldRetry: shouldRetryAnthropic }
             );
+            logger.info('Anthropic follow-up call', { requestId, duration: Date.now() - followUpStart, loop: loopCount, stopReason: response.stop_reason });
           }
 
           // Warn user if tool loop hit the limit
@@ -234,15 +246,16 @@ export async function POST(req: NextRequest) {
                 await addMessage(auth.supabaseClient, convId, 'assistant', assistantText);
               }
             } catch (persistErr) {
-              console.error('Error persisting chat:', persistErr);
+              logger.error('Error persisting chat', persistErr, { requestId });
             }
           }
 
+          logger.info('Chat stream complete', { requestId, duration: Date.now() - startTime, toolLoops: loopCount });
           sendEvent({ type: 'done', conversationId: responseConversationId });
           controller.close();
 
         } catch (error: unknown) {
-          console.error('Stream error:', error);
+          logger.error('Stream error', error, { requestId, duration: Date.now() - startTime });
           let errorContent = 'An unexpected error occurred. Please try again.';
           if (error && typeof error === 'object' && 'status' in error) {
             const status = (error as { status: number }).status;
@@ -278,7 +291,7 @@ export async function POST(req: NextRequest) {
 
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Chat API error:', error);
+    logger.error('Chat API error', error, { requestId, duration: Date.now() - startTime });
     return applyCorsHeaders(req, new Response(
       JSON.stringify({
         error: 'Failed to process message',
