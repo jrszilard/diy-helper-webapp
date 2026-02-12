@@ -11,9 +11,11 @@ export function middleware(request: NextRequest) {
   request.headers.set('x-request-id', requestId);
 
   const isDev = process.env.NODE_ENV === 'development';
+  // Next.js requires 'unsafe-inline' for RSC hydration scripts in production.
+  // In dev, 'unsafe-eval' is also needed for HMR/Turbopack.
   const scriptSrc = isDev
     ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-    : "script-src 'self'";
+    : "script-src 'self' 'unsafe-inline'";
 
   response.headers.set(
     'Content-Security-Policy',
