@@ -89,8 +89,9 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
   // Export modal state
   const [showExportModal, setShowExportModal] = useState(false);
 
-  // Error state for store search
+  // Error state for store search (per-item)
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [itemErrors, setItemErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (project) loadItems();
@@ -245,7 +246,9 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
 
     setIsSearching(true);
     setSearchError(null);
+    setItemErrors({});
     const results: Record<string, SearchResultWithMeta> = {};
+    const errors: Record<string, string> = {};
 
     try {
       const itemsArray = Array.from(selectedItems);
@@ -258,31 +261,40 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
           continue;
         }
 
-        const requestBody = {
-          materialName: item.product_name,
-          location: location,
-          quantity: item.quantity,
-          validatePricing: true
-        };
+        try {
+          const requestBody = {
+            materialName: item.product_name,
+            location: location,
+            quantity: item.quantity,
+            validatePricing: true
+          };
 
-        const response = await fetch('/api/search-stores', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody)
-        });
+          const response = await fetch('/api/search-stores', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+          });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('API error:', response.status, errorText);
-          continue;
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('API error:', response.status, errorText);
+            errors[itemId] = response.status === 429
+              ? 'Rate limited. Try again shortly.'
+              : `Search failed (${response.status})`;
+            continue;
+          }
+
+          const data = await response.json();
+
+          results[itemId] = {
+            results: data.results || [],
+            priceRange: data.priceRange || null
+          };
+        } catch (itemError: unknown) {
+          const msg = itemError instanceof Error ? itemError.message : 'Unknown error';
+          console.error(`Error searching stores for "${item.product_name}":`, msg);
+          errors[itemId] = 'Search failed. Try again.';
         }
-
-        const data = await response.json();
-
-        results[itemId] = {
-          results: data.results || [],
-          priceRange: data.priceRange || null
-        };
 
         // Short delay between items (server rate limiting handles protection)
         if (i < itemsArray.length - 1) {
@@ -291,6 +303,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
       }
 
       setSearchResults(results);
+      setItemErrors(errors);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       console.error('Error searching stores:', message);
@@ -604,6 +617,16 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                           </button>
                         </div>
                       </div>
+
+                      {/* Per-item search error */}
+                      {itemErrors[item.id] && (
+                        <div className="px-4 py-2 bg-[#FADDD0] border-t border-[#E8A990]">
+                          <div className="flex items-center gap-2 text-sm text-[#B8593B]">
+                            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                            <span>{itemErrors[item.id]}</span>
+                          </div>
+                        </div>
+                      )}
 
                       {searchResults[item.id] && searchResults[item.id].results.length > 0 && (
                         <div className="px-4 pb-4 bg-[#F5F0E6]">

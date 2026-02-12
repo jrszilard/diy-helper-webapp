@@ -9,6 +9,7 @@ import ChatInput from './ChatInput';
 import SaveMaterialsDialog from './SaveMaterialsDialog';
 import ConversationList from './ConversationList';
 import { ProgressStep } from './ProgressIndicator';
+import { classifyError, getUserMessage } from '@/lib/api-retry';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -385,9 +386,11 @@ export default function ChatInterface({
     } catch (error) {
       console.error('Error:', error);
       setFailedMessage(messageContent);
+      const errorType = classifyError(error);
+      const errorMsg = getUserMessage(errorType);
       setMessages(prev => [
         ...prev,
-        { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }
+        { role: 'assistant', content: errorMsg }
       ]);
       setStreamingContent('');
       setIsStreaming(false);

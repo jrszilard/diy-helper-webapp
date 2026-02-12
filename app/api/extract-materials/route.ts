@@ -4,6 +4,7 @@ import { handleCorsOptions, applyCorsHeaders } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { ExtractMaterialsRequestSchema, parseRequestBody } from '@/lib/validation';
 import { anthropic as anthropicConfig } from '@/lib/config';
+import { withRetry } from '@/lib/api-retry';
 
 export async function POST(req: NextRequest) {
   try {
@@ -69,11 +70,14 @@ Important:
 - Calculate total_estimate as the sum of all estimated prices
 - If no materials are found, return an empty materials array`;
 
-    const response = await anthropic.messages.create({
-      model: anthropicConfig.model,
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: extractionPrompt }]
-    });
+    const response = await withRetry(
+      () => anthropic.messages.create({
+        model: anthropicConfig.model,
+        max_tokens: 2000,
+        messages: [{ role: 'user', content: extractionPrompt }]
+      }),
+      { maxRetries: 2, baseDelayMs: 1000 }
+    );
 
     const content = response.content[0];
     if (content.type === 'text') {

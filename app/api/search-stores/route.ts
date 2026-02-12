@@ -10,6 +10,7 @@ import { handleCorsOptions, applyCorsHeaders } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { SearchStoresRequestSchema, parseRequestBody } from '@/lib/validation';
 import { storeSearch as storeSearchConfig } from '@/lib/config';
+import { withRetry } from '@/lib/api-retry';
 
 // Helper function to add delay
 function sleep(ms: number) {
@@ -355,6 +356,7 @@ export async function POST(req: NextRequest) {
     } = parsed.data;
 
     const results: StoreResult[] = [];
+    const warnings: string[] = [];
     const metadata = {
       totalSearched: 0,
       successfulSearches: 0,
@@ -381,7 +383,10 @@ export async function POST(req: NextRequest) {
 
       const searchQuery = `${materialName} site:${storeCfg.domain}`;
 
-      const searchResult = await webSearch(searchQuery);
+      const searchResult = await withRetry(
+        () => webSearch(searchQuery),
+        { maxRetries: 1, baseDelayMs: 2000 }
+      );
 
       // Check for search failures
       if (
@@ -486,12 +491,17 @@ export async function POST(req: NextRequest) {
         chunk.map(s => searchOneStore(s.key, s.cfg))
       );
 
-      for (const result of chunkResults) {
+      for (let j = 0; j < chunkResults.length; j++) {
+        const result = chunkResults[j];
         if (result.status === 'fulfilled') {
           results.push(result.value);
         } else {
           console.error('Store search failed:', result.reason);
           metadata.fallbackResults++;
+          const failedStore = chunk[j];
+          if (failedStore) {
+            warnings.push(`${failedStore.cfg.name} data may be unavailable`);
+          }
         }
       }
 
@@ -528,6 +538,7 @@ export async function POST(req: NextRequest) {
 
     const response = NextResponse.json({
       results,
+      warnings: warnings.length > 0 ? warnings : undefined,
       stores_searched: stores.length,
       query: materialName,
       location,

@@ -11,10 +11,24 @@ import { systemPrompt } from '@/lib/system-prompt';
 import { tools, progressMessages } from '@/lib/tools/definitions';
 import { executeTool } from '@/lib/tools/executor';
 import { StreamEvent } from '@/lib/tools/types';
+import { withRetry } from '@/lib/api-retry';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
+
+const shouldRetryAnthropic = (error: unknown): boolean => {
+  if (error && typeof error === 'object' && 'status' in error) {
+    const status = (error as { status: number }).status;
+    return status === 429 || status === 529 || status >= 500;
+  }
+  if (error instanceof Error) {
+    const msg = error.message.toLowerCase();
+    return msg.includes('overloaded') || msg.includes('529') || msg.includes('500') ||
+           msg.includes('network') || msg.includes('timeout');
+  }
+  return false;
+};
 
 export async function POST(req: NextRequest) {
   const encoder = new TextEncoder();
@@ -85,13 +99,16 @@ export async function POST(req: NextRequest) {
             { role: 'user' as const, content: message }
           ];
 
-          let response = await anthropic.messages.create({
-            model: config.anthropic.model,
-            max_tokens: config.anthropic.maxTokens,
-            system: systemPrompt,
-            tools: tools as Anthropic.Tool[],
-            messages
-          });
+          let response = await withRetry(
+            () => anthropic.messages.create({
+              model: config.anthropic.model,
+              max_tokens: config.anthropic.maxTokens,
+              system: systemPrompt,
+              tools: tools as Anthropic.Tool[],
+              messages
+            }),
+            { maxRetries: 2, baseDelayMs: 1000, shouldRetry: shouldRetryAnthropic }
+          );
 
           let loopCount = 0;
           const maxLoops = 10;
@@ -161,13 +178,16 @@ export async function POST(req: NextRequest) {
               icon: '✨'
             });
 
-            response = await anthropic.messages.create({
-              model: config.anthropic.model,
-              max_tokens: config.anthropic.maxTokens,
-              system: systemPrompt,
-              tools: tools as Anthropic.Tool[],
-              messages
-            });
+            response = await withRetry(
+              () => anthropic.messages.create({
+                model: config.anthropic.model,
+                max_tokens: config.anthropic.maxTokens,
+                system: systemPrompt,
+                tools: tools as Anthropic.Tool[],
+                messages
+              }),
+              { maxRetries: 2, baseDelayMs: 1000, shouldRetry: shouldRetryAnthropic }
+            );
           }
 
           // Warn user if tool loop hit the limit
@@ -222,12 +242,26 @@ export async function POST(req: NextRequest) {
           controller.close();
 
         } catch (error: unknown) {
-          const message = error instanceof Error ? error.message : 'Unknown error';
           console.error('Stream error:', error);
-          sendEvent({
-            type: 'error',
-            content: `An error occurred: ${message}. Please try again.`
-          });
+          let errorContent = 'An unexpected error occurred. Please try again.';
+          if (error && typeof error === 'object' && 'status' in error) {
+            const status = (error as { status: number }).status;
+            if (status === 429 || status === 529) {
+              errorContent = 'Service is busy. Please wait a moment and try again.';
+            } else if (status >= 500) {
+              errorContent = 'Service temporarily unavailable. Please try again in a moment.';
+            }
+          } else if (error instanceof Error) {
+            const msg = error.message.toLowerCase();
+            if (msg.includes('overloaded') || msg.includes('529')) {
+              errorContent = 'Service is busy. Please wait a moment and try again.';
+            } else if (msg.includes('timeout') || msg.includes('abort')) {
+              errorContent = 'The request timed out. Please try again.';
+            } else if (msg.includes('network') || msg.includes('econnrefused')) {
+              errorContent = 'Could not connect to the service. Please check your connection and try again.';
+            }
+          }
+          sendEvent({ type: 'error', content: errorContent });
           sendEvent({ type: 'done' });
           controller.close();
         }
@@ -266,13 +300,16 @@ async function handleNonStreamingRequest(
     { role: 'user' as const, content: message }
   ];
 
-  let response = await anthropic.messages.create({
-    model: config.anthropic.model,
-    max_tokens: config.anthropic.maxTokens,
-    system: systemPrompt,
-    tools: tools as Anthropic.Tool[],
-    messages
-  });
+  let response = await withRetry(
+    () => anthropic.messages.create({
+      model: config.anthropic.model,
+      max_tokens: config.anthropic.maxTokens,
+      system: systemPrompt,
+      tools: tools as Anthropic.Tool[],
+      messages
+    }),
+    { maxRetries: 2, baseDelayMs: 1000, shouldRetry: shouldRetryAnthropic }
+  );
 
   let loopCount = 0;
   const maxLoops = 10;
@@ -309,13 +346,16 @@ async function handleNonStreamingRequest(
       content: toolResults
     });
 
-    response = await anthropic.messages.create({
-      model: config.anthropic.model,
-      max_tokens: config.anthropic.maxTokens,
-      system: systemPrompt,
-      tools: tools as Anthropic.Tool[],
-      messages
-    });
+    response = await withRetry(
+      () => anthropic.messages.create({
+        model: config.anthropic.model,
+        max_tokens: config.anthropic.maxTokens,
+        system: systemPrompt,
+        tools: tools as Anthropic.Tool[],
+        messages
+      }),
+      { maxRetries: 2, baseDelayMs: 1000, shouldRetry: shouldRetryAnthropic }
+    );
   }
 
   // Warn if tool loop hit the limit
