@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { webSearch } from '@/lib/search';
+import { webSearchStructured, type BraveSearchResult } from '@/lib/search';
 import {
   fetchProductData,
   searchGoogleShopping,
@@ -97,37 +97,30 @@ function scoreUrl(url: string, config: StoreConfig): number {
 
 /**
  * Enhanced URL Extraction with Scoring
+ * Accepts structured BraveSearchResult[] and extracts URLs matching the store domain.
  */
 function extractProductUrls(
-  searchResults: string,
+  searchResults: BraveSearchResult[],
   config: StoreConfig,
   materialName: string
 ): { urls: string[]; quality: 'high' | 'medium' | 'low'; fallbackSearch: boolean } {
   try {
     const escapedDomain = config.domain.replace(/\./g, '\\.');
-    const urlRegex = new RegExp(
-      `https?://(?:www\\.)?${escapedDomain}[^\\s<>"'\\]\\)]+`,
-      'g'
-    );
+    const domainRegex = new RegExp(`^https?://(?:www\\.)?${escapedDomain}`, 'i');
 
-    const matches = searchResults.match(urlRegex) || [];
-
-    // Clean URLs
-    const cleanedUrls = matches
-      .map(url => {
-        return url
-          .replace(/[)\]}>'",.;:]+$/, '') // Remove trailing punctuation
-          .split('#')[0]; // Remove hash fragments (keep query for now for scoring)
-      })
+    // Extract URLs from structured results that match the store domain
+    const matchingUrls = searchResults
+      .map(r => r.url)
+      .filter(url => domainRegex.test(url))
+      .map(url => url.replace(/[)\]}>'",.;:]+$/, '').split('#')[0])
       .filter(Boolean);
 
     // Remove duplicates before scoring
-    const uniqueUrls = [...new Set(cleanedUrls)];
+    const uniqueUrls = [...new Set(matchingUrls)];
 
     // Score and filter URLs
     const scoredUrls = uniqueUrls
       .map(url => {
-        // Clean query params for the final URL but score with them
         const cleanUrl = url.split('?')[0];
         const score = scoreUrl(url, config);
         return { url: cleanUrl, score };
@@ -315,9 +308,12 @@ export async function POST(req: NextRequest) {
 
     let shoppingPrices: Awaited<ReturnType<typeof searchGoogleShopping>> | null = null;
 
-    // Get aggregated pricing in background
+    // Get aggregated pricing in background (with extra_snippets via structured search)
     const shoppingPromise = validatePricing
-      ? searchGoogleShopping(materialName)
+      ? (async () => {
+          const { results } = await webSearchStructured(`${materialName} price buy`);
+          return searchGoogleShopping(materialName, undefined, results.length > 0 ? results : undefined);
+        })()
       : Promise.resolve(null);
 
     // Search stores in parallel (concurrency controlled by config)
@@ -344,17 +340,13 @@ export async function POST(req: NextRequest) {
       const searchQuery = `${materialName} site:${storeCfg.domain}`;
 
       const searchResult = await withRetry(
-        () => webSearch(searchQuery),
+        () => webSearchStructured(searchQuery),
         { maxRetries: 1, baseDelayMs: 2000 }
       );
 
       // Check for search failures
-      if (
-        searchResult.includes('Search API error') ||
-        searchResult.includes('No search results') ||
-        searchResult.includes('Search error') ||
-        searchResult.includes('Search failed')
-      ) {
+      if (searchResult.error || searchResult.results.length === 0) {
+        logger.warn('Store search returned no usable results', { requestId, store: storeKey, query: searchQuery, error: searchResult.error });
         metadata.fallbackResults++;
         return {
           store: `${storeCfg.name} - ${location}`,
@@ -373,7 +365,7 @@ export async function POST(req: NextRequest) {
       }
 
       metadata.successfulSearches++;
-      const urlData = extractProductUrls(searchResult, storeCfg, materialName);
+      const urlData = extractProductUrls(searchResult.results, storeCfg, materialName);
 
       if (urlData.urls.length > 0 && !urlData.fallbackSearch) {
         const productData = await fetchBestProductData(urlData.urls, storeKey);

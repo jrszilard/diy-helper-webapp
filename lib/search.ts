@@ -1,8 +1,17 @@
+import { logger } from '@/lib/logger';
+
+export interface BraveSearchResult {
+  title: string;
+  description: string;
+  url: string;
+  extra_snippets?: string[];
+}
+
 export async function webSearch(query: string, retries: number = 2): Promise<string> {
   const apiKey = process.env.BRAVE_SEARCH_API_KEY;
 
   if (!apiKey) {
-    console.error('BRAVE_SEARCH_API_KEY not set');
+    logger.error('BRAVE_SEARCH_API_KEY not set');
     return "Web search not configured. Please add BRAVE_SEARCH_API_KEY to environment variables.";
   }
 
@@ -24,7 +33,7 @@ export async function webSearch(query: string, retries: number = 2): Promise<str
       );
 
       if (!response.ok) {
-        console.error('Brave API error:', response.status, response.statusText);
+        logger.error('Brave API error', null, { status: response.status, statusText: response.statusText, query });
         if (attempt < retries && response.status >= 500) {
           continue;
         }
@@ -50,7 +59,7 @@ export async function webSearch(query: string, retries: number = 2): Promise<str
 
       return results;
     } catch (error) {
-      console.error('Search error:', error);
+      logger.error('Search error', error, { query, attempt });
       if (attempt < retries) {
         continue;
       }
@@ -59,6 +68,77 @@ export async function webSearch(query: string, retries: number = 2): Promise<str
   }
 
   return "Search failed after retries";
+}
+
+/**
+ * Structured search using Brave Pro AI — returns typed results with extra_snippets.
+ * Used by store search pipeline for richer data extraction.
+ */
+export async function webSearchStructured(
+  query: string,
+  retries: number = 2
+): Promise<{ results: BraveSearchResult[]; error?: string }> {
+  const apiKey = process.env.BRAVE_SEARCH_API_KEY;
+
+  if (!apiKey) {
+    logger.error('BRAVE_SEARCH_API_KEY not set');
+    return { results: [], error: 'Web search not configured' };
+  }
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      if (attempt > 0) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
+
+      const response = await fetch(
+        `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=15&extra_snippets=true`,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Accept-Encoding': 'gzip',
+            'X-Subscription-Token': apiKey,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        logger.error('Brave API error (structured)', null, { status: response.status, statusText: response.statusText, query });
+        if (attempt < retries && response.status >= 500) {
+          continue;
+        }
+        return { results: [], error: `Search API error: ${response.status}` };
+      }
+
+      const data = await response.json();
+
+      if (!data.web?.results?.length) {
+        if (attempt < retries) {
+          continue;
+        }
+        return { results: [], error: 'No search results found' };
+      }
+
+      const results: BraveSearchResult[] = data.web.results.slice(0, 12).map(
+        (r: { title?: string; description?: string; url?: string; extra_snippets?: string[] }) => ({
+          title: r.title || '',
+          description: r.description || '',
+          url: r.url || '',
+          extra_snippets: r.extra_snippets || [],
+        })
+      );
+
+      return { results };
+    } catch (error) {
+      logger.error('Structured search error', error, { query, attempt });
+      if (attempt < retries) {
+        continue;
+      }
+      return { results: [], error: `Search error: ${error}` };
+    }
+  }
+
+  return { results: [], error: 'Search failed after retries' };
 }
 
 export async function webFetch(url: string): Promise<string> {
@@ -82,7 +162,7 @@ export async function webFetch(url: string): Promise<string> {
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      console.error('Fetch failed:', response.status);
+      logger.error('Fetch failed', null, { url, status: response.status });
       return `Error fetching URL: HTTP ${response.status}`;
     }
 
@@ -101,7 +181,7 @@ export async function webFetch(url: string): Promise<string> {
 
     return text.substring(0, 15000);
   } catch (error: unknown) {
-    console.error('Fetch error:', error);
+    logger.error('Fetch error', error, { url });
 
     if (error instanceof Error && error.name === 'AbortError') {
       return 'Error fetching URL: Request timeout';
