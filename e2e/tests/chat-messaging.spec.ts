@@ -77,7 +77,7 @@ test.describe('Chat Messaging', () => {
     await chat.sendMessage('Test network failure');
 
     // Wait for error message
-    await expect(page.locator('text=Sorry, I encountered an error')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Could not connect')).toBeVisible({ timeout: 10000 });
 
     // Retry button should be visible
     await expect(chat.getRetryButton()).toBeVisible();
