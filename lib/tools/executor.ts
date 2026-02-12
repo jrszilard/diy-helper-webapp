@@ -1,6 +1,7 @@
 import { webSearch, webFetch } from '@/lib/search';
 import { AuthResult } from '@/lib/auth';
 import { ToolName } from './types';
+import { isSameItem } from '@/lib/fuzzy-match';
 
 type ToolHandler = (input: Record<string, unknown>, auth: AuthResult) => Promise<string>;
 
@@ -436,17 +437,8 @@ async function handleExtractMaterialsList(input: Record<string, unknown>, auth: 
         if (materialInGroup && invInGroup) return invItem.item_name;
       }
 
-      const materialWords = normalizedName.split(/\s+/).filter((w: string) => w.length > 2);
-      const invWords = invName.split(/\s+/).filter((w: string) => w.length > 2);
-      const commonWords = materialWords.filter((mw: string) =>
-        invWords.some((iw: string) =>
-          iw === mw ||
-          (mw.length > 4 && iw.includes(mw)) ||
-          (iw.length > 4 && mw.includes(iw))
-        )
-      );
-
-      if (commonWords.length >= 2 || (commonWords.length === 1 && commonWords[0].length >= 5)) {
+      // Fuzzy match as final fallback
+      if (isSameItem(normalizedName, invName)) {
         return invItem.item_name;
       }
     }
