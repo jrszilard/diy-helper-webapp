@@ -6,6 +6,7 @@ import { ExtractMaterialsRequestSchema, parseRequestBody } from '@/lib/validatio
 import { anthropic as anthropicConfig } from '@/lib/config';
 import { withRetry } from '@/lib/api-retry';
 import { logger } from '@/lib/logger';
+import { lookupMaterialPrices } from '@/lib/product-extractor';
 
 export async function POST(req: NextRequest) {
   const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
@@ -61,7 +62,7 @@ Return ONLY a valid JSON object with this exact structure (no markdown, no code 
       "name": "Specific product name",
       "quantity": "Amount needed (e.g., '2', '1 box', '10 feet')",
       "category": "electrical|lumber|plumbing|hardware|tools|paint|fasteners|general",
-      "estimated_price": "Price as number only (e.g., '15.99')",
+      "estimated_price": "Per-unit price as number only, NOT multiplied by quantity (e.g., '15.99')",
       "required": true
     }
   ],
@@ -71,9 +72,12 @@ Return ONLY a valid JSON object with this exact structure (no markdown, no code 
 Important:
 - Include ALL materials mentioned in the conversation
 - Use specific product names when possible
-- estimated_price should be a reasonable estimate as a number string
+- estimated_price MUST reflect current big-box retailer prices (Home Depot, Lowe's level)
+- Use standard/builder-grade products, not premium brands
+- Common references: 2x4x8 ~$4, Romex 12/2 250ft ~$85, GFCI outlet ~$17, drywall 4x8 ~$14, paint gallon ~$30
+- When in doubt, estimate conservatively (lower)
 - Set required to true for essential items, false for optional
-- Calculate total_estimate as the sum of all estimated prices
+- Calculate total_estimate as the sum of (estimated_price × quantity) for all items
 - If no materials are found, return an empty materials array`;
 
     const response = await withRetry(
@@ -104,17 +108,20 @@ Important:
 
           // Validate structure
           if (materials.materials && Array.isArray(materials.materials)) {
-            // Calculate total if not provided
-            if (!materials.total_estimate) {
-              materials.total_estimate = materials.materials.reduce(
-                (sum: number, m: { estimated_price?: string; quantity?: string }) => {
-                  const price = parseFloat(m.estimated_price || '0');
-                  const qty = parseInt(m.quantity || '1') || 1;
-                  return sum + (price * qty);
-                },
-                0
-              );
-            }
+            // Live price lookup — more time budget here (no 15s tool constraint)
+            await lookupMaterialPrices(materials.materials, {
+              limit: 10, concurrency: 5, perCallTimeoutMs: 3000, totalTimeoutMs: 12000,
+            });
+
+            // Always recalculate total from per-unit prices × quantities
+            materials.total_estimate = materials.materials.reduce(
+              (sum: number, m: { estimated_price?: string; quantity?: string }) => {
+                const price = parseFloat(m.estimated_price || '0');
+                const qty = parseInt(m.quantity || '1') || 1;
+                return sum + (price * qty);
+              },
+              0
+            );
 
             logger.info('Materials extracted', { requestId, duration: Date.now() - startTime, materialCount: materials.materials.length });
             return applyCorsHeaders(req, NextResponse.json(materials));

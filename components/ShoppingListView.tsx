@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { guestStorage } from '@/lib/guestStorage';
 import {
@@ -59,9 +59,17 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
   const [showExportModal, setShowExportModal] = useState(false);
 
   const storeSearch = useStoreSearch();
+  const [priceSyncNotification, setPriceSyncNotification] = useState<string | null>(null);
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+  const syncedPriceItemsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    if (project) loadItems();
+    if (project) {
+      loadItems();
+      storeSearch.clearResults();
+      syncedPriceItemsRef.current = new Set();
+    }
   }, [project]);
 
   const isGuestProject = project?.isGuest === true;
@@ -131,6 +139,21 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
     }
   };
 
+  const updateItemPrice = useCallback(async (itemId: string, newPrice: number) => {
+    const roundedPrice = Math.round(newPrice * 100) / 100;
+    setItems(prev => prev.map(i => i.id === itemId ? { ...i, price: roundedPrice } : i));
+    if (isGuestProject) {
+      guestStorage.updateMaterial(project!.id, itemId, { price: roundedPrice });
+    } else {
+      const { error } = await supabase.from('shopping_list_items').update({ price: roundedPrice }).eq('id', itemId);
+      if (error) {
+        console.error('Error updating price:', error);
+        const oldItem = itemsRef.current.find(i => i.id === itemId);
+        if (oldItem) setItems(prev => prev.map(i => i.id === itemId ? { ...i, price: oldItem.price } : i));
+      }
+    }
+  }, [isGuestProject, project]);
+
   const deleteItem = async (itemId: string) => {
     const item = items.find(i => i.id === itemId);
     if (!item || !confirm(`Remove "${item.product_name}" from the list?`)) return;
@@ -146,8 +169,42 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
   };
 
   const handleSearchStores = () => {
+    syncedPriceItemsRef.current = new Set();
     storeSearch.searchStores(selectedItems, items, location);
   };
+
+  // Auto-sync store search prices to shopping list
+  useEffect(() => {
+    const entries = Object.entries(storeSearch.searchResults);
+    if (entries.length === 0) return;
+    const currentItems = itemsRef.current;
+    if (currentItems.length === 0) return;
+
+    const updatedNames: string[] = [];
+    for (const [itemId, resultData] of entries) {
+      if (syncedPriceItemsRef.current.has(itemId)) continue;
+      const bestResult = resultData.results.find(
+        r => r.price > 0 && (r.confidence === 'high' || r.confidence === 'medium')
+      );
+      if (!bestResult) continue;
+      const item = currentItems.find(i => i.id === itemId);
+      if (!item) continue;
+      syncedPriceItemsRef.current.add(itemId);
+      const roundedBest = Math.round(bestResult.price * 100) / 100;
+      const currentPrice = item.price != null ? Math.round(item.price * 100) / 100 : null;
+      if (currentPrice !== roundedBest) {
+        updateItemPrice(itemId, bestResult.price);
+        updatedNames.push(item.product_name);
+      }
+    }
+    if (updatedNames.length > 0) {
+      const msg = updatedNames.length === 1
+        ? `Updated price for ${updatedNames[0]}`
+        : `Updated prices for ${updatedNames.length} items`;
+      setPriceSyncNotification(msg);
+      setTimeout(() => setPriceSyncNotification(null), 4000);
+    }
+  }, [storeSearch.searchResults, updateItemPrice]);
 
   if (!project) {
     return (
@@ -174,6 +231,17 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
     <div className={`${isMobile ? 'p-4' : 'p-6'}`}>
       {showExportModal && (
         <MaterialsExport projectName={project.name} materials={items} onClose={() => setShowExportModal(false)} />
+      )}
+
+      {priceSyncNotification && (
+        <div className="fixed top-20 right-4 bg-[#4A7C59] text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 max-w-sm">
+          <DollarSign className="w-5 h-5 flex-shrink-0" />
+          <p className="font-medium text-sm">{priceSyncNotification}</p>
+          <button onClick={() => setPriceSyncNotification(null)}
+            className="ml-2 hover:bg-[#2D5A3B] p-1 rounded flex-shrink-0" aria-label="Dismiss">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       )}
 
       {!isMobile && (

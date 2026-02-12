@@ -11,6 +11,9 @@
  * 5. Multi-URL Validation - Cross-reference multiple results
  */
 
+import { logger } from '@/lib/logger';
+import type { BraveSearchResult } from '@/lib/search';
+
 export interface ExtractedProductData {
   price: number | null;
   originalPrice: number | null;
@@ -67,7 +70,7 @@ export function extractJsonLd(html: string): Partial<ExtractedProductData> | nul
     }
     return null;
   } catch (error) {
-    console.error('JSON-LD extraction error:', error);
+    logger.error('JSON-LD extraction error', error);
     return null;
   }
 }
@@ -580,7 +583,7 @@ export async function fetchProductData(url: string, store?: string): Promise<Ext
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      console.error(`Failed to fetch ${url}: HTTP ${response.status}`);
+      logger.error('Failed to fetch product URL', null, { url, status: response.status });
       return defaultResult;
     }
 
@@ -593,16 +596,50 @@ export async function fetchProductData(url: string, store?: string): Promise<Ext
     };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`Error fetching product data from ${url}:`, message);
+    logger.error('Error fetching product data', error, { url });
     return defaultResult;
   }
 }
 
 /**
- * Search Google Shopping for price validation
- * Returns aggregated pricing from multiple retailers
+ * Extract prices from text using regex, returning price+store pairs.
  */
-export async function searchGoogleShopping(query: string, apiKey?: string): Promise<{
+function extractPricesFromText(
+  text: string,
+  url: string
+): Array<{ store: string; price: number }> {
+  const found: Array<{ store: string; price: number }> = [];
+  const priceRegex = /\$\s*([\d,]+\.?\d{0,2})/g;
+  let match;
+  while ((match = priceRegex.exec(text)) !== null) {
+    const price = parseFloat(match[1].replace(/,/g, ''));
+    if (price > 0.5 && price < 10000) {
+      let store = 'Unknown';
+      if (url.includes('homedepot')) store = 'Home Depot';
+      else if (url.includes('lowes')) store = "Lowe's";
+      else if (url.includes('amazon')) store = 'Amazon';
+      else if (url.includes('walmart')) store = 'Walmart';
+      else if (url.includes('ace')) store = 'Ace Hardware';
+      else if (url.includes('menards')) store = 'Menards';
+      found.push({ store, price });
+    }
+  }
+  return found;
+}
+
+/**
+ * Search Google Shopping for price validation.
+ * Returns aggregated pricing from multiple retailers.
+ *
+ * When prefetchedResults are provided (from webSearchStructured), uses those
+ * instead of making a separate API call — avoids double requests and leverages
+ * extra_snippets from Brave Pro AI for richer price extraction.
+ */
+export async function searchGoogleShopping(
+  query: string,
+  apiKey?: string,
+  prefetchedResults?: BraveSearchResult[]
+): Promise<{
   avgPrice: number | null;
   minPrice: number | null;
   maxPrice: number | null;
@@ -615,7 +652,32 @@ export async function searchGoogleShopping(query: string, apiKey?: string): Prom
     sources: [] as Array<{ store: string; price: number }>,
   };
 
-  // Use Brave Search to find Google Shopping-like results
+  const prices: number[] = [];
+
+  // If pre-fetched structured results are available, use them directly
+  if (prefetchedResults && prefetchedResults.length > 0) {
+    for (const item of prefetchedResults) {
+      // Build text from title + description + extra_snippets
+      const snippetText = (item.extra_snippets || []).join(' ');
+      const text = `${item.title} ${item.description} ${snippetText}`;
+
+      const found = extractPricesFromText(text, item.url);
+      for (const f of found) {
+        prices.push(f.price);
+        result.sources.push(f);
+      }
+    }
+
+    if (prices.length > 0) {
+      result.minPrice = Math.min(...prices);
+      result.maxPrice = Math.max(...prices);
+      result.avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
+    }
+
+    return result;
+  }
+
+  // Fallback: make our own API call
   if (!apiKey) {
     apiKey = process.env.BRAVE_SEARCH_API_KEY;
   }
@@ -625,10 +687,9 @@ export async function searchGoogleShopping(query: string, apiKey?: string): Prom
   }
 
   try {
-    // Search for product with price-focused query
     const searchQuery = `${query} price buy`;
     const response = await fetch(
-      `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(searchQuery)}&count=15`,
+      `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(searchQuery)}&count=15&extra_snippets=true`,
       {
         headers: {
           'Accept': 'application/json',
@@ -643,31 +704,15 @@ export async function searchGoogleShopping(query: string, apiKey?: string): Prom
 
     const data = await response.json();
 
-    // Extract prices from search result snippets
-    const priceRegex = /\$\s*([\d,]+\.?\d{0,2})/g;
-    const prices: number[] = [];
-
     if (data.web?.results) {
       for (const item of data.web.results) {
-        const text = `${item.title} ${item.description}`;
-        let match;
-        while ((match = priceRegex.exec(text)) !== null) {
-          const price = parseFloat(match[1].replace(/,/g, ''));
-          if (price > 0.5 && price < 10000) { // Reasonable price range
-            prices.push(price);
+        const snippetText = (item.extra_snippets || []).join(' ');
+        const text = `${item.title} ${item.description} ${snippetText}`;
 
-            // Try to identify the store
-            const url = item.url || '';
-            let store = 'Unknown';
-            if (url.includes('homedepot')) store = 'Home Depot';
-            else if (url.includes('lowes')) store = "Lowe's";
-            else if (url.includes('amazon')) store = 'Amazon';
-            else if (url.includes('walmart')) store = 'Walmart';
-            else if (url.includes('ace')) store = 'Ace Hardware';
-            else if (url.includes('menards')) store = 'Menards';
-
-            result.sources.push({ store, price });
-          }
+        const found = extractPricesFromText(text, item.url || '');
+        for (const f of found) {
+          prices.push(f.price);
+          result.sources.push(f);
         }
       }
     }
@@ -680,7 +725,7 @@ export async function searchGoogleShopping(query: string, apiKey?: string): Prom
 
     return result;
   } catch (error) {
-    console.error('Google Shopping search error:', error);
+    logger.error('Google Shopping search error', error, { query });
     return result;
   }
 }
@@ -729,4 +774,124 @@ export function validatePrices(
       warning: `Price may be incorrect. Typical range: $${shoppingPrices.minPrice?.toFixed(2)} - $${shoppingPrices.maxPrice?.toFixed(2)}`,
     };
   }
+}
+
+/**
+ * Look up real prices for a list of materials using web search,
+ * then update estimated_price in-place where better data is found.
+ *
+ * Design:
+ * - Pre-checks API key once before entering the loop
+ * - Per-call timeout + total timeout prevents hanging callers
+ * - Median-based price selection reduces outlier influence
+ * - Sanity check rejects lookups >10x or <0.1x the AI estimate
+ * - Rate-limit detection: if majority of a chunk fails, abort
+ * - Never throws — returns gracefully so materials list generation isn't blocked
+ */
+export async function lookupMaterialPrices(
+  materials: Array<{ name: string; estimated_price: string; [key: string]: unknown }>,
+  options?: { limit?: number; concurrency?: number; perCallTimeoutMs?: number; totalTimeoutMs?: number }
+): Promise<number> {
+  const {
+    limit = 8,
+    concurrency = 4,
+    perCallTimeoutMs = 3000,
+    totalTimeoutMs = 10000,
+  } = options || {};
+
+  // Pre-check API key — avoid N wasted calls
+  const apiKey = process.env.BRAVE_SEARCH_API_KEY;
+  if (!apiKey) {
+    return 0;
+  }
+
+  const totalDeadline = Date.now() + totalTimeoutMs;
+  const toProcess = materials.slice(0, limit);
+  let updatedCount = 0;
+  let failCount = 0;
+
+  // Process in chunks of `concurrency`
+  for (let i = 0; i < toProcess.length; i += concurrency) {
+    if (Date.now() >= totalDeadline) break;
+
+    // Rate-limit detection: if majority of previous chunk failed, abort
+    if (i > 0 && failCount > i * 0.6) break;
+
+    const chunk = toProcess.slice(i, i + concurrency);
+
+    const results = await Promise.allSettled(
+      chunk.map(async (mat) => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), perCallTimeoutMs);
+
+        try {
+          const response = await fetch(
+            `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(`${mat.name} price buy`)}&count=10&extra_snippets=true`,
+            {
+              headers: {
+                'Accept': 'application/json',
+                'X-Subscription-Token': apiKey,
+              },
+              signal: controller.signal,
+            }
+          );
+
+          clearTimeout(timeout);
+
+          if (!response.ok) return null;
+
+          const data = await response.json();
+          const webResults = data.web?.results;
+          if (!webResults?.length) return null;
+
+          // Extract prices from search results
+          const prices: number[] = [];
+          for (const item of webResults) {
+            const snippetText = (item.extra_snippets || []).join(' ');
+            const text = `${item.title} ${item.description} ${snippetText}`;
+            const found = extractPricesFromText(text, item.url || '');
+            for (const f of found) {
+              prices.push(f.price);
+            }
+          }
+
+          if (prices.length === 0) return null;
+
+          // Compute price using median-based selection
+          prices.sort((a, b) => a - b);
+          const median = prices.length % 2 === 0
+            ? (prices[prices.length / 2 - 1] + prices[prices.length / 2]) / 2
+            : prices[Math.floor(prices.length / 2)];
+          const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
+          const bestPrice = prices.length >= 3 ? Math.min(avg, median) : avg;
+
+          return { mat, bestPrice };
+        } catch {
+          clearTimeout(timeout);
+          return null;
+        }
+      })
+    );
+
+    for (const result of results) {
+      if (result.status === 'rejected' || result.value === null) {
+        failCount++;
+        continue;
+      }
+
+      const { mat, bestPrice } = result.value;
+      const aiEstimate = parseFloat(mat.estimated_price);
+
+      // Sanity check: reject if lookup is >10x or <0.1x the AI estimate
+      if (aiEstimate > 0 && (bestPrice > aiEstimate * 10 || bestPrice < aiEstimate * 0.1)) {
+        continue;
+      }
+
+      const rounded = Math.round(bestPrice * 100) / 100;
+      mat.estimated_price = String(rounded);
+      updatedCount++;
+    }
+  }
+
+  return updatedCount;
 }

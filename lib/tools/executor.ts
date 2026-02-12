@@ -2,6 +2,7 @@ import { webSearch, webFetch } from '@/lib/search';
 import { AuthResult } from '@/lib/auth';
 import { ToolName } from './types';
 import { isSameItem } from '@/lib/fuzzy-match';
+import { lookupMaterialPrices } from '@/lib/product-extractor';
 
 type ToolHandler = (input: Record<string, unknown>, auth: AuthResult) => Promise<string>;
 
@@ -453,6 +454,7 @@ async function handleExtractMaterialsList(input: Record<string, unknown>, auth: 
     estimated_price: string;
     required: boolean;
     ownedAs?: string;
+    [key: string]: unknown;
   }
 
   const needToBuy: MaterialWithOwned[] = [];
@@ -466,6 +468,13 @@ async function handleExtractMaterialsList(input: Record<string, unknown>, auth: 
       needToBuy.push(mat);
     }
   });
+
+  // Live price lookup — budget ~8s max (leaves time for inventory fetch + response)
+  if (needToBuy.length > 0) {
+    await lookupMaterialPrices(needToBuy, {
+      limit: 8, concurrency: 4, perCallTimeoutMs: 2500, totalTimeoutMs: 8000,
+    });
+  }
 
   let response = `**Materials List for ${project_description}**\n\n`;
 
@@ -623,6 +632,12 @@ const toolHandlers: Record<ToolName, ToolHandler> = {
   web_fetch: (input) => handleWebFetch(input),
 };
 
+// --- Per-tool timeout overrides ---
+
+const TOOL_TIMEOUTS: Partial<Record<ToolName, number>> = {
+  extract_materials_list: 25_000, // extra time for live price lookups
+};
+
 // --- Timeout wrapper ---
 
 const TOOL_TIMEOUT_MS = 15_000;
@@ -647,7 +662,8 @@ export async function executeTool(
   if (!handler) return 'Tool not implemented yet.';
 
   try {
-    return await withTimeout(handler(toolInput, auth), TOOL_TIMEOUT_MS, toolName);
+    const timeout = TOOL_TIMEOUTS[toolName as ToolName] ?? TOOL_TIMEOUT_MS;
+    return await withTimeout(handler(toolInput, auth), timeout, toolName);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     console.error(`Tool execution error (${toolName}):`, err);

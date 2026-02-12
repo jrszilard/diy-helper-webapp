@@ -182,7 +182,7 @@ export const tools = [
               name: { type: "string", description: "Material name" },
               quantity: { type: "string", description: "Quantity needed (e.g., '250 ft', '10 pieces', '1 box')" },
               category: { type: "string", description: "Category (electrical, lumber, plumbing, hardware, tools)" },
-              estimated_price: { type: "string", description: "Rough price estimate" },
+              estimated_price: { type: "string", description: "Per-unit price at current big-box retailer prices (Home Depot/Lowe's). Use standard grade, not premium. E.g., 2x4x8='4', GFCI outlet='17', Romex 12/2 250ft='85'" },
               required: { type: "boolean", description: "Is this absolutely required vs optional" }
             }
           }

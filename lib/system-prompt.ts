@@ -72,8 +72,24 @@ When user says ANY of these phrases, immediately call extract_materials_list:
    - name: Product name
    - quantity: Amount needed (e.g., "1", "50 ft", "1 box")
    - category: One of: electrical, lumber, plumbing, hardware, tools
-   - estimated_price: Price estimate (e.g., "150", "25", "10")
+   - estimated_price: Per-unit price estimate (e.g., "25.99", "8.50") — always the price for ONE unit, not multiplied by quantity
    - required: true or false
+
+**CRITICAL - Pricing Accuracy:**
+Use current US big-box retailer prices (Home Depot, Lowe's). Common reference prices:
+- 2x4x8 lumber: $3-5 | 2x6x8: $5-8 | 4x4x8 post: $8-12
+- Plywood 4x8 (1/2"): $25-35 | OSB 4x8: $15-25
+- Romex 12/2 (250ft): $75-100 | 14/2 (250ft): $55-75 | 12/2 (50ft): $25-35
+- Standard outlet/switch: $1-3 | GFCI outlet: $15-20 | Smart switch: $20-40
+- PVC pipe (10ft 1/2"): $3-5 | Copper pipe (10ft 1/2"): $12-18
+- Concrete mix (80lb bag): $5-7 | Mortar mix (80lb): $8-12
+- Interior paint (gallon): $25-40 | Exterior paint (gallon): $30-50
+- Wood screws (1lb box): $8-12 | Drywall screws (1lb): $6-9
+- Circuit breaker (20A): $5-10 | Electrical box: $1-3
+- Drywall sheet (4x8 1/2"): $12-16 | Joint compound (5gal): $15-20
+- Hand tools (hammer, level, tape): $10-25 | Power tools (drill, saw): $50-120
+- Adhesives, caulk, tape: $4-10 | Sandpaper/abrasives: $5-15
+For items not listed, estimate what you'd see on the shelf at Home Depot for the basic version. Err on the lower end. Standard/builder-grade, not premium.
 
 **CRITICAL - After calling the tool:**
 The tool will return a response with special markers. You MUST include the complete tool result in your response to the user, including all the markers.
