@@ -48,7 +48,7 @@ describe('searchGoogleShopping', () => {
     expect(result.avgPrice).not.toBeNull();
   });
 
-  it('extracts prices from extra_snippets in prefetched results', async () => {
+  it('extracts price from extra_snippets in prefetched results (one per result)', async () => {
     const prefetched: BraveSearchResult[] = [
       {
         title: 'Product Title',
@@ -63,10 +63,10 @@ describe('searchGoogleShopping', () => {
     const result = await searchGoogleShopping('test product', undefined, prefetched);
 
     expect(globalThis.fetch).not.toHaveBeenCalled();
-    // Should find $29.99 and $39.99 from extra_snippets
-    expect(result.sources).toHaveLength(2);
+    // Should find only the first price ($29.99) — one price per result
+    expect(result.sources).toHaveLength(1);
     expect(result.minPrice).toBe(29.99);
-    expect(result.maxPrice).toBe(39.99);
+    expect(result.maxPrice).toBe(29.99);
   });
 
   it('identifies store from URL in prefetched results', async () => {
@@ -214,7 +214,7 @@ describe('lookupMaterialPrices', () => {
     expect(globalThis.fetch).toHaveBeenCalledTimes(2);
   });
 
-  it('skips update when lookup price is >10x AI estimate (sanity check)', async () => {
+  it('skips update when lookup price is >3x AI estimate (sanity check)', async () => {
     process.env.BRAVE_SEARCH_API_KEY = 'test-key';
 
     globalThis.fetch = vi.fn().mockResolvedValue({
@@ -222,7 +222,7 @@ describe('lookupMaterialPrices', () => {
       json: () => Promise.resolve({
         web: {
           results: [
-            { title: 'Premium item $500.00', description: '', url: 'https://example.com', extra_snippets: [] },
+            { title: 'Premium item $50.00', description: '', url: 'https://example.com', extra_snippets: [] },
           ],
         },
       }),
@@ -235,7 +235,7 @@ describe('lookupMaterialPrices', () => {
     expect(materials[0].estimated_price).toBe('5');
   });
 
-  it('skips update when lookup price is <0.1x AI estimate (sanity check)', async () => {
+  it('skips update when lookup price is <0.33x AI estimate (sanity check)', async () => {
     process.env.BRAVE_SEARCH_API_KEY = 'test-key';
 
     globalThis.fetch = vi.fn().mockResolvedValue({
@@ -243,7 +243,7 @@ describe('lookupMaterialPrices', () => {
       json: () => Promise.resolve({
         web: {
           results: [
-            { title: 'Clearance $0.50', description: '', url: 'https://example.com', extra_snippets: [] },
+            { title: 'Clearance $2.50', description: '', url: 'https://example.com', extra_snippets: [] },
           ],
         },
       }),

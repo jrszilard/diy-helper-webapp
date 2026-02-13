@@ -254,20 +254,30 @@ function extractSnippetPricing(
   const candidates: Array<{ price: number; productName: string; url: string }> = [];
 
   for (const result of allResults) {
-    const text = `${result.title} ${result.description} ${(result.extra_snippets || []).join(' ')}`;
-    let match;
-    // Reset regex state for each result
-    const regex = new RegExp(priceRegex.source, priceRegex.flags);
-    while ((match = regex.exec(text)) !== null) {
-      const price = parseFloat(match[1].replace(/,/g, ''));
-      if (price > 0.5 && price < 10000) {
-        // Clean product name from title (strip price, store name, trailing junk)
-        const cleanTitle = result.title
-          .replace(/\$[\d,.]+/g, '')
-          .replace(/[-|].*$/, '')
-          .replace(/\s+/g, ' ')
-          .trim();
-        candidates.push({ price, productName: cleanTitle || result.title, url: result.url });
+    // Take only the FIRST price from each result to avoid noise from
+    // related products, shipping costs, bundles, etc.
+    const priceSourceOrder = [
+      result.title,
+      result.description,
+      ...(result.extra_snippets || []),
+    ];
+
+    let foundPrice = false;
+    for (const text of priceSourceOrder) {
+      if (foundPrice) break;
+      const regex = new RegExp(priceRegex.source, priceRegex.flags);
+      const match = regex.exec(text);
+      if (match) {
+        const price = parseFloat(match[1].replace(/,/g, ''));
+        if (price > 0.5 && price < 10000) {
+          const cleanTitle = result.title
+            .replace(/\$[\d,.]+/g, '')
+            .replace(/[-|].*$/, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+          candidates.push({ price, productName: cleanTitle || result.title, url: result.url });
+          foundPrice = true;
+        }
       }
     }
   }

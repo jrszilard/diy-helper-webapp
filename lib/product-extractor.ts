@@ -627,6 +627,67 @@ function extractPricesFromText(
   return found;
 }
 
+function storeNameFromUrl(url: string): string {
+  if (url.includes('homedepot')) return 'Home Depot';
+  if (url.includes('lowes')) return "Lowe's";
+  if (url.includes('amazon')) return 'Amazon';
+  if (url.includes('walmart')) return 'Walmart';
+  if (url.includes('ace')) return 'Ace Hardware';
+  if (url.includes('menards')) return 'Menards';
+  return 'Unknown';
+}
+
+/**
+ * Extract the single most likely product price from one search result.
+ * Takes only the FIRST price found in title > description > snippets,
+ * preventing noise from related products, shipping, bundles, etc.
+ */
+function extractBestPriceFromResult(result: { title: string; description: string; extra_snippets?: string[]; url: string }): { store: string; price: number } | null {
+  const priceRegex = /\$\s*([\d,]+\.?\d{0,2})/;
+
+  // Priority 1: Price in title (most likely the main product price)
+  const titleMatch = result.title.match(priceRegex);
+  if (titleMatch) {
+    const price = parseFloat(titleMatch[1].replace(/,/g, ''));
+    if (price > 0.5 && price < 10000) return { store: storeNameFromUrl(result.url), price };
+  }
+
+  // Priority 2: First price in description
+  const descMatch = result.description.match(priceRegex);
+  if (descMatch) {
+    const price = parseFloat(descMatch[1].replace(/,/g, ''));
+    if (price > 0.5 && price < 10000) return { store: storeNameFromUrl(result.url), price };
+  }
+
+  // Priority 3: First price in extra snippets
+  if (result.extra_snippets) {
+    for (const snippet of result.extra_snippets) {
+      const snippetMatch = snippet.match(priceRegex);
+      if (snippetMatch) {
+        const price = parseFloat(snippetMatch[1].replace(/,/g, ''));
+        if (price > 0.5 && price < 10000) return { store: storeNameFromUrl(result.url), price };
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Filter outlier prices using IQR (Interquartile Range) method.
+ * Removes prices that fall outside 1.5×IQR from Q1/Q3.
+ */
+function filterPriceOutliers(prices: number[]): number[] {
+  if (prices.length < 4) return prices;
+  const sorted = [...prices].sort((a, b) => a - b);
+  const q1 = sorted[Math.floor(sorted.length * 0.25)];
+  const q3 = sorted[Math.floor(sorted.length * 0.75)];
+  const iqr = q3 - q1;
+  const lower = q1 - 1.5 * iqr;
+  const upper = q3 + 1.5 * iqr;
+  return sorted.filter(p => p >= lower && p <= upper);
+}
+
 /**
  * Search Google Shopping for price validation.
  * Returns aggregated pricing from multiple retailers.
@@ -652,28 +713,29 @@ export async function searchGoogleShopping(
     sources: [] as Array<{ store: string; price: number }>,
   };
 
-  const prices: number[] = [];
-
-  // If pre-fetched structured results are available, use them directly
-  if (prefetchedResults && prefetchedResults.length > 0) {
-    for (const item of prefetchedResults) {
-      // Build text from title + description + extra_snippets
-      const snippetText = (item.extra_snippets || []).join(' ');
-      const text = `${item.title} ${item.description} ${snippetText}`;
-
-      const found = extractPricesFromText(text, item.url);
-      for (const f of found) {
-        prices.push(f.price);
-        result.sources.push(f);
+  // Helper to process search results into prices (one price per result, with outlier filtering)
+  function processResults(items: Array<{ title: string; description: string; extra_snippets?: string[]; url: string }>) {
+    const rawPrices: number[] = [];
+    for (const item of items) {
+      const best = extractBestPriceFromResult(item);
+      if (best) {
+        rawPrices.push(best.price);
+        result.sources.push(best);
       }
     }
 
-    if (prices.length > 0) {
-      result.minPrice = Math.min(...prices);
-      result.maxPrice = Math.max(...prices);
-      result.avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
+    // Filter outliers before computing aggregates
+    const filtered = filterPriceOutliers(rawPrices);
+    if (filtered.length > 0) {
+      result.minPrice = Math.min(...filtered);
+      result.maxPrice = Math.max(...filtered);
+      result.avgPrice = filtered.reduce((a, b) => a + b, 0) / filtered.length;
     }
+  }
 
+  // If pre-fetched structured results are available, use them directly
+  if (prefetchedResults && prefetchedResults.length > 0) {
+    processResults(prefetchedResults);
     return result;
   }
 
@@ -705,22 +767,7 @@ export async function searchGoogleShopping(
     const data = await response.json();
 
     if (data.web?.results) {
-      for (const item of data.web.results) {
-        const snippetText = (item.extra_snippets || []).join(' ');
-        const text = `${item.title} ${item.description} ${snippetText}`;
-
-        const found = extractPricesFromText(text, item.url || '');
-        for (const f of found) {
-          prices.push(f.price);
-          result.sources.push(f);
-        }
-      }
-    }
-
-    if (prices.length > 0) {
-      result.minPrice = Math.min(...prices);
-      result.maxPrice = Math.max(...prices);
-      result.avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
+      processResults(data.web.results);
     }
 
     return result;
@@ -825,8 +872,11 @@ export async function lookupMaterialPrices(
         const timeout = setTimeout(() => controller.abort(), perCallTimeoutMs);
 
         try {
+          // Include quantity in search for better specificity (e.g., "14/2 Romex 25ft price")
+          const qtyHint = mat.quantity ? ` ${mat.quantity}` : '';
+          const searchQuery = `${mat.name}${qtyHint} price`;
           const response = await fetch(
-            `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(`${mat.name} price buy`)}&count=10&extra_snippets=true`,
+            `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(searchQuery)}&count=10&extra_snippets=true`,
             {
               headers: {
                 'Accept': 'application/json',
@@ -844,26 +894,33 @@ export async function lookupMaterialPrices(
           const webResults = data.web?.results;
           if (!webResults?.length) return null;
 
-          // Extract prices from search results
-          const prices: number[] = [];
+          // Extract ONE price per search result (reduces noise dramatically)
+          const rawPrices: number[] = [];
           for (const item of webResults) {
-            const snippetText = (item.extra_snippets || []).join(' ');
-            const text = `${item.title} ${item.description} ${snippetText}`;
-            const found = extractPricesFromText(text, item.url || '');
-            for (const f of found) {
-              prices.push(f.price);
-            }
+            const best = extractBestPriceFromResult(item);
+            if (best) rawPrices.push(best.price);
           }
 
-          if (prices.length === 0) return null;
+          if (rawPrices.length === 0) return null;
+
+          // Filter outliers using IQR
+          const filtered = filterPriceOutliers(rawPrices);
+          if (filtered.length === 0) return null;
+
+          // Skip if remaining prices have high variance (coefficient of variation > 0.8)
+          const mean = filtered.reduce((a, b) => a + b, 0) / filtered.length;
+          if (filtered.length >= 3) {
+            const variance = filtered.reduce((sum, p) => sum + (p - mean) ** 2, 0) / filtered.length;
+            const cv = Math.sqrt(variance) / mean;
+            if (cv > 0.8) return null; // prices are all over the place, data is unreliable
+          }
 
           // Compute price using median-based selection
-          prices.sort((a, b) => a - b);
-          const median = prices.length % 2 === 0
-            ? (prices[prices.length / 2 - 1] + prices[prices.length / 2]) / 2
-            : prices[Math.floor(prices.length / 2)];
-          const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
-          const bestPrice = prices.length >= 3 ? Math.min(avg, median) : avg;
+          const sorted = [...filtered].sort((a, b) => a - b);
+          const median = sorted.length % 2 === 0
+            ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+            : sorted[Math.floor(sorted.length / 2)];
+          const bestPrice = filtered.length >= 3 ? Math.min(mean, median) : median;
 
           return { mat, bestPrice };
         } catch {
@@ -882,8 +939,9 @@ export async function lookupMaterialPrices(
       const { mat, bestPrice } = result.value;
       const aiEstimate = parseFloat(mat.estimated_price);
 
-      // Sanity check: reject if lookup is >10x or <0.1x the AI estimate
-      if (aiEstimate > 0 && (bestPrice > aiEstimate * 10 || bestPrice < aiEstimate * 0.1)) {
+      // Tighter sanity check: reject if lookup is >3x or <0.33x the AI estimate
+      // (AI estimate is already in the right ballpark thanks to pricing reference table)
+      if (aiEstimate > 0 && (bestPrice > aiEstimate * 3 || bestPrice < aiEstimate * 0.33)) {
         continue;
       }
 
