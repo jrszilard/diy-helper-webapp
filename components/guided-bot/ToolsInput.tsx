@@ -36,7 +36,7 @@ export default function ToolsInput({ onSubmit, onSkip }: ToolsInputProps) {
         <button
           type="button"
           onClick={onSkip}
-          className="flex-1 py-2.5 rounded-lg text-sm font-medium text-[#7D6B5D] border border-[#D4C8B8] hover:bg-[#E8E0D4] transition-colors"
+          className="flex-1 py-2.5 rounded-lg text-sm font-medium text-[#5C4D42] border border-[#D4C8B8] hover:bg-[#E8E0D4] transition-colors"
         >
           Skip
         </button>

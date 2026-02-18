@@ -72,7 +72,7 @@ export default function ProjectBrief({ gathered, onEdit, onSubmit, isSubmitting 
           disabled={isSubmitting}
           className={`w-full py-3 rounded-xl text-base font-bold transition-all duration-200 flex items-center justify-center gap-2 ${
             isSubmitting
-              ? 'bg-[#B0A696] text-white cursor-not-allowed'
+              ? 'bg-[#8B7D6B] text-white cursor-not-allowed'
               : 'bg-[#C67B5C] text-white hover:bg-[#A65D3F] shadow-md hover:shadow-lg hover:-translate-y-0.5'
           }`}
         >
@@ -104,7 +104,7 @@ function SummaryRow({
   return (
     <div className="flex items-start justify-between gap-3 px-4 py-3">
       <div className="flex-1 min-w-0">
-        <span className="block text-[10px] font-semibold text-[#A89880] uppercase tracking-wider">{label}</span>
+        <span className="block text-[10px] font-semibold text-[#7D6B5D] uppercase tracking-wider">{label}</span>
         <span className={`block text-sm text-[#3E2723] mt-0.5 ${truncate ? 'line-clamp-2' : ''}`}>
           {value}
         </span>

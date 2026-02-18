@@ -319,14 +319,15 @@ export function useAgentRun() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        setState(prev => ({ ...prev, isRunning: false, error: 'Please sign in.' }));
-        return;
+
+      const headers: Record<string, string> = {};
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
       }
 
       const response = await fetch(`/api/agents/runs/${runId}/retry`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers,
         signal: abortRef.current.signal,
       });
 

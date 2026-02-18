@@ -41,7 +41,7 @@ export default function AgentProgress({
                 ? projectDescription.slice(0, 80) + '...'
                 : projectDescription}
             </p>
-            <p className="text-xs text-[#B0A696] mt-0.5">{location}</p>
+            <p className="text-xs text-[#8B7D6B] mt-0.5">{location}</p>
           </div>
           {(isRunning || isCancelling) && (
             <button
@@ -109,7 +109,7 @@ export default function AgentProgress({
             disabled={isCancelling}
             className={`w-full py-2.5 rounded-lg border text-sm font-medium transition-colors ${
               isCancelling
-                ? 'border-[#E8E0D4] text-[#B0A696] cursor-not-allowed'
+                ? 'border-[#E8E0D4] text-[#7D6B5D] cursor-not-allowed'
                 : 'border-[#D4C8B8] text-[#7D6B5D] hover:bg-[#E8E0D4]'
             }`}
           >
@@ -159,11 +159,11 @@ function PhaseCard({ phase, index }: { phase: PhaseProgress; index: number }) {
           {isComplete && <CheckCircle2 size={24} className="text-[#4A7C59]" />}
           {isActive && <Loader2 size={24} className="text-[#5D7B93] animate-spin" />}
           {isError && <AlertCircle size={24} className="text-[#B8593B]" />}
-          {isSkipped && <SkipForward size={24} className="text-[#B0A696]" />}
+          {isSkipped && <SkipForward size={24} className="text-[#8B7D6B]" />}
           {phase.status === 'pending' && (
             <div className="relative">
               <Circle size={24} className="text-[#D4C8B8]" />
-              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#B0A696]">
+              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#8B7D6B]">
                 {index + 1}
               </span>
             </div>
@@ -177,7 +177,7 @@ function PhaseCard({ phase, index }: { phase: PhaseProgress; index: number }) {
               isActive ? 'text-[#3E2723]' :
               isComplete ? 'text-[#4A7C59]' :
               isError ? 'text-[#B8593B]' :
-              isSkipped ? 'text-[#B0A696]' :
+              isSkipped ? 'text-[#8B7D6B]' :
               'text-[#7D6B5D]'
             }`}>
               Phase {index + 1}: {phaseLabels[phase.phase]}
@@ -193,15 +193,15 @@ function PhaseCard({ phase, index }: { phase: PhaseProgress; index: number }) {
               </span>
             )}
             {isSkipped && (
-              <span className="text-xs text-[#B0A696]">Skipped</span>
+              <span className="text-xs text-[#8B7D6B]">Skipped</span>
             )}
           </div>
 
           {/* Description or current activity */}
           <p className={`text-xs mt-0.5 ${
             isActive ? 'text-[#5D7B93]' :
-            isSkipped ? 'text-[#B0A696]' :
-            'text-[#B0A696]'
+            isSkipped ? 'text-[#8B7D6B]' :
+            'text-[#8B7D6B]'
           }`}>
             {isActive ? phase.message : phaseDescriptions[phase.phase]}
           </p>

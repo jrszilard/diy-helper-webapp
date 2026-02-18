@@ -30,20 +30,17 @@ export async function POST(
     const { id: runId } = await params;
     const auth = await getAuthFromRequest(req);
 
-    if (!auth.userId) {
-      return applyCorsHeaders(req, new Response(
-        JSON.stringify({ error: 'Authentication required' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      ));
-    }
-
-    // Fetch the run
-    const { data: run, error: runError } = await auth.supabaseClient
+    // Fetch the run — match by user_id if authenticated, otherwise just by id
+    let query = auth.supabaseClient
       .from('agent_runs')
       .select('*')
-      .eq('id', runId)
-      .eq('user_id', auth.userId)
-      .single();
+      .eq('id', runId);
+
+    if (auth.userId) {
+      query = query.eq('user_id', auth.userId);
+    }
+
+    const { data: run, error: runError } = await query.single();
 
     if (runError || !run) {
       return applyCorsHeaders(req, new Response(
@@ -52,9 +49,9 @@ export async function POST(
       ));
     }
 
-    if (run.status !== 'error' && run.status !== 'cancelled') {
+    if (run.status === 'completed') {
       return applyCorsHeaders(req, new Response(
-        JSON.stringify({ error: 'Run can only be retried from error or cancelled state' }),
+        JSON.stringify({ error: 'Run already completed' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       ));
     }
@@ -82,7 +79,7 @@ export async function POST(
         zipCode: run.location_zip || undefined,
       },
       projectId: run.project_id || run.id,
-      userId: auth.userId,
+      userId: auth.userId || run.user_id,
       preferences: {
         budgetLevel: run.budget_level || 'mid-range',
         experienceLevel: run.experience_level || 'intermediate',
@@ -217,7 +214,7 @@ export async function POST(
             .from('project_reports')
             .insert({
               run_id: runId,
-              user_id: auth.userId,
+              user_id: auth.userId || run.user_id,
               project_id: run.project_id || null,
               title: context.report!.title,
               sections: context.report!.sections,
@@ -253,6 +250,7 @@ export async function POST(
             reportId: report.id,
             summary: context.report!.summary,
             totalCost: context.report!.totalCost,
+            report,
             apiCost: {
               totalTokens: totalInput + totalOutput,
               estimatedCost: Math.round(estimatedCost * 10000) / 10000,

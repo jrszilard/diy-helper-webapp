@@ -31,7 +31,7 @@ export default function PreferenceCards({ type, onSelect }: PreferenceCardsProps
           <span className="text-xl flex-shrink-0">{option.icon}</span>
           <div className="flex-1 min-w-0">
             <span className="block text-sm font-semibold text-[#3E2723]">{option.title}</span>
-            <span className="block text-xs text-[#7D6B5D]">{option.description}</span>
+            <span className="block text-xs text-[#5C4D42]">{option.description}</span>
           </div>
         </button>
       ))}

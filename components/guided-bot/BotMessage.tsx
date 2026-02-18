@@ -46,9 +46,9 @@ export function TypingIndicator() {
     <div className="flex justify-start">
       <div className="bg-[#FDFBF7] border border-[#D4C8B8] rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
         <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#B0A696] animate-bounce" style={{ animationDelay: '0ms' }} />
-          <span className="w-2 h-2 rounded-full bg-[#B0A696] animate-bounce" style={{ animationDelay: '150ms' }} />
-          <span className="w-2 h-2 rounded-full bg-[#B0A696] animate-bounce" style={{ animationDelay: '300ms' }} />
+          <span className="w-2 h-2 rounded-full bg-[#7D6B5D] animate-bounce" style={{ animationDelay: '0ms' }} />
+          <span className="w-2 h-2 rounded-full bg-[#7D6B5D] animate-bounce" style={{ animationDelay: '150ms' }} />
+          <span className="w-2 h-2 rounded-full bg-[#7D6B5D] animate-bounce" style={{ animationDelay: '300ms' }} />
         </div>
       </div>
     </div>
