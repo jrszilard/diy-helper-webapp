@@ -148,40 +148,60 @@ export async function runPhase(options: RunPhaseOptions): Promise<PhaseResult> {
     const assistantContent: Anthropic.ContentBlock[] = [];
     const toolResults: Array<{ type: 'tool_result'; tool_use_id: string; content: string }> = [];
 
+    // Separate tool_use blocks into output tools and real tools for parallel execution
+    const outputToolBlocks: Anthropic.ToolUseBlock[] = [];
+    const realToolBlocks: Anthropic.ToolUseBlock[] = [];
+
     for (const block of response.content) {
       if (block.type === 'tool_use') {
-        // Check if this is the output submission tool
         if (block.name === outputToolName) {
-          structuredOutput = block.input as Record<string, unknown>;
-          assistantContent.push(block);
-          toolResults.push({
-            type: 'tool_result',
-            tool_use_id: block.id,
-            content: 'Results received successfully.',
-          });
-          continue;
+          outputToolBlocks.push(block);
+        } else {
+          realToolBlocks.push(block);
         }
+      } else if (block.type === 'text') {
+        assistantContent.push(block);
+      }
+    }
 
-        // Check cancellation before each tool execution
-        if (checkCancelled?.()) throw new CancellationError();
+    // Handle output submission tools first
+    for (const block of outputToolBlocks) {
+      structuredOutput = block.input as Record<string, unknown>;
+      assistantContent.push(block);
+      toolResults.push({
+        type: 'tool_result',
+        tool_use_id: block.id,
+        content: 'Results received successfully.',
+      });
+    }
 
-        // It's a real tool — execute it
-        const progressPct = overallProgressBase +
-          (overallProgressRange * (loopCount / (maxToolLoops * 0.7)));
+    // Execute real tools in parallel
+    if (realToolBlocks.length > 0) {
+      // Check cancellation before tool execution
+      if (checkCancelled?.()) throw new CancellationError();
 
-        sendEvent({
-          type: 'agent_progress',
-          runId,
-          phase,
-          phaseStatus: 'tool_call',
-          message: getToolProgressMessage(block.name),
-          detail: block.name,
-          overallProgress: Math.min(
-            Math.round(progressPct),
-            overallProgressBase + overallProgressRange - 5,
-          ),
-        });
+      const progressPct = overallProgressBase +
+        (overallProgressRange * (loopCount / (maxToolLoops * 0.7)));
 
+      // Send progress for all tools being executed
+      const toolNames = realToolBlocks.map(b => b.name);
+      sendEvent({
+        type: 'agent_progress',
+        runId,
+        phase,
+        phaseStatus: 'tool_call',
+        message: realToolBlocks.length > 1
+          ? `Running ${realToolBlocks.length} lookups in parallel...`
+          : getToolProgressMessage(realToolBlocks[0].name),
+        detail: toolNames.join(', '),
+        overallProgress: Math.min(
+          Math.round(progressPct),
+          overallProgressBase + overallProgressRange - 5,
+        ),
+      });
+
+      // Execute all real tools concurrently
+      const toolPromises = realToolBlocks.map(async (block) => {
         const toolStart = Date.now();
         let result: string;
         let success = true;
@@ -209,14 +229,19 @@ export async function runPhase(options: RunPhaseOptions): Promise<PhaseResult> {
           phase, runId, tool: block.name, duration: toolDuration, success,
         });
 
+        return { block, result };
+      });
+
+      const results = await Promise.all(toolPromises);
+
+      // Collect results in original order
+      for (const { block, result } of results) {
         assistantContent.push(block);
         toolResults.push({
           type: 'tool_result',
           tool_use_id: block.id,
           content: result,
         });
-      } else if (block.type === 'text') {
-        assistantContent.push(block);
       }
     }
 

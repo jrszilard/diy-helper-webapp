@@ -264,6 +264,10 @@ function MarkdownContent({ content, isPrint = false }: { content: string; isPrin
         ? 'prose-th:bg-gray-100 prose-th:p-2 prose-th:border prose-th:border-gray-300 prose-td:p-2 prose-td:border prose-td:border-gray-300'
         : 'prose-th:bg-[#F5F0E6] prose-th:p-2 prose-th:border prose-th:border-[#D4C8B8] prose-td:p-2 prose-td:border prose-td:border-[#D4C8B8]'
       }
+      prose-li:my-0.5
+      [&_ul]:space-y-1
+      [&_ul_ul]:mt-1
+      [&_strong]:text-[#3E2723]
       print:[&_*]:!text-black
     `}>
       <ReactMarkdown

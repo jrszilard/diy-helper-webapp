@@ -144,8 +144,8 @@ IMPORTANT: Be efficient. Do NOT search for every item individually. Only search 
     sendEvent,
     overallProgressBase: 50,
     overallProgressRange: 35,
-    maxToolLoops: 8,
-    timeoutMs: 90_000,
+    maxToolLoops: 6,
+    timeoutMs: 75_000,
     checkCancelled,
   });
 

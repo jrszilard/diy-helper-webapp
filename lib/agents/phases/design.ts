@@ -174,8 +174,8 @@ Based on this research, design a complete project plan with step-by-step instruc
     sendEvent,
     overallProgressBase: 25,
     overallProgressRange: 25,
-    maxToolLoops: 5,
-    timeoutMs: 90_000,
+    maxToolLoops: 4,
+    timeoutMs: 75_000,
     checkCancelled,
   });
 

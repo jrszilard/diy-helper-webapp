@@ -94,8 +94,8 @@ Then call submit_research_results immediately with your findings. Do NOT over-re
     sendEvent,
     overallProgressBase: 0,
     overallProgressRange: 25,
-    maxToolLoops: 5,
-    timeoutMs: 90_000,
+    maxToolLoops: 3,
+    timeoutMs: 60_000,
     checkCancelled,
   });
 
