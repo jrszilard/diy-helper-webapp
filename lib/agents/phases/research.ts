@@ -41,17 +41,6 @@ const RESEARCH_TOOLS: PhaseToolDef[] = [
     },
   },
   {
-    name: 'web_fetch',
-    description: 'Fetch and read the contents of a specific web page.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        url: { type: 'string', description: 'The URL to fetch' },
-      },
-      required: ['url'],
-    },
-  },
-  {
     name: 'submit_research_results',
     description: 'Submit the research findings as structured data. Call this when you have gathered enough information.',
     input_schema: {
@@ -87,15 +76,12 @@ export async function runResearchPhase(
 **Location:** ${context.location.city}, ${context.location.state}${context.location.zipCode ? ` (${context.location.zipCode})` : ''}
 **DIYer Experience Level:** ${context.preferences.experienceLevel}
 
-Please research:
-1. National building codes (NEC, IRC, IBC) that apply to this project
-2. Local building codes and amendments for ${context.location.city}, ${context.location.state}
-3. Permit requirements for this project in this location
-4. Best practices from professional contractors
-5. Common pitfalls and mistakes for this type of project
-6. Safety warnings and whether any part requires a licensed professional
+Research this project using at most 3-4 tool calls total:
+1. Search national building codes once (combine topics into one query)
+2. Search local codes once for ${context.location.city}, ${context.location.state}
+3. One web search for best practices and common pitfalls
 
-When done, call submit_research_results with your structured findings.`;
+Then call submit_research_results immediately with your findings. Do NOT over-research — use your existing knowledge to fill gaps.`;
 
   const result = await runPhase({
     phase: 'research',
@@ -108,6 +94,7 @@ When done, call submit_research_results with your structured findings.`;
     sendEvent,
     overallProgressBase: 0,
     overallProgressRange: 25,
+    maxToolLoops: 5,
     timeoutMs: 90_000,
     checkCancelled,
   });

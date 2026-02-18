@@ -52,6 +52,7 @@ export interface RunPhaseOptions {
   maxToolLoops?: number;
   timeoutMs?: number;
   maxTokens?: number;
+  model?: string; // override per-phase model (e.g. haiku for report)
   checkCancelled?: () => boolean;
 }
 
@@ -74,9 +75,12 @@ export async function runPhase(options: RunPhaseOptions): Promise<PhaseResult> {
     overallProgressBase, overallProgressRange,
     maxToolLoops = 10,
     timeoutMs = 120_000,
-    maxTokens = 8192,
+    maxTokens = 4096,
+    model,
     checkCancelled,
   } = options;
+
+  const phaseModel = model || config.anthropic.model;
 
   const startTime = Date.now();
   const toolCalls: ToolCallLog[] = [];
@@ -111,7 +115,7 @@ export async function runPhase(options: RunPhaseOptions): Promise<PhaseResult> {
   const apiStart = Date.now();
   let response = await withRetry(
     () => anthropic.messages.create({
-      model: config.anthropic.model,
+      model: phaseModel,
       max_tokens: maxTokens,
       system: systemPrompt,
       tools: allTools,
@@ -239,7 +243,7 @@ export async function runPhase(options: RunPhaseOptions): Promise<PhaseResult> {
     const followUpStart = Date.now();
     response = await withRetry(
       () => anthropic.messages.create({
-        model: config.anthropic.model,
+        model: phaseModel,
         max_tokens: maxTokens,
         system: systemPrompt,
         tools: allTools,

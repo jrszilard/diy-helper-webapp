@@ -36,41 +36,6 @@ const SOURCING_TOOLS: PhaseToolDef[] = [
     },
   },
   {
-    name: 'compare_store_prices',
-    description: 'Compare prices for a material across multiple stores.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        material_name: { type: 'string', description: 'Material to compare' },
-        stores: { type: 'array', items: { type: 'string' }, description: 'Store names' },
-        location: { type: 'string', description: 'City, State format' },
-      },
-      required: ['material_name', 'location'],
-    },
-  },
-  {
-    name: 'search_products',
-    description: 'Search for products with pricing information.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        query: { type: 'string', description: 'Product search query' },
-      },
-      required: ['query'],
-    },
-  },
-  {
-    name: 'web_search',
-    description: 'Search the web for pricing or availability.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        query: { type: 'string', description: 'The search query' },
-      },
-      required: ['query'],
-    },
-  },
-  {
     name: 'submit_sourcing_results',
     description: 'Submit the sourcing analysis as structured data. Call this when sourcing is complete.',
     input_schema: {
