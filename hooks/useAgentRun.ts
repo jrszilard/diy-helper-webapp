@@ -412,6 +412,10 @@ export function useAgentRun() {
   const startPolling = useCallback((runId: string, accessToken: string) => {
     if (pollRef.current) clearInterval(pollRef.current);
 
+    let lastCompletedCount = -1;
+    let staleCount = 0;
+    const MAX_STALE_POLLS = 6; // 6 polls * 5s = 30s with no progress
+
     pollRef.current = setInterval(async () => {
       try {
         const resp = await fetch(`/api/agents/runs?status=running`, {
@@ -513,6 +517,32 @@ export function useAgentRun() {
         const completedCount = phases.filter(p => p.status === 'completed').length;
         const hasRunning = phases.some(p => p.status === 'running');
         const overallProgress = completedCount * 25 + (hasRunning ? 10 : 0);
+
+        // Detect stale runs (no phase progress across multiple polls)
+        if (completedCount === lastCompletedCount) {
+          staleCount++;
+        } else {
+          staleCount = 0;
+          lastCompletedCount = completedCount;
+        }
+
+        if (staleCount >= MAX_STALE_POLLS) {
+          // Run appears dead — server likely timed out
+          if (pollRef.current) clearInterval(pollRef.current);
+          pollRef.current = null;
+
+          setState(prev => ({
+            ...prev,
+            isRunning: false,
+            phases: prev.phases.map(p =>
+              p.status === 'running'
+                ? { ...p, status: 'error' as const, message: 'Phase timed out' }
+                : p
+            ),
+            error: 'The server process appears to have stopped. You can retry to continue from where it left off.',
+          }));
+          return;
+        }
 
         setState(prev => ({
           ...prev,

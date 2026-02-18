@@ -42,6 +42,22 @@ export default function ProjectPlanner({ userId, onProjectCreated }: ProjectPlan
         const data = await response.json();
         if (data.runs?.length > 0) {
           const activeRun = data.runs[0];
+
+          // Check if run is stale (started > 6 min ago — our max is 5 min)
+          const startedAt = activeRun.started_at ? new Date(activeRun.started_at).getTime() : 0;
+          const isStale = startedAt > 0 && (Date.now() - startedAt) > 6 * 60 * 1000;
+
+          if (isStale) {
+            // Mark as errored in DB so it doesn't keep showing up
+            try {
+              await fetch(`/api/agents/runs/${activeRun.id}/cancel`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${session.access_token}` },
+              });
+            } catch { /* best effort */ }
+            return;
+          }
+
           setRunRequest({
             projectDescription: activeRun.project_description || '',
             city: activeRun.location_city || '',
