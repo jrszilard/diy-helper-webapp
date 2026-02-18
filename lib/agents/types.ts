@@ -2,7 +2,7 @@
 
 // ── Phase Names ───────────────────────────────────────────────────────────────
 
-export type AgentPhase = 'research' | 'design' | 'sourcing' | 'report';
+export type AgentPhase = 'research' | 'design' | 'sourcing' | 'report' | 'plan';
 export type AgentRunStatus = 'pending' | 'running' | 'completed' | 'error' | 'cancelled';
 export type PhaseStatus = 'pending' | 'running' | 'completed' | 'error' | 'skipped';
 
@@ -35,6 +35,10 @@ export interface AgentContext {
 
   // Phase 4 output: Report
   report?: ReportOutput;
+
+  // New 2-phase pipeline
+  plan?: PlanOutput;
+  inventoryData?: InventoryData;
 }
 
 // ── Phase Outputs ─────────────────────────────────────────────────────────────
@@ -76,6 +80,48 @@ export interface ReportOutput {
   summary: string;
   totalCost: number;
   generatedAt: string;
+}
+
+// ── Plan Phase Output (merged Research + Design + lightweight sourcing) ──────
+
+export interface PlanOutput {
+  // Research fields
+  buildingCodes: string;
+  localCodes: string;
+  permitRequirements: string;
+  bestPractices: string;
+  commonPitfalls: string;
+  safetyWarnings: string[];
+  proRequired: boolean;
+  proRequiredReason?: string;
+
+  // Design fields
+  approach: string;
+  steps: ProjectStep[];
+  materials: DesignMaterial[];
+  tools: DesignTool[];
+  estimatedDuration: string;
+  skillLevel: string;
+  videos: DesignVideo[];
+  alternativeApproaches?: string;
+
+  // Lightweight sourcing (from inventory pre-fetch)
+  ownedItems: OwnedItem[];
+  totalEstimate: number;
+  savingsFromInventory: number;
+}
+
+export interface InventoryItem {
+  id: string;
+  item_name: string;
+  category: string;
+  quantity: number;
+  condition: string;
+}
+
+export interface InventoryData {
+  items: InventoryItem[];
+  fetchedAt: string;
 }
 
 // ── Supporting Types ──────────────────────────────────────────────────────────

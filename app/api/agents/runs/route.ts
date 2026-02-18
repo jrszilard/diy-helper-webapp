@@ -8,10 +8,9 @@ import { logger } from '@/lib/logger';
 import { CancellationError } from '@/lib/agents/runner';
 import { isCancelled, clearCancellation } from '@/lib/agents/cancellation';
 import { updatePhaseStatus, updateRunPhase, savePhaseResult } from '@/lib/agents/db-helpers';
-import { runResearchPhase } from '@/lib/agents/phases/research';
-import { runDesignPhase } from '@/lib/agents/phases/design';
-import { runSourcingPhase } from '@/lib/agents/phases/sourcing';
-import { runReportPhase } from '@/lib/agents/phases/report';
+import { runPlanPhase } from '@/lib/agents/phases/plan';
+import { buildReport } from '@/lib/agents/phases/report-builder';
+import { prefetchInventory } from '@/lib/agents/inventory-prefetch';
 import type { AgentContext, AgentStreamEvent, AgentPhase, TokenUsage } from '@/lib/agents/types';
 
 const StartRunSchema = z.object({
@@ -25,7 +24,7 @@ const StartRunSchema = z.object({
   projectId: z.string().uuid().optional(),
 });
 
-const PHASE_ORDER: AgentPhase[] = ['research', 'design', 'sourcing', 'report'];
+const PHASE_ORDER: AgentPhase[] = ['plan', 'report'];
 
 // Sonnet pricing: $3/M input, $15/M output
 const INPUT_COST_PER_TOKEN = 3 / 1_000_000;
@@ -132,52 +131,66 @@ export async function POST(req: NextRequest) {
           sendEvent({ type: 'heartbeat' });
         }, 15_000);
 
-        let currentPhase: AgentPhase = 'research';
+        let currentPhase: AgentPhase = 'plan';
         const phaseTokenUsage: TokenUsage[] = [];
 
         try {
-          // ── Phase 1: Research ──
-          currentPhase = 'research';
-          await updatePhaseStatus(auth, run.id, 'research', 'running');
-          await updateRunPhase(auth, run.id, 'research');
-          const researchResult = await runResearchPhase(context, auth, sendEvent, checkCancelled);
-          context.research = researchResult.output;
-          phaseTokenUsage.push(researchResult.tokenUsage);
-          await savePhaseResult(auth, run.id, 'research', researchResult);
+          // Pre-fetch inventory in parallel with phase setup
+          const inventoryPromise = prefetchInventory(auth);
 
-          // Check cancellation between phases
-          if (checkCancelled()) throw new CancellationError();
+          // ── Phase 1: Plan (research + design in one Claude call) ──
+          currentPhase = 'plan';
+          await updatePhaseStatus(auth, run.id, 'plan', 'running');
+          await updateRunPhase(auth, run.id, 'plan');
 
-          // ── Phase 2: Design ──
-          currentPhase = 'design';
-          await updatePhaseStatus(auth, run.id, 'design', 'running');
-          await updateRunPhase(auth, run.id, 'design');
-          const designResult = await runDesignPhase(context, auth, sendEvent, checkCancelled);
-          context.design = designResult.output;
-          phaseTokenUsage.push(designResult.tokenUsage);
-          await savePhaseResult(auth, run.id, 'design', designResult);
+          const inventoryData = await inventoryPromise;
+          const planResult = await runPlanPhase(context, auth, sendEvent, inventoryData, checkCancelled);
+          context.plan = planResult.output;
+          context.inventoryData = inventoryData ?? undefined;
+          phaseTokenUsage.push(planResult.tokenUsage);
+          await savePhaseResult(auth, run.id, 'plan', planResult);
 
           if (checkCancelled()) throw new CancellationError();
 
-          // ── Phase 3: Sourcing ──
-          currentPhase = 'sourcing';
-          await updatePhaseStatus(auth, run.id, 'sourcing', 'running');
-          await updateRunPhase(auth, run.id, 'sourcing');
-          const sourcingResult = await runSourcingPhase(context, auth, sendEvent, checkCancelled);
-          context.sourcing = sourcingResult.output;
-          phaseTokenUsage.push(sourcingResult.tokenUsage);
-          await savePhaseResult(auth, run.id, 'sourcing', sourcingResult);
-
-          if (checkCancelled()) throw new CancellationError();
-
-          // ── Phase 4: Report ──
+          // ── Phase 2: Report (deterministic TypeScript — no Claude call) ──
           currentPhase = 'report';
           await updatePhaseStatus(auth, run.id, 'report', 'running');
           await updateRunPhase(auth, run.id, 'report');
-          const reportResult = await runReportPhase(context, auth, sendEvent, checkCancelled);
-          context.report = reportResult.output;
-          phaseTokenUsage.push(reportResult.tokenUsage);
-          await savePhaseResult(auth, run.id, 'report', reportResult);
+
+          sendEvent({
+            type: 'agent_progress',
+            runId: run.id,
+            phase: 'report',
+            phaseStatus: 'started',
+            message: 'Building report...',
+            overallProgress: 85,
+          });
+
+          const reportStartTime = Date.now();
+          const reportOutput = buildReport({
+            plan: context.plan,
+            projectDescription: context.projectDescription,
+            location: context.location,
+            preferences: context.preferences,
+          });
+          context.report = reportOutput;
+
+          // Save report phase result (no token usage — deterministic)
+          await savePhaseResult(auth, run.id, 'report', {
+            output: reportOutput as unknown as Record<string, unknown>,
+            toolCalls: [],
+            durationMs: Date.now() - reportStartTime,
+            tokenUsage: { inputTokens: 0, outputTokens: 0 },
+          });
+
+          sendEvent({
+            type: 'agent_progress',
+            runId: run.id,
+            phase: 'report',
+            phaseStatus: 'completed',
+            message: 'Report complete',
+            overallProgress: 100,
+          });
 
           // Save the final report
           const { data: report, error: reportError } = await auth.supabaseClient
@@ -222,7 +235,6 @@ export async function POST(req: NextRequest) {
             reportId: report.id,
             summary: context.report.summary,
             totalCost: context.report.totalCost,
-            // Include full report so anon users can render without a separate fetch
             report,
             apiCost: {
               totalTokens: totalInput + totalOutput,
@@ -349,5 +361,5 @@ export async function OPTIONS(req: NextRequest) {
 }
 
 export const runtime = 'nodejs';
-export const maxDuration = 300; // 5 minutes max for the full pipeline
+export const maxDuration = 120; // 2 minutes max for the 2-phase pipeline
 export const dynamic = 'force-dynamic';

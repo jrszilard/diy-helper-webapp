@@ -168,7 +168,7 @@ IMMEDIATELY call submit_report_results with exactly 5 sections (overview, plan, 
     overallProgressRange: 15,
     maxToolLoops: 2,
     timeoutMs: 60_000,
-    model: 'claude-haiku-4-5',
+    model: 'claude-sonnet-4-6',
     checkCancelled,
   });
 

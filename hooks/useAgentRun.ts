@@ -30,11 +30,28 @@ export interface AgentRunState {
 }
 
 const INITIAL_PHASES: PhaseProgress[] = [
-  { phase: 'research', status: 'pending', message: 'Research building codes & permits' },
-  { phase: 'design', status: 'pending', message: 'Design project plan & materials list' },
-  { phase: 'sourcing', status: 'pending', message: 'Find prices at local stores' },
-  { phase: 'report', status: 'pending', message: 'Generate comprehensive report' },
+  { phase: 'plan', status: 'pending', message: 'Research codes & design project plan' },
+  { phase: 'report', status: 'pending', message: 'Build comprehensive report' },
 ];
+
+// Label maps for both new and legacy phase names
+const PHASE_LABELS: Record<string, string> = {
+  plan: 'Project Planning',
+  report: 'Report Generation',
+  // Legacy
+  research: 'Research',
+  design: 'Project Design',
+  sourcing: 'Materials Sourcing',
+};
+
+function buildLegacyPhases(): PhaseProgress[] {
+  return [
+    { phase: 'research', status: 'pending', message: 'Research building codes & permits' },
+    { phase: 'design', status: 'pending', message: 'Design project plan & materials list' },
+    { phase: 'sourcing', status: 'pending', message: 'Find prices at local stores' },
+    { phase: 'report', status: 'pending', message: 'Generate comprehensive report' },
+  ];
+}
 
 export function useAgentRun() {
   const [state, setState] = useState<AgentRunState>({
@@ -362,9 +379,17 @@ export function useAgentRun() {
       const run = data.runs?.find((r: { id: string }) => r.id === runId);
       if (!run) return;
 
+      // Detect legacy vs new runs from DB phase names
+      const dbPhases = run.agent_phases || [];
+      const phaseNames = dbPhases.map((ap: { phase: string }) => ap.phase);
+      const isLegacy = phaseNames.includes('research') || phaseNames.includes('design');
+      const templatePhases = isLegacy
+        ? buildLegacyPhases()
+        : INITIAL_PHASES;
+
       // Map DB phases to UI state
-      const phases: PhaseProgress[] = INITIAL_PHASES.map(p => {
-        const dbPhase = run.agent_phases?.find((ap: { phase: string }) => ap.phase === p.phase);
+      const phases: PhaseProgress[] = templatePhases.map(p => {
+        const dbPhase = dbPhases.find((ap: { phase: string }) => ap.phase === p.phase);
         if (!dbPhase) return { ...p };
 
         return {
@@ -375,18 +400,19 @@ export function useAgentRun() {
             : dbPhase.status === 'skipped' ? 'skipped' as const
             : 'pending' as const,
           message: dbPhase.status === 'completed'
-            ? `${p.phase.charAt(0).toUpperCase() + p.phase.slice(1)} phase complete`
+            ? `${PHASE_LABELS[p.phase] || p.phase} complete`
             : dbPhase.status === 'running'
-            ? `${p.phase.charAt(0).toUpperCase() + p.phase.slice(1)} in progress...`
+            ? `${PHASE_LABELS[p.phase] || p.phase} in progress...`
             : p.message,
           durationMs: dbPhase.duration_ms || undefined,
         };
       });
 
       // Compute progress from completed phases
+      const progressPerPhase = Math.floor(100 / phases.length);
       const completedCount = phases.filter(p => p.status === 'completed').length;
       const hasRunning = phases.some(p => p.status === 'running');
-      const overallProgress = completedCount * 25 + (hasRunning ? 10 : 0);
+      const overallProgress = completedCount * progressPerPhase + (hasRunning ? Math.floor(progressPerPhase / 3) : 0);
 
       setState({
         isRunning: run.status === 'running',
@@ -443,16 +469,16 @@ export function useAgentRun() {
           const finalRun = finalData.runs?.find((r: { id: string }) => r.id === runId);
           if (!finalRun) return;
 
+          const finalDbPhases = finalRun.agent_phases || [];
+          const finalPhaseNames = finalDbPhases.map((ap: { phase: string }) => ap.phase);
+          const finalIsLegacy = finalPhaseNames.includes('research') || finalPhaseNames.includes('design');
+          const finalTemplate = finalIsLegacy ? buildLegacyPhases() : INITIAL_PHASES;
+
           if (finalRun.status === 'completed') {
-            // Find the report
-            const reportResp = await fetch(`/api/agents/runs`, {
-              headers: { Authorization: `Bearer ${accessToken}` },
-            });
-            // Look for report via the phases
-            const phases: PhaseProgress[] = INITIAL_PHASES.map(p => ({
+            const phases: PhaseProgress[] = finalTemplate.map(p => ({
               ...p,
               status: 'completed' as const,
-              message: `${p.phase.charAt(0).toUpperCase() + p.phase.slice(1)} phase complete`,
+              message: `${PHASE_LABELS[p.phase] || p.phase} complete`,
             }));
 
             setState(prev => ({
@@ -465,17 +491,15 @@ export function useAgentRun() {
 
             // Try to find the associated report
             try {
-              const reportSearchResp = await fetch(`/api/reports/${finalRun.id}`, {
+              await fetch(`/api/reports/${finalRun.id}`, {
                 headers: { Authorization: `Bearer ${accessToken}` },
               }).catch(() => null);
-              // Reports are by report ID not run ID, so this may not work
-              // The user can refresh to see the completed state
             } catch {
               // Ignore
             }
           } else {
-            const phases: PhaseProgress[] = INITIAL_PHASES.map(p => {
-              const dbPhase = finalRun.agent_phases?.find((ap: { phase: string }) => ap.phase === p.phase);
+            const phases: PhaseProgress[] = finalTemplate.map(p => {
+              const dbPhase = finalDbPhases.find((ap: { phase: string }) => ap.phase === p.phase);
               return {
                 ...p,
                 status: dbPhase?.status === 'completed' ? 'completed' as const
@@ -496,9 +520,14 @@ export function useAgentRun() {
           return;
         }
 
-        // Still running — update phase states
-        const phases: PhaseProgress[] = INITIAL_PHASES.map(p => {
-          const dbPhase = run.agent_phases?.find((ap: { phase: string }) => ap.phase === p.phase);
+        // Still running — detect legacy vs new and update phase states
+        const runDbPhases = run.agent_phases || [];
+        const runPhaseNames = runDbPhases.map((ap: { phase: string }) => ap.phase);
+        const runIsLegacy = runPhaseNames.includes('research') || runPhaseNames.includes('design');
+        const runTemplate = runIsLegacy ? buildLegacyPhases() : INITIAL_PHASES;
+
+        const phases: PhaseProgress[] = runTemplate.map(p => {
+          const dbPhase = runDbPhases.find((ap: { phase: string }) => ap.phase === p.phase);
           if (!dbPhase) return { ...p };
 
           return {
@@ -507,9 +536,9 @@ export function useAgentRun() {
               : dbPhase.status === 'completed' ? 'completed' as const
               : 'pending' as const,
             message: dbPhase.status === 'completed'
-              ? `${p.phase.charAt(0).toUpperCase() + p.phase.slice(1)} phase complete`
+              ? `${PHASE_LABELS[p.phase] || p.phase} complete`
               : dbPhase.status === 'running'
-              ? `${p.phase.charAt(0).toUpperCase() + p.phase.slice(1)} in progress...`
+              ? `${PHASE_LABELS[p.phase] || p.phase} in progress...`
               : p.message,
             durationMs: dbPhase.duration_ms || undefined,
           };
@@ -517,7 +546,8 @@ export function useAgentRun() {
 
         const completedCount = phases.filter(p => p.status === 'completed').length;
         const hasRunning = phases.some(p => p.status === 'running');
-        const overallProgress = completedCount * 25 + (hasRunning ? 10 : 0);
+        const progressPerPhase = Math.floor(100 / phases.length);
+        const overallProgress = completedCount * progressPerPhase + (hasRunning ? Math.floor(progressPerPhase / 3) : 0);
 
         // Detect stale runs (no phase progress across multiple polls)
         if (completedCount === lastCompletedCount) {

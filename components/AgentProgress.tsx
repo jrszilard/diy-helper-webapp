@@ -123,17 +123,21 @@ export default function AgentProgress({
 
 function PhaseCard({ phase, index }: { phase: PhaseProgress; index: number }) {
   const phaseLabels: Record<string, string> = {
+    plan: 'Project Planning',
+    report: 'Report Generation',
+    // Legacy
     research: 'Research',
     design: 'Project Design',
     sourcing: 'Materials Sourcing',
-    report: 'Report Generation',
   };
 
   const phaseDescriptions: Record<string, string> = {
+    plan: 'Researching codes, designing plan, materials list, and timeline',
+    report: 'Building comprehensive project report with all details',
+    // Legacy
     research: 'Building codes, permits, best practices, and safety information',
     design: 'Step-by-step plan, materials list, tool requirements, and timeline',
     sourcing: 'Real store prices, inventory check, and optimized shopping list',
-    report: 'Comprehensive project report with all details assembled',
   };
 
   const isActive = phase.status === 'running';

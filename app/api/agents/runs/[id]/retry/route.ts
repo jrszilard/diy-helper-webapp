@@ -5,16 +5,22 @@ import { logger } from '@/lib/logger';
 import { CancellationError } from '@/lib/agents/runner';
 import { isCancelled, clearCancellation } from '@/lib/agents/cancellation';
 import { updatePhaseStatus, updateRunPhase, savePhaseResult } from '@/lib/agents/db-helpers';
+// Legacy phase runners (for old 4-phase runs)
 import { runResearchPhase } from '@/lib/agents/phases/research';
 import { runDesignPhase } from '@/lib/agents/phases/design';
 import { runSourcingPhase } from '@/lib/agents/phases/sourcing';
 import { runReportPhase } from '@/lib/agents/phases/report';
+// New phase runners (for 2-phase runs)
+import { runPlanPhase } from '@/lib/agents/phases/plan';
+import { buildReport } from '@/lib/agents/phases/report-builder';
+import { prefetchInventory } from '@/lib/agents/inventory-prefetch';
 import type {
   AgentContext, AgentStreamEvent, AgentPhase, AgentPhaseRecord, TokenUsage,
-  ResearchOutput, DesignOutput, SourcingOutput,
+  ResearchOutput, DesignOutput, SourcingOutput, PlanOutput,
 } from '@/lib/agents/types';
 
-const PHASE_ORDER: AgentPhase[] = ['research', 'design', 'sourcing', 'report'];
+const LEGACY_PHASE_ORDER: AgentPhase[] = ['research', 'design', 'sourcing', 'report'];
+const NEW_PHASE_ORDER: AgentPhase[] = ['plan', 'report'];
 
 // Sonnet pricing: $3/M input, $15/M output
 const INPUT_COST_PER_TOKEN = 3 / 1_000_000;
@@ -70,6 +76,11 @@ export async function POST(
       ));
     }
 
+    // Detect legacy vs new run based on phase names present in DB
+    const phaseNames = new Set((phases as AgentPhaseRecord[]).map(p => p.phase));
+    const isLegacyRun = phaseNames.has('research') || phaseNames.has('design') || phaseNames.has('sourcing');
+    const phaseOrder = isLegacyRun ? LEGACY_PHASE_ORDER : NEW_PHASE_ORDER;
+
     // Reconstruct context from completed phases
     const context: AgentContext = {
       projectDescription: run.project_description,
@@ -95,13 +106,12 @@ export async function POST(
 
     // Find the resume point (first non-completed phase)
     let resumeIndex = 0;
-    for (let i = 0; i < PHASE_ORDER.length; i++) {
-      const phase = phaseMap.get(PHASE_ORDER[i]);
+    for (let i = 0; i < phaseOrder.length; i++) {
+      const phase = phaseMap.get(phaseOrder[i]);
       if (phase?.status === 'completed' && phase.output_data) {
         const output = phase.output_data as Record<string, unknown>;
-        // Strip _tokenUsage metadata before restoring to context
         const { _tokenUsage, ...cleanOutput } = output;
-        switch (PHASE_ORDER[i]) {
+        switch (phaseOrder[i]) {
           case 'research':
             context.research = cleanOutput as unknown as ResearchOutput;
             break;
@@ -111,6 +121,9 @@ export async function POST(
           case 'sourcing':
             context.sourcing = cleanOutput as unknown as SourcingOutput;
             break;
+          case 'plan':
+            context.plan = cleanOutput as unknown as PlanOutput;
+            break;
         }
         resumeIndex = i + 1;
       } else {
@@ -118,7 +131,7 @@ export async function POST(
       }
     }
 
-    if (resumeIndex >= PHASE_ORDER.length) {
+    if (resumeIndex >= phaseOrder.length) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'All phases already completed' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
@@ -137,11 +150,13 @@ export async function POST(
       .eq('id', runId);
 
     // Reset failed/pending phases from resume point onwards
-    for (let i = resumeIndex; i < PHASE_ORDER.length; i++) {
-      await updatePhaseStatus(auth, runId, PHASE_ORDER[i], 'pending');
+    for (let i = resumeIndex; i < phaseOrder.length; i++) {
+      await updatePhaseStatus(auth, runId, phaseOrder[i], 'pending');
     }
 
-    logger.info('Agent run retry started', { runId, resumeFrom: PHASE_ORDER[resumeIndex] });
+    logger.info('Agent run retry started', {
+      runId, resumeFrom: phaseOrder[resumeIndex], isLegacyRun,
+    });
 
     const checkCancelled = () => isCancelled(runId);
 
@@ -161,52 +176,107 @@ export async function POST(
         }, 15_000);
 
         // Send progress for already-completed phases
+        const progressPerPhase = Math.floor(100 / phaseOrder.length);
         for (let i = 0; i < resumeIndex; i++) {
           sendEvent({
             type: 'agent_progress',
             runId,
-            phase: PHASE_ORDER[i],
+            phase: phaseOrder[i],
             phaseStatus: 'completed',
-            message: `${PHASE_ORDER[i].charAt(0).toUpperCase() + PHASE_ORDER[i].slice(1)} phase complete (previous run)`,
-            overallProgress: (i + 1) * 25,
+            message: `${phaseOrder[i].charAt(0).toUpperCase() + phaseOrder[i].slice(1)} phase complete (previous run)`,
+            overallProgress: (i + 1) * progressPerPhase,
           });
         }
 
-        let currentPhase = PHASE_ORDER[resumeIndex];
+        let currentPhase = phaseOrder[resumeIndex];
         const phaseTokenUsage: TokenUsage[] = [];
 
         try {
-          // Run remaining phases
-          for (let i = resumeIndex; i < PHASE_ORDER.length; i++) {
-            currentPhase = PHASE_ORDER[i];
+          if (isLegacyRun) {
+            // ── Legacy 4-phase pipeline ──
+            for (let i = resumeIndex; i < phaseOrder.length; i++) {
+              currentPhase = phaseOrder[i];
+              if (checkCancelled()) throw new CancellationError();
 
-            if (checkCancelled()) throw new CancellationError();
+              await updatePhaseStatus(auth, runId, currentPhase, 'running');
+              await updateRunPhase(auth, runId, currentPhase);
 
-            await updatePhaseStatus(auth, runId, currentPhase, 'running');
-            await updateRunPhase(auth, runId, currentPhase);
+              let result;
+              switch (currentPhase) {
+                case 'research':
+                  result = await runResearchPhase(context, auth, sendEvent, checkCancelled);
+                  context.research = result.output;
+                  break;
+                case 'design':
+                  result = await runDesignPhase(context, auth, sendEvent, checkCancelled);
+                  context.design = result.output;
+                  break;
+                case 'sourcing':
+                  result = await runSourcingPhase(context, auth, sendEvent, checkCancelled);
+                  context.sourcing = result.output;
+                  break;
+                case 'report':
+                  result = await runReportPhase(context, auth, sendEvent, checkCancelled);
+                  context.report = result.output;
+                  break;
+              }
 
-            let result;
-            switch (currentPhase) {
-              case 'research':
-                result = await runResearchPhase(context, auth, sendEvent, checkCancelled);
-                context.research = result.output;
-                break;
-              case 'design':
-                result = await runDesignPhase(context, auth, sendEvent, checkCancelled);
-                context.design = result.output;
-                break;
-              case 'sourcing':
-                result = await runSourcingPhase(context, auth, sendEvent, checkCancelled);
-                context.sourcing = result.output;
-                break;
-              case 'report':
-                result = await runReportPhase(context, auth, sendEvent, checkCancelled);
-                context.report = result.output;
-                break;
+              phaseTokenUsage.push(result!.tokenUsage);
+              await savePhaseResult(auth, runId, currentPhase, result!);
             }
+          } else {
+            // ── New 2-phase pipeline ──
+            for (let i = resumeIndex; i < phaseOrder.length; i++) {
+              currentPhase = phaseOrder[i];
+              if (checkCancelled()) throw new CancellationError();
 
-            phaseTokenUsage.push(result!.tokenUsage);
-            await savePhaseResult(auth, runId, currentPhase, result!);
+              await updatePhaseStatus(auth, runId, currentPhase, 'running');
+              await updateRunPhase(auth, runId, currentPhase);
+
+              if (currentPhase === 'plan') {
+                const inventoryData = await prefetchInventory(auth);
+                const planResult = await runPlanPhase(context, auth, sendEvent, inventoryData, checkCancelled);
+                context.plan = planResult.output;
+                context.inventoryData = inventoryData ?? undefined;
+                phaseTokenUsage.push(planResult.tokenUsage);
+                await savePhaseResult(auth, runId, 'plan', planResult);
+              } else if (currentPhase === 'report') {
+                sendEvent({
+                  type: 'agent_progress',
+                  runId,
+                  phase: 'report',
+                  phaseStatus: 'started',
+                  message: 'Building report...',
+                  overallProgress: 85,
+                });
+
+                const reportStartTime = Date.now();
+                const reportOutput = buildReport({
+                  plan: context.plan!,
+                  projectDescription: context.projectDescription,
+                  location: context.location,
+                  preferences: context.preferences,
+                });
+                context.report = reportOutput;
+
+                await savePhaseResult(auth, runId, 'report', {
+                  output: reportOutput as unknown as Record<string, unknown>,
+                  toolCalls: [],
+                  durationMs: Date.now() - reportStartTime,
+                  tokenUsage: { inputTokens: 0, outputTokens: 0 },
+                });
+                phaseTokenUsage.push({ inputTokens: 0, outputTokens: 0 });
+
+                sendEvent({
+                  type: 'agent_progress',
+                  runId,
+                  phase: 'report',
+                  phaseStatus: 'completed',
+                  message: 'Report complete',
+                  overallProgress: 100,
+                });
+              }
+            }
           }
 
           // Save the final report
@@ -262,9 +332,9 @@ export async function POST(
 
           if (isCancellation) {
             logger.info('Agent retry cancelled', { runId, phase: currentPhase });
-            const currentIdx = PHASE_ORDER.indexOf(currentPhase);
-            for (let i = currentIdx; i < PHASE_ORDER.length; i++) {
-              await updatePhaseStatus(auth, runId, PHASE_ORDER[i], 'skipped');
+            const currentIdx = phaseOrder.indexOf(currentPhase);
+            for (let i = currentIdx; i < phaseOrder.length; i++) {
+              await updatePhaseStatus(auth, runId, phaseOrder[i], 'skipped');
             }
             await auth.supabaseClient
               .from('agent_runs')
@@ -322,5 +392,5 @@ export async function OPTIONS(req: NextRequest) {
 }
 
 export const runtime = 'nodejs';
-export const maxDuration = 300;
+export const maxDuration = 300; // Legacy runs may still need more time
 export const dynamic = 'force-dynamic';
