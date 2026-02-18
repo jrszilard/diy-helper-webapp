@@ -255,19 +255,16 @@ function MarkdownContent({ content, isPrint = false }: { content: string; isPrin
   return (
     <div className={`prose prose-sm max-w-none
       ${isPrint
-        ? 'prose-headings:text-black prose-p:text-black prose-strong:text-black prose-li:text-black prose-a:text-black'
-        : `prose-headings:text-[#3E2723] prose-headings:font-bold
-           prose-p:text-[#5A4A3B] prose-p:leading-relaxed
-           prose-strong:text-[#3E2723]
-           prose-li:text-[#5A4A3B]
-           prose-a:text-[#5D7B93] prose-a:no-underline hover:prose-a:underline`
+        ? '[&_*]:!text-black'
+        : `prose-headings:font-bold prose-p:leading-relaxed
+           [&_a]:!text-[#5D7B93] prose-a:no-underline hover:prose-a:underline`
       }
       prose-table:border-collapse
       ${isPrint
-        ? 'prose-th:bg-gray-100 prose-th:text-black prose-th:p-2 prose-th:border prose-th:border-gray-300 prose-td:p-2 prose-td:border prose-td:border-gray-300 prose-td:text-black'
-        : 'prose-th:bg-[#F5F0E6] prose-th:text-[#3E2723] prose-th:p-2 prose-th:border prose-th:border-[#D4C8B8] prose-td:p-2 prose-td:border prose-td:border-[#D4C8B8] prose-td:text-[#5A4A3B]'
+        ? 'prose-th:bg-gray-100 prose-th:p-2 prose-th:border prose-th:border-gray-300 prose-td:p-2 prose-td:border prose-td:border-gray-300'
+        : 'prose-th:bg-[#F5F0E6] prose-th:p-2 prose-th:border prose-th:border-[#D4C8B8] prose-td:p-2 prose-td:border prose-td:border-[#D4C8B8]'
       }
-      print:prose-p:text-black print:prose-li:text-black
+      print:[&_*]:!text-black
     `}>
       <ReactMarkdown
         components={{
