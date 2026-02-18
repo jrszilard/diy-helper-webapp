@@ -255,7 +255,12 @@ export async function runPhase(options: RunPhaseOptions): Promise<PhaseResult> {
       messages.push({ role: 'user', content: `You ran out of output space. Call ${outputToolName} now with the structured data. Be concise.` });
     } else {
       messages.push({ role: 'assistant', content: assistantContent });
-      messages.push({ role: 'user', content: toolResults });
+      // After real tool calls return, nudge the model to call the output tool
+      const userContent: Array<{ type: 'tool_result'; tool_use_id: string; content: string } | { type: 'text'; text: string }> = [...toolResults];
+      if (realToolBlocks.length > 0 && loopCount >= 1) {
+        userContent.push({ type: 'text', text: `Now call ${outputToolName} with the complete structured data. Be concise.` });
+      }
+      messages.push({ role: 'user', content: userContent });
     }
 
     sendEvent({
@@ -280,6 +285,9 @@ export async function runPhase(options: RunPhaseOptions): Promise<PhaseResult> {
         system: systemPrompt,
         tools: allTools,
         messages,
+        // Force tool use on follow-ups — prevents the model from writing
+        // pages of explanatory text before calling the output tool
+        tool_choice: { type: 'any' },
       }),
       { maxRetries: 2, baseDelayMs: 1000, shouldRetry: shouldRetryAnthropic }
     );

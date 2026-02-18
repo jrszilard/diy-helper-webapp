@@ -208,7 +208,7 @@ IMPORTANT: You have exactly 2 turns — one for searches, one for submit_plan_re
     overallProgressRange: 85,
     maxToolLoops: 3,
     timeoutMs: 90_000,
-    maxTokens: 8192,
+    maxTokens: 4096,
     checkCancelled,
   });
 
