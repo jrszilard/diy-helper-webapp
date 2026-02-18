@@ -263,9 +263,9 @@ export async function runPhase(options: RunPhaseOptions): Promise<PhaseResult> {
       runId,
       phase,
       phaseStatus: 'thinking',
-      message: `Analyzing ${phase} results...`,
+      message: getThinkingMessage(phase, loopCount),
       overallProgress: Math.round(
-        overallProgressBase + overallProgressRange * 0.8
+        overallProgressBase + overallProgressRange * (0.6 + loopCount * 0.1)
       ),
     });
 
@@ -350,6 +350,15 @@ export async function runPhase(options: RunPhaseOptions): Promise<PhaseResult> {
 
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function getThinkingMessage(phase: string, loopCount: number): string {
+  if (phase === 'plan') {
+    if (loopCount <= 1) return 'Designing your project plan...';
+    return 'Finalizing plan details...';
+  }
+  if (loopCount <= 1) return `Analyzing ${phase} results...`;
+  return `Finalizing ${phase}...`;
 }
 
 function getToolProgressMessage(toolName: string): string {

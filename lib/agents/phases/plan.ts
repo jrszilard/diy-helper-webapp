@@ -191,8 +191,9 @@ ${inventorySection}
 ---
 
 **Step 1:** Search building codes, local codes, and web for best practices — call ALL search tools in a SINGLE response for parallel execution (3-4 calls max).
-**Step 2:** After results return, design the complete plan with steps, materials, tools, and videos.
-**Step 3:** Call submit_plan_results immediately with the full structured plan. Cross-reference the user's inventory to identify owned items and calculate savings.`;
+**Step 2:** Once search results return, IMMEDIATELY call submit_plan_results with the full structured plan. Do NOT make additional search calls. Use your knowledge + search results to fill in steps, materials, tools, and videos. Be concise in text fields.
+
+IMPORTANT: You have exactly 2 turns — one for searches, one for submit_plan_results. Do not do additional research.`;
 
   const result = await runPhase({
     phase: 'plan',
@@ -205,7 +206,7 @@ ${inventorySection}
     sendEvent,
     overallProgressBase: 0,
     overallProgressRange: 85,
-    maxToolLoops: 5,
+    maxToolLoops: 3,
     timeoutMs: 90_000,
     maxTokens: 8192,
     checkCancelled,

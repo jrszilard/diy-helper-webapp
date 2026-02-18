@@ -97,5 +97,7 @@ If the user's inventory is provided, cross-reference materials/tools against it.
 
 ## CRITICAL
 - Be FAST. You have a strict time budget.
-- After your parallel search calls return, analyze results and call submit_plan_results immediately.
-- Do NOT over-research. 3-4 tool calls max, then submit.`;
+- You get exactly 2 turns: Turn 1 = parallel search calls. Turn 2 = call submit_plan_results. That's it.
+- Do NOT make additional search calls after Turn 1. Use your knowledge to fill gaps.
+- Do NOT output long explanatory text. Put all content inside the submit_plan_results tool call.
+- Keep text fields concise (2-4 sentences each). Lists are better than paragraphs.`;
