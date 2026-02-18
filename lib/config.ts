@@ -27,7 +27,7 @@ function envList(key: string, fallback: string[]): string[] {
 
 // ── Anthropic ────────────────────────────────────────────────────────────────
 export const anthropic = {
-  model: envString('ANTHROPIC_MODEL', 'claude-sonnet-4-5-20250929'),
+  model: envString('ANTHROPIC_MODEL', 'claude-sonnet-4-6'),
   maxTokens: envInt('ANTHROPIC_MAX_TOKENS', 4096),
 } as const;
 

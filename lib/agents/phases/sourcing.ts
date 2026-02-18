@@ -161,13 +161,12 @@ ${toolsTable}
 ---
 
 **Instructions:**
-1. First, check the user's inventory to see what they already own.
-2. For the most expensive/critical materials (top 5-8 items by price), search local stores for real prices.
-3. For cheaper commodity items, use the design phase estimates.
-4. Compile the optimized shopping list with store recommendations.
-5. Calculate total cost and savings from inventory.
+1. Check the user's inventory to see what they already own.
+2. Search local stores for ONLY the top 3-4 most expensive materials. Use ONE search per material — do not repeat searches.
+3. For all other items, use the design phase price estimates directly.
+4. Compile the shopping list and call submit_sourcing_results.
 
-Focus your store searches on the highest-value items. When done, call submit_sourcing_results.`;
+IMPORTANT: Be efficient. Do NOT search for every item individually. Only search the 3-4 highest-cost items. Use design estimates for everything else. Call submit_sourcing_results as soon as you have enough data.`;
 
   const result = await runPhase({
     phase: 'sourcing',
@@ -180,8 +179,8 @@ Focus your store searches on the highest-value items. When done, call submit_sou
     sendEvent,
     overallProgressBase: 50,
     overallProgressRange: 35,
-    maxToolLoops: 15, // more loops for many store searches
-    timeoutMs: 180_000, // 3 minutes for sourcing
+    maxToolLoops: 8,
+    timeoutMs: 90_000,
     checkCancelled,
   });
 

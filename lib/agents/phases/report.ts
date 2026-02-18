@@ -166,8 +166,8 @@ IMMEDIATELY call submit_report_results with exactly 5 sections (overview, plan, 
     sendEvent,
     overallProgressBase: 85,
     overallProgressRange: 15,
-    maxToolLoops: 3, // report shouldn't need many loops
-    timeoutMs: 120_000,
+    maxToolLoops: 2,
+    timeoutMs: 60_000,
     checkCancelled,
   });
 

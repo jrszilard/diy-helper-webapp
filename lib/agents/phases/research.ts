@@ -108,7 +108,7 @@ When done, call submit_research_results with your structured findings.`;
     sendEvent,
     overallProgressBase: 0,
     overallProgressRange: 25,
-    timeoutMs: 120_000,
+    timeoutMs: 90_000,
     checkCancelled,
   });
 
