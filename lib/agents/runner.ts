@@ -136,7 +136,7 @@ export async function runPhase(options: RunPhaseOptions): Promise<PhaseResult> {
 
   let loopCount = 0;
 
-  while (response.stop_reason === 'tool_use' && loopCount < maxToolLoops) {
+  while ((response.stop_reason === 'tool_use' || response.stop_reason === 'max_tokens') && loopCount < maxToolLoops) {
     // Check timeout
     if (Date.now() - startTime > timeoutMs) {
       logger.warn('Agent phase timeout', { phase, runId, elapsed: Date.now() - startTime });
@@ -248,8 +248,15 @@ export async function runPhase(options: RunPhaseOptions): Promise<PhaseResult> {
     // If we already got the structured output, no need to continue the loop
     if (structuredOutput) break;
 
-    messages.push({ role: 'assistant', content: assistantContent });
-    messages.push({ role: 'user', content: toolResults });
+    // If max_tokens was hit with no tool calls, the model ran out of space.
+    // Send the partial content back and nudge it to call the output tool.
+    if (realToolBlocks.length === 0 && outputToolBlocks.length === 0) {
+      messages.push({ role: 'assistant', content: response.content });
+      messages.push({ role: 'user', content: `You ran out of output space. Call ${outputToolName} now with the structured data. Be concise.` });
+    } else {
+      messages.push({ role: 'assistant', content: assistantContent });
+      messages.push({ role: 'user', content: toolResults });
+    }
 
     sendEvent({
       type: 'agent_progress',

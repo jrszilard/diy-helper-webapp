@@ -176,6 +176,7 @@ Based on this research, design a complete project plan with step-by-step instruc
     overallProgressRange: 25,
     maxToolLoops: 4,
     timeoutMs: 75_000,
+    maxTokens: 8192,
     checkCancelled,
   });
 
