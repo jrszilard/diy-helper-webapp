@@ -108,7 +108,7 @@ export default function LandingPage() {
             <GuidedBot />
           </div>
           {/* Skip link */}
-          <p className="text-center mt-4 text-sm text-[#7D6B5D]">
+          <p className="text-center mt-4 text-sm text-[#5C4D42]">
             Already know what you need?{' '}
             <Link href="/chat" className="text-[#C67B5C] hover:underline">
               Skip to full chat →

@@ -37,7 +37,7 @@ export default function LocationInput({ onSubmit }: LocationInputProps) {
           value={city}
           onChange={(e) => setCity(e.target.value)}
           placeholder="e.g., Austin"
-          className="w-full px-3 py-2.5 text-sm text-[#3E2723] placeholder-[#A89880] bg-[#FDFBF7] border border-[#D4C8B8] rounded-lg focus:outline-none focus:border-[#C67B5C]"
+          className="w-full px-3 py-2.5 text-sm text-[#3E2723] placeholder-[#7D6B5D] bg-[#FDFBF7] border border-[#D4C8B8] rounded-lg focus:outline-none focus:border-[#C67B5C]"
           autoFocus
         />
       </div>
@@ -60,7 +60,7 @@ export default function LocationInput({ onSubmit }: LocationInputProps) {
         className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors ${
           city.trim() && state
             ? 'bg-[#C67B5C] text-white hover:bg-[#A65D3F]'
-            : 'bg-[#E8DFD0] text-[#A89880] cursor-not-allowed'
+            : 'bg-[#E8DFD0] text-[#7D6B5D] cursor-not-allowed'
         }`}
       >
         Continue

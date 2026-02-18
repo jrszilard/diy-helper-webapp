@@ -36,12 +36,12 @@ export default function AgentProgress({
             <h2 className="text-lg font-bold text-[#3E2723]">
               {isCancelling ? 'Cancelling...' : 'Planning Your Project'}
             </h2>
-            <p className="text-sm text-[#7D6B5D]">
+            <p className="text-sm text-[#5C4D42]">
               {projectDescription.length > 80
                 ? projectDescription.slice(0, 80) + '...'
                 : projectDescription}
             </p>
-            <p className="text-xs text-[#8B7D6B] mt-0.5">{location}</p>
+            <p className="text-xs text-[#5C4D42] mt-0.5">{location}</p>
           </div>
           {(isRunning || isCancelling) && (
             <button
@@ -70,7 +70,7 @@ export default function AgentProgress({
             style={{ width: `${overallProgress}%` }}
           />
         </div>
-        <p className="text-xs text-[#7D6B5D] mt-1.5 text-right">
+        <p className="text-xs text-[#5C4D42] mt-1.5 text-right">
           {isCancelling ? 'Cancelling...' : `${overallProgress}% complete`}
         </p>
       </div>
@@ -87,7 +87,7 @@ export default function AgentProgress({
             <AlertCircle size={20} className="text-[#B8593B] flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="text-sm font-semibold text-[#B8593B]">Something went wrong</p>
-              <p className="text-sm text-[#7D6B5D] mt-1">{error}</p>
+              <p className="text-sm text-[#5C4D42] mt-1">{error}</p>
             </div>
           </div>
         )}
@@ -159,11 +159,11 @@ function PhaseCard({ phase, index }: { phase: PhaseProgress; index: number }) {
           {isComplete && <CheckCircle2 size={24} className="text-[#4A7C59]" />}
           {isActive && <Loader2 size={24} className="text-[#5D7B93] animate-spin" />}
           {isError && <AlertCircle size={24} className="text-[#B8593B]" />}
-          {isSkipped && <SkipForward size={24} className="text-[#8B7D6B]" />}
+          {isSkipped && <SkipForward size={24} className="text-[#7D6B5D]" />}
           {phase.status === 'pending' && (
             <div className="relative">
               <Circle size={24} className="text-[#D4C8B8]" />
-              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#8B7D6B]">
+              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#7D6B5D]">
                 {index + 1}
               </span>
             </div>
@@ -177,13 +177,13 @@ function PhaseCard({ phase, index }: { phase: PhaseProgress; index: number }) {
               isActive ? 'text-[#3E2723]' :
               isComplete ? 'text-[#4A7C59]' :
               isError ? 'text-[#B8593B]' :
-              isSkipped ? 'text-[#8B7D6B]' :
-              'text-[#7D6B5D]'
+              isSkipped ? 'text-[#7D6B5D]' :
+              'text-[#5C4D42]'
             }`}>
               Phase {index + 1}: {phaseLabels[phase.phase]}
             </h3>
             {isComplete && phase.durationMs && (
-              <span className="text-xs text-[#7D6B5D]">
+              <span className="text-xs text-[#5C4D42]">
                 {Math.round(phase.durationMs / 1000)}s
               </span>
             )}
@@ -193,15 +193,15 @@ function PhaseCard({ phase, index }: { phase: PhaseProgress; index: number }) {
               </span>
             )}
             {isSkipped && (
-              <span className="text-xs text-[#8B7D6B]">Skipped</span>
+              <span className="text-xs text-[#7D6B5D]">Skipped</span>
             )}
           </div>
 
           {/* Description or current activity */}
           <p className={`text-xs mt-0.5 ${
             isActive ? 'text-[#5D7B93]' :
-            isSkipped ? 'text-[#8B7D6B]' :
-            'text-[#8B7D6B]'
+            isSkipped ? 'text-[#7D6B5D]' :
+            'text-[#5C4D42]'
           }`}>
             {isActive ? phase.message : phaseDescriptions[phase.phase]}
           </p>

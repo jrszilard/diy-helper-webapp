@@ -50,7 +50,7 @@ export default function BotInput({ phase, onSend, disabled = false }: BotInputPr
         onKeyDown={handleKeyDown}
         placeholder={PLACEHOLDERS[phase]}
         disabled={disabled}
-        className="flex-1 px-4 py-3 text-sm text-[#3E2723] placeholder-[#A89880] bg-white border border-[#D4C8B8] rounded-xl focus:outline-none focus:border-[#C67B5C] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex-1 px-4 py-3 text-sm text-[#3E2723] placeholder-[#7D6B5D] bg-white border border-[#D4C8B8] rounded-xl focus:outline-none focus:border-[#C67B5C] disabled:opacity-50 disabled:cursor-not-allowed"
       />
       <button
         type="submit"
@@ -59,7 +59,7 @@ export default function BotInput({ phase, onSend, disabled = false }: BotInputPr
         className={`p-3 rounded-xl transition-all duration-200 ${
           text.trim() && !disabled
             ? 'bg-[#C67B5C] text-white shadow-sm hover:bg-[#A65D3F]'
-            : 'bg-[#E8DFD0] text-[#A89880] cursor-not-allowed'
+            : 'bg-[#E8DFD0] text-[#7D6B5D] cursor-not-allowed'
         }`}
       >
         <Send className="w-4 h-4" />

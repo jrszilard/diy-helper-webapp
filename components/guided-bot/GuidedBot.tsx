@@ -47,13 +47,16 @@ export default function GuidedBot() {
     }
   }, [bot.messages, bot.isTyping, agentRun.phases, agentRun.overallProgress]);
 
-  // Watch for pipeline completion — fetch report when ready
+  // Watch for pipeline completion — show report when ready
   useEffect(() => {
-    if (agentRun.reportId && !agentRun.report && !agentRun.isRunning) {
-      agentRun.fetchReport(agentRun.reportId);
+    if (agentRun.reportId && !agentRun.isRunning && bot.pipelineState === 'running') {
+      // Report may already be inline from SSE; fetch only if missing
+      if (!agentRun.report) {
+        agentRun.fetchReport(agentRun.reportId);
+      }
       bot.setPipelineComplete();
     }
-  }, [agentRun.reportId, agentRun.report, agentRun.isRunning]);
+  }, [agentRun.reportId, agentRun.report, agentRun.isRunning, bot.pipelineState]);
 
   const handleBuildPlan = async () => {
     const request = toAgentRequest(bot.gathered);
