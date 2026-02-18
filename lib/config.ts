@@ -53,6 +53,10 @@ export const rateLimits = {
     maxTokens: envInt('RATE_LIMIT_AGENTS_MAX', 5),
     refillRate: envFloat('RATE_LIMIT_AGENTS_REFILL', 5 / 3600),
   },
+  'guided-chat': {
+    maxTokens: envInt('RATE_LIMIT_GUIDED_CHAT_MAX', 20),
+    refillRate: envFloat('RATE_LIMIT_GUIDED_CHAT_REFILL', 20 / 60),
+  },
 } as const;
 
 // ── CORS ─────────────────────────────────────────────────────────────────────

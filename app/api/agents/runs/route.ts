@@ -38,12 +38,8 @@ export async function POST(req: NextRequest) {
   try {
     const auth = await getAuthFromRequest(req);
 
-    if (!auth.userId) {
-      return applyCorsHeaders(req, new Response(
-        JSON.stringify({ error: 'Authentication required. Please sign in to use the project planner.' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      ));
-    }
+    // Support anonymous users — assign a temp user_id for DB records
+    const effectiveUserId = auth.userId || `anon-${crypto.randomUUID()}`;
 
     if (!process.env.ANTHROPIC_API_KEY) {
       return applyCorsHeaders(req, new Response(
@@ -52,6 +48,7 @@ export async function POST(req: NextRequest) {
       ));
     }
 
+    // Rate limit by userId if authenticated, by IP if anonymous
     const rateLimitResult = checkRateLimit(req, auth.userId, 'agents');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
@@ -75,7 +72,7 @@ export async function POST(req: NextRequest) {
     const { data: run, error: runError } = await auth.supabaseClient
       .from('agent_runs')
       .insert({
-        user_id: auth.userId,
+        user_id: effectiveUserId,
         project_id: projectId || null,
         project_description: projectDescription,
         location_city: city,
@@ -112,7 +109,7 @@ export async function POST(req: NextRequest) {
       projectDescription,
       location: { city, state, zipCode },
       projectId: projectId || run.id,
-      userId: auth.userId,
+      userId: effectiveUserId,
       preferences: { budgetLevel, experienceLevel, timeframe },
     };
 
@@ -187,7 +184,7 @@ export async function POST(req: NextRequest) {
             .from('project_reports')
             .insert({
               run_id: run.id,
-              user_id: auth.userId,
+              user_id: effectiveUserId,
               project_id: projectId || null,
               title: context.report.title,
               sections: context.report.sections,
@@ -225,6 +222,8 @@ export async function POST(req: NextRequest) {
             reportId: report.id,
             summary: context.report.summary,
             totalCost: context.report.totalCost,
+            // Include full report so anon users can render without a separate fetch
+            report,
             apiCost: {
               totalTokens: totalInput + totalOutput,
               estimatedCost: Math.round(estimatedCost * 10000) / 10000,

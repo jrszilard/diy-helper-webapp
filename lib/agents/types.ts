@@ -172,6 +172,7 @@ export interface AgentCompleteEvent {
   reportId: string;
   summary: string;
   totalCost: number;
+  report?: ProjectReportRecord; // included for anon users who can't fetch separately
   apiCost?: { totalTokens: number; estimatedCost: number };
 }
 

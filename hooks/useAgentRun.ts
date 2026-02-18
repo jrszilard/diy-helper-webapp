@@ -99,6 +99,7 @@ export function useAgentRun() {
           isRunning: false,
           isCancelling: false,
           reportId: event.reportId,
+          report: event.report || prev.report,
           summary: event.summary,
           totalCost: event.totalCost,
           overallProgress: 100,
@@ -178,21 +179,18 @@ export function useAgentRun() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        setState(prev => ({
-          ...prev,
-          isRunning: false,
-          error: 'Please sign in to use the project planner.',
-        }));
-        return;
+
+      // Build headers — auth is optional (anon users can run the pipeline)
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
       }
 
       const response = await fetch('/api/agents/runs', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers,
         body: JSON.stringify(request),
         signal: abortRef.current.signal,
       });
@@ -264,11 +262,13 @@ export function useAgentRun() {
   const fetchReport = useCallback(async (reportId: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) return;
 
-      const response = await fetch(`/api/reports/${reportId}`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
+      const headers: Record<string, string> = {};
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const response = await fetch(`/api/reports/${reportId}`, { headers });
 
       if (response.ok) {
         const data = await response.json();
