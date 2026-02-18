@@ -246,7 +246,7 @@ export default function ChatInterface({
             </button>
           )}
           <button
-            onClick={planner.handleOpenIntake}
+            onClick={() => planner.handleOpenIntake(chat.input)}
             className="flex items-center gap-2 px-4 py-2 bg-[#5D7B93] text-white rounded-lg hover:bg-[#4A6578] transition-colors shadow-sm"
             title="AI agents will research, design, and price your project"
           >

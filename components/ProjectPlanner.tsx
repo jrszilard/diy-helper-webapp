@@ -20,6 +20,7 @@ export default function ProjectPlanner({ userId, onProjectCreated }: ProjectPlan
   const [runRequest, setRunRequest] = useState<StartAgentRunRequest | null>(null);
   const [appliedProjectId, setAppliedProjectId] = useState<string | null>(null);
   const [isApplying, setIsApplying] = useState(false);
+  const [initialDescription, setInitialDescription] = useState('');
 
   const agentRun = useAgentRun();
 
@@ -70,13 +71,14 @@ export default function ProjectPlanner({ userId, onProjectCreated }: ProjectPlan
     }
   }, [agentRun.reportId, agentRun.isRunning, view, agentRun.fetchReport]);
 
-  const handleOpenIntake = useCallback(() => {
+  const handleOpenIntake = useCallback((prefill?: string) => {
     if (!userId) {
       alert('Please sign in to use the project planner.');
       return;
     }
     agentRun.reset();
     setAppliedProjectId(null);
+    setInitialDescription(prefill?.trim() || '');
     setView('intake');
   }, [userId, agentRun]);
 
@@ -140,6 +142,7 @@ export default function ProjectPlanner({ userId, onProjectCreated }: ProjectPlan
               onClose={handleCloseIntake}
               onSubmit={handleSubmit}
               isRunning={agentRun.isRunning}
+              initialDescription={initialDescription}
             />
           );
 
