@@ -133,6 +133,7 @@ export default function GuidedBot() {
         <div className="min-h-[600px]">
           <ReportView
             report={agentRun.report}
+            isAuthenticated={isAuthenticated}
             onApplyToProject={() => {
               if (agentRun.reportId) {
                 agentRun.applyToProject(agentRun.reportId);

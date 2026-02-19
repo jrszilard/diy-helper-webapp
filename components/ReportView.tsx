@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import {
   FileText, Printer, FolderPlus, ArrowLeft, ExternalLink,
   Shield, Hammer, DollarSign, ShoppingCart, Video, Calendar,
-  ClipboardCopy, CheckCircle2, Share2, Link,
+  ClipboardCopy, CheckCircle2, Share2, Link, LogIn, X,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { ReportSection, ProjectReportRecord } from '@/lib/agents/types';
@@ -17,6 +17,7 @@ interface ReportViewProps {
   isApplying?: boolean;
   appliedProjectId?: string | null;
   isSharedView?: boolean;
+  isAuthenticated?: boolean;
 }
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
@@ -40,11 +41,13 @@ export default function ReportView({
   isApplying = false,
   appliedProjectId = null,
   isSharedView = false,
+  isAuthenticated = true,
 }: ReportViewProps) {
   const sections = (report.sections as ReportSection[]).sort((a, b) => a.order - b.order);
   const [activeTab, setActiveTab] = useState(sections[0]?.id || 'overview');
   const [copied, setCopied] = useState(false);
   const [shareStatus, setShareStatus] = useState<'idle' | 'sharing' | 'shared'>('idle');
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   const activeSection = sections.find(s => s.id === activeTab);
 
@@ -210,6 +213,35 @@ export default function ReportView({
         ))}
       </div>
 
+      {/* Login prompt overlay */}
+      {showLoginPrompt && (
+        <div className="bg-[#FDF8F3] border-t border-[#D4C8B8] p-4 print:hidden">
+          <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-[#3E2723]">Sign in to save your plan</p>
+              <p className="text-xs text-[#5C4D42] mt-0.5">
+                Create a free account to save this project, track materials, and access your plans anytime.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <a
+                href="/chat"
+                className="flex items-center gap-2 px-4 py-2 bg-[#C67B5C] text-white text-sm font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors whitespace-nowrap"
+              >
+                <LogIn size={16} />
+                Sign In
+              </a>
+              <button
+                onClick={() => setShowLoginPrompt(false)}
+                className="p-1.5 text-[#7D6B5D] hover:bg-[#E8E0D4] rounded-lg transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Action bar */}
       <div className="bg-[#FDFBF7] border-t border-[#D4C8B8] p-4 print:hidden">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
@@ -233,7 +265,13 @@ export default function ReportView({
             </div>
           ) : (
             <button
-              onClick={onApplyToProject}
+              onClick={() => {
+                if (!isAuthenticated) {
+                  setShowLoginPrompt(true);
+                } else {
+                  onApplyToProject();
+                }
+              }}
               disabled={isApplying}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white transition-colors shadow-md ${
                 isApplying
