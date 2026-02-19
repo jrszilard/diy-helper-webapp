@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { logger } from '@/lib/logger';
-import type { ReportSection, PricedMaterial } from '@/lib/agents/types';
+import type { ReportSection, PricedMaterial, DesignMaterial } from '@/lib/agents/types';
 
 // POST /api/reports/[id]/apply — Apply report materials to a project's shopping list
 export async function POST(
@@ -35,7 +35,7 @@ export async function POST(
       ));
     }
 
-    // Get the sourcing phase output for priced materials
+    // Try sourcing phase first (legacy pipeline), fall back to plan phase (new pipeline)
     const { data: sourcingPhase } = await auth.supabaseClient
       .from('agent_phases')
       .select('output_data')
@@ -43,8 +43,35 @@ export async function POST(
       .eq('phase', 'sourcing')
       .single();
 
+    let planPhase = null;
+    if (!sourcingPhase) {
+      const { data } = await auth.supabaseClient
+        .from('agent_phases')
+        .select('output_data')
+        .eq('run_id', report.run_id)
+        .eq('phase', 'plan')
+        .single();
+      planPhase = data;
+    }
+
     const body = await req.json().catch(() => ({}));
     let targetProjectId = body.projectId || report.project_id;
+
+    // Infer category from report title
+    const inferCategory = (title: string): string => {
+      const patterns: [string, RegExp][] = [
+        ['electrical', /outlet|wire|circuit|switch|light|fan|electrical|panel|breaker|socket|volt/i],
+        ['flooring', /tile|floor|carpet|laminate|hardwood|vinyl|grout/i],
+        ['plumbing', /pipe|faucet|toilet|sink|drain|shower|bath|plumb/i],
+        ['structural', /wall|beam|joist|foundation|drywall|frame|stud|ceiling/i],
+        ['painting', /paint|prime|stain|finish|coat|brush|roller/i],
+        ['outdoor', /deck|fence|patio|garden|landscap|yard|outdoor|pergola|shed/i],
+      ];
+      for (const [category, pattern] of patterns) {
+        if (pattern.test(title)) return category;
+      }
+      return 'other';
+    };
 
     // If no project exists, create one
     if (!targetProjectId) {
@@ -55,6 +82,7 @@ export async function POST(
           name: report.title,
           description: (report.sections as ReportSection[])
             .find((s: ReportSection) => s.type === 'overview')?.content?.slice(0, 500) || report.summary || '',
+          category: inferCategory(report.title),
         })
         .select()
         .single();
@@ -81,11 +109,14 @@ export async function POST(
         .eq('id', report.run_id);
     }
 
-    // Extract priced materials from the sourcing phase
+    // Extract materials — try legacy sourcing phase first, then new plan phase
     const sourcingData = sourcingPhase?.output_data as { pricedMaterials?: PricedMaterial[] } | null;
-    const materials = sourcingData?.pricedMaterials || [];
+    const pricedMaterials = sourcingData?.pricedMaterials || [];
 
-    if (materials.length === 0) {
+    const planData = planPhase?.output_data as { materials?: DesignMaterial[] } | null;
+    const designMaterials = planData?.materials || [];
+
+    if (pricedMaterials.length === 0 && designMaterials.length === 0) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'No materials found in report' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
@@ -93,17 +124,29 @@ export async function POST(
     }
 
     // Insert materials into shopping_list_items
-    const items = materials.map((m: PricedMaterial) => ({
-      project_id: targetProjectId,
-      user_id: auth.userId,
-      product_name: m.name,
-      quantity: parseInt(m.quantity) || 1,
-      category: m.category,
-      required: m.required,
-      price: m.bestPrice || m.estimatedPrice || null,
-      purchased: false,
-      notes: m.bestStore ? `Best price at ${m.bestStore}` : null,
-    }));
+    const items = pricedMaterials.length > 0
+      ? pricedMaterials.map((m: PricedMaterial) => ({
+          project_id: targetProjectId,
+          user_id: auth.userId,
+          product_name: m.name,
+          quantity: parseInt(m.quantity) || 1,
+          category: m.category,
+          required: m.required,
+          price: m.bestPrice || m.estimatedPrice || null,
+          purchased: false,
+          notes: m.bestStore ? `Best price at ${m.bestStore}` : null,
+        }))
+      : designMaterials.map((m: DesignMaterial) => ({
+          project_id: targetProjectId,
+          user_id: auth.userId,
+          product_name: m.name,
+          quantity: parseInt(m.quantity) || 1,
+          category: m.category,
+          required: m.required,
+          price: m.estimatedPrice || null,
+          purchased: false,
+          notes: m.notes || null,
+        }));
 
     const { error: insertError } = await auth.supabaseClient
       .from('shopping_list_items')

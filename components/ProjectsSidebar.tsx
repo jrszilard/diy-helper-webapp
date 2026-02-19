@@ -31,15 +31,15 @@ interface ProjectsSidebarProps {
 
 // Auto-categorize based on project name
 function categorizeProject(name: string): string {
-  const patterns: Record<string, RegExp> = {
-    electrical: /outlet|wire|circuit|switch|light|fan|electrical|panel|breaker|socket|volt/i,
-    plumbing: /pipe|faucet|toilet|sink|drain|water|shower|bath|plumb/i,
-    structural: /wall|beam|joist|foundation|drywall|frame|stud|ceiling/i,
-    flooring: /tile|floor|carpet|laminate|hardwood|vinyl|grout/i,
-    painting: /paint|prime|stain|finish|coat|brush|roller/i,
-    outdoor: /deck|fence|patio|garden|landscap|yard|outdoor|pergola|shed/i
-  };
-  for (const [category, pattern] of Object.entries(patterns)) {
+  const patterns: [string, RegExp][] = [
+    ['electrical', /outlet|wire|circuit|switch|light|fan|electrical|panel|breaker|socket|volt/i],
+    ['flooring', /tile|floor|carpet|laminate|hardwood|vinyl|grout/i],
+    ['plumbing', /pipe|faucet|toilet|sink|drain|shower|bath|plumb/i],
+    ['structural', /wall|beam|joist|foundation|drywall|frame|stud|ceiling/i],
+    ['painting', /paint|prime|stain|finish|coat|brush|roller/i],
+    ['outdoor', /deck|fence|patio|garden|landscap|yard|outdoor|pergola|shed/i],
+  ];
+  for (const [category, pattern] of patterns) {
     if (pattern.test(name)) return category;
   }
   return 'other';

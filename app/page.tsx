@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -16,9 +17,24 @@ import {
 import WhyDIYHelper from '@/components/WhyDIYHelper';
 import ProjectTemplates from '@/components/ProjectTemplates';
 import GuidedBot from '@/components/guided-bot/GuidedBot';
+import AuthButton from '@/components/AuthButton';
+import { supabase } from '@/lib/supabase';
 
 export default function LandingPage() {
   const router = useRouter();
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ? { id: session.user.id, email: session.user.email ?? undefined } : null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ? { id: session.user.id, email: session.user.email ?? undefined } : null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const features = [
     {
@@ -77,6 +93,7 @@ export default function LandingPage() {
               </span>
             </div>
             <div className="flex items-center gap-4">
+              <AuthButton user={user} />
               <Link
                 href="/chat"
                 className="hidden sm:flex items-center gap-2 text-[#D4C8B8] hover:text-white font-medium transition-colors"

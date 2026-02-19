@@ -12,8 +12,10 @@ import type { ReportSection, ProjectReportRecord } from '@/lib/agents/types';
 
 interface ReportViewProps {
   report: ProjectReportRecord;
-  onApplyToProject: () => void;
   onBack: () => void;
+  reportId?: string;
+  applyToProject?: (reportId: string) => Promise<{ success: boolean; projectId: string; itemCount: number; message: string } | null>;
+  onApplyToProject?: () => void;
   isApplying?: boolean;
   appliedProjectId?: string | null;
   isSharedView?: boolean;
@@ -36,10 +38,12 @@ const SECTION_ICONS: Record<string, React.ReactNode> = {
 
 export default function ReportView({
   report,
-  onApplyToProject,
   onBack,
-  isApplying = false,
-  appliedProjectId = null,
+  reportId,
+  applyToProject,
+  onApplyToProject,
+  isApplying: externalIsApplying = false,
+  appliedProjectId: externalAppliedProjectId = null,
   isSharedView = false,
   isAuthenticated = true,
 }: ReportViewProps) {
@@ -48,6 +52,33 @@ export default function ReportView({
   const [copied, setCopied] = useState(false);
   const [shareStatus, setShareStatus] = useState<'idle' | 'sharing' | 'shared'>('idle');
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+  // Self-contained save state
+  const [internalIsApplying, setInternalIsApplying] = useState(false);
+  const [internalAppliedProjectId, setInternalAppliedProjectId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; visible: boolean } | null>(null);
+
+  const isApplying = applyToProject ? internalIsApplying : externalIsApplying;
+  const appliedProjectId = applyToProject ? internalAppliedProjectId : externalAppliedProjectId;
+
+  const handleSave = useCallback(async () => {
+    if (!isAuthenticated) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    if (applyToProject && reportId) {
+      setInternalIsApplying(true);
+      const result = await applyToProject(reportId);
+      setInternalIsApplying(false);
+      if (result?.success) {
+        setInternalAppliedProjectId(result.projectId);
+        setToast({ message: `Saved ${result.itemCount} items to your project!`, visible: true });
+        setTimeout(() => setToast(null), 5000);
+      }
+    } else if (onApplyToProject) {
+      onApplyToProject();
+    }
+  }, [applyToProject, reportId, onApplyToProject, isAuthenticated]);
 
   const activeSection = sections.find(s => s.id === activeTab);
 
@@ -94,6 +125,17 @@ export default function ReportView({
 
   return (
     <div className="flex flex-col h-full bg-[#F5F0E6]">
+      {/* Save confirmation toast */}
+      {toast?.visible && (
+        <div className="fixed top-20 right-4 bg-[#4A7C59] text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 max-w-sm animate-slide-in">
+          <CheckCircle2 size={20} className="flex-shrink-0" />
+          <p className="font-medium text-sm">{toast.message}</p>
+          <button onClick={() => setToast(null)} className="ml-auto hover:opacity-80">
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-[#FDFBF7] border-b border-[#D4C8B8] p-4 print:hidden">
         <div className="flex items-center justify-between mb-2">
@@ -265,13 +307,7 @@ export default function ReportView({
             </div>
           ) : (
             <button
-              onClick={() => {
-                if (!isAuthenticated) {
-                  setShowLoginPrompt(true);
-                } else {
-                  onApplyToProject();
-                }
-              }}
+              onClick={handleSave}
               disabled={isApplying}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white transition-colors shadow-md ${
                 isApplying

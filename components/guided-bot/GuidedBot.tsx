@@ -134,11 +134,8 @@ export default function GuidedBot() {
           <ReportView
             report={agentRun.report}
             isAuthenticated={isAuthenticated}
-            onApplyToProject={() => {
-              if (agentRun.reportId) {
-                agentRun.applyToProject(agentRun.reportId);
-              }
-            }}
+            reportId={agentRun.reportId || undefined}
+            applyToProject={agentRun.applyToProject}
             onBack={() => {
               agentRun.reset();
               window.location.reload();
