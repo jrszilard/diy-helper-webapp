@@ -93,7 +93,7 @@ export default function LandingPage() {
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <AuthButton user={user} />
+              <AuthButton user={user} variant="dark" />
               <Link
                 href="/chat"
                 className="hidden sm:flex items-center gap-2 text-[#D4C8B8] hover:text-white font-medium transition-colors"
