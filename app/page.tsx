@@ -17,11 +17,14 @@ import {
   Award,
   CheckCircle,
   DollarSign,
+  Star,
+  Home,
 } from 'lucide-react';
 import WhyDIYHelper from '@/components/WhyDIYHelper';
 import ProjectTemplates from '@/components/ProjectTemplates';
 import GuidedBot from '@/components/guided-bot/GuidedBot';
 import AuthButton from '@/components/AuthButton';
+import ExpertBar from '@/components/ExpertBar';
 import { supabase } from '@/lib/supabase';
 
 export default function LandingPage() {
@@ -122,6 +125,9 @@ export default function LandingPage() {
         </div>
       </nav>
 
+      {/* Expert Bar */}
+      <ExpertBar user={user} />
+
       {/* Hero Section with Guided Bot */}
       <section className="relative pt-12 sm:pt-20 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Blueprint corner markers */}
@@ -148,7 +154,7 @@ export default function LandingPage() {
       <section className="py-4 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="bg-[#FDFBF7] rounded-2xl py-6 px-8 shadow-lg border border-[#E8DFD0]">
-            <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-16 text-[#7D6B5D]">
+            <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-12 text-[#7D6B5D]">
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-[#3E2723]">Free</span>
                 <span className="text-sm">to use</span>
@@ -162,6 +168,83 @@ export default function LandingPage() {
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-[#3E2723]">No signup</span>
                 <span className="text-sm">required</span>
+              </div>
+              <div className="h-8 w-px bg-[#D4C8B8] hidden sm:block" />
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-[#3E2723]">Verified</span>
+                <span className="text-sm">experts</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Two-Sided Value Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="content-card">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
+                One platform, two ways to win
+              </h2>
+              <p className="text-lg text-[#5C4D42] max-w-2xl mx-auto">
+                Whether you&apos;re tackling a project or sharing your trade knowledge
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-6">
+              {/* For Homeowners */}
+              <div className="bg-white rounded-2xl p-6 border border-[#E8DFD0] hover:border-[#C67B5C] transition-all duration-300 hover:shadow-lg">
+                <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-[#5D7B93] to-[#4A6275] mb-4 shadow-lg">
+                  <Home className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-[#3E2723] mb-4">Get your project done right</h3>
+                <ul className="space-y-3 mb-6">
+                  {[
+                    'AI-powered project plans with local building codes',
+                    'Smart shopping lists with real store prices',
+                    'Expert help when you get stuck',
+                  ].map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-sm text-[#5C4D42]">
+                      <CheckCircle className="w-4 h-4 text-[#4A7C59] mt-0.5 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/chat"
+                  className="inline-flex items-center gap-2 bg-[#5D7B93] text-white px-5 py-2.5 rounded-xl hover:bg-[#4A6275] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
+                >
+                  <span>Start My Project</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+
+              {/* For Trade Professionals */}
+              <div className="bg-white rounded-2xl p-6 border border-[#E8DFD0] hover:border-[#D4A574] transition-all duration-300 hover:shadow-lg">
+                <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-[#D4A574] to-[#C6943E] mb-4 shadow-lg">
+                  <Award className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-[#3E2723] mb-4">Turn your expertise into income</h3>
+                <ul className="space-y-3 mb-6">
+                  {[
+                    'Answer DIY questions and get paid per response',
+                    'Set your own rates and schedule',
+                    'Build your reputation with verified reviews',
+                  ].map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-sm text-[#5C4D42]">
+                      <CheckCircle className="w-4 h-4 text-[#4A7C59] mt-0.5 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/experts/register"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-[#D4A574] to-[#C6943E] text-white px-5 py-2.5 rounded-xl hover:from-[#C6943E] hover:to-[#B8860B] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
+                >
+                  <span>Start Earning</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
               </div>
             </div>
           </div>
@@ -184,7 +267,7 @@ export default function LandingPage() {
                 Everything you need to DIY with confidence
               </h2>
               <p className="text-lg text-[#5C4D42] max-w-2xl mx-auto">
-                From planning to purchasing, we've got you covered
+                From planning to purchasing, we&apos;ve got you covered
               </p>
             </div>
 
@@ -239,14 +322,14 @@ export default function LandingPage() {
               {/* User message */}
               <div className="flex justify-end">
                 <div className="bg-[#C67B5C] text-white rounded-2xl rounded-br-md px-5 py-3 max-w-[85%]">
-                  <p>What size wire do I need for a 20-amp kitchen circuit that's 35 feet from the panel?</p>
+                  <p>What size wire do I need for a 20-amp kitchen circuit that&apos;s 35 feet from the panel?</p>
                 </div>
               </div>
 
               {/* Assistant message */}
               <div className="flex justify-start">
                 <div className="bg-[#5C4D42] rounded-2xl rounded-bl-md px-5 py-4 max-w-[90%]">
-                  <p className="mb-4">For a 20-amp circuit at 35 feet, you'll need <span className="text-[#C67B5C] font-semibold">12-gauge wire</span> per NEC 210.19.</p>
+                  <p className="mb-4">For a 20-amp circuit at 35 feet, you&apos;ll need <span className="text-[#C67B5C] font-semibold">12-gauge wire</span> per NEC 210.19.</p>
 
                   {/* Product card */}
                   <div className="bg-[#4A3F35]/50 rounded-xl p-4 border border-[#6B5D4F]">
@@ -285,114 +368,85 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Workflow Section */}
+      {/* Expert Earnings Spotlight */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="content-card">
-            <div className="text-center mb-12">
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center gap-2 mb-4">
+                <Award className="w-5 h-5 text-[#C6943E]" />
+                <span className="text-sm font-medium text-[#C6943E] uppercase tracking-wider">Expert Spotlight</span>
+              </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
-                From question to completion
+                Experts on DIY Helper
               </h2>
               <p className="text-lg text-[#5C4D42]">
-                A streamlined workflow designed for DIYers
+                Real professionals. Real earnings.
               </p>
             </div>
 
-            <div className="grid sm:grid-cols-4 gap-8">
+            <div className="grid sm:grid-cols-2 gap-6 mb-10">
               {[
-                { step: "1", title: "Ask", desc: "Describe your project or ask a question", emoji: "💬" },
-                { step: "2", title: "Learn", desc: "Get codes, tutorials, and expert guidance", emoji: "📚" },
-                { step: "3", title: "Plan", desc: "Generate a complete materials list", emoji: "📋" },
-                { step: "4", title: "Shop", desc: "Find the best prices at local stores", emoji: "🛒" }
-              ].map((item, idx) => (
-                <div key={idx} className="relative text-center">
-                  {idx < 3 && (
-                    <div className="hidden sm:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-[#C67B5C] to-transparent" />
-                  )}
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl text-3xl mb-4 border border-[#E8DFD0] shadow-sm">
-                    {item.emoji}
+                {
+                  name: 'Mike T.',
+                  trade: 'Licensed Electrician',
+                  location: 'Portland, OR',
+                  quote: 'I answer 5-6 questions a week during downtime between jobs. Easy extra income doing what I already know.',
+                  earnings: '$2,400',
+                  period: '/mo avg',
+                  rating: '4.9',
+                  reviews: '47',
+                },
+                {
+                  name: 'Sarah K.',
+                  trade: 'Master Plumber',
+                  location: 'Austin, TX',
+                  quote: 'I do a couple video consultations a week. DIYers love getting real-time help, and the pay is great.',
+                  earnings: '$1,800',
+                  period: '/mo avg',
+                  rating: '4.8',
+                  reviews: '32',
+                },
+              ].map((expert, idx) => (
+                <div key={idx} className="bg-white rounded-2xl p-6 border border-[#E8DFD0]">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#D4A574] to-[#C6943E] flex items-center justify-center text-white font-bold text-lg">
+                      {expert.name[0]}
+                    </div>
+                    <div>
+                      <p className="font-bold text-[#3E2723]">{expert.name}</p>
+                      <p className="text-sm text-[#7D6B5D]">{expert.trade} · {expert.location}</p>
+                    </div>
                   </div>
-                  <div className="text-xs font-bold text-[#C67B5C] mb-1">STEP {item.step}</div>
-                  <h3 className="text-lg font-bold text-[#3E2723] mb-1">{item.title}</h3>
-                  <p className="text-sm text-[#5C4D42]">{item.desc}</p>
+                  <p className="text-sm text-[#5C4D42] italic mb-4 leading-relaxed">
+                    &ldquo;{expert.quote}&rdquo;
+                  </p>
+                  <div className="flex items-center gap-4 pt-4 border-t border-[#E8DFD0]">
+                    <div>
+                      <span className="text-xl font-bold text-[#3E2723]">{expert.earnings}</span>
+                      <span className="text-sm text-[#7D6B5D]">{expert.period}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 text-[#C6943E] fill-[#C6943E]" />
+                      <span className="font-bold text-[#3E2723]">{expert.rating}</span>
+                      <span className="text-sm text-[#7D6B5D]">({expert.reviews} reviews)</span>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Expert Marketplace Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-5xl mx-auto">
-          <div className="content-card">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 mb-4">
-                <Users className="w-5 h-5 text-[#5D7B93]" />
-                <span className="text-sm font-medium text-[#5D7B93] uppercase tracking-wider">Expert Marketplace</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
-                Get help from real pros — or become one
-              </h2>
-              <p className="text-lg text-[#5C4D42] max-w-2xl mx-auto">
-                Connect with verified trade professionals or share your own expertise
+            <div className="text-center">
+              <Link
+                href="/experts/register"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-[#D4A574] to-[#C6943E] text-white px-6 py-3 rounded-xl hover:from-[#C6943E] hover:to-[#B8860B] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
+              >
+                <span>Become an Expert</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <p className="mt-3 text-sm text-[#7D6B5D]">
+                Free to join — start earning within days
               </p>
-            </div>
-
-            <div className="grid sm:grid-cols-2 gap-6">
-              {/* For DIYers */}
-              <div className="bg-white rounded-2xl p-6 border border-[#E8DFD0] hover:border-[#C67B5C] transition-all duration-300 hover:shadow-lg">
-                <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-[#5D7B93] to-[#4A6275] mb-4 shadow-lg">
-                  <Users className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-[#3E2723] mb-4">Get Expert Help</h3>
-                <ul className="space-y-3 mb-6">
-                  {[
-                    'Ask questions and get verified answers',
-                    'Browse experts by specialty and location',
-                    'Video consultations for tricky projects',
-                  ].map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm text-[#5C4D42]">
-                      <CheckCircle className="w-4 h-4 text-[#4A7C59] mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/experts"
-                  className="inline-flex items-center gap-2 bg-[#5D7B93] text-white px-5 py-2.5 rounded-xl hover:bg-[#4A6275] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
-                >
-                  <span>Find an Expert</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-
-              {/* For Professionals */}
-              <div className="bg-white rounded-2xl p-6 border border-[#E8DFD0] hover:border-[#C67B5C] transition-all duration-300 hover:shadow-lg">
-                <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-[#C67B5C] to-[#A65D3F] mb-4 shadow-lg">
-                  <Award className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-[#3E2723] mb-4">Share Your Expertise</h3>
-                <ul className="space-y-3 mb-6">
-                  {[
-                    'Earn money answering DIY questions',
-                    'Build your reputation with verified reviews',
-                    'Set your own rates and availability',
-                  ].map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm text-[#5C4D42]">
-                      <CheckCircle className="w-4 h-4 text-[#4A7C59] mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/experts/register"
-                  className="inline-flex items-center gap-2 bg-[#C67B5C] text-white px-5 py-2.5 rounded-xl hover:bg-[#A65D3F] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
-                >
-                  <span>Become an Expert</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
             </div>
           </div>
         </div>
@@ -415,76 +469,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Become an Expert Banner */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#4A3F35] text-white relative overflow-hidden">
-        {/* Blueprint pattern overlay */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: '40px 40px'
-          }} />
-        </div>
-
-        <div className="relative max-w-5xl mx-auto">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-[#C67B5C] to-[#A65D3F] rounded-2xl mb-4 shadow-lg">
-              <Award className="w-7 h-7 text-white" />
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Are you a trade professional?
-            </h2>
-            <p className="text-lg text-[#D4C8B8] max-w-2xl mx-auto">
-              Join DIY Helper as a verified expert. Help homeowners with their projects and earn money on your own schedule.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-3 gap-6 mb-10">
-            {[
-              {
-                icon: DollarSign,
-                title: 'Earn on Your Terms',
-                desc: 'Set your own rates. Get paid for answering questions and providing video consultations.',
-              },
-              {
-                icon: Award,
-                title: 'Build Your Reputation',
-                desc: 'Earn verified reviews from real homeowners. Stand out in your trade and local area.',
-              },
-              {
-                icon: Users,
-                title: 'Grow Your Client Base',
-                desc: 'Connect with DIYers who need professional help. Turn advice into real business leads.',
-              },
-            ].map((item, idx) => (
-              <div key={idx} className="bg-[#5C4D42]/50 rounded-2xl p-6 border border-[#6B5D4F] text-center">
-                <div className="inline-flex p-3 rounded-xl bg-[#C67B5C]/20 mb-4">
-                  <item.icon className="w-6 h-6 text-[#C67B5C]" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">{item.title}</h3>
-                <p className="text-sm text-[#D4C8B8] leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Link
-              href="/experts/register"
-              className="inline-flex items-center gap-3 bg-white text-[#3E2723] px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#F5F0E6] transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
-            >
-              <span>Become an Expert</span>
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-            <p className="mt-4 text-sm text-[#A89880]">
-              Free to sign up — start earning within days
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA */}
+      {/* Final CTA — Dual */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
           <div className="relative bg-gradient-to-br from-[#C67B5C] via-[#B8593B] to-[#A65D3F] rounded-3xl p-8 sm:p-12 text-center text-white overflow-hidden">
@@ -503,18 +488,27 @@ export default function LandingPage() {
 
             <div className="relative">
               <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                Ready to start your project?
+                Ready to get started?
               </h2>
               <p className="text-lg text-white/90 mb-8 max-w-xl mx-auto">
-                Get expert guidance in seconds. No signup, no hassle—just answers.
+                Whether you&apos;re tackling a project or sharing your expertise
               </p>
-              <Link
-                href="/chat"
-                className="inline-flex items-center gap-3 bg-white text-[#3E2723] px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#F5F0E6] transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
-              >
-                <span>Start Building</span>
-                <ArrowRight className="w-5 h-5" />
-              </Link>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="/chat"
+                  className="inline-flex items-center gap-3 bg-white text-[#3E2723] px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#F5F0E6] transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
+                >
+                  <span>Start My Project</span>
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+                <Link
+                  href="/experts/register"
+                  className="inline-flex items-center gap-3 bg-white/15 text-white border-2 border-white/40 px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/25 transition-all hover:-translate-y-0.5"
+                >
+                  <span>Become an Expert</span>
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -532,7 +526,7 @@ export default function LandingPage() {
                 <span className="font-bold text-[#3E2723]">DIY Helper</span>
               </div>
               <p className="text-sm text-[#5C4D42]">
-                Built for DIYers, by DIYers. Powered by Claude AI.
+                Built for DIYers and the pros who help them. Powered by Claude AI.
               </p>
             </div>
           </div>
