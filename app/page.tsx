@@ -16,6 +16,7 @@ import {
   Users,
   Award,
   CheckCircle,
+  DollarSign,
 } from 'lucide-react';
 import WhyDIYHelper from '@/components/WhyDIYHelper';
 import ProjectTemplates from '@/components/ProjectTemplates';
@@ -410,6 +411,75 @@ export default function LandingPage() {
               </p>
             </div>
             <ProjectTemplates variant="grid" maxItems={6} />
+          </div>
+        </div>
+      </section>
+
+      {/* Become an Expert Banner */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#4A3F35] text-white relative overflow-hidden">
+        {/* Blueprint pattern overlay */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `
+              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px'
+          }} />
+        </div>
+
+        <div className="relative max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-[#C67B5C] to-[#A65D3F] rounded-2xl mb-4 shadow-lg">
+              <Award className="w-7 h-7 text-white" />
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              Are you a trade professional?
+            </h2>
+            <p className="text-lg text-[#D4C8B8] max-w-2xl mx-auto">
+              Join DIY Helper as a verified expert. Help homeowners with their projects and earn money on your own schedule.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-3 gap-6 mb-10">
+            {[
+              {
+                icon: DollarSign,
+                title: 'Earn on Your Terms',
+                desc: 'Set your own rates. Get paid for answering questions and providing video consultations.',
+              },
+              {
+                icon: Award,
+                title: 'Build Your Reputation',
+                desc: 'Earn verified reviews from real homeowners. Stand out in your trade and local area.',
+              },
+              {
+                icon: Users,
+                title: 'Grow Your Client Base',
+                desc: 'Connect with DIYers who need professional help. Turn advice into real business leads.',
+              },
+            ].map((item, idx) => (
+              <div key={idx} className="bg-[#5C4D42]/50 rounded-2xl p-6 border border-[#6B5D4F] text-center">
+                <div className="inline-flex p-3 rounded-xl bg-[#C67B5C]/20 mb-4">
+                  <item.icon className="w-6 h-6 text-[#C67B5C]" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">{item.title}</h3>
+                <p className="text-sm text-[#D4C8B8] leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link
+              href="/experts/register"
+              className="inline-flex items-center gap-3 bg-white text-[#3E2723] px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#F5F0E6] transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
+            >
+              <span>Become an Expert</span>
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <p className="mt-4 text-sm text-[#A89880]">
+              Free to sign up — start earning within days
+            </p>
           </div>
         </div>
       </section>
