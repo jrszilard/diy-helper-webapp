@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 import type { ReportSection, PricedMaterial, DesignMaterial } from '@/lib/agents/types';
 
@@ -17,6 +18,14 @@ export async function POST(
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Authentication required' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
+    const rateLimitResult = checkRateLimit(req, auth.userId, 'agents');
+    if (!rateLimitResult.allowed) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimitResult.retryAfter) } }
       ));
     }
 
@@ -90,7 +99,7 @@ export async function POST(
       if (projectError || !project) {
         logger.error('Failed to create project', projectError);
         return applyCorsHeaders(req, new Response(
-          JSON.stringify({ error: 'Failed to create project', details: projectError?.message || projectError }),
+          JSON.stringify({ error: 'Failed to create project' }),
           { status: 500, headers: { 'Content-Type': 'application/json' } }
         ));
       }

@@ -2,6 +2,7 @@
 // Used by both the main POST route and the retry endpoint.
 
 import { AuthResult } from '@/lib/auth';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AgentPhase } from './types';
 
 export async function updatePhaseStatus(
@@ -10,8 +11,7 @@ export async function updatePhaseStatus(
   phase: AgentPhase,
   status: string,
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const client = auth.supabaseClient as any;
+  const client = auth.supabaseClient as SupabaseClient;
   await client
     .from('agent_phases')
     .update({ status, started_at: status === 'running' ? new Date().toISOString() : undefined })
@@ -24,8 +24,7 @@ export async function updateRunPhase(
   runId: string,
   phase: AgentPhase,
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const client = auth.supabaseClient as any;
+  const client = auth.supabaseClient as SupabaseClient;
   await client
     .from('agent_runs')
     .update({ current_phase: phase })
@@ -45,8 +44,7 @@ export async function savePhaseResult(
   phase: AgentPhase,
   result: PhaseResultData,
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const client = auth.supabaseClient as any;
+  const client = auth.supabaseClient as SupabaseClient;
 
   // Embed token usage inside output_data if available
   const outputData = result.tokenUsage

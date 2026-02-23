@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 
 // GET /api/agents/runs/[id] — Get run details with phases
@@ -16,6 +17,14 @@ export async function GET(
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Authentication required' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
+    const rateLimitResult = checkRateLimit(req, auth.userId, 'agents');
+    if (!rateLimitResult.allowed) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimitResult.retryAfter) } }
       ));
     }
 
@@ -48,7 +57,7 @@ export async function GET(
     if (run.status === 'completed') {
       const { data: reportData } = await auth.supabaseClient
         .from('project_reports')
-        .select('*')
+        .select('id, run_id, user_id, project_id, title, sections, summary, total_cost, share_enabled, created_at')
         .eq('run_id', id)
         .single();
       report = reportData;

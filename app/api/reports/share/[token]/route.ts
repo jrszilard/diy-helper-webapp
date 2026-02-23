@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 
 // GET /api/reports/share/[token] — Public report access (bypasses RLS)
@@ -9,6 +10,14 @@ export async function GET(
 ) {
   try {
     const { token } = await params;
+
+    const rateLimitResult = checkRateLimit(req, null, 'share-public');
+    if (!rateLimitResult.allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimitResult.retryAfter) } }
+      );
+    }
 
     if (!token || token.length < 10) {
       return new Response(

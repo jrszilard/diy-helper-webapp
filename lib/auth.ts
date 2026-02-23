@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { NextRequest } from 'next/server';
+import { logger } from '@/lib/logger';
 
 export interface AuthResult {
   userId: string | null;
@@ -48,7 +49,7 @@ export async function getAuthFromRequest(req: NextRequest): Promise<AuthResult> 
     const { data: { user }, error } = await userClient.auth.getUser(token);
 
     if (error || !user) {
-      // Invalid token — treat as guest
+      logger.warn('Invalid auth token', { error: error?.message });
       return {
         userId: null,
         isAuthenticated: false,
@@ -61,8 +62,8 @@ export async function getAuthFromRequest(req: NextRequest): Promise<AuthResult> 
       isAuthenticated: true,
       supabaseClient: userClient,
     };
-  } catch {
-    // Any error — treat as guest
+  } catch (error) {
+    logger.warn('Auth verification error', { error: error instanceof Error ? error.message : 'unknown' });
     return {
       userId: null,
       isAuthenticated: false,

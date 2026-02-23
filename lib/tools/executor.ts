@@ -222,11 +222,12 @@ async function handleDetectOwnedItems(input: Record<string, unknown>, auth: Auth
         .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
         .join(' ');
 
+      const escapedName = normalizedName.replace(/%/g, '\\%').replace(/_/g, '\\_');
       const { data: existingData } = await auth.supabaseClient
         .from('user_inventory')
         .select('id, item_name')
         .eq('user_id', userId)
-        .ilike('item_name', normalizedName);
+        .ilike('item_name', escapedName);
 
       if (existingData && existingData.length > 0) {
         existingItems.push(item.name);

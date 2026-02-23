@@ -6,7 +6,13 @@ export const ChatRequestSchema = z.object({
     .array(
       z.object({
         role: z.enum(['user', 'assistant']),
-        content: z.union([z.string(), z.array(z.any())]),
+        content: z.union([z.string(), z.array(z.object({
+          type: z.string().max(50),
+          text: z.string().max(100000).optional(),
+          source: z.record(z.string(), z.unknown()).optional(),
+          tool_use_id: z.string().max(200).optional(),
+          content: z.string().max(100000).optional(),
+        }).passthrough())]),
       })
     )
     .max(500, 'History too long')
@@ -49,7 +55,7 @@ export const CreateConversationSchema = z.object({
 export const AddMessageSchema = z.object({
   role: z.enum(['user', 'assistant']),
   content: z.string().min(1, 'Content is required').max(100000, 'Content too long'),
-  metadata: z.record(z.string(), z.any()).optional(),
+  metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])).optional(),
 });
 
 export const UpdateConversationSchema = z.object({

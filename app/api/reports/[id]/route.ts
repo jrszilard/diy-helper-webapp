@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 
 // GET /api/reports/[id] — Get full report
@@ -19,9 +20,17 @@ export async function GET(
       ));
     }
 
+    const rateLimitResult = checkRateLimit(req, auth.userId, 'agents');
+    if (!rateLimitResult.allowed) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimitResult.retryAfter) } }
+      ));
+    }
+
     const { data: report, error } = await auth.supabaseClient
       .from('project_reports')
-      .select('*')
+      .select('id, run_id, user_id, project_id, title, sections, summary, total_cost, share_enabled, created_at')
       .eq('id', id)
       .eq('user_id', auth.userId)
       .single();

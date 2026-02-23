@@ -45,16 +45,15 @@ export default function AuthButton({
     }
   };
 
-  // Get the proper redirect URL, avoiding chrome-extension:// URLs
   const getRedirectUrl = () => {
     const origin = window.location.origin;
-    // If we're in a chrome extension context, use a fallback
-    if (origin.startsWith('chrome-extension://')) {
-      // Fall back to the current host without the extension protocol
-      // or use a configured base URL
-      console.warn('Detected chrome-extension context, using alternative redirect');
-      return undefined; // Let Supabase use its default redirect
-    }
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'https://localhost:3000',
+    ];
+    const isAllowed = allowedOrigins.includes(origin) ||
+      /^https:\/\/diy-helper[a-z0-9-]*\.vercel\.app$/.test(origin);
+    if (!isAllowed) return undefined;
     return `${origin}/chat`;
   };
 

@@ -6,6 +6,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { parseRequestBody } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 import { CancellationError } from '@/lib/agents/runner';
+import { sanitizeReportRecord } from '@/lib/security';
 import { isCancelled, clearCancellation } from '@/lib/agents/cancellation';
 import { updatePhaseStatus, updateRunPhase, savePhaseResult } from '@/lib/agents/db-helpers';
 import { runPlanPhase } from '@/lib/agents/phases/plan';
@@ -37,8 +38,7 @@ export async function POST(req: NextRequest) {
   try {
     const auth = await getAuthFromRequest(req);
 
-    // Support anonymous users — assign a temp user_id for DB records
-    const effectiveUserId = auth.userId || `anon-${crypto.randomUUID()}`;
+    const isAuthenticated = !!auth.userId;
 
     if (!process.env.ANTHROPIC_API_KEY) {
       return applyCorsHeaders(req, new Response(
@@ -67,53 +67,61 @@ export async function POST(req: NextRequest) {
 
     const { projectDescription, city, state, zipCode, budgetLevel, experienceLevel, timeframe, projectId } = parsed.data;
 
-    // Create agent_run record
-    const { data: run, error: runError } = await auth.supabaseClient
-      .from('agent_runs')
-      .insert({
-        user_id: effectiveUserId,
-        project_id: projectId || null,
-        project_description: projectDescription,
-        location_city: city,
-        location_state: state,
-        location_zip: zipCode || null,
-        budget_level: budgetLevel,
-        experience_level: experienceLevel,
-        timeframe: timeframe || null,
-        status: 'running',
-        started_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
+    // For authenticated users, create DB records; for anonymous, use transient IDs
+    let runId: string;
 
-    if (runError || !run) {
-      logger.error('Failed to create agent run', runError, { requestId });
-      return applyCorsHeaders(req, new Response(
-        JSON.stringify({ error: 'Failed to start project planning. Please try again.' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      ));
+    if (isAuthenticated) {
+      const { data: run, error: runError } = await auth.supabaseClient
+        .from('agent_runs')
+        .insert({
+          user_id: auth.userId,
+          project_id: projectId || null,
+          project_description: projectDescription,
+          location_city: city,
+          location_state: state,
+          location_zip: zipCode || null,
+          budget_level: budgetLevel,
+          experience_level: experienceLevel,
+          timeframe: timeframe || null,
+          status: 'running',
+          started_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (runError || !run) {
+        logger.error('Failed to create agent run', runError, { requestId });
+        return applyCorsHeaders(req, new Response(
+          JSON.stringify({ error: 'Failed to start project planning. Please try again.' }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        ));
+      }
+
+      runId = run.id;
+
+      // Create phase records
+      for (const phase of PHASE_ORDER) {
+        await auth.supabaseClient
+          .from('agent_phases')
+          .insert({ run_id: runId, phase, status: 'pending' });
+      }
+    } else {
+      runId = crypto.randomUUID();
     }
 
-    // Create phase records
-    for (const phase of PHASE_ORDER) {
-      await auth.supabaseClient
-        .from('agent_phases')
-        .insert({ run_id: run.id, phase, status: 'pending' });
-    }
-
-    logger.info('Agent run started', { requestId, runId: run.id, projectDescription });
+    logger.info('Agent run started', { requestId, runId, projectDescription });
 
     // Build the context
     const context: AgentContext = {
       projectDescription,
       location: { city, state, zipCode },
-      projectId: projectId || run.id,
-      userId: effectiveUserId,
+      projectId: projectId || runId,
+      userId: auth.userId || runId,
       preferences: { budgetLevel, experienceLevel, timeframe },
     };
 
     // Cancellation check closure
-    const checkCancelled = () => isCancelled(run.id);
+    const checkCancelled = isAuthenticated ? () => isCancelled(runId) : () => false;
 
     // Stream the pipeline
     const stream = new ReadableStream({
@@ -122,7 +130,7 @@ export async function POST(req: NextRequest) {
           try {
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
           } catch (e) {
-            logger.error('Error sending agent SSE event', e, { requestId, runId: run.id });
+            logger.error('Error sending agent SSE event', e, { requestId, runId });
           }
         };
 
@@ -140,26 +148,26 @@ export async function POST(req: NextRequest) {
 
           // ── Phase 1: Plan (research + design in one Claude call) ──
           currentPhase = 'plan';
-          await updatePhaseStatus(auth, run.id, 'plan', 'running');
-          await updateRunPhase(auth, run.id, 'plan');
+          if (isAuthenticated) await updatePhaseStatus(auth, runId, 'plan', 'running');
+          if (isAuthenticated) await updateRunPhase(auth, runId, 'plan');
 
           const inventoryData = await inventoryPromise;
           const planResult = await runPlanPhase(context, auth, sendEvent, inventoryData, checkCancelled);
           context.plan = planResult.output;
           context.inventoryData = inventoryData ?? undefined;
           phaseTokenUsage.push(planResult.tokenUsage);
-          await savePhaseResult(auth, run.id, 'plan', planResult);
+          if (isAuthenticated) await savePhaseResult(auth, runId, 'plan', planResult);
 
           if (checkCancelled()) throw new CancellationError();
 
           // ── Phase 2: Report (deterministic TypeScript — no Claude call) ──
           currentPhase = 'report';
-          await updatePhaseStatus(auth, run.id, 'report', 'running');
-          await updateRunPhase(auth, run.id, 'report');
+          if (isAuthenticated) await updatePhaseStatus(auth, runId, 'report', 'running');
+          if (isAuthenticated) await updateRunPhase(auth, runId, 'report');
 
           sendEvent({
             type: 'agent_progress',
-            runId: run.id,
+            runId,
             phase: 'report',
             phaseStatus: 'started',
             message: 'Building report...',
@@ -176,7 +184,7 @@ export async function POST(req: NextRequest) {
           context.report = reportOutput;
 
           // Save report phase result (no token usage — deterministic)
-          await savePhaseResult(auth, run.id, 'report', {
+          if (isAuthenticated) await savePhaseResult(auth, runId, 'report', {
             output: reportOutput as unknown as Record<string, unknown>,
             toolCalls: [],
             durationMs: Date.now() - reportStartTime,
@@ -185,92 +193,116 @@ export async function POST(req: NextRequest) {
 
           sendEvent({
             type: 'agent_progress',
-            runId: run.id,
+            runId,
             phase: 'report',
             phaseStatus: 'completed',
             message: 'Report complete',
             overallProgress: 100,
           });
 
-          // Save the final report
-          const { data: report, error: reportError } = await auth.supabaseClient
-            .from('project_reports')
-            .insert({
-              run_id: run.id,
-              user_id: effectiveUserId,
-              project_id: projectId || null,
-              title: context.report.title,
-              sections: context.report.sections,
-              summary: context.report.summary,
-              total_cost: context.report.totalCost,
-            })
-            .select()
-            .single();
-
-          if (reportError) {
-            logger.error('Failed to save report', reportError, { runId: run.id });
-            throw new Error('Failed to save project report');
-          }
-
-          // Mark run as completed
-          await auth.supabaseClient
-            .from('agent_runs')
-            .update({ status: 'completed', completed_at: new Date().toISOString(), current_phase: null })
-            .eq('id', run.id);
-
           // Sum token usage across all phases
           const totalInput = phaseTokenUsage.reduce((sum, t) => sum + t.inputTokens, 0);
           const totalOutput = phaseTokenUsage.reduce((sum, t) => sum + t.outputTokens, 0);
           const estimatedCost = totalInput * INPUT_COST_PER_TOKEN + totalOutput * OUTPUT_COST_PER_TOKEN;
 
-          logger.info('Agent run completed', {
-            requestId, runId: run.id, reportId: report.id,
-            totalInputTokens: totalInput, totalOutputTokens: totalOutput,
-            estimatedCost: `$${estimatedCost.toFixed(4)}`,
-          });
+          if (isAuthenticated) {
+            // Save the final report
+            const { data: report, error: reportError } = await auth.supabaseClient
+              .from('project_reports')
+              .insert({
+                run_id: runId,
+                user_id: auth.userId,
+                project_id: projectId || null,
+                title: context.report.title,
+                sections: context.report.sections,
+                summary: context.report.summary,
+                total_cost: context.report.totalCost,
+              })
+              .select()
+              .single();
 
-          sendEvent({
-            type: 'agent_complete',
-            runId: run.id,
-            reportId: report.id,
-            summary: context.report.summary,
-            totalCost: context.report.totalCost,
-            report,
-            apiCost: {
-              totalTokens: totalInput + totalOutput,
-              estimatedCost: Math.round(estimatedCost * 10000) / 10000,
-            },
-          });
+            if (reportError) {
+              logger.error('Failed to save report', reportError, { runId });
+              throw new Error('Failed to save project report');
+            }
+
+            // Mark run as completed
+            await auth.supabaseClient
+              .from('agent_runs')
+              .update({ status: 'completed', completed_at: new Date().toISOString(), current_phase: null })
+              .eq('id', runId);
+
+            logger.info('Agent run completed', {
+              requestId, runId, reportId: report.id,
+              totalInputTokens: totalInput, totalOutputTokens: totalOutput,
+              estimatedCost: `$${estimatedCost.toFixed(4)}`,
+            });
+
+            sendEvent({
+              type: 'agent_complete',
+              runId,
+              reportId: report!.id,
+              summary: context.report!.summary,
+              totalCost: context.report!.totalCost,
+              report: sanitizeReportRecord(report!),
+              apiCost: {
+                totalTokens: totalInput + totalOutput,
+                estimatedCost: Math.round(estimatedCost * 10000) / 10000,
+              },
+            });
+          } else {
+            logger.info('Agent run completed (anonymous)', {
+              requestId, runId,
+              totalInputTokens: totalInput, totalOutputTokens: totalOutput,
+              estimatedCost: `$${estimatedCost.toFixed(4)}`,
+            });
+
+            sendEvent({
+              type: 'agent_complete',
+              runId,
+              summary: context.report!.summary,
+              totalCost: context.report!.totalCost,
+              report: context.report,
+              apiCost: {
+                totalTokens: totalInput + totalOutput,
+                estimatedCost: Math.round(estimatedCost * 10000) / 10000,
+              },
+            });
+          }
 
         } catch (error) {
           const isCancellation = error instanceof CancellationError;
 
           if (isCancellation) {
-            logger.info('Agent run cancelled', { requestId, runId: run.id, phase: currentPhase });
+            logger.info('Agent run cancelled', { requestId, runId, phase: currentPhase });
 
-            // Mark remaining phases as skipped
-            const currentIdx = PHASE_ORDER.indexOf(currentPhase);
-            for (let i = currentIdx; i < PHASE_ORDER.length; i++) {
-              await updatePhaseStatus(auth, run.id, PHASE_ORDER[i], 'skipped');
+            if (isAuthenticated) {
+              // Mark remaining phases as skipped
+              const currentIdx = PHASE_ORDER.indexOf(currentPhase);
+              for (let i = currentIdx; i < PHASE_ORDER.length; i++) {
+                await updatePhaseStatus(auth, runId, PHASE_ORDER[i], 'skipped');
+              }
+
+              await auth.supabaseClient
+                .from('agent_runs')
+                .update({ status: 'cancelled', cancelled_at: new Date().toISOString() })
+                .eq('id', runId);
             }
-
-            await auth.supabaseClient
-              .from('agent_runs')
-              .update({ status: 'cancelled', cancelled_at: new Date().toISOString() })
-              .eq('id', run.id);
           } else {
-            logger.error('Agent pipeline error', error, { requestId, runId: run.id });
+            logger.error('Agent pipeline error', error, { requestId, runId });
 
-            // Update current phase to error
-            await updatePhaseStatus(auth, run.id, currentPhase, 'error');
+            if (isAuthenticated) {
+              // Update current phase to error
+              await updatePhaseStatus(auth, runId, currentPhase, 'error');
 
-            await auth.supabaseClient
-              .from('agent_runs')
-              .update({
-                status: 'error',
-                error_message: error instanceof Error ? error.message : 'An unexpected error occurred',
-              })
-              .eq('id', run.id);
+              await auth.supabaseClient
+                .from('agent_runs')
+                .update({
+                  status: 'error',
+                  error_message: error instanceof Error ? error.message : 'An unexpected error occurred',
+                })
+                .eq('id', runId);
+            }
           }
 
           const errorMessage = isCancellation
@@ -279,14 +311,14 @@ export async function POST(req: NextRequest) {
 
           sendEvent({
             type: 'agent_error',
-            runId: run.id,
+            runId,
             phase: currentPhase,
             message: errorMessage,
             recoverable: !isCancellation,
           });
         } finally {
           clearInterval(heartbeat);
-          clearCancellation(run.id);
+          if (isAuthenticated) clearCancellation(runId);
           sendEvent({ type: 'done' });
           controller.close();
         }
@@ -318,6 +350,14 @@ export async function GET(req: NextRequest) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Authentication required' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
+    const rateLimitResult = checkRateLimit(req, auth.userId, 'agents');
+    if (!rateLimitResult.allowed) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimitResult.retryAfter) } }
       ));
     }
 

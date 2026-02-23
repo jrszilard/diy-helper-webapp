@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 
 // POST /api/reports/[id]/share — Generate a share link
@@ -19,6 +20,14 @@ export async function POST(
       ));
     }
 
+    const rateLimitResult = checkRateLimit(req, auth.userId, 'agents');
+    if (!rateLimitResult.allowed) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimitResult.retryAfter) } }
+      ));
+    }
+
     // Verify ownership
     const { data: report, error } = await auth.supabaseClient
       .from('project_reports')
@@ -34,7 +43,7 @@ export async function POST(
       ));
     }
 
-    // If already has a share token, return it
+    // If already has an active share token, return it
     if (report.share_token && report.share_enabled) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({
@@ -45,13 +54,14 @@ export async function POST(
       ));
     }
 
-    // Generate new share token
+    // Generate new share token (always rotate when re-enabling a disabled share)
     const shareToken = crypto.randomUUID();
 
     const { error: updateError } = await auth.supabaseClient
       .from('project_reports')
       .update({ share_token: shareToken, share_enabled: true })
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', auth.userId);
 
     if (updateError) {
       logger.error('Failed to generate share token', updateError, { reportId: id });

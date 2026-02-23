@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
 import { CancellationError } from '@/lib/agents/runner';
 import { isCancelled, clearCancellation } from '@/lib/agents/cancellation';
@@ -14,6 +15,7 @@ import { runReportPhase } from '@/lib/agents/phases/report';
 import { runPlanPhase } from '@/lib/agents/phases/plan';
 import { buildReport } from '@/lib/agents/phases/report-builder';
 import { prefetchInventory } from '@/lib/agents/inventory-prefetch';
+import { sanitizeReportRecord } from '@/lib/security';
 import type {
   AgentContext, AgentStreamEvent, AgentPhase, AgentPhaseRecord, TokenUsage,
   ResearchOutput, DesignOutput, SourcingOutput, PlanOutput,
@@ -36,15 +38,27 @@ export async function POST(
     const { id: runId } = await params;
     const auth = await getAuthFromRequest(req);
 
-    // Fetch the run — match by user_id if authenticated, otherwise just by id
-    let query = auth.supabaseClient
+    if (!auth.userId) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
+    const rateLimitResult = checkRateLimit(req, auth.userId, 'agents');
+    if (!rateLimitResult.allowed) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimitResult.retryAfter) } }
+      ));
+    }
+
+    // Fetch the run — always match by user_id for ownership check
+    const query = auth.supabaseClient
       .from('agent_runs')
       .select('*')
-      .eq('id', runId);
-
-    if (auth.userId) {
-      query = query.eq('user_id', auth.userId);
-    }
+      .eq('id', runId)
+      .eq('user_id', auth.userId);
 
     const { data: run, error: runError } = await query.single();
 
@@ -320,7 +334,7 @@ export async function POST(
             reportId: report.id,
             summary: context.report!.summary,
             totalCost: context.report!.totalCost,
-            report,
+            report: sanitizeReportRecord(report),
             apiCost: {
               totalTokens: totalInput + totalOutput,
               estimatedCost: Math.round(estimatedCost * 10000) / 10000,

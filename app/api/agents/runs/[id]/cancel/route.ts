@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { markCancelled } from '@/lib/agents/cancellation';
 import { logger } from '@/lib/logger';
 
@@ -16,6 +17,14 @@ export async function POST(
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Authentication required' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
+    const rateLimitResult = checkRateLimit(req, auth.userId, 'agents');
+    if (!rateLimitResult.allowed) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimitResult.retryAfter) } }
       ));
     }
 
