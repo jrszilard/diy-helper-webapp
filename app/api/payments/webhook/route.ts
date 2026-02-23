@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { stripeClient } from '@/lib/stripe';
+import { getStripeClient } from '@/lib/stripe';
 import { stripe as stripeConfig } from '@/lib/config';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { logger } from '@/lib/logger';
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     let event;
     try {
-      event = stripeClient.webhooks.constructEvent(
+      event = getStripeClient().webhooks.constructEvent(
         body,
         signature,
         stripeConfig.paymentWebhookSecret,

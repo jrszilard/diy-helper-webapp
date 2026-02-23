@@ -1,12 +1,20 @@
 import Stripe from 'stripe';
 import { stripe as stripeConfig } from '@/lib/config';
 
-const stripeClient = new Stripe(stripeConfig.secretKey);
+let _stripeClient: Stripe | null = null;
 
-export { stripeClient };
+export function getStripeClient(): Stripe {
+  if (!_stripeClient) {
+    if (!stripeConfig.secretKey) {
+      throw new Error('STRIPE_SECRET_KEY is not configured');
+    }
+    _stripeClient = new Stripe(stripeConfig.secretKey);
+  }
+  return _stripeClient;
+}
 
 export async function createConnectAccount(email: string): Promise<Stripe.Account> {
-  return stripeClient.accounts.create({
+  return getStripeClient().accounts.create({
     type: 'express',
     email,
     capabilities: {
@@ -17,7 +25,7 @@ export async function createConnectAccount(email: string): Promise<Stripe.Accoun
 }
 
 export async function createOnboardingLink(accountId: string, returnUrl: string): Promise<string> {
-  const link = await stripeClient.accountLinks.create({
+  const link = await getStripeClient().accountLinks.create({
     account: accountId,
     refresh_url: returnUrl,
     return_url: returnUrl,
@@ -34,7 +42,7 @@ export async function createCheckoutSession(params: {
   cancelUrl: string;
   metadata?: Record<string, string>;
 }): Promise<Stripe.Checkout.Session> {
-  return stripeClient.checkout.sessions.create({
+  return getStripeClient().checkout.sessions.create({
     mode: 'subscription',
     customer: params.customerId,
     customer_email: params.customerId ? undefined : params.customerEmail,
@@ -58,7 +66,7 @@ export async function createQAPaymentIntent(params: {
   customerEmail: string;
   metadata: Record<string, string>;
 }): Promise<Stripe.PaymentIntent> {
-  return stripeClient.paymentIntents.create({
+  return getStripeClient().paymentIntents.create({
     amount: params.amountCents,
     currency: 'usd',
     receipt_email: params.customerEmail,
@@ -72,7 +80,7 @@ export async function transferToExpert(params: {
   transferGroup?: string;
   metadata?: Record<string, string>;
 }): Promise<Stripe.Transfer> {
-  return stripeClient.transfers.create({
+  return getStripeClient().transfers.create({
     amount: params.amountCents,
     currency: 'usd',
     destination: params.destinationAccountId,
