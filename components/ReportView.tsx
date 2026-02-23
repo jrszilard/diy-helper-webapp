@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { ReportSection, ProjectReportRecord } from '@/lib/agents/types';
+import { sanitizeHref } from '@/lib/security';
+import ExpertHelpDropdown from '@/components/marketplace/ExpertHelpDropdown';
 
 interface ReportViewProps {
   report: ProjectReportRecord;
@@ -292,33 +294,42 @@ export default function ReportView({
               month: 'long', day: 'numeric', year: 'numeric',
             })}
           </p>
-          {isSharedView ? (
-            <a
-              href="/"
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white bg-[#C67B5C] hover:bg-[#A65D3F] transition-colors shadow-md"
-            >
-              <FolderPlus size={18} />
-              Create Your Own Project Plan
-            </a>
-          ) : appliedProjectId ? (
-            <div className="flex items-center gap-2 text-sm text-[#4A7C59] font-medium">
-              <CheckCircle2 size={18} />
-              Materials saved to project
-            </div>
-          ) : (
-            <button
-              onClick={handleSave}
-              disabled={isApplying}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white transition-colors shadow-md ${
-                isApplying
-                  ? 'bg-[#B0A696] cursor-not-allowed'
-                  : 'bg-[#C67B5C] hover:bg-[#A65D3F]'
-              }`}
-            >
-              <FolderPlus size={18} />
-              {isApplying ? 'Saving...' : 'Save to Project'}
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            {!isSharedView && report.id && (
+              <ExpertHelpDropdown
+                reportId={report.id}
+                totalCost={report.total_cost ?? undefined}
+                isAuthenticated={isAuthenticated}
+              />
+            )}
+            {isSharedView ? (
+              <a
+                href="/"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white bg-[#C67B5C] hover:bg-[#A65D3F] transition-colors shadow-md"
+              >
+                <FolderPlus size={18} />
+                Create Your Own Project Plan
+              </a>
+            ) : appliedProjectId ? (
+              <div className="flex items-center gap-2 text-sm text-[#4A7C59] font-medium">
+                <CheckCircle2 size={18} />
+                Materials saved to project
+              </div>
+            ) : (
+              <button
+                onClick={handleSave}
+                disabled={isApplying}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white transition-colors shadow-md ${
+                  isApplying
+                    ? 'bg-[#B0A696] cursor-not-allowed'
+                    : 'bg-[#C67B5C] hover:bg-[#A65D3F]'
+                }`}
+              >
+                <FolderPlus size={18} />
+                {isApplying ? 'Saving...' : 'Save to Project'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -348,7 +359,7 @@ function MarkdownContent({ content, isPrint = false }: { content: string; isPrin
         components={{
           a: ({ href, children, ...props }) => (
             <a
-              href={href}
+              href={sanitizeHref(href)}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1"

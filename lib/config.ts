@@ -61,6 +61,30 @@ export const rateLimits = {
     maxTokens: envInt('RATE_LIMIT_SHARE_PUBLIC_MAX', 30),
     refillRate: envFloat('RATE_LIMIT_SHARE_PUBLIC_REFILL', 30 / 60),
   },
+  usage: {
+    maxTokens: envInt('RATE_LIMIT_USAGE_MAX', 30),
+    refillRate: envFloat('RATE_LIMIT_USAGE_REFILL', 30 / 60),
+  },
+  subscriptions: {
+    maxTokens: envInt('RATE_LIMIT_SUBSCRIPTIONS_MAX', 10),
+    refillRate: envFloat('RATE_LIMIT_SUBSCRIPTIONS_REFILL', 10 / 60),
+  },
+  notifications: {
+    maxTokens: envInt('RATE_LIMIT_NOTIFICATIONS_MAX', 60),
+    refillRate: envFloat('RATE_LIMIT_NOTIFICATIONS_REFILL', 1),
+  },
+  experts: {
+    maxTokens: envInt('RATE_LIMIT_EXPERTS_MAX', 20),
+    refillRate: envFloat('RATE_LIMIT_EXPERTS_REFILL', 20 / 60),
+  },
+  marketplace: {
+    maxTokens: envInt('RATE_LIMIT_MARKETPLACE_MAX', 30),
+    refillRate: envFloat('RATE_LIMIT_MARKETPLACE_REFILL', 30 / 60),
+  },
+  messages: {
+    maxTokens: envInt('RATE_LIMIT_MESSAGES_MAX', 30),
+    refillRate: envFloat('RATE_LIMIT_MESSAGES_REFILL', 30 / 60),
+  },
 } as const;
 
 // ── CORS ─────────────────────────────────────────────────────────────────────
@@ -92,6 +116,23 @@ export const pruning = {
   maxSingleMessageChars: envInt('PRUNE_MAX_SINGLE_MSG_CHARS', 8000),
 } as const;
 
+// ── Freemium ────────────────────────────────────────────────────────────────
+export const freemium = {
+  freeReportsPerMonth: envInt('FREE_REPORTS_PER_MONTH', 5),
+  freeChatMessagesPerMonth: envInt('FREE_CHAT_MESSAGES_PER_MONTH', 30),
+  freeSavedProjects: envInt('FREE_SAVED_PROJECTS', 5),
+  proPriceCents: envInt('PRO_PRICE_CENTS', 999),
+} as const;
+
+// ── Stripe ──────────────────────────────────────────────────────────────────
+export const stripe = {
+  secretKey: envString('STRIPE_SECRET_KEY', ''),
+  publishableKey: envString('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY', ''),
+  connectWebhookSecret: envString('STRIPE_CONNECT_WEBHOOK_SECRET', ''),
+  paymentWebhookSecret: envString('STRIPE_PAYMENT_WEBHOOK_SECRET', ''),
+  subscriptionWebhookSecret: envString('STRIPE_SUBSCRIPTION_WEBHOOK_SECRET', ''),
+} as const;
+
 // Re-export everything as a single default for convenience
-const config = { anthropic, rateLimits, cors, storeSearch, streaming, pruning } as const;
+const config = { anthropic, rateLimits, cors, storeSearch, streaming, pruning, freemium, stripe } as const;
 export default config;

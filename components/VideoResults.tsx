@@ -42,7 +42,13 @@ export default function VideoResults({ videos, projectQuery }: VideoResultsProps
       </div>
       
       <div className="space-y-4">
-        {videos.map((video, index) => (
+        {videos.map((video, index) => {
+          // Validate video URL — must start with https://
+          if (!video.url || !video.url.startsWith('https://')) return null;
+          // Validate thumbnail — use null for invalid URLs
+          const safeThumbnail = video.thumbnail?.startsWith('https://') ? video.thumbnail : null;
+
+          return (
           <a
             key={index}
             href={video.url}
@@ -52,9 +58,9 @@ export default function VideoResults({ videos, projectQuery }: VideoResultsProps
           >
             {/* Thumbnail */}
             <div className="flex-shrink-0 w-48 h-28 bg-gray-200 rounded-lg overflow-hidden relative">
-              {video.thumbnail ? (
-                <img 
-                  src={video.thumbnail} 
+              {safeThumbnail ? (
+                <img
+                  src={safeThumbnail}
                   alt={video.title}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -113,7 +119,8 @@ export default function VideoResults({ videos, projectQuery }: VideoResultsProps
               </div>
             </div>
           </a>
-        ))}
+          );
+        })}
       </div>
       
       <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">

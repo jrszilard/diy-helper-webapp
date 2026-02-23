@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { sanitizeHref } from '@/lib/security';
 
 interface BotMessageProps {
   content: string;
@@ -28,7 +29,21 @@ export default function BotMessage({ content, children, animate = true }: BotMes
       <div className="max-w-[90%] sm:max-w-[85%]">
         <div className="bg-[#FDFBF7] border border-[#D4C8B8] rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
           <div className="prose prose-sm max-w-none prose-p:leading-relaxed [&_a]:!text-[#5D7B93]">
-            <ReactMarkdown>{content}</ReactMarkdown>
+            <ReactMarkdown
+              components={{
+                a: ({ href, children }) => (
+                  <a
+                    href={sanitizeHref(href)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {children}
+                  </a>
+                ),
+              }}
+            >
+              {content}
+            </ReactMarkdown>
           </div>
         </div>
         {children && (

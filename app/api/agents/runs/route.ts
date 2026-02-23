@@ -13,6 +13,7 @@ import { runPlanPhase } from '@/lib/agents/phases/plan';
 import { buildReport } from '@/lib/agents/phases/report-builder';
 import { prefetchInventory } from '@/lib/agents/inventory-prefetch';
 import type { AgentContext, AgentStreamEvent, AgentPhase, TokenUsage } from '@/lib/agents/types';
+import { checkUsageLimit, incrementUsage } from '@/lib/usage';
 
 const StartRunSchema = z.object({
   projectDescription: z.string().min(10, 'Please describe your project in more detail').max(2000),
@@ -54,6 +55,21 @@ export async function POST(req: NextRequest) {
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),
         { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimitResult.retryAfter) } }
       ));
+    }
+
+    // Check freemium usage limit for authenticated users
+    if (auth.userId) {
+      const usageCheck = await checkUsageLimit(auth.supabaseClient, auth.userId, 'report');
+      if (!usageCheck.allowed) {
+        return applyCorsHeaders(req, new Response(
+          JSON.stringify({
+            error: 'Monthly report limit reached. Upgrade to Pro for unlimited access.',
+            code: 'USAGE_LIMIT_EXCEEDED',
+            usage: usageCheck,
+          }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        ));
+      }
     }
 
     const body = await req.json();
@@ -225,6 +241,11 @@ export async function POST(req: NextRequest) {
               logger.error('Failed to save report', reportError, { runId });
               throw new Error('Failed to save project report');
             }
+
+            // Increment report usage counter
+            incrementUsage(auth.userId!, 'report').catch(err =>
+              logger.error('Failed to increment report usage', err, { runId })
+            );
 
             // Mark run as completed
             await auth.supabaseClient

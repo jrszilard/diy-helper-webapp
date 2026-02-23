@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Download, FileText, Printer, Copy, X, Check, Share2, FileDown } from 'lucide-react';
+import { escapeHtml } from '@/lib/security';
 
 interface ExportMaterial {
   product_name: string;
@@ -132,7 +133,7 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Shopping List - ${projectName}</title>
+          <title>Shopping List - ${escapeHtml(projectName)}</title>
           <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
             body {
@@ -244,7 +245,7 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
         </head>
         <body>
           <h1>Shopping List</h1>
-          <div class="subtitle">${projectName}</div>
+          <div class="subtitle">${escapeHtml(projectName)}</div>
 
           <div class="meta">
             <span>Date: ${new Date().toLocaleDateString()}</span>
@@ -254,11 +255,11 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
 
           ${Object.entries(groupedMaterials).map(([cat, items]) => `
             <div class="category">
-              <div class="category-header">${cat}</div>
+              <div class="category-header">${escapeHtml(cat)}</div>
               ${items.map(item => `
                 <div class="item">
                   <div class="checkbox ${item.purchased ? 'checked' : ''}"></div>
-                  <span class="item-name ${item.purchased ? 'purchased' : ''}">${item.product_name}</span>
+                  <span class="item-name ${item.purchased ? 'purchased' : ''}">${escapeHtml(item.product_name)}</span>
                   <span class="item-qty">Qty: ${item.quantity}</span>
                   <span class="item-price">${item.price ? '$' + (item.price * item.quantity).toFixed(2) : 'TBD'}</span>
                 </div>
@@ -298,7 +299,7 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Shopping List - ${projectName}</title>
+          <title>Shopping List - ${escapeHtml(projectName)}</title>
           <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
             body {
@@ -357,7 +358,7 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
             Select "Save as PDF" as the destination in the print dialog below.
           </div>
           <h1>Shopping List</h1>
-          <div class="subtitle">${projectName}</div>
+          <div class="subtitle">${escapeHtml(projectName)}</div>
           <div class="meta">
             <span>Date: ${new Date().toLocaleDateString()}</span>
             <span>Items: ${materials.length}</span>
@@ -365,11 +366,11 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
           </div>
           ${Object.entries(groupedMaterials).map(([cat, items]) => `
             <div class="category">
-              <div class="category-header">${cat}</div>
+              <div class="category-header">${escapeHtml(cat)}</div>
               ${items.map(item => `
                 <div class="item">
                   <div class="checkbox ${item.purchased ? 'checked' : ''}"></div>
-                  <span class="item-name ${item.purchased ? 'purchased' : ''}">${item.product_name}</span>
+                  <span class="item-name ${item.purchased ? 'purchased' : ''}">${escapeHtml(item.product_name)}</span>
                   <span class="item-qty">Qty: ${item.quantity}</span>
                   <span class="item-price">${item.price ? '$' + (item.price * item.quantity).toFixed(2) : 'TBD'}</span>
                 </div>

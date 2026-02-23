@@ -6,6 +6,7 @@ import VideoResults from './VideoResults';
 import ProgressIndicator, { ProgressStep } from './ProgressIndicator';
 import { RefreshCw } from 'lucide-react';
 import { ExtractedMaterials, Video } from '@/types';
+import { sanitizeHref } from '@/lib/security';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -119,7 +120,7 @@ const MarkdownComponents = (role: 'user' | 'assistant') => ({
   ),
   a: ({ children, href }: { children?: React.ReactNode; href?: string }) => (
     <a
-      href={href}
+      href={sanitizeHref(href)}
       className={`underline ${role === 'user' ? 'text-white hover:text-[#FFE0D0]' : 'text-[#5D7B93] hover:text-[#4A6275]'}`}
       target="_blank"
       rel="noopener noreferrer"

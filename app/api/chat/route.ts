@@ -13,6 +13,7 @@ import { executeTool } from '@/lib/tools/executor';
 import { StreamEvent } from '@/lib/tools/types';
 import { withRetry } from '@/lib/api-retry';
 import { logger } from '@/lib/logger';
+import { checkUsageLimit, incrementUsage } from '@/lib/usage';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
@@ -62,6 +63,21 @@ export async function POST(req: NextRequest) {
       ));
     }
 
+    // Check freemium usage limit for authenticated users
+    if (auth.userId) {
+      const usageCheck = await checkUsageLimit(auth.supabaseClient, auth.userId, 'chat_message');
+      if (!usageCheck.allowed) {
+        return applyCorsHeaders(req, new Response(
+          JSON.stringify({
+            error: 'Monthly chat message limit reached. Upgrade to Pro for unlimited access.',
+            code: 'USAGE_LIMIT_EXCEEDED',
+            usage: usageCheck,
+          }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        ));
+      }
+    }
+
     const body = await req.json();
 
     const parsed = parseRequestBody(ChatRequestSchema, body);
@@ -75,6 +91,13 @@ export async function POST(req: NextRequest) {
     const { message, history, streaming, conversationId: existingConversationId, image } = parsed.data;
 
     logger.info('Chat request', { requestId, streaming, historyLength: history.length, hasConversationId: !!existingConversationId, hasImage: !!image });
+
+    // Increment usage counter for authenticated users
+    if (auth.userId) {
+      incrementUsage(auth.userId, 'chat_message').catch(err =>
+        logger.error('Failed to increment chat usage', err, { requestId })
+      );
+    }
 
     const prunedHistory = pruneConversation(history);
 
@@ -304,12 +327,10 @@ export async function POST(req: NextRequest) {
     }));
 
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error('Chat API error', error, { requestId, duration: Date.now() - startTime });
     return applyCorsHeaders(req, new Response(
       JSON.stringify({
         error: 'Failed to process message',
-        details: errorMessage
       }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     ));

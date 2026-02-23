@@ -9,6 +9,7 @@ import { Home, Wrench, Menu, FolderOpen, ShoppingCart, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { guestStorage } from '@/lib/guestStorage';
 import AuthButton from '@/components/AuthButton';
+import NotificationBell from '@/components/NotificationBell';
 import InventoryPanel from '@/components/InventoryPanel';
 import { Package } from 'lucide-react';
 import { Project } from '@/types';
@@ -227,6 +228,7 @@ export default function ChatPage() {
                   externalShowAuth={showAuthModal}
                   onAuthToggle={setShowAuthModal}
                 />
+                <NotificationBell userId={user?.id} />
                 <button
                   onClick={() => setShowInventory(true)}
                   className="flex items-center gap-2 px-3 py-2 sm:px-4 bg-[#4A7C59] text-white rounded-lg hover:bg-[#2D5A3B] transition"

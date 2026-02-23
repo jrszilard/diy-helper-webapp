@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import type {
   AgentStreamEvent, AgentProgressEvent, AgentPhase,
-  StartAgentRunRequest, ProjectReportRecord,
+  StartAgentRunRequest, ProjectReportRecord, ReportOutput,
 } from '@/lib/agents/types';
 
 export interface PhaseProgress {
@@ -110,18 +110,44 @@ export function useAgentRun() {
         break;
       }
 
-      case 'agent_complete':
+      case 'agent_complete': {
+        // Normalize report: SSE may send a DB record (authenticated) or ReportOutput (anonymous)
+        let normalizedReport: ProjectReportRecord | null = null;
+        if (event.report) {
+          const r = event.report as Record<string, unknown>;
+          // If it has snake_case fields, it's a DB record; otherwise normalize from ReportOutput
+          if ('total_cost' in r) {
+            normalizedReport = r as unknown as ProjectReportRecord;
+          } else {
+            normalizedReport = {
+              id: (r.id as string) || event.runId,
+              run_id: event.runId,
+              user_id: '',
+              project_id: null,
+              title: r.title as string,
+              sections: r.sections as ProjectReportRecord['sections'],
+              summary: (r.summary as string) || null,
+              version: 1,
+              total_cost: (r.totalCost as number) || null,
+              share_token: null,
+              share_enabled: false,
+              created_at: (r.generatedAt as string) || new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            };
+          }
+        }
         setState(prev => ({
           ...prev,
           isRunning: false,
           isCancelling: false,
-          reportId: event.reportId,
-          report: event.report || prev.report,
+          reportId: event.reportId ?? null,
+          report: normalizedReport || prev.report,
           summary: event.summary,
           totalCost: event.totalCost,
           overallProgress: 100,
         }));
         break;
+      }
 
       case 'agent_error':
         setState(prev => ({

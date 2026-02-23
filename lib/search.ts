@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { isUrlSafe } from '@/lib/security';
 
 export interface BraveSearchResult {
   title: string;
@@ -142,6 +143,11 @@ export async function webSearchStructured(
 }
 
 export async function webFetch(url: string): Promise<string> {
+  if (!isUrlSafe(url)) {
+    logger.warn('Blocked unsafe URL in webFetch', { url: url.substring(0, 200) });
+    return 'Error: URL not allowed';
+  }
+
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
