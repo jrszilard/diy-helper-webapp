@@ -5,7 +5,7 @@ import ChatInterface from '@/components/ChatInterface';
 import ProjectsSidebar from '@/components/ProjectsSidebar';
 import ShoppingListView from '@/components/ShoppingListView';
 import Link from 'next/link';
-import { Home, Wrench, Menu, FolderOpen, ShoppingCart, X } from 'lucide-react';
+import { Home, Wrench, Menu, FolderOpen, ShoppingCart, X, Users } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { guestStorage } from '@/lib/guestStorage';
 import AuthButton from '@/components/AuthButton';
@@ -222,6 +222,10 @@ export default function ChatPage() {
                 <Link href="/" className="flex items-center gap-2 text-[#3E2723] hover:text-[#C67B5C] transition p-2 sm:p-0">
                   <Home className="w-5 h-5" />
                   <span className="hidden sm:inline font-medium">Home</span>
+                </Link>
+                <Link href="/experts" className="hidden sm:flex items-center gap-2 text-[#3E2723] hover:text-[#C67B5C] transition">
+                  <Users className="w-5 h-5" />
+                  <span className="hidden md:inline font-medium">Experts</span>
                 </Link>
                 <AuthButton
                   user={user}

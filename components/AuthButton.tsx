@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { User, LogOut, X, Mail, ChevronDown, FolderOpen } from 'lucide-react';
+import { User, LogOut, X, Mail, ChevronDown, FolderOpen, MessageSquare, Users, Award } from 'lucide-react';
+import Link from 'next/link';
 
 export default function AuthButton({
   user,
@@ -132,6 +133,30 @@ export default function AuthButton({
               <FolderOpen className="w-4 h-4 text-[#7D6B5D]" />
               My Projects
             </a>
+            <Link
+              href="/marketplace/qa"
+              className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#3E2723] hover:bg-[#F5F0E6] transition-colors"
+              onClick={() => setShowDropdown(false)}
+            >
+              <MessageSquare className="w-4 h-4 text-[#7D6B5D]" />
+              My Questions
+            </Link>
+            <Link
+              href="/experts"
+              className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#3E2723] hover:bg-[#F5F0E6] transition-colors"
+              onClick={() => setShowDropdown(false)}
+            >
+              <Users className="w-4 h-4 text-[#7D6B5D]" />
+              Find an Expert
+            </Link>
+            <Link
+              href="/experts/register"
+              className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#3E2723] hover:bg-[#F5F0E6] transition-colors"
+              onClick={() => setShowDropdown(false)}
+            >
+              <Award className="w-4 h-4 text-[#7D6B5D]" />
+              Become an Expert
+            </Link>
             <div className="border-t border-[#E8DFD0] my-1" />
             <button
               onClick={handleSignOut}
