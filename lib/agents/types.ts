@@ -215,10 +215,10 @@ export interface AgentProgressEvent {
 export interface AgentCompleteEvent {
   type: 'agent_complete';
   runId: string;
-  reportId: string;
+  reportId?: string;
   summary: string;
   totalCost: number;
-  report?: ProjectReportRecord; // included for anon users who can't fetch separately
+  report?: ProjectReportRecord | ReportOutput; // included for anon users who can't fetch separately
   apiCost?: { totalTokens: number; estimatedCost: number };
 }
 

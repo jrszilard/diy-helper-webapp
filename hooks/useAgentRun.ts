@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import type {
   AgentStreamEvent, AgentProgressEvent, AgentPhase,
-  StartAgentRunRequest, ProjectReportRecord,
+  StartAgentRunRequest, ProjectReportRecord, ReportOutput,
 } from '@/lib/agents/types';
 
 export interface PhaseProgress {
@@ -21,7 +21,7 @@ export interface AgentRunState {
   isCancelling: boolean;
   runId: string | null;
   reportId: string | null;
-  report: ProjectReportRecord | null;
+  report: ProjectReportRecord | ReportOutput | null;
   phases: PhaseProgress[];
   overallProgress: number;
   error: string | null;
@@ -115,7 +115,7 @@ export function useAgentRun() {
           ...prev,
           isRunning: false,
           isCancelling: false,
-          reportId: event.reportId,
+          reportId: event.reportId ?? null,
           report: event.report || prev.report,
           summary: event.summary,
           totalCost: event.totalCost,
