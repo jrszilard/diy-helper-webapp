@@ -240,6 +240,20 @@ body {
   }
 }
 
+/* Force dark text in prose blocks — overrides Tailwind prose grey defaults */
+.prose {
+  --tw-prose-body: #3E2723;
+  --tw-prose-headings: #3E2723;
+  --tw-prose-bold: #3E2723;
+  --tw-prose-counters: #5C4D42;
+  --tw-prose-bullets: #5C4D42;
+  --tw-prose-quotes: #3E2723;
+  --tw-prose-code: #3E2723;
+  --tw-prose-th-borders: #D4C8B8;
+  --tw-prose-td-borders: #D4C8B8;
+  color: #3E2723;
+}
+
 /* Line clamp utility */
 .line-clamp-2 {
   display: -webkit-box;

@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Package, X, Trash2, FolderPlus, MessageSquare } from 'lucide-react';
+import { Package, X, Trash2, FolderPlus, MessageSquare, Sparkles } from 'lucide-react';
 import ChatMessages from './ChatMessages';
 import ChatInput from './ChatInput';
 import SaveMaterialsDialog from './SaveMaterialsDialog';
 import ConversationList from './ConversationList';
+import ProjectPlanner from './ProjectPlanner';
 import { useChat } from '@/hooks/useChat';
 import { useProjectActions } from '@/hooks/useProjectActions';
 import type { Message } from '@/hooks/useChat';
@@ -31,6 +32,14 @@ export default function ChatInterface({
 
   const chat = useChat({ projectId, conversationId: undefined });
   const projectActions = useProjectActions({ userId });
+
+  const planner = ProjectPlanner({
+    userId,
+    onProjectCreated: (id) => {
+      setProjectId(id);
+      onProjectLinked?.(id);
+    },
+  });
 
   const saveToProject = useCallback(async (targetProjectId: string, isGuestProject: boolean = false) => {
     if (!chat.extractedMaterials) return;
@@ -236,6 +245,14 @@ export default function ChatInterface({
               <span className="hidden sm:inline">Save to Project</span>
             </button>
           )}
+          <button
+            onClick={() => planner.handleOpenIntake(chat.input)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#5D7B93] text-white rounded-lg hover:bg-[#4A6578] transition-colors shadow-sm"
+            title="AI agents will research, design, and price your project"
+          >
+            <Sparkles size={18} />
+            <span className="hidden sm:inline">Plan My Project</span>
+          </button>
           {onOpenInventory && (
             <button
               onClick={onOpenInventory}
@@ -249,32 +266,39 @@ export default function ChatInterface({
         </div>
       </div>
 
-      {/* Messages */}
-      <ChatMessages
-        messages={chat.messages}
-        streamingContent={chat.streamingContent}
-        isStreaming={chat.isStreaming}
-        progressSteps={chat.progressSteps}
-        failedMessage={chat.failedMessage}
-        onRetry={chat.handleRetry}
-        messagesEndRef={chat.messagesEndRef}
-      />
+      {/* Planner views (progress/report) replace the chat area when active */}
+      {planner.view === 'progress' || planner.view === 'report' ? (
+        planner.renderPlanner()
+      ) : (
+        <>
+          {/* Messages */}
+          <ChatMessages
+            messages={chat.messages}
+            streamingContent={chat.streamingContent}
+            isStreaming={chat.isStreaming}
+            progressSteps={chat.progressSteps}
+            failedMessage={chat.failedMessage}
+            onRetry={chat.handleRetry}
+            messagesEndRef={chat.messagesEndRef}
+          />
 
-      {/* Input area with banners */}
-      <ChatInput
-        input={chat.input}
-        onInputChange={chat.setInput}
-        onSend={chat.sendMessage}
-        isLoading={chat.isLoading}
-        showGoogleFallback={chat.showGoogleFallback}
-        onGoogleSearch={chat.handleGoogleSearch}
-        showMaterialsBanner={chat.showMaterialsBanner}
-        isAutoExtracting={chat.isAutoExtracting}
-        onAutoExtractMaterials={chat.handleAutoExtractMaterials}
-      />
+          {/* Input area with banners */}
+          <ChatInput
+            input={chat.input}
+            onInputChange={chat.setInput}
+            onSend={chat.sendMessage}
+            isLoading={chat.isLoading}
+            showGoogleFallback={chat.showGoogleFallback}
+            onGoogleSearch={chat.handleGoogleSearch}
+            showMaterialsBanner={chat.showMaterialsBanner}
+            isAutoExtracting={chat.isAutoExtracting}
+            onAutoExtractMaterials={chat.handleAutoExtractMaterials}
+          />
+        </>
+      )}
 
       {/* Floating Save to Project Banner */}
-      {chat.messages.length > 0 && !projectId && !chat.isLoading && (
+      {chat.messages.length > 0 && !projectId && !chat.isLoading && planner.view === 'idle' && (
         <div className="bg-gradient-to-r from-[#C67B5C] to-[#A65D3F] px-4 py-3 shadow-lg">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-white min-w-0">
@@ -333,6 +357,9 @@ export default function ChatInterface({
         onSelectConversation={handleSelectConversation}
         onNewChat={handleNewChat}
       />
+
+      {/* Agent Intake Form Modal (only renders when view is 'intake') */}
+      {planner.view === 'intake' && planner.renderPlanner()}
     </div>
   );
 }

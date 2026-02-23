@@ -69,20 +69,7 @@ export async function DELETE(
 
   const { id } = await params;
 
-  // Delete messages first (cascade), then conversation
-  const { error: messagesError } = await auth.supabaseClient
-    .from('conversation_messages')
-    .delete()
-    .eq('conversation_id', id);
-
-  if (messagesError) {
-    console.error('Error deleting conversation messages:', messagesError);
-    return applyCorsHeaders(req, new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    ));
-  }
-
+  // DB FK has ON DELETE CASCADE — messages are removed automatically
   const { error } = await auth.supabaseClient
     .from('conversations')
     .delete()

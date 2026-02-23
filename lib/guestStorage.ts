@@ -4,6 +4,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
 const GUEST_PROJECTS_KEY = 'diy-helper-guest-projects';
+const MAX_PROJECTS = 50;
+const MAX_MATERIALS_PER_PROJECT = 500;
 
 export interface GuestMaterial {
   id: string;
@@ -45,7 +47,16 @@ export const guestStorage = {
     try {
       const stored = localStorage.getItem(GUEST_PROJECTS_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (!Array.isArray(parsed)) return [];
+        const valid = parsed.filter(
+          (item: unknown) =>
+            typeof item === 'object' &&
+            item !== null &&
+            typeof (item as Record<string, unknown>).id === 'string' &&
+            Array.isArray((item as Record<string, unknown>).materials)
+        ) as GuestProject[];
+        return valid.slice(0, MAX_PROJECTS);
       }
     } catch (error) {
       console.error('Error loading guest projects:', error);
@@ -60,8 +71,14 @@ export const guestStorage = {
   },
 
   // Save a new project
-  saveProject(project: Omit<GuestProject, 'id' | 'createdAt' | 'updatedAt'>): GuestProject {
+  saveProject(project: Omit<GuestProject, 'id' | 'createdAt' | 'updatedAt'>): GuestProject | null {
     const projects = this.getProjects();
+
+    if (projects.length >= MAX_PROJECTS) {
+      console.warn('Guest project limit reached');
+      return null;
+    }
+
     const now = new Date().toISOString();
 
     const newProject: GuestProject = {
@@ -72,7 +89,12 @@ export const guestStorage = {
     };
 
     projects.push(newProject);
-    localStorage.setItem(GUEST_PROJECTS_KEY, JSON.stringify(projects));
+    try {
+      localStorage.setItem(GUEST_PROJECTS_KEY, JSON.stringify(projects));
+    } catch (error) {
+      console.error('Failed to save guest project (storage full?):', error);
+      return null;
+    }
 
     return newProject;
   },
@@ -90,7 +112,12 @@ export const guestStorage = {
       updatedAt: new Date().toISOString(),
     };
 
-    localStorage.setItem(GUEST_PROJECTS_KEY, JSON.stringify(projects));
+    try {
+      localStorage.setItem(GUEST_PROJECTS_KEY, JSON.stringify(projects));
+    } catch (error) {
+      console.error('Failed to update guest project (storage full?):', error);
+      return null;
+    }
     return projects[index];
   },
 
@@ -101,7 +128,12 @@ export const guestStorage = {
 
     if (filtered.length === projects.length) return false;
 
-    localStorage.setItem(GUEST_PROJECTS_KEY, JSON.stringify(filtered));
+    try {
+      localStorage.setItem(GUEST_PROJECTS_KEY, JSON.stringify(filtered));
+    } catch (error) {
+      console.error('Failed to delete guest project (storage full?):', error);
+      return false;
+    }
     return true;
   },
 
@@ -109,6 +141,11 @@ export const guestStorage = {
   addMaterials(projectId: string, materials: Omit<GuestMaterial, 'id' | 'purchased'>[]): GuestMaterial[] {
     const project = this.getProject(projectId);
     if (!project) return [];
+
+    if (project.materials.length + materials.length > MAX_MATERIALS_PER_PROJECT) {
+      console.warn('Guest materials limit reached for project', projectId);
+      return [];
+    }
 
     const newMaterials: GuestMaterial[] = materials.map(mat => ({
       ...mat,

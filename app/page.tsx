@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -12,49 +12,29 @@ import {
   Video,
   MapPin,
   Package,
-  ChevronRight,
-  Sparkles,
-  Send,
   Ruler,
-  HardHat
 } from 'lucide-react';
 import WhyDIYHelper from '@/components/WhyDIYHelper';
 import ProjectTemplates from '@/components/ProjectTemplates';
+import GuidedBot from '@/components/guided-bot/GuidedBot';
+import AuthButton from '@/components/AuthButton';
+import { supabase } from '@/lib/supabase';
 
 export default function LandingPage() {
   const router = useRouter();
-  const [chatInput, setChatInput] = useState('');
-  const [isInputFocused, setIsInputFocused] = useState(false);
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
-
-  const placeholders = [
-    "How do I install a ceiling fan safely?",
-    "What size wire do I need for a 20-amp circuit?",
-    "Help me plan a bathroom tile project",
-    "What permits do I need for a deck in my area?",
-    "Calculate materials for my kitchen backsplash"
-  ];
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPlaceholderIndex((prev) => (prev + 1) % placeholders.length);
-    }, 4000);
-    return () => clearInterval(interval);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ? { id: session.user.id, email: session.user.email ?? undefined } : null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ? { id: session.user.id, email: session.user.email ?? undefined } : null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
-
-  const handleChatSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (chatInput.trim()) {
-      // Store the message and navigate to chat
-      sessionStorage.setItem('initialChatMessage', chatInput);
-      router.push('/chat');
-    }
-  };
-
-  const handleQuickStart = (prompt: string) => {
-    sessionStorage.setItem('initialChatMessage', prompt);
-    router.push('/chat');
-  };
 
   const features = [
     {
@@ -95,15 +75,6 @@ export default function LandingPage() {
     }
   ];
 
-  const popularProjects = [
-    { label: "Install a ceiling fan", icon: "💡" },
-    { label: "Build a deck", icon: "🪵" },
-    { label: "Tile a bathroom", icon: "🚿" },
-    { label: "Wire an outlet", icon: "🔌" },
-    { label: "Fix a leaky faucet", icon: "🔧" },
-    { label: "Install shelving", icon: "📚" }
-  ];
-
   return (
     <div className="min-h-screen blueprint-bg">
       {/* Navigation */}
@@ -122,6 +93,7 @@ export default function LandingPage() {
               </span>
             </div>
             <div className="flex items-center gap-4">
+              <AuthButton user={user} variant="dark" />
               <Link
                 href="/chat"
                 className="hidden sm:flex items-center gap-2 text-[#D4C8B8] hover:text-white font-medium transition-colors"
@@ -140,7 +112,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero Section with Integrated Chat */}
+      {/* Hero Section with Guided Bot */}
       <section className="relative pt-12 sm:pt-20 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Blueprint corner markers */}
         <div className="absolute top-8 left-8 w-16 h-16 border-l-2 border-t-2 border-white/20" />
@@ -148,93 +120,17 @@ export default function LandingPage() {
         <div className="absolute bottom-8 left-8 w-16 h-16 border-l-2 border-b-2 border-white/20" />
         <div className="absolute bottom-8 right-8 w-16 h-16 border-r-2 border-b-2 border-white/20" />
 
-        {/* Content Card for Accessibility */}
         <div className="relative max-w-4xl mx-auto">
-          <div className="content-card text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-[#F5F0E6] border border-[#D4C8B8] text-[#5C4D42] px-4 py-2 rounded-full text-sm font-medium mb-8 shadow-sm">
-              <HardHat className="w-4 h-4 text-[#C67B5C]" />
-              <span>AI-Powered Project Assistant</span>
-            </div>
-
-            {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-[#C67B5C] mb-6 leading-[1.1] tracking-tight">
-              Your DIY projects,
-              <br />
-              <span className="relative inline-block">
-                <span className="text-[#3E2723]">
-                  done right
-                </span>
-                <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 200 8" fill="none">
-                  <path d="M2 6C50 2 150 2 198 6" stroke="url(#underline-gradient)" strokeWidth="3" strokeLinecap="round"/>
-                  <defs>
-                    <linearGradient id="underline-gradient" x1="0" y1="0" x2="200" y2="0">
-                      <stop stopColor="#C67B5C"/>
-                      <stop offset="0.5" stopColor="#B8593B"/>
-                      <stop offset="1" stopColor="#B87333"/>
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </span>
-            </h1>
-
-            <p className="text-lg sm:text-xl text-[#5C4D42] mb-10 max-w-2xl mx-auto leading-relaxed">
-              Get expert guidance, building codes, materials lists, and local store prices—all in one conversation.
-            </p>
-
-            {/* Main Chat Input - The Hero Element */}
-            <div className="relative max-w-2xl mx-auto mb-8">
-              <form onSubmit={handleChatSubmit}>
-                <div className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-300 ${
-                  isInputFocused
-                    ? 'border-[#C67B5C] shadow-[#C67B5C]/20'
-                    : 'border-[#D4C8B8] hover:border-[#A89880]'
-                }`}>
-                  <input
-                    type="text"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    onFocus={() => setIsInputFocused(true)}
-                    onBlur={() => setIsInputFocused(false)}
-                    placeholder={placeholders[placeholderIndex]}
-                    className="w-full px-6 py-5 pr-16 text-lg text-[#3E2723] placeholder-[#A89880] rounded-2xl focus:outline-none bg-transparent"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!chatInput.trim()}
-                    aria-label="Send message"
-                    className={`absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-xl transition-all duration-200 ${
-                      chatInput.trim()
-                        ? 'bg-gradient-to-r from-[#C67B5C] to-[#A65D3F] text-white shadow-lg shadow-[#C67B5C]/30 hover:shadow-xl hover:shadow-[#C67B5C]/40 hover:scale-105'
-                        : 'bg-[#E8DFD0] text-[#A89880]'
-                    }`}
-                  >
-                    <Send className="w-5 h-5" />
-                  </button>
-                </div>
-              </form>
-
-              {/* Helper text */}
-              <p className="text-sm text-[#7D6B5D] mt-3">
-                Press <kbd className="px-2 py-0.5 bg-[#E8DFD0] rounded text-[#5C4D42] font-mono text-xs border border-[#D4C8B8]">Enter</kbd> to start chatting
-              </p>
-            </div>
-
-            {/* Quick Start Prompts */}
-            <div className="flex flex-wrap justify-center gap-2 max-w-2xl mx-auto">
-              {popularProjects.map((project, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleQuickStart(project.label)}
-                  className="group flex items-center gap-2 px-4 py-2.5 bg-white border border-[#D4C8B8] rounded-xl hover:border-[#C67B5C] hover:bg-[#FDF8F3] transition-all text-sm font-medium text-[#5C4D42] hover:text-[#3E2723] shadow-sm hover:shadow"
-                >
-                  <span>{project.icon}</span>
-                  <span>{project.label}</span>
-                  <ChevronRight className="w-3 h-3 text-[#A89880] group-hover:text-[#C67B5C] group-hover:translate-x-0.5 transition-all" />
-                </button>
-              ))}
-            </div>
+          <div className="content-card">
+            <GuidedBot />
           </div>
+          {/* Skip link */}
+          <p className="text-center mt-4 text-sm text-[#5C4D42]">
+            Already know what you need?{' '}
+            <Link href="/chat" className="text-[#C67B5C] hover:underline">
+              Skip to full chat →
+            </Link>
+          </p>
         </div>
       </section>
 

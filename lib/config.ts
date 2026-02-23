@@ -27,7 +27,7 @@ function envList(key: string, fallback: string[]): string[] {
 
 // ── Anthropic ────────────────────────────────────────────────────────────────
 export const anthropic = {
-  model: envString('ANTHROPIC_MODEL', 'claude-sonnet-4-5-20250929'),
+  model: envString('ANTHROPIC_MODEL', 'claude-sonnet-4-6'),
   maxTokens: envInt('ANTHROPIC_MAX_TOKENS', 4096),
 } as const;
 
@@ -49,6 +49,18 @@ export const rateLimits = {
     maxTokens: envInt('RATE_LIMIT_CONVERSATIONS_MAX', 30),
     refillRate: envFloat('RATE_LIMIT_CONVERSATIONS_REFILL', 30 / 60),
   },
+  agents: {
+    maxTokens: envInt('RATE_LIMIT_AGENTS_MAX', 5),
+    refillRate: envFloat('RATE_LIMIT_AGENTS_REFILL', 5 / 3600),
+  },
+  'guided-chat': {
+    maxTokens: envInt('RATE_LIMIT_GUIDED_CHAT_MAX', 20),
+    refillRate: envFloat('RATE_LIMIT_GUIDED_CHAT_REFILL', 20 / 60),
+  },
+  'share-public': {
+    maxTokens: envInt('RATE_LIMIT_SHARE_PUBLIC_MAX', 30),
+    refillRate: envFloat('RATE_LIMIT_SHARE_PUBLIC_REFILL', 30 / 60),
+  },
 } as const;
 
 // ── CORS ─────────────────────────────────────────────────────────────────────
@@ -57,7 +69,7 @@ export const cors = {
     'http://localhost:3000',
     'https://localhost:3000',
   ]),
-  vercelRegex: /^https:\/\/[a-z0-9-]+\.vercel\.app$/,
+  vercelRegex: /^https:\/\/diy-helper[a-z0-9-]*\.vercel\.app$/,
 } as const;
 
 // ── Store Search ─────────────────────────────────────────────────────────────

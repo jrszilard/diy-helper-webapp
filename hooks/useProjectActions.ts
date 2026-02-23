@@ -79,6 +79,7 @@ export function useProjectActions({ userId }: UseProjectActionsOptions = {}) {
         description,
         materials: [],
       });
+      if (!guestProject) return null;
       refreshGuestProjects();
       return { id: guestProject.id, name: guestProject.name };
     }

@@ -1,23 +1,40 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { User, LogOut, X, Mail } from 'lucide-react';
+import { User, LogOut, X, Mail, ChevronDown, FolderOpen } from 'lucide-react';
 
 export default function AuthButton({
   user,
   externalShowAuth,
-  onAuthToggle
+  onAuthToggle,
+  variant = 'light',
 }: {
   user: { id: string; email?: string } | null;
   externalShowAuth?: boolean;
   onAuthToggle?: (show: boolean) => void;
+  variant?: 'light' | 'dark';
 }) {
   const [loading, setLoading] = useState(false);
   const [internalShowAuth, setInternalShowAuth] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showDropdown]);
 
   const showAuth = externalShowAuth !== undefined ? externalShowAuth : internalShowAuth;
   const setShowAuth = (show: boolean) => {
@@ -28,16 +45,15 @@ export default function AuthButton({
     }
   };
 
-  // Get the proper redirect URL, avoiding chrome-extension:// URLs
   const getRedirectUrl = () => {
     const origin = window.location.origin;
-    // If we're in a chrome extension context, use a fallback
-    if (origin.startsWith('chrome-extension://')) {
-      // Fall back to the current host without the extension protocol
-      // or use a configured base URL
-      console.warn('Detected chrome-extension context, using alternative redirect');
-      return undefined; // Let Supabase use its default redirect
-    }
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'https://localhost:3000',
+    ];
+    const isAllowed = allowedOrigins.includes(origin) ||
+      /^https:\/\/diy-helper[a-z0-9-]*\.vercel\.app$/.test(origin);
+    if (!isAllowed) return undefined;
     return `${origin}/chat`;
   };
 
@@ -89,16 +105,44 @@ export default function AuthButton({
   };
 
   if (user) {
+    const isDark = variant === 'dark';
     return (
-      <button
-        onClick={handleSignOut}
-        className="flex items-center gap-2 text-[#3E2723] hover:text-[#C67B5C] transition"
-        aria-label="Sign out"
-      >
-        <User className="w-5 h-5" />
-        <span className="hidden sm:inline">{user.email}</span>
-        <LogOut className="w-4 h-4" />
-      </button>
+      <div className="relative" ref={dropdownRef}>
+        <button
+          onClick={() => setShowDropdown(!showDropdown)}
+          className={`flex items-center gap-2 transition ${
+            isDark
+              ? 'text-[#D4C8B8] hover:text-white'
+              : 'text-[#3E2723] hover:text-[#C67B5C]'
+          }`}
+          aria-label="Account menu"
+          aria-expanded={showDropdown}
+        >
+          <User className="w-5 h-5" />
+          <span className="hidden sm:inline text-sm">{user.email}</span>
+          <ChevronDown className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+        </button>
+
+        {showDropdown && (
+          <div className="absolute right-0 mt-2 w-48 bg-[#FDFBF7] rounded-lg shadow-xl border border-[#D4C8B8] py-1 z-50">
+            <a
+              href="/chat"
+              className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#3E2723] hover:bg-[#F5F0E6] transition-colors"
+            >
+              <FolderOpen className="w-4 h-4 text-[#7D6B5D]" />
+              My Projects
+            </a>
+            <div className="border-t border-[#E8DFD0] my-1" />
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-[#B8593B] hover:bg-[#FDF3ED] transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </button>
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -178,9 +222,9 @@ export default function AuthButton({
                   placeholder="••••••••"
                   className="w-full border border-[#D4C8B8] rounded-lg px-4 py-3 text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white placeholder-[#A89880]"
                   required
-                  minLength={6}
+                  minLength={8}
                 />
-                <p className="text-xs text-[#7D6B5D] mt-1">At least 6 characters</p>
+                <p className="text-xs text-[#7D6B5D] mt-1">At least 8 characters, with letters and digits</p>
               </div>
 
               <button
