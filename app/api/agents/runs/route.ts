@@ -59,16 +59,21 @@ export async function POST(req: NextRequest) {
 
     // Check freemium usage limit for authenticated users
     if (auth.userId) {
-      const usageCheck = await checkUsageLimit(auth.supabaseClient, auth.userId, 'report');
-      if (!usageCheck.allowed) {
-        return applyCorsHeaders(req, new Response(
-          JSON.stringify({
-            error: 'Monthly report limit reached. Upgrade to Pro for unlimited access.',
-            code: 'USAGE_LIMIT_EXCEEDED',
-            usage: usageCheck,
-          }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
-        ));
+      try {
+        const usageCheck = await checkUsageLimit(auth.supabaseClient, auth.userId, 'report');
+        if (!usageCheck.allowed) {
+          return applyCorsHeaders(req, new Response(
+            JSON.stringify({
+              error: 'Monthly report limit reached. Upgrade to Pro for unlimited access.',
+              code: 'USAGE_LIMIT_EXCEEDED',
+              usage: usageCheck,
+            }),
+            { status: 403, headers: { 'Content-Type': 'application/json' } }
+          ));
+        }
+      } catch (usageErr) {
+        // Usage tables may not exist yet — allow the request through
+        logger.error('Usage limit check failed, allowing request', usageErr);
       }
     }
 
@@ -242,10 +247,14 @@ export async function POST(req: NextRequest) {
               throw new Error('Failed to save project report');
             }
 
-            // Increment report usage counter
-            incrementUsage(auth.userId!, 'report').catch(err =>
-              logger.error('Failed to increment report usage', err, { runId })
-            );
+            // Increment report usage counter (fire-and-forget, must not block report delivery)
+            try {
+              incrementUsage(auth.userId!, 'report').catch(err =>
+                logger.error('Failed to increment report usage', err, { runId })
+              );
+            } catch (usageErr) {
+              logger.error('Failed to start usage increment', usageErr, { runId });
+            }
 
             // Mark run as completed
             await auth.supabaseClient

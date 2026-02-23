@@ -65,16 +65,21 @@ export async function POST(req: NextRequest) {
 
     // Check freemium usage limit for authenticated users
     if (auth.userId) {
-      const usageCheck = await checkUsageLimit(auth.supabaseClient, auth.userId, 'chat_message');
-      if (!usageCheck.allowed) {
-        return applyCorsHeaders(req, new Response(
-          JSON.stringify({
-            error: 'Monthly chat message limit reached. Upgrade to Pro for unlimited access.',
-            code: 'USAGE_LIMIT_EXCEEDED',
-            usage: usageCheck,
-          }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
-        ));
+      try {
+        const usageCheck = await checkUsageLimit(auth.supabaseClient, auth.userId, 'chat_message');
+        if (!usageCheck.allowed) {
+          return applyCorsHeaders(req, new Response(
+            JSON.stringify({
+              error: 'Monthly chat message limit reached. Upgrade to Pro for unlimited access.',
+              code: 'USAGE_LIMIT_EXCEEDED',
+              usage: usageCheck,
+            }),
+            { status: 403, headers: { 'Content-Type': 'application/json' } }
+          ));
+        }
+      } catch (usageErr) {
+        // Usage tables may not exist yet — allow the request through
+        logger.error('Usage limit check failed, allowing request', usageErr);
       }
     }
 
@@ -92,11 +97,15 @@ export async function POST(req: NextRequest) {
 
     logger.info('Chat request', { requestId, streaming, historyLength: history.length, hasConversationId: !!existingConversationId, hasImage: !!image });
 
-    // Increment usage counter for authenticated users
+    // Increment usage counter for authenticated users (must not block response)
     if (auth.userId) {
-      incrementUsage(auth.userId, 'chat_message').catch(err =>
-        logger.error('Failed to increment chat usage', err, { requestId })
-      );
+      try {
+        incrementUsage(auth.userId, 'chat_message').catch(err =>
+          logger.error('Failed to increment chat usage', err, { requestId })
+        );
+      } catch (usageErr) {
+        logger.error('Failed to start chat usage increment', usageErr, { requestId });
+      }
     }
 
     const prunedHistory = pruneConversation(history);
