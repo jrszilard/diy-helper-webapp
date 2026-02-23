@@ -49,9 +49,9 @@ export default function GuidedBot() {
 
   // Watch for pipeline completion — show report when ready
   useEffect(() => {
-    if (agentRun.reportId && !agentRun.isRunning && bot.pipelineState === 'running') {
-      // Report may already be inline from SSE; fetch only if missing
-      if (!agentRun.report) {
+    if ((agentRun.reportId || agentRun.report) && !agentRun.isRunning && bot.pipelineState === 'running') {
+      // Report may already be inline from SSE; fetch from DB only if we have an ID but no report
+      if (!agentRun.report && agentRun.reportId) {
         agentRun.fetchReport(agentRun.reportId);
       }
       bot.setPipelineComplete();

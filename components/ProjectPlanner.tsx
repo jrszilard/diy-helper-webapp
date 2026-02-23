@@ -81,11 +81,14 @@ export default function ProjectPlanner({ userId, onProjectCreated }: ProjectPlan
 
   // Transition to report view when complete
   useEffect(() => {
-    if (agentRun.reportId && !agentRun.isRunning && view === 'progress') {
-      agentRun.fetchReport(agentRun.reportId);
+    if ((agentRun.reportId || agentRun.report) && !agentRun.isRunning && view === 'progress') {
+      // Fetch from DB only if we have an ID but no inline report yet
+      if (!agentRun.report && agentRun.reportId) {
+        agentRun.fetchReport(agentRun.reportId);
+      }
       setView('report');
     }
-  }, [agentRun.reportId, agentRun.isRunning, view, agentRun.fetchReport]);
+  }, [agentRun.reportId, agentRun.report, agentRun.isRunning, view, agentRun.fetchReport]);
 
   const handleOpenIntake = useCallback((prefill?: string) => {
     if (!userId) {
