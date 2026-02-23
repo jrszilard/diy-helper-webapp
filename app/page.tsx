@@ -13,6 +13,9 @@ import {
   MapPin,
   Package,
   Ruler,
+  Users,
+  Award,
+  CheckCircle,
 } from 'lucide-react';
 import WhyDIYHelper from '@/components/WhyDIYHelper';
 import ProjectTemplates from '@/components/ProjectTemplates';
@@ -313,6 +316,82 @@ export default function LandingPage() {
                   <p className="text-sm text-[#5C4D42]">{item.desc}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Expert Marketplace Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="content-card">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 mb-4">
+                <Users className="w-5 h-5 text-[#5D7B93]" />
+                <span className="text-sm font-medium text-[#5D7B93] uppercase tracking-wider">Expert Marketplace</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
+                Get help from real pros — or become one
+              </h2>
+              <p className="text-lg text-[#5C4D42] max-w-2xl mx-auto">
+                Connect with verified trade professionals or share your own expertise
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-6">
+              {/* For DIYers */}
+              <div className="bg-white rounded-2xl p-6 border border-[#E8DFD0] hover:border-[#C67B5C] transition-all duration-300 hover:shadow-lg">
+                <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-[#5D7B93] to-[#4A6275] mb-4 shadow-lg">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-[#3E2723] mb-4">Get Expert Help</h3>
+                <ul className="space-y-3 mb-6">
+                  {[
+                    'Ask questions and get verified answers',
+                    'Browse experts by specialty and location',
+                    'Video consultations for tricky projects',
+                  ].map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-sm text-[#5C4D42]">
+                      <CheckCircle className="w-4 h-4 text-[#4A7C59] mt-0.5 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/experts"
+                  className="inline-flex items-center gap-2 bg-[#5D7B93] text-white px-5 py-2.5 rounded-xl hover:bg-[#4A6275] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
+                >
+                  <span>Find an Expert</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+
+              {/* For Professionals */}
+              <div className="bg-white rounded-2xl p-6 border border-[#E8DFD0] hover:border-[#C67B5C] transition-all duration-300 hover:shadow-lg">
+                <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-[#C67B5C] to-[#A65D3F] mb-4 shadow-lg">
+                  <Award className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-[#3E2723] mb-4">Share Your Expertise</h3>
+                <ul className="space-y-3 mb-6">
+                  {[
+                    'Earn money answering DIY questions',
+                    'Build your reputation with verified reviews',
+                    'Set your own rates and availability',
+                  ].map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-sm text-[#5C4D42]">
+                      <CheckCircle className="w-4 h-4 text-[#4A7C59] mt-0.5 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/experts/register"
+                  className="inline-flex items-center gap-2 bg-[#C67B5C] text-white px-5 py-2.5 rounded-xl hover:bg-[#A65D3F] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
+                >
+                  <span>Become an Expert</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
             </div>
           </div>
         </div>
