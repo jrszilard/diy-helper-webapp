@@ -222,9 +222,9 @@ export default function AuthButton({
                   placeholder="••••••••"
                   className="w-full border border-[#D4C8B8] rounded-lg px-4 py-3 text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white placeholder-[#A89880]"
                   required
-                  minLength={6}
+                  minLength={8}
                 />
-                <p className="text-xs text-[#7D6B5D] mt-1">At least 6 characters</p>
+                <p className="text-xs text-[#7D6B5D] mt-1">At least 8 characters, with letters and digits</p>
               </div>
 
               <button
