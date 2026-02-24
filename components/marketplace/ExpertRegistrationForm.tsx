@@ -80,26 +80,28 @@ export default function ExpertRegistrationForm() {
         return;
       }
 
+      const payload: Record<string, unknown> = {
+        displayName,
+        city,
+        state,
+        zipCode,
+        bio,
+        specialties: specialties.map(s => ({
+          specialty: s.specialty,
+          yearsExperience: s.yearsExperience,
+          isPrimary: specialties.indexOf(s) === 0,
+        })),
+      };
+      if (hourlyRate) payload.hourlyRateCents = Math.round(parseFloat(hourlyRate) * 100);
+      if (qaRate) payload.qaRateCents = Math.round(parseFloat(qaRate) * 100);
+
       const res = await fetch('/api/experts/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          displayName,
-          city,
-          state,
-          zipCode,
-          bio,
-          specialties: specialties.map(s => ({
-            specialty: s.specialty,
-            yearsExperience: s.yearsExperience,
-            isPrimary: specialties.indexOf(s) === 0,
-          })),
-          hourlyRateCents: hourlyRate ? Math.round(parseFloat(hourlyRate) * 100) : null,
-          qaRateCents: qaRate ? Math.round(parseFloat(qaRate) * 100) : null,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
