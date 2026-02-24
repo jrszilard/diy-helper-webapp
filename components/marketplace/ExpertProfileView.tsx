@@ -220,28 +220,32 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
             ) : (
               <>
                 {/* Project selector */}
-                {conversations.length > 0 && (
-                  <div className="mb-3">
-                    <label className="block text-xs font-medium text-[#7D6B5D] mb-1">
-                      Share a project for context (optional)
-                    </label>
+                <div className="mb-3">
+                  <label className="block text-xs font-medium text-[#7D6B5D] mb-1">
+                    Link a project for context (optional)
+                  </label>
+                  {conversationsLoaded && conversations.length === 0 ? (
+                    <p className="text-xs text-[#B0A696] italic">
+                      No projects yet. <Link href="/chat" className="text-[#5D7B93] hover:underline">Start a project</Link> first to share details with an expert.
+                    </p>
+                  ) : (
                     <select
                       value={selectedConversationId}
                       onChange={e => setSelectedConversationId(e.target.value)}
                       className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50"
                     >
-                      <option value="">No project attached</option>
+                      <option value="">Select a project...</option>
                       {conversations.map(c => (
                         <option key={c.id} value={c.id}>{c.title}</option>
                       ))}
                     </select>
-                    {selectedConversationId && (
-                      <p className="text-xs text-[#7D6B5D] mt-1">
-                        The expert will see your project name and a link to the full details.
-                      </p>
-                    )}
-                  </div>
-                )}
+                  )}
+                  {selectedConversationId && (
+                    <p className="text-xs text-[#4A7C59] mt-1">
+                      The expert will see your project name and a link to the full details.
+                    </p>
+                  )}
+                </div>
 
                 <textarea
                   value={messageText}
