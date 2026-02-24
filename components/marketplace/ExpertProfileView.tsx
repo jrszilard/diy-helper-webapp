@@ -1,9 +1,11 @@
 'use client';
 
-import { Star, MapPin, DollarSign, Clock, Shield, MessageSquare } from 'lucide-react';
+import { Star, MapPin, DollarSign, Clock, Shield, MessageSquare, Mail } from 'lucide-react';
 import type { ExpertProfile } from '@/lib/marketplace/types';
 import ReviewCard from './ReviewCard';
 import Link from 'next/link';
+import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 interface ExpertProfileViewProps {
   expert: ExpertProfile;
@@ -18,6 +20,48 @@ interface ExpertProfileViewProps {
 }
 
 export default function ExpertProfileView({ expert, reviews }: ExpertProfileViewProps) {
+  const [messageSending, setMessageSending] = useState(false);
+  const [messageText, setMessageText] = useState('');
+  const [showMessageBox, setShowMessageBox] = useState(false);
+  const [messageSent, setMessageSent] = useState(false);
+  const [messageError, setMessageError] = useState<string | null>(null);
+
+  const handleSendMessage = async () => {
+    if (!messageText.trim()) return;
+    setMessageSending(true);
+    setMessageError(null);
+    try {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) {
+        setMessageError('Please sign in to send a message.');
+        setMessageSending(false);
+        return;
+      }
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          recipientUserId: expert.userId,
+          content: messageText.trim(),
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setMessageError(data.error || 'Failed to send message.');
+      } else {
+        setMessageSent(true);
+        setMessageText('');
+      }
+    } catch {
+      setMessageError('Something went wrong.');
+    } finally {
+      setMessageSending(false);
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Profile header */}
@@ -119,13 +163,55 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
             Ask a Question
           </Link>
           <button
-            disabled
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#E8DFD0] text-[#7D6B5D] text-sm font-semibold rounded-lg cursor-not-allowed"
+            onClick={() => setShowMessageBox(!showMessageBox)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[#4A6578] transition-colors"
           >
-            Book Consultation
-            <span className="text-xs italic">(Coming Soon)</span>
+            <Mail size={16} />
+            Send Message
           </button>
         </div>
+
+        {/* Inline message composer */}
+        {showMessageBox && (
+          <div className="mt-4 p-4 bg-[#F5F0E6] rounded-lg border border-[#D4C8B8]">
+            {messageSent ? (
+              <div className="text-center py-2">
+                <p className="text-sm font-medium text-[#4A7C59]">Message sent!</p>
+                <Link href="/messages" className="text-xs text-[#5D7B93] hover:underline mt-1 inline-block">
+                  View your messages
+                </Link>
+              </div>
+            ) : (
+              <>
+                <textarea
+                  value={messageText}
+                  onChange={e => setMessageText(e.target.value)}
+                  placeholder={`Send a message to ${expert.displayName}...`}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#5D7B93]/50 resize-none"
+                  maxLength={2000}
+                />
+                {messageError && (
+                  <p className="text-xs text-red-600 mt-1">{messageError}</p>
+                )}
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-xs text-[#7D6B5D]">{messageText.length}/2000</span>
+                  <button
+                    onClick={handleSendMessage}
+                    disabled={messageSending || !messageText.trim()}
+                    className={`px-4 py-1.5 text-sm font-semibold rounded-lg text-white transition-colors ${
+                      messageSending || !messageText.trim()
+                        ? 'bg-[#B0A696] cursor-not-allowed'
+                        : 'bg-[#5D7B93] hover:bg-[#4A6578]'
+                    }`}
+                  >
+                    {messageSending ? 'Sending...' : 'Send'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Rates */}

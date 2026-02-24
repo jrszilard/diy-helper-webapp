@@ -32,6 +32,7 @@ export async function GET(
     // Return public profile (exclude sensitive fields)
     const publicProfile = {
       id: profile.id,
+      userId: profile.userId,
       displayName: profile.displayName,
       bio: profile.bio,
       profilePhotoUrl: profile.profilePhotoUrl,

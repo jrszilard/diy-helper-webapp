@@ -34,7 +34,7 @@ export default function ExpertDetailPage() {
 
         if (expertRes.ok) {
           const expertData = await expertRes.json();
-          setExpert(expertData.expert);
+          setExpert(expertData.profile || expertData.expert);
         } else {
           setError(true);
         }
