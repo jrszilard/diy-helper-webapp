@@ -9,13 +9,13 @@ import MessageThread from '@/components/marketplace/MessageThread';
 
 interface ApiMessage {
   id: string;
-  sender_user_id: string;
-  recipient_user_id: string;
+  senderUserId: string;
+  recipientUserId: string;
   senderName: string;
   content: string;
   attachments: string[];
-  is_read: boolean;
-  created_at: string;
+  isRead: boolean;
+  createdAt: string;
 }
 
 interface Message {
@@ -51,11 +51,11 @@ export default function DIYerThreadPage() {
 
         const mapped: Message[] = apiMessages.map(m => ({
           id: m.id,
-          senderUserId: m.sender_user_id,
+          senderUserId: m.senderUserId,
           senderName: m.senderName,
           content: m.content,
           attachments: m.attachments,
-          createdAt: m.created_at,
+          createdAt: m.createdAt,
         }));
 
         setMessages(mapped);

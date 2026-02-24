@@ -4,7 +4,7 @@ import { Star, MapPin, DollarSign, Clock, Shield, MessageSquare, Mail } from 'lu
 import type { ExpertProfile } from '@/lib/marketplace/types';
 import ReviewCard from './ReviewCard';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 
 interface ExpertProfileViewProps {
@@ -25,6 +25,31 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
   const [showMessageBox, setShowMessageBox] = useState(false);
   const [messageSent, setMessageSent] = useState(false);
   const [messageError, setMessageError] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<{ id: string; title: string }[]>([]);
+  const [selectedConversationId, setSelectedConversationId] = useState('');
+  const [conversationsLoaded, setConversationsLoaded] = useState(false);
+
+  const fetchConversations = useCallback(async () => {
+    if (conversationsLoaded) return;
+    try {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) return;
+      const res = await fetch('/api/conversations', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const convs = (data.conversations || [])
+          .filter((c: { id: string; title: string | null }) => c.title)
+          .map((c: { id: string; title: string }) => ({ id: c.id, title: c.title }));
+        setConversations(convs);
+      }
+    } catch {
+      // Conversations fetch is optional — silently ignore
+    } finally {
+      setConversationsLoaded(true);
+    }
+  }, [conversationsLoaded]);
 
   const handleSendMessage = async () => {
     if (!messageText.trim()) return;
@@ -37,6 +62,15 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
         setMessageSending(false);
         return;
       }
+
+      let fullContent = messageText.trim();
+      if (selectedConversationId) {
+        const selectedConv = conversations.find(c => c.id === selectedConversationId);
+        if (selectedConv) {
+          fullContent = `Project: ${selectedConv.title}\nView: /chat?id=${selectedConv.id}\n---\n${fullContent}`;
+        }
+      }
+
       const res = await fetch('/api/messages', {
         method: 'POST',
         headers: {
@@ -45,7 +79,7 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
         },
         body: JSON.stringify({
           recipientUserId: expert.userId,
-          content: messageText.trim(),
+          content: fullContent,
         }),
       });
       if (!res.ok) {
@@ -163,7 +197,11 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
             Ask a Question
           </Link>
           <button
-            onClick={() => setShowMessageBox(!showMessageBox)}
+            onClick={() => {
+              const willShow = !showMessageBox;
+              setShowMessageBox(willShow);
+              if (willShow) fetchConversations();
+            }}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[#4A6578] transition-colors"
           >
             <Mail size={16} />
@@ -177,12 +215,29 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
             {messageSent ? (
               <div className="text-center py-2">
                 <p className="text-sm font-medium text-[#4A7C59]">Message sent!</p>
-                <Link href="/messages" className="text-xs text-[#5D7B93] hover:underline mt-1 inline-block">
+                <Link href={`/messages/${expert.userId}`} className="text-xs text-[#5D7B93] hover:underline mt-1 inline-block">
                   View your messages
                 </Link>
               </div>
             ) : (
               <>
+                {conversations.length > 0 && (
+                  <div className="mb-3">
+                    <label className="block text-xs font-medium text-[#7D6B5D] mb-1">
+                      Attach a project (optional)
+                    </label>
+                    <select
+                      value={selectedConversationId}
+                      onChange={e => setSelectedConversationId(e.target.value)}
+                      className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#5D7B93]/50"
+                    >
+                      <option value="">No project attached</option>
+                      {conversations.map(c => (
+                        <option key={c.id} value={c.id}>{c.title}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <textarea
                   value={messageText}
                   onChange={e => setMessageText(e.target.value)}

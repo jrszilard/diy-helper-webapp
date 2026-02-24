@@ -95,9 +95,9 @@ export async function GET(req: NextRequest) {
     }>();
 
     for (const msg of messages || []) {
-      const threadId = msg.qa_question_id || msg.consultation_id || msg.rfp_id || msg.bid_id || msg.id;
-      const contextType = msg.qa_question_id ? 'qa' : msg.consultation_id ? 'consultation' : msg.rfp_id ? 'rfp' : msg.bid_id ? 'bid' : 'direct';
       const otherUserId = msg.sender_user_id === auth.userId ? msg.recipient_user_id : msg.sender_user_id;
+      const threadId = msg.qa_question_id || msg.consultation_id || msg.rfp_id || msg.bid_id || otherUserId;
+      const contextType = msg.qa_question_id ? 'qa' : msg.consultation_id ? 'consultation' : msg.rfp_id ? 'rfp' : msg.bid_id ? 'bid' : 'direct';
 
       const existing = threadMap.get(threadId);
       if (!existing) {

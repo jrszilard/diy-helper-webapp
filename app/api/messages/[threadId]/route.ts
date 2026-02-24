@@ -74,8 +74,8 @@ export async function GET(
 
     const { threadId } = await params;
 
-    // Query messages where any context field matches the threadId
-    const { data: messages, error } = await auth.supabaseClient
+    // First try context-based lookup
+    let { data: messages, error } = await auth.supabaseClient
       .from('marketplace_messages')
       .select('*')
       .or(`qa_question_id.eq.${threadId},consultation_id.eq.${threadId},rfp_id.eq.${threadId},bid_id.eq.${threadId}`)
@@ -89,10 +89,36 @@ export async function GET(
       ));
     }
 
+    // If no context match, try direct message lookup (threadId = other user's ID)
+    if (!messages || messages.length === 0) {
+      const directResult = await auth.supabaseClient
+        .from('marketplace_messages')
+        .select('*')
+        .or(
+          `and(sender_user_id.eq.${auth.userId},recipient_user_id.eq.${threadId}),and(sender_user_id.eq.${threadId},recipient_user_id.eq.${auth.userId})`
+        )
+        .is('qa_question_id', null)
+        .is('consultation_id', null)
+        .is('rfp_id', null)
+        .is('bid_id', null)
+        .order('created_at', { ascending: true });
+
+      if (directResult.error) {
+        logger.error('Failed to fetch direct messages', directResult.error);
+        return applyCorsHeaders(req, new Response(
+          JSON.stringify({ error: 'Failed to fetch messages' }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        ));
+      }
+
+      messages = directResult.data;
+    }
+
+    // Return empty array for threads with no messages yet (e.g. new direct message threads)
     if (!messages || messages.length === 0) {
       return applyCorsHeaders(req, new Response(
-        JSON.stringify({ error: 'Thread not found' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({ messages: [] }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
       ));
     }
 
@@ -193,6 +219,22 @@ export async function POST(
       .limit(1);
 
     if (lookupError || !existingMessages || existingMessages.length === 0) {
+      // Try as direct message thread — threadId is the other user's ID
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (uuidRegex.test(threadId)) {
+        await sendMessage({
+          adminClient,
+          senderUserId: auth.userId,
+          recipientUserId: threadId,
+          content: parsed.data.content,
+          attachments: parsed.data.attachments,
+        });
+        return applyCorsHeaders(req, new Response(
+          JSON.stringify({ success: true }),
+          { status: 201, headers: { 'Content-Type': 'application/json' } }
+        ));
+      }
+
       logger.error('Thread lookup failed', lookupError);
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Thread not found' }),
