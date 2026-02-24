@@ -70,10 +70,16 @@ export const SubmitReviewSchema = z.object({
 export const SendMessageSchema = z.object({
   recipientUserId: z.string().uuid(),
   content: z.string().min(1, 'Message cannot be empty').max(2000),
+  attachments: z.array(z.string().url()).max(4).default([]),
   qaQuestionId: z.string().uuid().optional(),
   consultationId: z.string().uuid().optional(),
   rfpId: z.string().uuid().optional(),
   bidId: z.string().uuid().optional(),
+});
+
+export const ThreadMessageSchema = z.object({
+  content: z.string().min(1, 'Message cannot be empty').max(2000),
+  attachments: z.array(z.string().url()).max(4).default([]),
 });
 
 // ── Subscriptions ───────────────────────────────────────────────────────────
@@ -89,3 +95,4 @@ export type SubmitQuestion = z.infer<typeof SubmitQuestionSchema>;
 export type AnswerQuestion = z.infer<typeof AnswerQuestionSchema>;
 export type SubmitReview = z.infer<typeof SubmitReviewSchema>;
 export type SendMessage = z.infer<typeof SendMessageSchema>;
+export type ThreadMessage = z.infer<typeof ThreadMessageSchema>;

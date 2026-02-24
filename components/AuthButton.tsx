@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { User, LogOut, X, ChevronDown, FolderOpen, MessageSquare, Users, Award } from 'lucide-react';
+import { User, LogOut, X, ChevronDown, FolderOpen, MessageSquare, Mail, Users, Award } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AuthButton({
@@ -104,6 +104,14 @@ export default function AuthButton({
             >
               <MessageSquare className="w-4 h-4 text-[#7D6B5D]" />
               My Questions
+            </Link>
+            <Link
+              href="/messages"
+              className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#3E2723] hover:bg-[#F5F0E6] transition-colors"
+              onClick={() => setShowDropdown(false)}
+            >
+              <Mail className="w-4 h-4 text-[#7D6B5D]" />
+              Messages
             </Link>
             <Link
               href="/experts"

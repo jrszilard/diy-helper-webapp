@@ -8,6 +8,49 @@ import { sendMessage } from '@/lib/marketplace/messaging';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { logger } from '@/lib/logger';
 
+/**
+ * Resolve display names for a set of user IDs.
+ * Checks expert_profiles first, then falls back to auth admin email.
+ */
+async function resolveDisplayNames(
+  adminClient: ReturnType<typeof getAdminClient>,
+  userIds: string[]
+): Promise<Record<string, string>> {
+  const names: Record<string, string> = {};
+  if (userIds.length === 0) return names;
+
+  const uniqueIds = [...new Set(userIds)];
+
+  // Try expert_profiles first for display names
+  const { data: experts } = await adminClient
+    .from('expert_profiles')
+    .select('user_id, display_name')
+    .in('user_id', uniqueIds);
+
+  if (experts) {
+    for (const expert of experts) {
+      names[expert.user_id] = expert.display_name;
+    }
+  }
+
+  // For any users not found in expert_profiles, fall back to auth email
+  const missingIds = uniqueIds.filter(id => !names[id]);
+  for (const userId of missingIds) {
+    try {
+      const { data: userData } = await adminClient.auth.admin.getUserById(userId);
+      if (userData?.user?.email) {
+        names[userId] = userData.user.email.split('@')[0];
+      } else {
+        names[userId] = 'Unknown User';
+      }
+    } catch {
+      names[userId] = 'Unknown User';
+    }
+  }
+
+  return names;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const auth = await getAuthFromRequest(req);
@@ -74,15 +117,22 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // Resolve display names for all other-user IDs
+    const otherUserIds = [...new Set(Array.from(threadMap.values()).map(t => t.otherUserId))];
+    const adminClient = getAdminClient();
+    const displayNames = await resolveDisplayNames(adminClient, otherUserIds);
+
     const threads = Array.from(threadMap.values()).map(t => ({
       threadId: t.threadId,
       contextType: t.contextType,
       otherUserId: t.otherUserId,
+      otherUserName: displayNames[t.otherUserId] || 'Unknown User',
       messageCount: t.messageCount,
       unreadCount: t.unreadCount,
       lastMessage: {
         id: t.latestMessage.id,
         content: t.latestMessage.content,
+        attachments: t.latestMessage.attachments || [],
         senderUserId: t.latestMessage.sender_user_id,
         createdAt: t.latestMessage.created_at,
       },
@@ -135,6 +185,7 @@ export async function POST(req: NextRequest) {
       senderUserId: auth.userId,
       recipientUserId: parsed.data.recipientUserId,
       content: parsed.data.content,
+      attachments: parsed.data.attachments,
       qaQuestionId: parsed.data.qaQuestionId,
       consultationId: parsed.data.consultationId,
       rfpId: parsed.data.rfpId,

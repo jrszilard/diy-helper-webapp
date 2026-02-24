@@ -15,6 +15,7 @@ export async function sendMessage(params: {
   senderUserId: string;
   recipientUserId: string;
   content: string;
+  attachments?: string[];
   qaQuestionId?: string;
   consultationId?: string;
   rfpId?: string;
@@ -32,7 +33,7 @@ export async function sendMessage(params: {
       consultation_id: params.consultationId || null,
       rfp_id: params.rfpId || null,
       bid_id: params.bidId || null,
-      attachments: [],
+      attachments: params.attachments || [],
       is_read: false,
     });
 
@@ -41,6 +42,6 @@ export async function sendMessage(params: {
     type: 'message_received',
     title: 'You have a new message',
     body: sanitized.length > 100 ? sanitized.slice(0, 100) + '...' : sanitized,
-    link: '/dashboard/messages',
+    link: '/messages',
   });
 }
