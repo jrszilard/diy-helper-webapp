@@ -10,8 +10,8 @@ export const ExpertRegistrationSchema = z.object({
   state: z.string().min(1, 'State is required').max(50),
   zipCode: z.string().max(10).optional(),
   serviceRadiusMiles: z.number().int().min(1).max(500).default(50),
-  hourlyRateCents: z.number().int().min(0).max(50000).optional(),
-  qaRateCents: z.number().int().min(0).max(5000).optional(),
+  hourlyRateCents: z.number().int().min(0).max(50000).nullable().optional(),
+  qaRateCents: z.number().int().min(0).max(5000).nullable().optional(),
   specialties: z.array(z.object({
     specialty: z.enum(SPECIALTIES as unknown as [string, ...string[]]),
     yearsExperience: z.number().int().min(0).max(60).optional(),
@@ -26,8 +26,8 @@ export const UpdateExpertProfileSchema = z.object({
   state: z.string().min(1).max(50).optional(),
   zipCode: z.string().max(10).optional(),
   serviceRadiusMiles: z.number().int().min(1).max(500).optional(),
-  hourlyRateCents: z.number().int().min(0).max(50000).optional(),
-  qaRateCents: z.number().int().min(0).max(5000).optional(),
+  hourlyRateCents: z.number().int().min(0).max(50000).nullable().optional(),
+  qaRateCents: z.number().int().min(0).max(5000).nullable().optional(),
   isAvailable: z.boolean().optional(),
   profilePhotoUrl: z.string().url().max(500).optional(),
   specialties: z.array(z.object({
