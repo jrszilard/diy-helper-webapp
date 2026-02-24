@@ -7,27 +7,21 @@ import StripeOnboardBanner from '@/components/marketplace/StripeOnboardBanner';
 import DashboardStats from '@/components/marketplace/DashboardStats';
 import DashboardQAQueue from '@/components/marketplace/DashboardQAQueue';
 
-interface DashboardData {
-  stats: {
-    totalEarnings: number;
-    monthEarnings: number;
-    totalReviews: number;
+interface DashboardApiResponse {
+  dashboard: {
+    totalEarningsCents: number;
+    recentReviewsCount: number;
+    activeQACount: number;
+    pendingPayoutCents: number;
     avgRating: number;
-    activeQuestions: number;
-    pendingPayouts: number;
+    totalReviews: number;
+    isAvailable: boolean;
+    verificationLevel: number;
   };
-  stripeOnboardingComplete: boolean;
-  recentQuestions: Array<{
-    id: string;
-    questionText: string;
-    category: string;
-    priceCents: number;
-    createdAt: string;
-  }>;
 }
 
 export default function ExpertDashboardPage() {
-  const [data, setData] = useState<DashboardData | null>(null);
+  const [data, setData] = useState<DashboardApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -68,13 +62,23 @@ export default function ExpertDashboardPage() {
     );
   }
 
+  const d = data.dashboard;
+  const stats = {
+    totalEarnings: d.totalEarningsCents,
+    monthEarnings: d.pendingPayoutCents, // use pending as month proxy for now
+    totalReviews: d.totalReviews,
+    avgRating: d.avgRating,
+    activeQuestions: d.activeQACount,
+    pendingPayouts: d.pendingPayoutCents,
+  };
+
   return (
     <div className="space-y-6 max-w-4xl">
       <h1 className="text-xl font-bold text-[#3E2723]">Dashboard</h1>
 
-      <StripeOnboardBanner stripeOnboardingComplete={data.stripeOnboardingComplete} />
-      <DashboardStats stats={data.stats} />
-      <DashboardQAQueue questions={data.recentQuestions} />
+      <StripeOnboardBanner stripeOnboardingComplete={false} />
+      <DashboardStats stats={stats} />
+      <DashboardQAQueue questions={[]} />
     </div>
   );
 }
