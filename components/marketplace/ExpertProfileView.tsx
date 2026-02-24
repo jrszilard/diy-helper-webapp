@@ -25,31 +25,27 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
   const [showMessageBox, setShowMessageBox] = useState(false);
   const [messageSent, setMessageSent] = useState(false);
   const [messageError, setMessageError] = useState<string | null>(null);
-  const [conversations, setConversations] = useState<{ id: string; title: string }[]>([]);
-  const [selectedConversationId, setSelectedConversationId] = useState('');
-  const [conversationsLoaded, setConversationsLoaded] = useState(false);
+  const [projects, setProjects] = useState<{ id: string; name: string; description: string | null }[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const [projectsLoaded, setProjectsLoaded] = useState(false);
 
-  const fetchConversations = useCallback(async () => {
-    if (conversationsLoaded) return;
+  const fetchProjects = useCallback(async () => {
+    if (projectsLoaded) return;
     try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token;
-      if (!token) return;
-      const res = await fetch('/api/conversations', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const convs = (data.conversations || [])
-          .filter((c: { id: string; title: string | null }) => c.title)
-          .map((c: { id: string; title: string }) => ({ id: c.id, title: c.title }));
-        setConversations(convs);
+      const { data } = await supabase
+        .from('projects')
+        .select('id, name, description')
+        .order('updated_at', { ascending: false })
+        .limit(20);
+      if (data) {
+        setProjects(data.filter(p => p.name));
       }
     } catch {
-      // Conversations fetch is optional — silently ignore
+      // Projects fetch is optional — silently ignore
     } finally {
-      setConversationsLoaded(true);
+      setProjectsLoaded(true);
     }
-  }, [conversationsLoaded]);
+  }, [projectsLoaded]);
 
   const handleSendMessage = async () => {
     if (!messageText.trim()) return;
@@ -64,15 +60,15 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
       }
 
       let fullContent = messageText.trim();
-      if (selectedConversationId) {
-        const selectedConv = conversations.find(c => c.id === selectedConversationId);
-        if (selectedConv) {
-          fullContent = [
-            `[Project: ${selectedConv.title}]`,
-            `Details: /chat?id=${selectedConv.id}`,
-            `---`,
-            fullContent,
-          ].join('\n');
+      if (selectedProjectId) {
+        const selected = projects.find(p => p.id === selectedProjectId);
+        if (selected) {
+          const lines = [`[Project: ${selected.name}]`];
+          if (selected.description) lines.push(selected.description);
+          lines.push(`Details: /chat?project=${selected.id}`);
+          lines.push('---');
+          lines.push(fullContent);
+          fullContent = lines.join('\n');
         }
       }
 
@@ -198,7 +194,7 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
             onClick={() => {
               const willShow = !showMessageBox;
               setShowMessageBox(willShow);
-              if (willShow) fetchConversations();
+              if (willShow) fetchProjects();
             }}
             className="flex items-center gap-2 px-6 py-2.5 bg-[#C67B5C] text-white text-sm font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors"
           >
@@ -224,23 +220,23 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
                   <label className="block text-xs font-medium text-[#7D6B5D] mb-1">
                     Link a project for context (optional)
                   </label>
-                  {conversationsLoaded && conversations.length === 0 ? (
+                  {projectsLoaded && projects.length === 0 ? (
                     <p className="text-xs text-[#B0A696] italic">
                       No projects yet. <Link href="/chat" className="text-[#5D7B93] hover:underline">Start a project</Link> first to share details with an expert.
                     </p>
                   ) : (
                     <select
-                      value={selectedConversationId}
-                      onChange={e => setSelectedConversationId(e.target.value)}
+                      value={selectedProjectId}
+                      onChange={e => setSelectedProjectId(e.target.value)}
                       className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50"
                     >
                       <option value="">Select a project...</option>
-                      {conversations.map(c => (
-                        <option key={c.id} value={c.id}>{c.title}</option>
+                      {projects.map(p => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
                       ))}
                     </select>
                   )}
-                  {selectedConversationId && (
+                  {selectedProjectId && (
                     <p className="text-xs text-[#4A7C59] mt-1">
                       The expert will see your project name and a link to the full details.
                     </p>

@@ -140,10 +140,12 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
   };
 
   // Parse project context from message content
-  const parseProjectContext = (content: string): { projectName: string; detailsLink: string; message: string } | null => {
-    const match = content.match(/^\[Project: (.+?)\]\nDetails: (\/chat\?id=[^\n]+)\n---\n([\s\S]*)$/);
+  const parseProjectContext = (content: string): { projectName: string; description?: string; detailsLink: string; message: string } | null => {
+    // Match: [Project: Name]\n(optional description)\nDetails: /chat?...\n---\n(message)
+    const match = content.match(/^\[Project: (.+?)\]\n([\s\S]*?)Details: (\/chat\?[^\n]+)\n---\n([\s\S]*)$/);
     if (!match) return null;
-    return { projectName: match[1], detailsLink: match[2], message: match[3] };
+    const description = match[2].trim() || undefined;
+    return { projectName: match[1], description, detailsLink: match[3], message: match[4] };
   };
 
   const isBusy = sending || uploading;
@@ -186,6 +188,11 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
                             <p className={`text-xs font-semibold truncate ${isCurrentUser ? 'text-white' : 'text-[#3E2723]'}`}>
                               {project.projectName}
                             </p>
+                            {project.description && (
+                              <p className={`text-xs truncate mt-0.5 ${isCurrentUser ? 'text-white/70' : 'text-[#7D6B5D]'}`}>
+                                {project.description}
+                              </p>
+                            )}
                           </div>
                           <Link
                             href={project.detailsLink}
