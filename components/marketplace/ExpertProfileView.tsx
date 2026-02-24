@@ -1,6 +1,6 @@
 'use client';
 
-import { Star, MapPin, DollarSign, Clock, Shield, MessageSquare, Mail } from 'lucide-react';
+import { Star, MapPin, DollarSign, Clock, Shield, MessageSquare } from 'lucide-react';
 import type { ExpertProfile } from '@/lib/marketplace/types';
 import ReviewCard from './ReviewCard';
 import Link from 'next/link';
@@ -67,7 +67,12 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
       if (selectedConversationId) {
         const selectedConv = conversations.find(c => c.id === selectedConversationId);
         if (selectedConv) {
-          fullContent = `Project: ${selectedConv.title}\nView: /chat?id=${selectedConv.id}\n---\n${fullContent}`;
+          fullContent = [
+            `[Project: ${selectedConv.title}]`,
+            `Details: /chat?id=${selectedConv.id}`,
+            `---`,
+            fullContent,
+          ].join('\n');
         }
       }
 
@@ -187,25 +192,18 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
           </div>
         )}
 
-        {/* CTA buttons */}
-        <div className="flex items-center gap-3 mt-6">
-          <Link
-            href={`/marketplace/qa?expertId=${expert.id}`}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#C67B5C] text-white text-sm font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors"
-          >
-            <MessageSquare size={16} />
-            Ask a Question
-          </Link>
+        {/* Contact button */}
+        <div className="mt-6">
           <button
             onClick={() => {
               const willShow = !showMessageBox;
               setShowMessageBox(willShow);
               if (willShow) fetchConversations();
             }}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[#4A6578] transition-colors"
+            className="flex items-center gap-2 px-6 py-2.5 bg-[#C67B5C] text-white text-sm font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors"
           >
-            <Mail size={16} />
-            Send Message
+            <MessageSquare size={16} />
+            Contact {expert.displayName}
           </button>
         </div>
 
@@ -221,29 +219,36 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
               </div>
             ) : (
               <>
+                {/* Project selector */}
                 {conversations.length > 0 && (
                   <div className="mb-3">
                     <label className="block text-xs font-medium text-[#7D6B5D] mb-1">
-                      Attach a project (optional)
+                      Share a project for context (optional)
                     </label>
                     <select
                       value={selectedConversationId}
                       onChange={e => setSelectedConversationId(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#5D7B93]/50"
+                      className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50"
                     >
                       <option value="">No project attached</option>
                       {conversations.map(c => (
                         <option key={c.id} value={c.id}>{c.title}</option>
                       ))}
                     </select>
+                    {selectedConversationId && (
+                      <p className="text-xs text-[#7D6B5D] mt-1">
+                        The expert will see your project name and a link to the full details.
+                      </p>
+                    )}
                   </div>
                 )}
+
                 <textarea
                   value={messageText}
                   onChange={e => setMessageText(e.target.value)}
-                  placeholder={`Send a message to ${expert.displayName}...`}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#5D7B93]/50 resize-none"
+                  placeholder={`Describe what you need help with...`}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
                   maxLength={2000}
                 />
                 {messageError && (
@@ -254,13 +259,13 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
                   <button
                     onClick={handleSendMessage}
                     disabled={messageSending || !messageText.trim()}
-                    className={`px-4 py-1.5 text-sm font-semibold rounded-lg text-white transition-colors ${
+                    className={`px-4 py-2 text-sm font-semibold rounded-lg text-white transition-colors ${
                       messageSending || !messageText.trim()
                         ? 'bg-[#B0A696] cursor-not-allowed'
-                        : 'bg-[#5D7B93] hover:bg-[#4A6578]'
+                        : 'bg-[#C67B5C] hover:bg-[#A65D3F]'
                     }`}
                   >
-                    {messageSending ? 'Sending...' : 'Send'}
+                    {messageSending ? 'Sending...' : 'Send Message'}
                   </button>
                 </div>
               </>

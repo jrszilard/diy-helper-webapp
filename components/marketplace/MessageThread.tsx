@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Image, X, Loader2 } from 'lucide-react';
+import { Send, Image, X, Loader2, FolderOpen, ExternalLink } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
 
 interface Message {
   id: string;
@@ -138,6 +139,13 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
     }
   };
 
+  // Parse project context from message content
+  const parseProjectContext = (content: string): { projectName: string; detailsLink: string; message: string } | null => {
+    const match = content.match(/^\[Project: (.+?)\]\nDetails: (\/chat\?id=[^\n]+)\n---\n([\s\S]*)$/);
+    if (!match) return null;
+    return { projectName: match[1], detailsLink: match[2], message: match[3] };
+  };
+
   const isBusy = sending || uploading;
   const canSend = (newMessage.trim() || pendingImages.length > 0) && !isBusy;
 
@@ -165,9 +173,36 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
                 {!isCurrentUser && msg.senderName && (
                   <p className="text-xs font-semibold text-[#5D7B93] mb-0.5">{msg.senderName}</p>
                 )}
-                {msg.content && (
-                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                )}
+                {msg.content && (() => {
+                  const project = parseProjectContext(msg.content);
+                  if (project) {
+                    return (
+                      <>
+                        <div className={`rounded-md px-2.5 py-2 mb-2 flex items-center gap-2 ${
+                          isCurrentUser ? 'bg-white/15' : 'bg-[#5D7B93]/10'
+                        }`}>
+                          <FolderOpen size={14} className={isCurrentUser ? 'text-white/80' : 'text-[#5D7B93]'} />
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-xs font-semibold truncate ${isCurrentUser ? 'text-white' : 'text-[#3E2723]'}`}>
+                              {project.projectName}
+                            </p>
+                          </div>
+                          <Link
+                            href={project.detailsLink}
+                            className={`text-xs flex items-center gap-0.5 flex-shrink-0 ${
+                              isCurrentUser ? 'text-white/80 hover:text-white' : 'text-[#5D7B93] hover:text-[#4A6578]'
+                            }`}
+                            onClick={e => e.stopPropagation()}
+                          >
+                            View <ExternalLink size={10} />
+                          </Link>
+                        </div>
+                        <p className="text-sm whitespace-pre-wrap">{project.message}</p>
+                      </>
+                    );
+                  }
+                  return <p className="text-sm whitespace-pre-wrap">{msg.content}</p>;
+                })()}
                 {msg.attachments && msg.attachments.length > 0 && (
                   <div className="mt-2 space-y-2">
                     {msg.attachments.map((url, idx) => (

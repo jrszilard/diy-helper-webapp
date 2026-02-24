@@ -123,7 +123,7 @@ export async function GET(req: NextRequest) {
     const displayNames = await resolveDisplayNames(adminClient, otherUserIds);
 
     const threads = Array.from(threadMap.values()).map(t => ({
-      threadId: t.threadId,
+      id: t.threadId,
       contextType: t.contextType,
       otherUserId: t.otherUserId,
       otherUserName: displayNames[t.otherUserId] || 'Unknown User',
