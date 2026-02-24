@@ -58,11 +58,13 @@ export const BIDDING_COMMISSION = {
   repeatCustomerRate: 0.05,                   // 5% flat for re-hires
 } as const;
 
-// ── Timing ──────────────────────────────────────────────────────────────────
+// ── Timing (read from config / env vars) ────────────────────────────────────
 
-export const CLAIM_EXPIRY_HOURS = 2;
-export const AUTO_ACCEPT_HOURS = 24;
-export const PAYOUT_HOLD_HOURS = 24;
+import { marketplace as marketplaceConfig } from '@/lib/config';
+
+export const CLAIM_EXPIRY_HOURS = marketplaceConfig.claimExpiryHours;
+export const AUTO_ACCEPT_HOURS = marketplaceConfig.autoAcceptHours;
+export const PAYOUT_HOLD_HOURS = marketplaceConfig.payoutHoldHours;
 export const RFP_DEFAULT_DAYS = 7;
 
 // ── Consultation Cancellation Policy ────────────────────────────────────────

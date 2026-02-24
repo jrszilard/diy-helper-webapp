@@ -3,11 +3,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft, Target, Users, RotateCcw, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import QAAnswerView from '@/components/marketplace/QAAnswerView';
 import QAAnswerForm from '@/components/marketplace/QAAnswerForm';
 import ReviewForm from '@/components/marketplace/ReviewForm';
+import CreditBalance from '@/components/marketplace/CreditBalance';
 
 interface QuestionDetail {
   id: string;
@@ -22,6 +23,12 @@ interface QuestionDetail {
   proRecommendationReason: string | null;
   priceCents: number;
   createdAt: string;
+  questionMode: 'pool' | 'direct';
+  targetExpertId: string | null;
+  markedNotHelpful: boolean;
+  creditAppliedCents: number;
+  refundId: string | null;
+  refundedAt: string | null;
 }
 
 export default function QADetailPage() {
@@ -32,6 +39,7 @@ export default function QADetailPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showReview, setShowReview] = useState(false);
+  const [showCreditNotice, setShowCreditNotice] = useState(false);
 
   const fetchQuestion = useCallback(async () => {
     try {
@@ -103,10 +111,27 @@ export default function QADetailPage() {
     }
   };
 
+  const handleNotHelpful = async () => {
+    try {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) return;
+      const res = await fetch(`/api/qa/${questionId}/not-helpful`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setShowCreditNotice(true);
+        await fetchQuestion();
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F5F0E6]">
       <header className="bg-[#FDFBF7] border-b border-[#D4C8B8] shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 py-4">
+        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link
             href="/marketplace/qa"
             className="flex items-center gap-1.5 text-sm text-[#5D7B93] hover:text-[#4A6578] transition-colors"
@@ -114,16 +139,54 @@ export default function QADetailPage() {
             <ArrowLeft size={16} />
             Back to Q&A
           </Link>
+          <div className="flex items-center gap-3">
+            {/* Mode badge */}
+            {question.questionMode === 'direct' ? (
+              <span className="flex items-center gap-1 text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full font-medium">
+                <Target size={12} />
+                Direct Question
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-xs px-2 py-1 bg-[#E8DFD0] text-[#7D6B5D] rounded-full font-medium">
+                <Users size={12} />
+                Pool Question
+              </span>
+            )}
+            {/* Status badges */}
+            {question.status === 'expired' && (
+              <span className="flex items-center gap-1 text-xs px-2 py-1 bg-red-100 text-red-700 rounded-full font-medium">
+                <XCircle size={12} />
+                Expired
+              </span>
+            )}
+            {question.refundId && (
+              <span className="flex items-center gap-1 text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">
+                <RotateCcw size={12} />
+                Refunded
+              </span>
+            )}
+          </div>
         </div>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+        {/* Credit notice after not-helpful */}
+        {showCreditNotice && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-sm text-green-700 font-medium">
+              Platform credit has been added to your account.
+            </p>
+            <CreditBalance className="mt-2" showZero />
+          </div>
+        )}
+
         {isDIYer && (
           <>
             <QAAnswerView
               question={question}
               onAccept={question.status === 'answered' ? handleAccept : undefined}
-              onReview={question.status === 'accepted' ? () => setShowReview(true) : undefined}
+              onReview={question.status === 'accepted' && !question.markedNotHelpful ? () => setShowReview(true) : undefined}
+              onNotHelpful={question.status === 'answered' ? handleNotHelpful : undefined}
             />
             {showReview && question.expertId && (
               <ReviewForm

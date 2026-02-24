@@ -72,7 +72,8 @@ export interface ExpertInsurance {
 
 // ── Q&A ─────────────────────────────────────────────────────────────────────
 
-export type QAStatus = 'open' | 'claimed' | 'answered' | 'accepted' | 'disputed' | 'resolved';
+export type QuestionMode = 'pool' | 'direct';
+export type QAStatus = 'open' | 'claimed' | 'answered' | 'accepted' | 'expired' | 'disputed' | 'resolved';
 
 export interface QAQuestion {
   id: string;
@@ -100,6 +101,16 @@ export interface QAQuestion {
   payoutReleasedAt: string | null;
   diyerCity: string | null;
   diyerState: string | null;
+  // Payment flow v2 fields
+  questionMode: QuestionMode;
+  targetExpertId: string | null;
+  paymentMethodId: string | null;
+  stripeCustomerId: string | null;
+  refundId: string | null;
+  refundedAt: string | null;
+  markedNotHelpful: boolean;
+  notHelpfulAt: string | null;
+  creditAppliedCents: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -234,11 +245,12 @@ export interface MarketplaceMessage {
 
 export type NotificationType =
   | 'qa_question_posted' | 'qa_question_claimed' | 'qa_answer_received'
-  | 'qa_answer_accepted' | 'qa_review_received'
+  | 'qa_answer_accepted' | 'qa_review_received' | 'qa_claim_expired'
+  | 'qa_not_helpful'
   | 'consultation_booked' | 'consultation_reminder' | 'consultation_summary'
   | 'rfp_new_bid' | 'rfp_bid_accepted' | 'rfp_bid_rejected'
   | 'message_received'
-  | 'payment_received' | 'payment_sent'
+  | 'payment_received' | 'payment_sent' | 'payment_refunded'
   | 'expert_verified';
 
 export interface Notification {

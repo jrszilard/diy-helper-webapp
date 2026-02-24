@@ -73,6 +73,34 @@ export async function POST(req: NextRequest) {
         break;
       }
 
+      case 'charge.refunded': {
+        const charge = event.data.object;
+        const paymentIntentId = typeof charge.payment_intent === 'string'
+          ? charge.payment_intent
+          : charge.payment_intent?.id;
+
+        if (paymentIntentId) {
+          // Update payment_transactions status
+          await adminClient
+            .from('payment_transactions')
+            .update({
+              status: 'refunded',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('stripe_payment_intent_id', paymentIntentId);
+
+          // Update qa_questions payout_status
+          await adminClient
+            .from('qa_questions')
+            .update({
+              payout_status: 'refunded',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('payment_intent_id', paymentIntentId);
+        }
+        break;
+      }
+
       default:
         logger.info('Unhandled payment webhook event', { type: event.type });
     }

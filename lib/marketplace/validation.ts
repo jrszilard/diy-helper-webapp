@@ -48,6 +48,8 @@ export const SubmitQuestionSchema = z.object({
   photoUrls: z.array(z.string().url()).max(3).default([]),
   diyerCity: z.string().max(100).optional(),
   diyerState: z.string().max(50).optional(),
+  paymentMethodId: z.string().optional(),
+  targetExpertId: z.string().uuid().optional(),
 });
 
 export const AnswerQuestionSchema = z.object({

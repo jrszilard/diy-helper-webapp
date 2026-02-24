@@ -1,6 +1,7 @@
 'use client';
 
-import { CheckCircle2, Star, AlertTriangle, Image } from 'lucide-react';
+import { useState } from 'react';
+import { CheckCircle2, Star, AlertTriangle, Image, ThumbsDown, Loader2 } from 'lucide-react';
 
 interface QAAnswerViewProps {
   question: {
@@ -13,15 +14,34 @@ interface QAAnswerViewProps {
     recommendsProfessional?: boolean;
     proRecommendationReason?: string | null;
     expertId?: string | null;
+    priceCents?: number;
+    creditAppliedCents?: number;
+    markedNotHelpful?: boolean;
   };
   onAccept?: () => void;
   onReview?: () => void;
+  onNotHelpful?: () => void;
 }
 
-export default function QAAnswerView({ question, onAccept, onReview }: QAAnswerViewProps) {
+export default function QAAnswerView({ question, onAccept, onReview, onNotHelpful }: QAAnswerViewProps) {
+  const [confirmNotHelpful, setConfirmNotHelpful] = useState(false);
+  const [notHelpfulLoading, setNotHelpfulLoading] = useState(false);
+
   const hasAnswer = question.answerText && question.answerText.trim().length > 0;
   const canAccept = question.status === 'answered' && onAccept;
   const canReview = question.status === 'accepted' && onReview;
+  const canMarkNotHelpful = question.status === 'answered' && onNotHelpful && !question.markedNotHelpful;
+
+  const creditAmount = (question.priceCents || 0) - (question.creditAppliedCents || 0);
+
+  const handleNotHelpful = async () => {
+    if (!confirmNotHelpful) {
+      setConfirmNotHelpful(true);
+      return;
+    }
+    setNotHelpfulLoading(true);
+    onNotHelpful?.();
+  };
 
   return (
     <div className="space-y-4">
@@ -75,6 +95,45 @@ export default function QAAnswerView({ question, onAccept, onReview }: QAAnswerV
                 Accept Answer
               </button>
             )}
+            {canMarkNotHelpful && (
+              <>
+                {confirmNotHelpful ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleNotHelpful}
+                      disabled={notHelpfulLoading}
+                      className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      {notHelpfulLoading ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <ThumbsDown size={16} />
+                      )}
+                      Confirm: Not Helpful
+                    </button>
+                    <button
+                      onClick={() => setConfirmNotHelpful(false)}
+                      className="text-sm text-[#7D6B5D] hover:text-[#3E2723]"
+                    >
+                      Cancel
+                    </button>
+                    {creditAmount > 0 && (
+                      <span className="text-xs text-[#7D6B5D]">
+                        You&apos;ll receive ${(creditAmount / 100).toFixed(2)} in platform credit
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleNotHelpful}
+                    className="flex items-center gap-2 px-4 py-2 border border-red-300 text-red-600 text-sm font-semibold rounded-lg hover:bg-red-50 transition-colors"
+                  >
+                    <ThumbsDown size={16} />
+                    Not Helpful
+                  </button>
+                )}
+              </>
+            )}
             {canReview && (
               <button
                 onClick={onReview}
@@ -85,6 +144,15 @@ export default function QAAnswerView({ question, onAccept, onReview }: QAAnswerV
               </button>
             )}
           </div>
+
+          {/* Show if already marked not helpful */}
+          {question.markedNotHelpful && (
+            <div className="mt-3 bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-sm text-red-700">
+                You marked this answer as not helpful. Platform credit has been applied to your account.
+              </p>
+            </div>
+          )}
         </div>
       ) : (
         <div className="bg-[#E8DFD0]/50 border border-[#D4C8B8] rounded-lg p-6 text-center">

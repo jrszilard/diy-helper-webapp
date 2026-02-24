@@ -82,6 +82,13 @@ export async function GET(
       proRecommendationReason: question.pro_recommendation_reason,
       diyerCity: question.diyer_city,
       diyerState: question.diyer_state,
+      questionMode: question.question_mode,
+      targetExpertId: question.target_expert_id,
+      markedNotHelpful: question.marked_not_helpful,
+      notHelpfulAt: question.not_helpful_at,
+      creditAppliedCents: question.credit_applied_cents,
+      refundId: question.refund_id,
+      refundedAt: question.refunded_at,
       createdAt: question.created_at,
     };
 

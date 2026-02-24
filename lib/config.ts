@@ -133,6 +133,15 @@ export const stripe = {
   subscriptionWebhookSecret: envString('STRIPE_SUBSCRIPTION_WEBHOOK_SECRET', ''),
 } as const;
 
+// ── Marketplace ─────────────────────────────────────────────────────────────
+export const marketplace = {
+  claimExpiryHours: envInt('QA_CLAIM_EXPIRY_HOURS', 2),
+  autoAcceptHours: envInt('QA_AUTO_ACCEPT_HOURS', 24),
+  payoutHoldHours: envInt('QA_PAYOUT_HOLD_HOURS', 24),
+  /** Set to 'true' to bypass real Stripe calls and fake payment flows */
+  testMode: envString('QA_PAYMENT_TEST_MODE', '') === 'true',
+} as const;
+
 // Re-export everything as a single default for convenience
-const config = { anthropic, rateLimits, cors, storeSearch, streaming, pruning, freemium, stripe } as const;
+const config = { anthropic, rateLimits, cors, storeSearch, streaming, pruning, freemium, stripe, marketplace } as const;
 export default config;

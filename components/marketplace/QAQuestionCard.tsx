@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, DollarSign, Image } from 'lucide-react';
+import { Clock, DollarSign, Image, Target, Users } from 'lucide-react';
 
 interface QAQuestionCardProps {
   question: {
@@ -11,6 +11,7 @@ interface QAQuestionCardProps {
     createdAt: string;
     photoUrls?: string[];
     aiContext?: { projectSummary?: string } | null;
+    questionMode?: 'pool' | 'direct';
   };
   onClaim?: () => void;
   showClaim?: boolean;
@@ -27,6 +28,8 @@ export default function QAQuestionCard({ question, onClaim, showClaim = false }:
     const days = Math.floor(hours / 24);
     return `${days}d ago`;
   };
+
+  const isDirect = question.questionMode === 'direct';
 
   return (
     <div className="bg-white border border-[#D4C8B8] rounded-lg p-4">
@@ -55,6 +58,17 @@ export default function QAQuestionCard({ question, onClaim, showClaim = false }:
             <span className="text-xs px-2 py-0.5 bg-[#5D7B93]/10 text-[#5D7B93] rounded-full font-medium">
               {question.category}
             </span>
+            {isDirect ? (
+              <span className="flex items-center gap-1 text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full font-medium">
+                <Target size={10} />
+                Direct
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-xs px-2 py-0.5 bg-[#E8DFD0] text-[#7D6B5D] rounded-full font-medium">
+                <Users size={10} />
+                Pool
+              </span>
+            )}
             <span className="flex items-center gap-1 text-xs font-medium text-[#4A7C59]">
               <DollarSign size={12} />
               {(question.priceCents / 100).toFixed(2)}

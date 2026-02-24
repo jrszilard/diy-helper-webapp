@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Clock, CheckCircle2, MessageSquare, UserCheck } from 'lucide-react';
+import { Clock, CheckCircle2, MessageSquare, UserCheck, XCircle, RotateCcw, Target } from 'lucide-react';
 import type { QAQuestion } from '@/lib/marketplace/types';
 
 interface QAQuestionListProps {
@@ -13,6 +13,7 @@ const STATUS_STYLES: Record<string, { label: string; bg: string; text: string; i
   claimed: { label: 'Claimed', bg: 'bg-amber-100', text: 'text-amber-700', icon: <UserCheck size={12} /> },
   answered: { label: 'Answered', bg: 'bg-[#4A7C59]/10', text: 'text-[#4A7C59]', icon: <MessageSquare size={12} /> },
   accepted: { label: 'Accepted', bg: 'bg-[#4A7C59]/10', text: 'text-[#4A7C59]', icon: <CheckCircle2 size={12} /> },
+  expired: { label: 'Expired', bg: 'bg-red-100', text: 'text-red-700', icon: <XCircle size={12} /> },
 };
 
 export default function QAQuestionList({ questions }: QAQuestionListProps) {
@@ -36,6 +37,9 @@ export default function QAQuestionList({ questions }: QAQuestionListProps) {
     <div className="space-y-2">
       {questions.map(q => {
         const style = STATUS_STYLES[q.status] || STATUS_STYLES.open;
+        const isDirect = q.questionMode === 'direct';
+        const isRefunded = !!q.refundId;
+
         return (
           <Link
             key={q.id}
@@ -49,6 +53,18 @@ export default function QAQuestionList({ questions }: QAQuestionListProps) {
                   <span className="text-xs px-2 py-0.5 bg-[#5D7B93]/10 text-[#5D7B93] rounded-full font-medium">
                     {q.category}
                   </span>
+                  {isDirect && (
+                    <span className="flex items-center gap-1 text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full font-medium">
+                      <Target size={10} />
+                      Direct
+                    </span>
+                  )}
+                  {isRefunded && (
+                    <span className="flex items-center gap-1 text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">
+                      <RotateCcw size={10} />
+                      Refunded
+                    </span>
+                  )}
                   <span className="text-xs text-[#B0A696]">{formatDate(q.createdAt)}</span>
                 </div>
               </div>
