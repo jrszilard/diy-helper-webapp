@@ -102,6 +102,12 @@ export default function LandingPage() {
             <div className="flex items-center gap-4">
               <AuthButton user={user} variant="dark" />
               <Link
+                href="/marketplace/qa"
+                className="hidden md:inline-flex text-[#D4C8B8] hover:text-white font-medium transition-colors"
+              >
+                Ask an Expert
+              </Link>
+              <Link
                 href="/experts"
                 className="hidden md:inline-flex text-[#D4C8B8] hover:text-white font-medium transition-colors"
               >

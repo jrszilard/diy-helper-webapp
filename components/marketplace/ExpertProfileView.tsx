@@ -1,6 +1,6 @@
 'use client';
 
-import { Star, MapPin, DollarSign, Clock, Shield, MessageSquare } from 'lucide-react';
+import { Star, MapPin, DollarSign, Clock, Shield, MessageSquare, HelpCircle } from 'lucide-react';
 import type { ExpertProfile } from '@/lib/marketplace/types';
 import ReviewCard from './ReviewCard';
 import Link from 'next/link';
@@ -188,8 +188,8 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
           </div>
         )}
 
-        {/* Contact button */}
-        <div className="mt-6">
+        {/* Action buttons */}
+        <div className="mt-6 flex flex-wrap items-center gap-3">
           <button
             onClick={() => {
               const willShow = !showMessageBox;
@@ -201,6 +201,15 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
             <MessageSquare size={16} />
             Contact {expert.displayName}
           </button>
+          {expert.qaRateCents && (
+            <Link
+              href={`/marketplace/qa?targetExpertId=${expert.id}&targetExpertName=${encodeURIComponent(expert.displayName)}`}
+              className="flex items-center gap-2 px-6 py-2.5 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[#4A6578] transition-colors"
+            >
+              <HelpCircle size={16} />
+              Ask a Paid Question — ${(expert.qaRateCents / 100).toFixed(0)}
+            </Link>
+          )}
         </div>
 
         {/* Inline message composer */}

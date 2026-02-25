@@ -13,6 +13,8 @@ function QAPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const reportId = searchParams.get('reportId') || undefined;
+  const targetExpertId = searchParams.get('targetExpertId') || undefined;
+  const targetExpertName = searchParams.get('targetExpertName') || undefined;
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [reportContext, setReportContext] = useState<{ projectSummary?: string; projectType?: string } | undefined>();
@@ -100,6 +102,8 @@ function QAPageContent() {
         <QASubmitForm
           reportId={reportId}
           reportContext={reportContext}
+          targetExpertId={targetExpertId}
+          targetExpertName={targetExpertName}
           onSuccess={handleSuccess}
         />
 
