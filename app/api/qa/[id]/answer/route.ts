@@ -107,7 +107,7 @@ export async function POST(
       type: 'qa_answer_received',
       title: 'Your question has been answered',
       body: `${expert.displayName} has answered your question`,
-      link: `/qa/${id}`,
+      link: `/marketplace/qa/${id}`,
     });
 
     return applyCorsHeaders(req, new Response(

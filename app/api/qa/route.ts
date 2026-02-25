@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
           type: 'qa_question_posted',
           title: 'You have a direct question',
           body: parsed.data.questionText.slice(0, 100),
-          link: `/experts/qa/${question.id}`,
+          link: `/experts/dashboard/qa`,
         });
       }
     } else {
@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
               type: 'qa_question_posted',
               title: 'New question in your specialty',
               body: parsed.data.questionText.slice(0, 100),
-              link: `/experts/qa/${question.id}`,
+              link: `/experts/dashboard/qa`,
             });
           }
         }

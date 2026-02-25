@@ -154,7 +154,7 @@ export async function POST(
       type: 'qa_question_claimed',
       title: 'An expert has claimed your question',
       body: `${expert.displayName} is working on your answer`,
-      link: `/qa/${id}`,
+      link: `/marketplace/qa/${id}`,
     });
 
     return applyCorsHeaders(req, new Response(

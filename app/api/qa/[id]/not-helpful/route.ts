@@ -149,7 +149,7 @@ export async function POST(
           body: partialPayout > 0
             ? `You received a partial payment of $${(partialPayout / 100).toFixed(2)}`
             : 'The DIYer found your answer unhelpful.',
-          link: `/experts/qa/${id}`,
+          link: `/marketplace/qa/${id}`,
         });
       }
     }

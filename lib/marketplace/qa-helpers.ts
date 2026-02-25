@@ -130,7 +130,7 @@ export async function releaseExpiredClaims(adminClient: SupabaseClient): Promise
               type: 'qa_question_posted',
               title: 'Question available again',
               body: (q.question_text || '').slice(0, 100),
-              link: `/experts/qa/${q.id}`,
+              link: `/experts/dashboard/qa`,
             });
           }
         }

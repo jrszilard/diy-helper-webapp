@@ -122,7 +122,7 @@ export async function POST(
           body: question.expert_payout_cents > 0
             ? `You earned $${(question.expert_payout_cents / 100).toFixed(2)}`
             : 'Great job helping a fellow DIYer!',
-          link: `/experts/qa/${id}`,
+          link: `/marketplace/qa/${id}`,
         });
       }
     }
