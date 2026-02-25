@@ -4,15 +4,17 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import NotificationBell from '@/components/NotificationBell';
+import AuthButton from '@/components/AuthButton';
 import {
-  Wrench, LayoutDashboard, MessageSquare, Mail, Settings, Loader2, Menu, X,
+  Wrench, LayoutDashboard, MessageSquare, Mail, User, Loader2, Menu, X, Home, Users,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { href: '/experts/dashboard', label: 'Overview', icon: LayoutDashboard },
   { href: '/experts/dashboard/qa', label: 'Q&A Queue', icon: MessageSquare },
   { href: '/experts/dashboard/messages', label: 'Messages', icon: Mail },
-  { href: '/experts/dashboard/settings', label: 'Settings', icon: Settings },
+  { href: '/experts/dashboard/profile', label: 'My Profile', icon: User },
 ];
 
 export default function ExpertDashboardLayout({ children }: { children: React.ReactNode }) {
@@ -21,6 +23,8 @@ export default function ExpertDashboardLayout({ children }: { children: React.Re
   const [loading, setLoading] = useState(true);
   const [ready, setReady] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [userId, setUserId] = useState<string | undefined>();
+  const [expertName, setExpertName] = useState<string>('');
 
   useEffect(() => {
     async function check() {
@@ -29,6 +33,8 @@ export default function ExpertDashboardLayout({ children }: { children: React.Re
         router.push('/chat');
         return;
       }
+
+      setUserId(user.id);
 
       try {
         const token = (await supabase.auth.getSession()).data.session?.access_token;
@@ -44,6 +50,7 @@ export default function ExpertDashboardLayout({ children }: { children: React.Re
           router.push('/experts/register');
           return;
         }
+        setExpertName(data.expert.displayName || '');
       } catch {
         router.push('/experts/register');
         return;
@@ -76,8 +83,13 @@ export default function ExpertDashboardLayout({ children }: { children: React.Re
             </div>
             <span className="text-lg font-bold text-[#3E2723]">DIY Helper</span>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
             <span className="text-xs font-medium text-[#7D6B5D] hidden sm:inline">Expert Dashboard</span>
+            <NotificationBell userId={userId} />
+            <AuthButton
+              user={userId ? { id: userId } : null}
+              isExpert={true}
+            />
             <button
               onClick={() => setMobileNavOpen(!mobileNavOpen)}
               className="sm:hidden p-2 text-[#7D6B5D] hover:bg-[#E8DFD0] rounded-lg"
@@ -90,8 +102,16 @@ export default function ExpertDashboardLayout({ children }: { children: React.Re
 
       <div className="max-w-7xl mx-auto flex">
         {/* Sidebar - desktop */}
-        <aside className="hidden sm:block w-56 border-r border-[#D4C8B8] bg-[#FDFBF7] min-h-[calc(100vh-57px)]">
-          <nav className="p-3 space-y-1">
+        <aside className="hidden sm:flex sm:flex-col w-56 border-r border-[#D4C8B8] bg-[#FDFBF7] min-h-[calc(100vh-57px)]">
+          {/* Greeting */}
+          {expertName && (
+            <div className="px-4 py-3 border-b border-[#E8DFD0]">
+              <p className="text-xs text-[#7D6B5D]">Welcome back,</p>
+              <p className="text-sm font-semibold text-[#3E2723] truncate">{expertName}</p>
+            </div>
+          )}
+
+          <nav className="p-3 space-y-1 flex-1">
             {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
               const isActive = pathname === href;
               return (
@@ -110,6 +130,24 @@ export default function ExpertDashboardLayout({ children }: { children: React.Re
               );
             })}
           </nav>
+
+          {/* Bottom links */}
+          <div className="p-3 border-t border-[#E8DFD0] space-y-1">
+            <Link
+              href="/experts"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-[#7D6B5D] hover:bg-[#E8DFD0] hover:text-[#3E2723] transition-colors"
+            >
+              <Users size={16} />
+              Browse Experts
+            </Link>
+            <Link
+              href="/"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-[#7D6B5D] hover:bg-[#E8DFD0] hover:text-[#3E2723] transition-colors"
+            >
+              <Home size={16} />
+              Back to DIY Helper
+            </Link>
+          </div>
         </aside>
 
         {/* Mobile nav dropdown */}
@@ -134,6 +172,23 @@ export default function ExpertDashboardLayout({ children }: { children: React.Re
                   </Link>
                 );
               })}
+              <div className="border-t border-[#E8DFD0] my-2" />
+              <Link
+                href="/experts"
+                onClick={() => setMobileNavOpen(false)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-[#7D6B5D] hover:bg-[#E8DFD0] hover:text-[#3E2723] transition-colors"
+              >
+                <Users size={16} />
+                Browse Experts
+              </Link>
+              <Link
+                href="/"
+                onClick={() => setMobileNavOpen(false)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-[#7D6B5D] hover:bg-[#E8DFD0] hover:text-[#3E2723] transition-colors"
+              >
+                <Home size={16} />
+                Back to DIY Helper
+              </Link>
             </nav>
           </div>
         )}

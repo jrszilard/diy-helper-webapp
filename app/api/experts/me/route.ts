@@ -26,13 +26,26 @@ export async function GET(req: NextRequest) {
     const expert = await getExpertByUserId(auth.supabaseClient, auth.userId);
     if (!expert) {
       return applyCorsHeaders(req, new Response(
-        JSON.stringify({ expert: null }),
+        JSON.stringify({ expert: null, openQueueCount: 0 }),
         { status: 200, headers: { 'Content-Type': 'application/json' } }
       ));
     }
 
+    // Count open questions matching expert's specialties
+    let openQueueCount = 0;
+    if (expert.specialties.length > 0) {
+      const specialtyNames = expert.specialties.map(s => s.specialty);
+      const { count } = await auth.supabaseClient
+        .from('qa_questions')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'open')
+        .in('category', specialtyNames)
+        .neq('diyer_user_id', auth.userId);
+      openQueueCount = count ?? 0;
+    }
+
     return applyCorsHeaders(req, new Response(
-      JSON.stringify({ expert }),
+      JSON.stringify({ expert, openQueueCount }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     ));
   } catch (error) {

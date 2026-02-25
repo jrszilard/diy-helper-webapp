@@ -25,11 +25,14 @@ import ProjectTemplates from '@/components/ProjectTemplates';
 import GuidedBot from '@/components/guided-bot/GuidedBot';
 import AuthButton from '@/components/AuthButton';
 import ExpertBar from '@/components/ExpertBar';
+import ExpertQuickBar from '@/components/ExpertQuickBar';
+import { useExpertStatus } from '@/hooks/useExpertStatus';
 import { supabase } from '@/lib/supabase';
 
 export default function LandingPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const { isExpert, expert, openQueueCount } = useExpertStatus();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -100,7 +103,7 @@ export default function LandingPage() {
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <AuthButton user={user} variant="dark" />
+              <AuthButton user={user} variant="dark" isExpert={isExpert} />
               <Link
                 href="/marketplace/qa"
                 className="hidden md:inline-flex text-[#D4C8B8] hover:text-white font-medium transition-colors"
@@ -131,8 +134,12 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Expert Bar */}
-      <ExpertBar user={user} />
+      {/* Expert Bar / Quick Bar */}
+      {isExpert && expert ? (
+        <ExpertQuickBar displayName={expert.displayName} openQueueCount={openQueueCount} />
+      ) : (
+        <ExpertBar user={user} />
+      )}
 
       {/* Hero Section with Guided Bot */}
       <section className="relative pt-12 sm:pt-20 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">

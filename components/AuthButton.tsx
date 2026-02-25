@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { User, LogOut, X, ChevronDown, FolderOpen, MessageSquare, Mail, Users, Award } from 'lucide-react';
+import { User, LogOut, X, ChevronDown, FolderOpen, MessageSquare, Mail, Users, Award, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AuthButton({
@@ -10,11 +10,13 @@ export default function AuthButton({
   externalShowAuth,
   onAuthToggle,
   variant = 'light',
+  isExpert = false,
 }: {
   user: { id: string; email?: string } | null;
   externalShowAuth?: boolean;
   onAuthToggle?: (show: boolean) => void;
   variant?: 'light' | 'dark';
+  isExpert?: boolean;
 }) {
   const [loading, setLoading] = useState(false);
   const [internalShowAuth, setInternalShowAuth] = useState(false);
@@ -106,6 +108,14 @@ export default function AuthButton({
               My Questions
             </Link>
             <Link
+              href="/profile"
+              className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#3E2723] hover:bg-[#F5F0E6] transition-colors"
+              onClick={() => setShowDropdown(false)}
+            >
+              <User className="w-4 h-4 text-[#7D6B5D]" />
+              My Profile
+            </Link>
+            <Link
               href="/messages"
               className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#3E2723] hover:bg-[#F5F0E6] transition-colors"
               onClick={() => setShowDropdown(false)}
@@ -121,14 +131,35 @@ export default function AuthButton({
               <Users className="w-4 h-4 text-[#7D6B5D]" />
               Find an Expert
             </Link>
-            <Link
-              href="/experts/register"
-              className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#3E2723] hover:bg-[#F5F0E6] transition-colors"
-              onClick={() => setShowDropdown(false)}
-            >
-              <Award className="w-4 h-4 text-[#7D6B5D]" />
-              Become an Expert
-            </Link>
+            {isExpert ? (
+              <>
+                <Link
+                  href="/experts/dashboard"
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#3E2723] hover:bg-[#F5F0E6] transition-colors"
+                  onClick={() => setShowDropdown(false)}
+                >
+                  <LayoutDashboard className="w-4 h-4 text-[#7D6B5D]" />
+                  Expert Dashboard
+                </Link>
+                <Link
+                  href="/experts/dashboard/qa"
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#3E2723] hover:bg-[#F5F0E6] transition-colors"
+                  onClick={() => setShowDropdown(false)}
+                >
+                  <MessageSquare className="w-4 h-4 text-[#7D6B5D]" />
+                  Q&A Queue
+                </Link>
+              </>
+            ) : (
+              <Link
+                href="/experts/register"
+                className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#3E2723] hover:bg-[#F5F0E6] transition-colors"
+                onClick={() => setShowDropdown(false)}
+              >
+                <Award className="w-4 h-4 text-[#7D6B5D]" />
+                Become an Expert
+              </Link>
+            )}
             <div className="border-t border-[#E8DFD0] my-1" />
             <button
               onClick={handleSignOut}

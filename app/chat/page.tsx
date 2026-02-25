@@ -11,12 +11,14 @@ import { guestStorage } from '@/lib/guestStorage';
 import AuthButton from '@/components/AuthButton';
 import NotificationBell from '@/components/NotificationBell';
 import InventoryPanel from '@/components/InventoryPanel';
+import { useExpertStatus } from '@/hooks/useExpertStatus';
 import { Package } from 'lucide-react';
 import { Project } from '@/types';
 import type { User } from '@supabase/supabase-js';
 
 export default function ChatPage() {
   const [user, setUser] = useState<User | null>(null);
+  const { isExpert } = useExpertStatus();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [projectRefreshTrigger, setProjectRefreshTrigger] = useState(0);
 
@@ -235,6 +237,7 @@ export default function ChatPage() {
                   user={user}
                   externalShowAuth={showAuthModal}
                   onAuthToggle={setShowAuthModal}
+                  isExpert={isExpert}
                 />
                 <NotificationBell userId={user?.id} />
                 <button
