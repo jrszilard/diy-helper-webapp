@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/qa/cron/expire-claims",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }

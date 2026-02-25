@@ -4,7 +4,7 @@ import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { parseRequestBody } from '@/lib/validation';
 import { SubmitQuestionSchema } from '@/lib/marketplace/validation';
-import { calculateQAPrice, isFirstQuestionFree } from '@/lib/marketplace/qa-helpers';
+import { calculateQAPrice, isFirstQuestionFree, releaseExpiredClaims } from '@/lib/marketplace/qa-helpers';
 import { buildExpertContext } from '@/lib/marketplace/context-builder';
 import { createNotification } from '@/lib/notifications';
 import { getAdminClient } from '@/lib/supabase-admin';
@@ -178,6 +178,9 @@ export async function GET(req: NextRequest) {
         { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': String(rateLimitResult.retryAfter) } }
       ));
     }
+
+    // Release any expired claims on-demand
+    try { await releaseExpiredClaims(getAdminClient()); } catch { /* best-effort */ }
 
     const { data: questions, error } = await auth.supabaseClient
       .from('qa_questions')

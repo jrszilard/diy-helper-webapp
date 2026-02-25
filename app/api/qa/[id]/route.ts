@@ -3,6 +3,8 @@ import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { getExpertById } from '@/lib/marketplace/expert-helpers';
+import { releaseExpiredClaims } from '@/lib/marketplace/qa-helpers';
+import { getAdminClient } from '@/lib/supabase-admin';
 import { logger } from '@/lib/logger';
 
 export async function GET(
@@ -27,6 +29,9 @@ export async function GET(
     }
 
     const { id } = await params;
+
+    // Release any expired claims on-demand
+    try { await releaseExpiredClaims(getAdminClient()); } catch { /* best-effort */ }
 
     const { data: question, error } = await auth.supabaseClient
       .from('qa_questions')
