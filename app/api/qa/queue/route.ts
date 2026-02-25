@@ -71,6 +71,7 @@ export async function GET(req: NextRequest) {
           diyerCity: q.diyer_city,
           diyerState: q.diyer_state,
           hasAiContext: !!q.ai_context,
+          questionMode: q.question_mode,
           createdAt: q.created_at,
         })),
       }),

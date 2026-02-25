@@ -30,6 +30,7 @@ export default function QAQuestionCard({ question, onClaim, showClaim = false }:
   };
 
   const isDirect = question.questionMode === 'direct';
+  const isFree = question.priceCents === 0;
 
   return (
     <div className="bg-white border border-[#D4C8B8] rounded-lg p-4">
@@ -71,7 +72,7 @@ export default function QAQuestionCard({ question, onClaim, showClaim = false }:
             )}
             <span className="flex items-center gap-1 text-xs font-medium text-[#4A7C59]">
               <DollarSign size={12} />
-              {(question.priceCents / 100).toFixed(2)}
+              {isFree ? 'Free' : `${(question.priceCents / 100).toFixed(2)}`}
             </span>
             <span className="flex items-center gap-1 text-xs text-[#B0A696]">
               <Clock size={12} />
@@ -81,12 +82,17 @@ export default function QAQuestionCard({ question, onClaim, showClaim = false }:
         </div>
 
         {showClaim && onClaim && (
-          <button
-            onClick={onClaim}
-            className="px-4 py-2 bg-[#C67B5C] text-white text-sm font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors whitespace-nowrap flex-shrink-0"
-          >
-            Claim
-          </button>
+          <div className="flex flex-col items-end gap-1 flex-shrink-0">
+            <button
+              onClick={onClaim}
+              className="px-4 py-2 bg-[#C67B5C] text-white text-sm font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors whitespace-nowrap"
+            >
+              Claim
+            </button>
+            {!isFree && (
+              <span className="text-[10px] text-[#7D6B5D]">Charges DIYer on claim</span>
+            )}
+          </div>
         )}
       </div>
     </div>

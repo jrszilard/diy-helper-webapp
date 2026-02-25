@@ -89,6 +89,8 @@ export async function GET(
       creditAppliedCents: question.credit_applied_cents,
       refundId: question.refund_id,
       refundedAt: question.refunded_at,
+      paymentIntentId: question.payment_intent_id,
+      payoutStatus: question.payout_status,
       createdAt: question.created_at,
     };
 

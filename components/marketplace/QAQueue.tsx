@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Filter } from 'lucide-react';
+import { Filter, DollarSign, Zap } from 'lucide-react';
 import type { QAQuestion } from '@/lib/marketplace/types';
 import QAQuestionCard from './QAQuestionCard';
 
@@ -28,13 +28,32 @@ const FILTER_OPTIONS = [
 
 export default function QAQueue({ questions, onClaim }: QAQueueProps) {
   const [activeFilter, setActiveFilter] = useState('all');
+  const [claimingId, setClaimingId] = useState<string | null>(null);
 
   const filtered = activeFilter === 'all'
     ? questions
     : questions.filter(q => q.category === activeFilter);
 
+  const handleClaim = async (questionId: string) => {
+    setClaimingId(questionId);
+    await onClaim(questionId);
+    setClaimingId(null);
+  };
+
   return (
     <div>
+      {/* Info banner */}
+      <div className="mb-4 p-3 bg-[#5D7B93]/5 border border-[#5D7B93]/20 rounded-lg flex items-start gap-2">
+        <DollarSign size={16} className="text-[#5D7B93] flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-xs text-[#5D7B93] font-semibold">Charge on Claim</p>
+          <p className="text-xs text-[#5D7B93]">
+            When you claim a question, the DIYer&apos;s card is charged and you have 2 hours to answer.
+            If you don&apos;t answer in time, they&apos;re automatically refunded.
+          </p>
+        </div>
+      </div>
+
       <div className="flex items-center gap-2 mb-4">
         <Filter size={14} className="text-[#7D6B5D]" />
         <div className="flex gap-1 overflow-x-auto pb-1">
@@ -71,9 +90,10 @@ export default function QAQueue({ questions, onClaim }: QAQueueProps) {
                 createdAt: q.createdAt,
                 photoUrls: q.photoUrls,
                 aiContext: q.aiContext,
+                questionMode: q.questionMode,
               }}
               showClaim
-              onClaim={() => onClaim(q.id)}
+              onClaim={() => handleClaim(q.id)}
             />
           ))}
         </div>

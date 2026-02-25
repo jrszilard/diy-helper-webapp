@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Send, Loader2, CreditCard, Wallet } from 'lucide-react';
+import { Send, Loader2, CreditCard, Wallet, Shield, CheckCircle2, Zap } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 interface QASubmitFormProps {
@@ -41,9 +41,9 @@ export default function QASubmitForm({
   const [error, setError] = useState<string | null>(null);
   const [isFirstQuestion, setIsFirstQuestion] = useState(false);
   const [creditBalanceCents, setCreditBalanceCents] = useState(0);
+  const [isTestMode, setIsTestMode] = useState(false);
 
   // Payment setup state
-  const [paymentStep, setPaymentStep] = useState<'form' | 'payment' | 'done'>('form');
   const [savingCard, setSavingCard] = useState(false);
   const [paymentMethodId, setPaymentMethodId] = useState<string | null>(null);
   const [customerId, setCustomerId] = useState<string | null>(null);
@@ -109,9 +109,8 @@ export default function QASubmitForm({
 
       // In test mode, the clientSecret is a fake — auto-confirm
       if (data.clientSecret.includes('_test_')) {
-        // Test mode: use a fake payment method
+        setIsTestMode(true);
         setPaymentMethodId(`pm_test_${Date.now()}`);
-        setPaymentStep('done');
         setSavingCard(false);
         return;
       }
@@ -125,8 +124,6 @@ export default function QASubmitForm({
         return;
       }
 
-      // Use Stripe's card element via confirmCardSetup
-      // For now, we use the PaymentElement approach
       const { setupIntent, error: confirmError } = await stripe.confirmCardSetup(data.clientSecret, {
         payment_method: {
           card: { token: 'tok_visa' } as unknown as Parameters<typeof stripe.confirmCardSetup>[1] extends { payment_method: { card: infer C } } ? C : never,
@@ -144,7 +141,6 @@ export default function QASubmitForm({
           ? setupIntent.payment_method
           : setupIntent.payment_method.id;
         setPaymentMethodId(pmId);
-        setPaymentStep('done');
       }
     } catch {
       setError('Something went wrong setting up payment.');
@@ -159,9 +155,9 @@ export default function QASubmitForm({
       return;
     }
 
-    // If not first question and no payment method saved, prompt for payment
-    if (!isFirstQuestion && !paymentMethodId && paymentStep === 'form') {
-      setPaymentStep('payment');
+    // If not first question and no payment method saved, show error
+    if (!isFirstQuestion && !paymentMethodId) {
+      setError('Please save a payment method before submitting.');
       return;
     }
 
@@ -211,16 +207,47 @@ export default function QASubmitForm({
     }
   };
 
+  const needsPayment = !isFirstQuestion;
+
   return (
     <div className="bg-white border border-[#D4C8B8] rounded-lg p-6">
-      <h2 className="text-lg font-bold text-[#3E2723] mb-4">
+      {/* Test mode banner */}
+      {isTestMode && (
+        <div className="mb-4 p-3 bg-amber-50 border border-amber-300 rounded-lg flex items-center gap-2">
+          <Zap size={16} className="text-amber-600 flex-shrink-0" />
+          <p className="text-sm text-amber-800 font-medium">
+            Test Mode — Using fake payment. No real charges will occur.
+          </p>
+        </div>
+      )}
+
+      <h2 className="text-lg font-bold text-[#3E2723] mb-1">
         {targetExpertName ? `Ask ${targetExpertName}` : 'Ask an Expert'}
       </h2>
 
+      {/* How it works note */}
+      <div className="mb-4 p-3 bg-[#5D7B93]/5 border border-[#5D7B93]/20 rounded-lg">
+        <p className="text-xs text-[#5D7B93] font-semibold mb-1">How it works</p>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-start gap-2">
+            <span className="text-xs font-bold text-[#5D7B93] bg-[#5D7B93]/10 rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+            <p className="text-xs text-[#5D7B93]">Write your question and save a payment method</p>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-xs font-bold text-[#5D7B93] bg-[#5D7B93]/10 rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+            <p className="text-xs text-[#5D7B93]">Your card is <strong>only charged when an expert claims</strong> your question</p>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-xs font-bold text-[#5D7B93] bg-[#5D7B93]/10 rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+            <p className="text-xs text-[#5D7B93]">If no expert answers, you&apos;re automatically refunded</p>
+          </div>
+        </div>
+      </div>
+
       {targetExpertId && targetExpertName && (
-        <div className="bg-[#5D7B93]/10 rounded-lg p-3 mb-4">
-          <p className="text-xs text-[#5D7B93] font-medium">Direct Question</p>
-          <p className="text-sm text-[#3E2723]">Sending to {targetExpertName}</p>
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
+          <p className="text-xs text-purple-600 font-medium">Direct Question</p>
+          <p className="text-sm text-[#3E2723]">Sending directly to {targetExpertName}</p>
         </div>
       )}
 
@@ -237,130 +264,146 @@ export default function QASubmitForm({
         </div>
       )}
 
-      {paymentStep === 'payment' ? (
-        <div className="space-y-4">
-          <div className="bg-[#E8DFD0]/50 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <CreditCard size={16} className="text-[#7D6B5D]" />
-              <h3 className="text-sm font-semibold text-[#3E2723]">Save Payment Method</h3>
+      <div className="space-y-4">
+        {/* Category */}
+        <div>
+          <label className="block text-sm font-medium text-[#3E2723] mb-1">Category</label>
+          <select
+            value={category}
+            onChange={e => setCategory(e.target.value)}
+            className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50"
+          >
+            {CATEGORIES.map(c => (
+              <option key={c} value={c}>
+                {c.charAt(0).toUpperCase() + c.slice(1)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Question */}
+        <div>
+          <label className="block text-sm font-medium text-[#3E2723] mb-1">Your Question</label>
+          <textarea
+            value={questionText}
+            onChange={e => setQuestionText(e.target.value)}
+            rows={5}
+            className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
+            placeholder="Describe your question in detail..."
+          />
+          <p className="text-xs text-[#B0A696] mt-1">{questionText.length} characters (minimum 20)</p>
+        </div>
+
+        {/* Photo URLs */}
+        <div>
+          <label className="block text-sm font-medium text-[#3E2723] mb-1">Photo URLs (optional)</label>
+          <textarea
+            value={photoUrls}
+            onChange={e => setPhotoUrls(e.target.value)}
+            rows={2}
+            className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
+            placeholder="One URL per line"
+          />
+        </div>
+
+        {/* ── Payment Section (always visible) ── */}
+        {needsPayment && (
+          <div className={`border rounded-lg p-4 ${paymentMethodId ? 'border-[#4A7C59] bg-[#4A7C59]/5' : 'border-[#D4C8B8] bg-[#E8DFD0]/30'}`}>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <CreditCard size={16} className={paymentMethodId ? 'text-[#4A7C59]' : 'text-[#7D6B5D]'} />
+                <h3 className="text-sm font-semibold text-[#3E2723]">Payment Method</h3>
+              </div>
+              {paymentMethodId && (
+                <span className="flex items-center gap-1 text-xs text-[#4A7C59] font-medium">
+                  <CheckCircle2 size={14} />
+                  {isTestMode ? 'Test card saved' : 'Card saved'}
+                </span>
+              )}
             </div>
-            <p className="text-xs text-[#7D6B5D] mb-3">
-              Your card will only be charged when an expert claims your question.
-              If no one answers, you won&apos;t be charged.
-            </p>
+
+            {paymentMethodId ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Shield size={14} className="text-[#4A7C59]" />
+                  <p className="text-xs text-[#4A7C59]">
+                    Your card is saved. You will only be charged when an expert claims your question.
+                  </p>
+                </div>
+                {isTestMode && (
+                  <p className="text-xs text-amber-600 font-medium">
+                    Test mode: pm_{customerId?.slice(-8) || 'test'} (fake card)
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-[#7D6B5D]">
+                  Save a payment method to submit your question. You won&apos;t be charged now — only when an expert claims it.
+                </p>
+                <button
+                  onClick={handleSetupPayment}
+                  disabled={savingCard}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-white text-sm transition-colors ${
+                    savingCard
+                      ? 'bg-[#B0A696] cursor-not-allowed'
+                      : 'bg-[#5D7B93] hover:bg-[#4A6578]'
+                  }`}
+                >
+                  {savingCard ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <CreditCard size={16} />
+                  )}
+                  {savingCard ? 'Saving...' : 'Save Payment Method'}
+                </button>
+              </div>
+            )}
+
             {creditBalanceCents > 0 && (
-              <div className="flex items-center gap-1.5 mb-3 text-sm">
+              <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-[#D4C8B8]/50">
                 <Wallet size={14} className="text-[#4A7C59]" />
-                <span className="text-[#4A7C59] font-medium">
-                  ${(creditBalanceCents / 100).toFixed(2)} in credits will be applied
+                <span className="text-sm text-[#4A7C59] font-medium">
+                  ${(creditBalanceCents / 100).toFixed(2)} in credits will be applied first
                 </span>
               </div>
             )}
-            <button
-              onClick={handleSetupPayment}
-              disabled={savingCard}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-white transition-colors ${
-                savingCard
-                  ? 'bg-[#B0A696] cursor-not-allowed'
-                  : 'bg-[#5D7B93] hover:bg-[#4A6578]'
-              }`}
-            >
-              {savingCard ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <CreditCard size={16} />
-              )}
-              {savingCard ? 'Saving...' : 'Save Card & Continue'}
-            </button>
-            <button
-              onClick={() => setPaymentStep('form')}
-              className="ml-3 text-sm text-[#7D6B5D] hover:text-[#3E2723]"
-            >
-              Back
-            </button>
           </div>
+        )}
+
+        {/* ── Price + Submit ── */}
+        <div className="flex items-center justify-between pt-2 border-t border-[#D4C8B8]/50">
+          <div>
+            {isFirstQuestion ? (
+              <div>
+                <span className="text-sm font-bold text-[#4A7C59]">FREE — First question on us!</span>
+                <p className="text-xs text-[#7D6B5D] mt-0.5">No payment method needed</p>
+              </div>
+            ) : (
+              <div>
+                <span className="text-sm font-medium text-[#3E2723]">Price: $5 - $8</span>
+                <p className="text-xs text-[#7D6B5D] mt-0.5">Charged only when an expert claims</p>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={handleSubmit}
+            disabled={submitting || questionText.trim().length < 20 || (needsPayment && !paymentMethodId)}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-white transition-colors ${
+              submitting || questionText.trim().length < 20 || (needsPayment && !paymentMethodId)
+                ? 'bg-[#B0A696] cursor-not-allowed'
+                : 'bg-[#C67B5C] hover:bg-[#A65D3F]'
+            }`}
+          >
+            {submitting ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Send size={16} />
+            )}
+            {submitting ? 'Submitting...' : 'Submit Question'}
+          </button>
         </div>
-      ) : (
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-[#3E2723] mb-1">Category</label>
-            <select
-              value={category}
-              onChange={e => setCategory(e.target.value)}
-              className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50"
-            >
-              {CATEGORIES.map(c => (
-                <option key={c} value={c}>
-                  {c.charAt(0).toUpperCase() + c.slice(1)}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#3E2723] mb-1">Your Question</label>
-            <textarea
-              value={questionText}
-              onChange={e => setQuestionText(e.target.value)}
-              rows={5}
-              className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
-              placeholder="Describe your question in detail..."
-            />
-            <p className="text-xs text-[#B0A696] mt-1">{questionText.length} characters (minimum 20)</p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#3E2723] mb-1">Photo URLs (optional)</label>
-            <textarea
-              value={photoUrls}
-              onChange={e => setPhotoUrls(e.target.value)}
-              rows={2}
-              className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
-              placeholder="One URL per line"
-            />
-          </div>
-
-          <div className="flex items-center justify-between pt-2">
-            <div className="space-y-1">
-              {isFirstQuestion ? (
-                <span className="text-sm font-semibold text-[#4A7C59]">FREE</span>
-              ) : (
-                <span className="text-sm text-[#7D6B5D]">Price: $5 - $8 (charged when expert claims)</span>
-              )}
-              {!isFirstQuestion && creditBalanceCents > 0 && (
-                <div className="flex items-center gap-1.5">
-                  <Wallet size={12} className="text-[#4A7C59]" />
-                  <span className="text-xs text-[#4A7C59]">
-                    ${(creditBalanceCents / 100).toFixed(2)} in credits will be applied
-                  </span>
-                </div>
-              )}
-              {paymentMethodId && (
-                <div className="flex items-center gap-1.5">
-                  <CreditCard size={12} className="text-[#4A7C59]" />
-                  <span className="text-xs text-[#4A7C59]">Card saved</span>
-                </div>
-              )}
-            </div>
-            <button
-              onClick={handleSubmit}
-              disabled={submitting || questionText.trim().length < 20}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-white transition-colors ${
-                submitting || questionText.trim().length < 20
-                  ? 'bg-[#B0A696] cursor-not-allowed'
-                  : 'bg-[#C67B5C] hover:bg-[#A65D3F]'
-              }`}
-            >
-              {submitting ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <Send size={16} />
-              )}
-              {submitting ? 'Submitting...' : 'Submit Question'}
-            </button>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
