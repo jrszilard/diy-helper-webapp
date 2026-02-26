@@ -4,6 +4,7 @@ import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { getExpertByUserId } from '@/lib/marketplace/expert-helpers';
 import { releaseExpiredClaims } from '@/lib/marketplace/qa-helpers';
+import { getQueuePriorityTier, type ExpertLevel } from '@/lib/marketplace/reputation-engine';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { logger } from '@/lib/logger';
 
@@ -39,16 +40,42 @@ export async function GET(req: NextRequest) {
     // Release any expired claims first
     await releaseExpiredClaims(adminClient);
 
+    // Get expert's reputation level and subscription tier for queue priority
+    const { data: repProfile } = await adminClient
+      .from('expert_profiles')
+      .select('expert_level, reputation_score, subscription_tier')
+      .eq('id', expert.id)
+      .single();
+
+    const expertLevel = (repProfile?.expert_level || 'bronze') as ExpertLevel;
+    const subscriptionTier = (repProfile?.subscription_tier || 'free') as string;
+    const reputationPriority = getQueuePriorityTier(expertLevel);
+    // Subscription can boost priority: pro → priority, premium → premium
+    const subscriptionPriority = subscriptionTier === 'premium' ? 'premium' : subscriptionTier === 'pro' ? 'priority' : 'standard';
+    // Use the higher of reputation or subscription priority
+    const priorityRank = { standard: 0, priority: 1, premium: 2 };
+    const priorityTier = priorityRank[subscriptionPriority as keyof typeof priorityRank] >= priorityRank[reputationPriority as keyof typeof priorityRank]
+      ? subscriptionPriority
+      : reputationPriority;
+
     // Get expert's specialties
     const expertCategories = expert.specialties.map(s => s.specialty);
 
-    // Get open questions matching expert's specialties
-    const { data: questions, error } = await adminClient
+    // Build query — Gold/Platinum experts see specialist questions first
+    let query = adminClient
       .from('qa_questions')
       .select('*')
       .eq('status', 'open')
       .in('category', expertCategories)
-      .neq('diyer_user_id', auth.userId)
+      .neq('diyer_user_id', auth.userId);
+
+    // Standard-tier experts don't see specialist bidding questions
+    // (they can still bid if they find them, but won't clutter their queue)
+    if (priorityTier === 'standard') {
+      query = query.or('pricing_mode.is.null,pricing_mode.neq.bidding');
+    }
+
+    const { data: questions, error } = await query
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -61,6 +88,10 @@ export async function GET(req: NextRequest) {
 
     return applyCorsHeaders(req, new Response(
       JSON.stringify({
+        expertLevel,
+        priorityTier,
+        subscriptionTier,
+        reputationScore: Number(repProfile?.reputation_score) || 0,
         questions: (questions || []).map(q => ({
           id: q.id,
           questionText: q.question_text,
@@ -70,8 +101,13 @@ export async function GET(req: NextRequest) {
           expertPayoutCents: q.expert_payout_cents,
           diyerCity: q.diyer_city,
           diyerState: q.diyer_state,
-          hasAiContext: !!q.ai_context,
+          aiContext: q.ai_context || null,
           questionMode: q.question_mode,
+          priceTier: q.price_tier || null,
+          difficultyScore: q.difficulty_score || null,
+          pricingMode: q.pricing_mode || 'fixed',
+          bidCount: q.bid_count || 0,
+          bidDeadline: q.bid_deadline || null,
           createdAt: q.created_at,
         })),
       }),

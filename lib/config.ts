@@ -140,8 +140,43 @@ export const marketplace = {
   payoutHoldHours: envInt('QA_PAYOUT_HOLD_HOURS', 24),
   /** Set to 'true' to bypass real Stripe calls and fake payment flows */
   testMode: envString('QA_PAYMENT_TEST_MODE', '') === 'true',
+  /** Platform fee rate for Q&A (v2 pricing uses 18%) */
+  platformFeeRate: envFloat('QA_PLATFORM_FEE_RATE', 0.18),
+  /** Bid window hours for expert bidding mode */
+  bidWindowHours: envInt('QA_BID_WINDOW_HOURS', 4),
+  /** Max follow-up messages before tier 2 gate */
+  tier2MessageThreshold: envInt('QA_TIER2_MESSAGE_THRESHOLD', 3),
+  /** Max follow-up messages before tier 3 gate */
+  tier3MessageThreshold: envInt('QA_TIER3_MESSAGE_THRESHOLD', 6),
+} as const;
+
+// ── Expert Subscriptions ────────────────────────────────────────────────────
+export const expertSubscriptions = {
+  tiers: {
+    free: {
+      label: 'Free',
+      priceCents: 0,
+      platformFeeRate: 0.18,
+      queuePriority: 'standard' as const,
+      features: ['Queue access', 'Standard questions'],
+    },
+    pro: {
+      label: 'Pro',
+      priceCents: 2900, // $29/mo
+      platformFeeRate: 0.15,
+      queuePriority: 'priority' as const,
+      features: ['Priority queue', 'Analytics dashboard', '15% platform fee'],
+    },
+    premium: {
+      label: 'Premium',
+      priceCents: 7900, // $79/mo
+      platformFeeRate: 0.12,
+      queuePriority: 'premium' as const,
+      features: ['Featured profile', 'Direct question routing', '12% platform fee', 'Project leads'],
+    },
+  },
 } as const;
 
 // Re-export everything as a single default for convenience
-const config = { anthropic, rateLimits, cors, storeSearch, streaming, pruning, freemium, stripe, marketplace } as const;
+const config = { anthropic, rateLimits, cors, storeSearch, streaming, pruning, freemium, stripe, marketplace, expertSubscriptions } as const;
 export default config;

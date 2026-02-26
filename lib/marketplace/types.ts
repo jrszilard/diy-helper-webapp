@@ -73,7 +73,7 @@ export interface ExpertInsurance {
 // ── Q&A ─────────────────────────────────────────────────────────────────────
 
 export type QuestionMode = 'pool' | 'direct';
-export type QAStatus = 'open' | 'claimed' | 'answered' | 'accepted' | 'expired' | 'disputed' | 'resolved';
+export type QAStatus = 'open' | 'claimed' | 'answered' | 'in_conversation' | 'resolve_proposed' | 'accepted' | 'expired' | 'disputed' | 'resolved';
 
 export interface QAQuestion {
   id: string;
@@ -111,6 +111,90 @@ export interface QAQuestion {
   markedNotHelpful: boolean;
   notHelpfulAt: string | null;
   creditAppliedCents: number;
+  // Threaded conversation fields
+  isThreaded: boolean;
+  messageCount: number;
+  resolveProposedAt: string | null;
+  resolveProposedBy: 'expert' | 'diyer' | null;
+  // Progressive payment tier fields
+  currentTier: number;
+  tierPayments: TierPayment[];
+  expertNotes: ExpertInsightNotes | null;
+  // Dynamic pricing / difficulty fields
+  priceTier: string | null;
+  difficultyScore: number | null;
+  // Bidding fields
+  pricingMode: 'fixed' | 'bidding';
+  bidDeadline: string | null;
+  bidCount: number;
+  acceptedBidId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ── Q&A Messages (threaded conversation) ──────────────────────────────────
+
+export interface QAMessage {
+  id: string;
+  questionId: string;
+  senderUserId: string;
+  senderRole: 'diyer' | 'expert';
+  content: string;
+  attachments: string[];
+  createdAt: string;
+}
+
+// ── Tier Payments ──────────────────────────────────────────────────────────
+
+export interface TierPayment {
+  tier: number;
+  amountCents: number;
+  paymentIntentId: string;
+  chargedAt: string;
+}
+
+// ── Expert Insight Notes ───────────────────────────────────────────────────
+
+export interface ExpertInsightNotes {
+  toolsNeeded?: string[];
+  estimatedTime?: string;
+  commonMistakes?: string[];
+  localCodeNotes?: string;
+  additional?: string;
+}
+
+// ── Report Correction ──────────────────────────────────────────────────────
+
+export interface ReportCorrection {
+  id: string;
+  reportId: string;
+  expertId: string;
+  sectionType: string;
+  originalContent: string | null;
+  correctedContent: string;
+  correctionReason: string | null;
+  sourceType: string;
+  sourceId: string | null;
+  validated: boolean;
+  validatedBy: string | null;
+  createdAt: string;
+}
+
+// ── Q&A Bids ──────────────────────────────────────────────────────────────
+
+export type QABidStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn';
+
+export interface QABid {
+  id: string;
+  questionId: string;
+  expertId: string;
+  proposedPriceCents: number;
+  platformFeeCents: number;
+  expertPayoutCents: number;
+  pitch: string;
+  estimatedMinutes: number | null;
+  relevantExperience: string | null;
+  status: QABidStatus;
   createdAt: string;
   updatedAt: string;
 }
@@ -246,7 +330,9 @@ export interface MarketplaceMessage {
 export type NotificationType =
   | 'qa_question_posted' | 'qa_question_claimed' | 'qa_answer_received'
   | 'qa_answer_accepted' | 'qa_review_received' | 'qa_claim_expired'
-  | 'qa_not_helpful'
+  | 'qa_not_helpful' | 'qa_message_received' | 'qa_resolve_proposed'
+  | 'qa_continue_requested' | 'qa_tier_upgraded' | 'qa_correction_submitted'
+  | 'qa_bid_received' | 'qa_bid_accepted' | 'qa_bid_rejected' | 'qa_bidding_open'
   | 'consultation_booked' | 'consultation_reminder' | 'consultation_summary'
   | 'rfp_new_bid' | 'rfp_bid_accepted' | 'rfp_bid_rejected'
   | 'message_received'

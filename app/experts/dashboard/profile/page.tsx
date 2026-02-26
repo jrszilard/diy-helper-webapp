@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { SPECIALTIES, SPECIALTY_LABELS } from '@/lib/marketplace/constants';
 import type { ExpertProfile, ExpertSpecialty } from '@/lib/marketplace/types';
-import { Loader2, Save, CheckCircle, AlertCircle, Plus, X } from 'lucide-react';
+import { Loader2, Save, CheckCircle, AlertCircle, Plus, X, Code, Copy, CheckCircle2 } from 'lucide-react';
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
@@ -18,6 +18,7 @@ export default function ExpertProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [badgeCopied, setBadgeCopied] = useState(false);
 
   // Form fields
   const [displayName, setDisplayName] = useState('');
@@ -383,6 +384,59 @@ export default function ExpertProfilePage() {
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
+
+      {/* Embeddable Badge */}
+      {profile && (
+        <div className="bg-[#FDFBF7] rounded-2xl border border-[#D4C8B8] shadow-sm p-6 mt-6">
+          <h2 className="text-lg font-bold text-[#3E2723] mb-1 flex items-center gap-2">
+            <Code size={18} className="text-[#5D7B93]" />
+            Embeddable Badge
+          </h2>
+          <p className="text-sm text-[#7D6B5D] mb-4">
+            Add your verified expert badge to your website, portfolio, or social profiles.
+          </p>
+
+          {/* Badge preview */}
+          <div className="bg-white border border-[#D4C8B8] rounded-lg p-4 mb-4 flex items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/api/experts/${profile.id}/badge`}
+              alt="Expert badge preview"
+              width={280}
+              height={90}
+            />
+          </div>
+
+          {/* Embed code */}
+          <div className="relative">
+            <label className="block text-xs font-semibold text-[#7D6B5D] mb-1">HTML Embed Code</label>
+            <div className="bg-[#3E2723] text-[#E8DFD0] rounded-lg p-3 pr-12 text-xs font-mono overflow-x-auto">
+              {`<a href="${typeof window !== 'undefined' ? window.location.origin : ''}/experts/${profile.id}" target="_blank" rel="noopener"><img src="${typeof window !== 'undefined' ? window.location.origin : ''}/api/experts/${profile.id}/badge" alt="Verified Expert on DIY Helper" width="280" height="90" /></a>`}
+            </div>
+            <button
+              onClick={() => {
+                const origin = window.location.origin;
+                const code = `<a href="${origin}/experts/${profile.id}" target="_blank" rel="noopener"><img src="${origin}/api/experts/${profile.id}/badge" alt="Verified Expert on DIY Helper" width="280" height="90" /></a>`;
+                navigator.clipboard.writeText(code);
+                setBadgeCopied(true);
+                setTimeout(() => setBadgeCopied(false), 2000);
+              }}
+              className="absolute top-7 right-2 p-1.5 rounded hover:bg-white/10 transition-colors"
+              title="Copy embed code"
+            >
+              {badgeCopied ? (
+                <CheckCircle2 size={14} className="text-[#4A7C59]" />
+              ) : (
+                <Copy size={14} className="text-[#E8DFD0]" />
+              )}
+            </button>
+          </div>
+
+          <p className="text-xs text-[#B0A696] mt-2">
+            Your badge updates automatically as you answer questions and earn reviews.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

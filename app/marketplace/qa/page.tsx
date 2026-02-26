@@ -7,7 +7,7 @@ import { Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import QASubmitForm from '@/components/marketplace/QASubmitForm';
 import QAQuestionList from '@/components/marketplace/QAQuestionList';
-import type { QAQuestion } from '@/lib/marketplace/types';
+import type { QAQuestion, ExpertContext } from '@/lib/marketplace/types';
 
 function QAPageContent() {
   const router = useRouter();
@@ -18,6 +18,7 @@ function QAPageContent() {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [reportContext, setReportContext] = useState<{ projectSummary?: string; projectType?: string } | undefined>();
+  const [expertContext, setExpertContext] = useState<ExpertContext | null>(null);
   const [myQuestions, setMyQuestions] = useState<QAQuestion[]>([]);
 
   const fetchMyQuestions = useCallback(async () => {
@@ -49,15 +50,24 @@ function QAPageContent() {
       if (reportId) {
         try {
           const token = (await supabase.auth.getSession()).data.session?.access_token;
-          const res = await fetch(`/api/reports/${reportId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.ok) {
-            const data = await res.json();
+          const [reportRes, contextRes] = await Promise.all([
+            fetch(`/api/reports/${reportId}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            fetch(`/api/reports/${reportId}/context`, {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+          ]);
+          if (reportRes.ok) {
+            const data = await reportRes.json();
             setReportContext({
               projectSummary: data.report?.summary,
               projectType: data.report?.title,
             });
+          }
+          if (contextRes.ok) {
+            const data = await contextRes.json();
+            if (data.context) setExpertContext(data.context);
           }
         } catch {
           // no context, that's ok
@@ -102,6 +112,7 @@ function QAPageContent() {
         <QASubmitForm
           reportId={reportId}
           reportContext={reportContext}
+          expertContext={expertContext}
           targetExpertId={targetExpertId}
           targetExpertName={targetExpertName}
           onSuccess={handleSuccess}

@@ -1,14 +1,23 @@
 'use client';
 
-import { Star, MapPin, DollarSign, Clock, Shield, MessageSquare, HelpCircle } from 'lucide-react';
+import { Star, MapPin, DollarSign, Clock, Shield, MessageSquare, HelpCircle, CheckCircle, TrendingUp } from 'lucide-react';
 import type { ExpertProfile } from '@/lib/marketplace/types';
+import ExpertLevelBadge from './ExpertLevelBadge';
+import type { ExpertLevel } from './ExpertLevelBadge';
 import ReviewCard from './ReviewCard';
+import ConsultationBooking from './ConsultationBooking';
 import Link from 'next/link';
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 
 interface ExpertProfileViewProps {
-  expert: ExpertProfile;
+  expert: ExpertProfile & {
+    reputationScore?: number;
+    expertLevel?: string;
+    acceptanceRate?: number;
+    avgResponseMinutes?: number | null;
+    totalQuestionsAnswered?: number;
+  };
   reviews: Array<{
     id: string;
     rating: number;
@@ -120,6 +129,9 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
               <h1 className="text-xl font-bold text-[#3E2723]">{expert.displayName}</h1>
               {expert.verificationLevel >= 2 && (
                 <Shield size={18} className="text-[#5D7B93]" />
+              )}
+              {expert.expertLevel && expert.expertLevel !== 'bronze' && (
+                <ExpertLevelBadge level={expert.expertLevel as ExpertLevel} size="md" />
               )}
             </div>
 
@@ -306,6 +318,57 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
             )}
           </div>
         </div>
+      )}
+
+      {/* Performance stats */}
+      {(expert.totalQuestionsAnswered ?? 0) > 0 && (
+        <div className="bg-white border border-[#D4C8B8] rounded-lg p-4">
+          <h3 className="text-sm font-semibold text-[#3E2723] mb-3 flex items-center gap-2">
+            <TrendingUp size={16} className="text-[#5D7B93]" />
+            Performance
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div>
+              <p className="text-xs text-[#7D6B5D]">Questions Answered</p>
+              <p className="text-lg font-bold text-[#3E2723]">{expert.totalQuestionsAnswered}</p>
+            </div>
+            {(expert.acceptanceRate ?? 0) > 0 && (
+              <div>
+                <p className="text-xs text-[#7D6B5D]">Acceptance Rate</p>
+                <p className="text-lg font-bold text-[#4A7C59] flex items-center gap-1">
+                  <CheckCircle size={14} />
+                  {expert.acceptanceRate}%
+                </p>
+              </div>
+            )}
+            {expert.avgResponseMinutes && (
+              <div>
+                <p className="text-xs text-[#7D6B5D]">Avg Response</p>
+                <p className="text-lg font-bold text-[#3E2723]">
+                  {expert.avgResponseMinutes < 60
+                    ? `${expert.avgResponseMinutes}m`
+                    : `${(expert.avgResponseMinutes / 60).toFixed(1)}h`}
+                </p>
+              </div>
+            )}
+            {expert.expertLevel && (
+              <div>
+                <p className="text-xs text-[#7D6B5D]">Expert Level</p>
+                <div className="mt-1">
+                  <ExpertLevelBadge level={(expert.expertLevel || 'bronze') as ExpertLevel} size="md" />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Consultation Booking */}
+      {expert.hourlyRateCents && (
+        <ConsultationBooking
+          expertId={expert.id}
+          expertName={expert.displayName}
+        />
       )}
 
       {/* Reviews */}

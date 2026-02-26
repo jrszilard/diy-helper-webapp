@@ -219,3 +219,76 @@ export async function refundQACharge(
 
   return { refundId: refund.id };
 }
+
+// ── Destination Charges (Project Payments) ─────────────────────────────────
+
+/**
+ * Calculate the platform commission for a project payment using tiered rates.
+ * Tier 1: 10% on first $10K
+ * Tier 2: 7% on $10K-$25K
+ * Tier 3: 5% above $25K
+ */
+export function calculateProjectCommission(
+  amountCents: number,
+  isRepeatCustomer: boolean = false,
+): number {
+  if (isRepeatCustomer) {
+    return Math.round(amountCents * 0.05); // 5% flat for re-hires
+  }
+
+  let remaining = amountCents;
+  let commission = 0;
+
+  // Tier 1: 10% on first $10K (1,000,000 cents)
+  const tier1Amount = Math.min(remaining, 1000000);
+  commission += Math.round(tier1Amount * 0.10);
+  remaining -= tier1Amount;
+
+  // Tier 2: 7% on $10K-$25K
+  if (remaining > 0) {
+    const tier2Amount = Math.min(remaining, 1500000); // $25K - $10K = $15K
+    commission += Math.round(tier2Amount * 0.07);
+    remaining -= tier2Amount;
+  }
+
+  // Tier 3: 5% above $25K
+  if (remaining > 0) {
+    commission += Math.round(remaining * 0.05);
+  }
+
+  return commission;
+}
+
+/**
+ * Create a Stripe Connect destination charge.
+ * The platform collects the full amount and transfers (amount - fee) to the expert.
+ * Used for project deposits and milestone payments.
+ */
+export async function createDestinationCharge(params: {
+  amountCents: number;
+  applicationFeeCents: number;
+  destinationAccountId: string;
+  customerId: string;
+  paymentMethodId: string;
+  metadata?: Record<string, string>;
+}): Promise<{ paymentIntentId: string }> {
+  if (isTestMode()) {
+    return { paymentIntentId: `pi_test_proj_${randomUUID().slice(0, 8)}` };
+  }
+
+  const paymentIntent = await getStripeClient().paymentIntents.create({
+    amount: params.amountCents,
+    currency: 'usd',
+    customer: params.customerId,
+    payment_method: params.paymentMethodId,
+    off_session: true,
+    confirm: true,
+    application_fee_amount: params.applicationFeeCents,
+    transfer_data: {
+      destination: params.destinationAccountId,
+    },
+    metadata: params.metadata || {},
+  });
+
+  return { paymentIntentId: paymentIntent.id };
+}

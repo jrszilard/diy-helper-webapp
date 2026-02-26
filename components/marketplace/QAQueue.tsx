@@ -8,6 +8,7 @@ import QAQuestionCard from './QAQuestionCard';
 interface QAQueueProps {
   questions: QAQuestion[];
   onClaim: (id: string) => void;
+  onBid?: (id: string) => void;
 }
 
 const FILTER_OPTIONS = [
@@ -26,7 +27,7 @@ const FILTER_OPTIONS = [
   'general',
 ];
 
-export default function QAQueue({ questions, onClaim }: QAQueueProps) {
+export default function QAQueue({ questions, onClaim, onBid }: QAQueueProps) {
   const [activeFilter, setActiveFilter] = useState('all');
   const [claimingId, setClaimingId] = useState<string | null>(null);
 
@@ -87,13 +88,20 @@ export default function QAQueue({ questions, onClaim }: QAQueueProps) {
                 questionText: q.questionText,
                 category: q.category,
                 priceCents: q.priceCents,
+                expertPayoutCents: q.expertPayoutCents,
                 createdAt: q.createdAt,
                 photoUrls: q.photoUrls,
                 aiContext: q.aiContext,
                 questionMode: q.questionMode,
+                priceTier: q.priceTier ?? undefined,
+                difficultyScore: q.difficultyScore ?? undefined,
+                pricingMode: q.pricingMode,
+                bidCount: q.bidCount,
+                bidDeadline: q.bidDeadline,
               }}
               showClaim
               onClaim={() => handleClaim(q.id)}
+              onBid={onBid ? () => onBid(q.id) : undefined}
             />
           ))}
         </div>

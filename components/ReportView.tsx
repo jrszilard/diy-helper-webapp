@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase';
 import type { ReportSection, ProjectReportRecord } from '@/lib/agents/types';
 import { sanitizeHref } from '@/lib/security';
 import ExpertHelpDropdown from '@/components/marketplace/ExpertHelpDropdown';
+import ProjectTimeline from '@/components/marketplace/ProjectTimeline';
 
 interface ReportViewProps {
   report: ProjectReportRecord;
@@ -238,11 +239,18 @@ export default function ReportView({
 
       {/* Screen content (single tab) */}
       <div className="flex-1 overflow-y-auto p-5 print:hidden">
-        {activeSection && (
-          <div className="bg-white rounded-lg border border-[#D4C8B8] p-6 max-w-4xl mx-auto">
-            <MarkdownContent content={activeSection.content} />
-          </div>
-        )}
+        <div className="max-w-4xl mx-auto space-y-4">
+          {activeSection && (
+            <div className="bg-white rounded-lg border border-[#D4C8B8] p-6">
+              <MarkdownContent content={activeSection.content} />
+            </div>
+          )}
+
+          {/* Expert activity timeline — shows Q&A interactions for this report */}
+          {!isSharedView && isAuthenticated && reportId && (
+            <ProjectTimeline reportId={reportId} />
+          )}
+        </div>
       </div>
 
       {/* Print content: all sections (hidden on screen, visible when printing) */}

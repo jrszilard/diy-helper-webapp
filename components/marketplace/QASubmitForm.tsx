@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Send, Loader2, CreditCard, Wallet, Shield, CheckCircle2, Zap } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Send, Loader2, CreditCard, Wallet, Shield, CheckCircle2, Zap, MessageSquare, FileCheck, Users, TrendingUp } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import type { ExpertContext } from '@/lib/marketplace/types';
+import ProjectContextCard from '@/components/marketplace/ProjectContextCard';
 
 interface QASubmitFormProps {
   reportId?: string;
   reportContext?: { projectSummary?: string; projectType?: string };
+  expertContext?: ExpertContext | null;
   onSuccess: (questionId: string) => void;
   targetExpertId?: string;
   targetExpertName?: string;
@@ -30,6 +33,7 @@ const CATEGORIES = [
 export default function QASubmitForm({
   reportId,
   reportContext,
+  expertContext,
   onSuccess,
   targetExpertId,
   targetExpertName,
@@ -47,6 +51,19 @@ export default function QASubmitForm({
   const [savingCard, setSavingCard] = useState(false);
   const [paymentMethodId, setPaymentMethodId] = useState<string | null>(null);
   const [customerId, setCustomerId] = useState<string | null>(null);
+
+  // Dynamic pricing state
+  const [dynamicPricing, setDynamicPricing] = useState<{
+    priceCents: number;
+    platformFeeCents: number;
+    expertPayoutCents: number;
+    tier?: string;
+    tierLabel?: string;
+    difficultyScore?: number;
+    factors?: string[];
+  } | null>(null);
+  const [pricingLoading, setPricingLoading] = useState(false);
+  const priceFetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     async function checkFirstQuestion() {
@@ -77,6 +94,38 @@ export default function QASubmitForm({
     }
     checkFirstQuestion();
   }, []);
+
+  // Debounced dynamic price fetch
+  const fetchPrice = useCallback(async (cat: string, text: string, photos: number) => {
+    try {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) return;
+      setPricingLoading(true);
+      const res = await fetch('/api/qa/price', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ reportId, category: cat, questionText: text, photoCount: photos }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.pricing) setDynamicPricing(data.pricing);
+      }
+    } catch {
+      // ignore — fall back to static display
+    } finally {
+      setPricingLoading(false);
+    }
+  }, [reportId]);
+
+  useEffect(() => {
+    if (questionText.trim().length < 20) return;
+    if (priceFetchTimer.current) clearTimeout(priceFetchTimer.current);
+    priceFetchTimer.current = setTimeout(() => {
+      const photoCount = photoUrls.split('\n').filter(u => u.trim()).length;
+      fetchPrice(category, questionText.trim(), photoCount);
+    }, 800);
+    return () => { if (priceFetchTimer.current) clearTimeout(priceFetchTimer.current); };
+  }, [category, questionText, photoUrls, fetchPrice]);
 
   const handleSetupPayment = async () => {
     setSavingCard(true);
@@ -222,24 +271,44 @@ export default function QASubmitForm({
       )}
 
       <h2 className="text-lg font-bold text-[#3E2723] mb-1">
-        {targetExpertName ? `Ask ${targetExpertName}` : 'Ask an Expert'}
+        {targetExpertName ? `Get Expert Guidance from ${targetExpertName}` : 'Get Expert Guidance on Your Project'}
       </h2>
+      <p className="text-sm text-[#7D6B5D] mb-4">
+        {expertContext
+          ? 'Your AI report gives the expert full context before they even start — no explaining from scratch.'
+          : 'Connect with a verified tradesperson who can answer the questions AI can\u2019t.'}
+      </p>
 
-      {/* How it works note */}
+      {/* ProjectContextCard — show AI context if available */}
+      {expertContext && (
+        <div className="mb-4">
+          <ProjectContextCard
+            context={expertContext}
+            photoCount={photoUrls.split('\n').filter(u => u.trim()).length || undefined}
+            compact
+          />
+        </div>
+      )}
+
+      {/* What you get — value messaging */}
       <div className="mb-4 p-3 bg-[#5D7B93]/5 border border-[#5D7B93]/20 rounded-lg">
-        <p className="text-xs text-[#5D7B93] font-semibold mb-1">How it works</p>
-        <div className="flex flex-col gap-1">
+        <p className="text-xs text-[#5D7B93] font-semibold mb-2">What you get that a phone call can&apos;t provide</p>
+        <div className="flex flex-col gap-1.5">
           <div className="flex items-start gap-2">
-            <span className="text-xs font-bold text-[#5D7B93] bg-[#5D7B93]/10 rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
-            <p className="text-xs text-[#5D7B93]">Write your question and save a payment method</p>
+            <FileCheck size={14} className="text-[#5D7B93] flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-[#5D7B93]"><strong>Pre-contextualized answer</strong> — your expert sees your full AI report, photos, and building codes upfront</p>
           </div>
           <div className="flex items-start gap-2">
-            <span className="text-xs font-bold text-[#5D7B93] bg-[#5D7B93]/10 rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
-            <p className="text-xs text-[#5D7B93]">Your card is <strong>only charged when an expert claims</strong> your question</p>
+            <MessageSquare size={14} className="text-[#5D7B93] flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-[#5D7B93]"><strong>Documented record</strong> — every answer stays with your project forever, not lost after a call</p>
           </div>
           <div className="flex items-start gap-2">
-            <span className="text-xs font-bold text-[#5D7B93] bg-[#5D7B93]/10 rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
-            <p className="text-xs text-[#5D7B93]">If no expert answers, you&apos;re automatically refunded</p>
+            <Shield size={14} className="text-[#5D7B93] flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-[#5D7B93]"><strong>Payment protection</strong> — only charged when an expert claims; full refund if unanswered</p>
+          </div>
+          <div className="flex items-start gap-2">
+            <Users size={14} className="text-[#5D7B93] flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-[#5D7B93]"><strong>Verified tradespeople</strong> — rated experts matched by specialty to your project</p>
           </div>
         </div>
       </div>
@@ -251,7 +320,7 @@ export default function QASubmitForm({
         </div>
       )}
 
-      {reportContext?.projectSummary && (
+      {reportContext?.projectSummary && !expertContext && (
         <div className="bg-[#E8DFD0]/50 rounded-lg p-3 mb-4">
           <p className="text-xs text-[#7D6B5D] font-medium mb-1">Project Context</p>
           <p className="text-sm text-[#3E2723]">{reportContext.projectSummary}</p>
@@ -371,6 +440,36 @@ export default function QASubmitForm({
           </div>
         )}
 
+        {/* ── Dynamic Price Breakdown ── */}
+        {!isFirstQuestion && dynamicPricing?.tier && (
+          <div className="p-3 bg-[#F5F0E6] border border-[#D4C8B8] rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <TrendingUp size={14} className="text-[#C67B5C]" />
+                <span className="text-sm font-semibold text-[#3E2723]">
+                  {dynamicPricing.tierLabel} Question — ${(dynamicPricing.priceCents / 100).toFixed(0)}
+                </span>
+              </div>
+              {pricingLoading && <Loader2 size={12} className="animate-spin text-[#B0A696]" />}
+            </div>
+            <div className="flex items-center gap-4 text-xs text-[#7D6B5D]">
+              <span>You pay <strong>${(dynamicPricing.priceCents / 100).toFixed(2)}</strong></span>
+              <span className="text-[#B0A696]">&rarr;</span>
+              <span>Expert earns <strong className="text-[#4A7C59]">${(dynamicPricing.expertPayoutCents / 100).toFixed(2)}</strong></span>
+              <span className="text-[#B0A696]">&rarr;</span>
+              <span>Protected by escrow</span>
+            </div>
+            {dynamicPricing.factors && dynamicPricing.factors.length > 0 && (
+              <p className="text-[10px] text-[#B0A696] mt-1.5">
+                Based on: {dynamicPricing.factors.join(' · ')}
+              </p>
+            )}
+            <p className="text-[10px] text-[#B0A696] mt-0.5">
+              A service call for this would cost $75-150
+            </p>
+          </div>
+        )}
+
         {/* ── Price + Submit ── */}
         <div className="flex items-center justify-between pt-2 border-t border-[#D4C8B8]/50">
           <div>
@@ -378,6 +477,13 @@ export default function QASubmitForm({
               <div>
                 <span className="text-sm font-bold text-[#4A7C59]">FREE — First question on us!</span>
                 <p className="text-xs text-[#7D6B5D] mt-0.5">No payment method needed</p>
+              </div>
+            ) : dynamicPricing?.tier ? (
+              <div>
+                <span className="text-sm font-medium text-[#3E2723]">
+                  {dynamicPricing.tierLabel}: ${(dynamicPricing.priceCents / 100).toFixed(0)}
+                </span>
+                <p className="text-xs text-[#7D6B5D] mt-0.5">Charged only when an expert claims</p>
               </div>
             ) : (
               <div>

@@ -1,14 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { createNotification } from '@/lib/notifications';
-
-const PHONE_REGEX = /(\+?1?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})/g;
-const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-
-function sanitizeContent(content: string): string {
-  return content
-    .replace(PHONE_REGEX, '[phone removed]')
-    .replace(EMAIL_REGEX, '[email removed]');
-}
+import { sanitizeContentDetailed } from '@/lib/marketplace/messaging-utils';
+import { logActivity } from '@/lib/marketplace/fraud-detection';
 
 export async function sendMessage(params: {
   adminClient: SupabaseClient;
@@ -21,14 +14,14 @@ export async function sendMessage(params: {
   rfpId?: string;
   bidId?: string;
 }): Promise<void> {
-  const sanitized = sanitizeContent(params.content);
+  const result = sanitizeContentDetailed(params.content);
 
   await params.adminClient
     .from('marketplace_messages')
     .insert({
       sender_user_id: params.senderUserId,
       recipient_user_id: params.recipientUserId,
-      content: sanitized,
+      content: result.sanitized,
       qa_question_id: params.qaQuestionId || null,
       consultation_id: params.consultationId || null,
       rfp_id: params.rfpId || null,
@@ -37,11 +30,29 @@ export async function sendMessage(params: {
       is_read: false,
     });
 
+  // Log sanitization events for fraud review
+  if (result.wasFlagged) {
+    try {
+      await logActivity(params.adminClient, {
+        eventType: 'sanitization_trigger',
+        severity: result.flags.length >= 3 ? 'high' : result.flags.length >= 2 ? 'medium' : 'low',
+        userId: params.senderUserId,
+        questionId: params.qaQuestionId,
+        consultationId: params.consultationId,
+        description: `Contact info detected and sanitized: ${result.flags.map(f => f.type).join(', ')}`,
+        originalContent: params.content,
+        metadata: { flags: result.flags, context: 'marketplace_message' },
+      });
+    } catch {
+      // Best-effort logging — don't block the message
+    }
+  }
+
   await createNotification({
     userId: params.recipientUserId,
     type: 'message_received',
     title: 'You have a new message',
-    body: sanitized.length > 100 ? sanitized.slice(0, 100) + '...' : sanitized,
+    body: result.sanitized.length > 100 ? result.sanitized.slice(0, 100) + '...' : result.sanitized,
     link: '/messages',
   });
 }

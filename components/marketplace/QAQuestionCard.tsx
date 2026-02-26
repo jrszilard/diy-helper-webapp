@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, DollarSign, Image, Target, Users } from 'lucide-react';
+import { Clock, DollarSign, Image, Target, Users, Gavel } from 'lucide-react';
 
 interface QAQuestionCardProps {
   question: {
@@ -8,16 +8,24 @@ interface QAQuestionCardProps {
     questionText: string;
     category: string;
     priceCents: number;
+    platformFeeCents?: number;
+    expertPayoutCents?: number;
     createdAt: string;
     photoUrls?: string[];
     aiContext?: { projectSummary?: string } | null;
     questionMode?: 'pool' | 'direct';
+    priceTier?: string;
+    difficultyScore?: number;
+    pricingMode?: 'fixed' | 'bidding';
+    bidCount?: number;
+    bidDeadline?: string | null;
   };
   onClaim?: () => void;
+  onBid?: () => void;
   showClaim?: boolean;
 }
 
-export default function QAQuestionCard({ question, onClaim, showClaim = false }: QAQuestionCardProps) {
+export default function QAQuestionCard({ question, onClaim, onBid, showClaim = false }: QAQuestionCardProps) {
   const formatTimeAgo = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
     const minutes = Math.floor(diff / 60000);
@@ -30,7 +38,24 @@ export default function QAQuestionCard({ question, onClaim, showClaim = false }:
   };
 
   const isDirect = question.questionMode === 'direct';
+  const isBidding = question.pricingMode === 'bidding';
   const isFree = question.priceCents === 0;
+  const expertEarnings = question.expertPayoutCents
+    ? (question.expertPayoutCents / 100).toFixed(2)
+    : null;
+  const tierLabel = question.priceTier
+    ? question.priceTier.charAt(0).toUpperCase() + question.priceTier.slice(1)
+    : null;
+
+  // Estimate response time based on difficulty
+  const estMinutes = (question.difficultyScore ?? 3) <= 3 ? '~5 min' : (question.difficultyScore ?? 5) <= 6 ? '~10 min' : '~15 min';
+
+  // Bid deadline countdown
+  const bidTimeLeft = isBidding && question.bidDeadline
+    ? Math.max(0, new Date(question.bidDeadline).getTime() - Date.now())
+    : 0;
+  const bidHoursLeft = Math.floor(bidTimeLeft / (60 * 60 * 1000));
+  const bidMinsLeft = Math.floor((bidTimeLeft % (60 * 60 * 1000)) / (60 * 1000));
 
   return (
     <div className="bg-white border border-[#D4C8B8] rounded-lg p-4">
@@ -55,10 +80,27 @@ export default function QAQuestionCard({ question, onClaim, showClaim = false }:
             </div>
           )}
 
-          <div className="flex items-center gap-3 mt-3">
+          <div className="flex flex-wrap items-center gap-2 mt-3">
             <span className="text-xs px-2 py-0.5 bg-[#5D7B93]/10 text-[#5D7B93] rounded-full font-medium">
               {question.category}
             </span>
+            {tierLabel && (
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                question.priceTier === 'specialist'
+                  ? 'bg-[#C67B5C]/10 text-[#C67B5C]'
+                  : question.priceTier === 'complex'
+                  ? 'bg-amber-100 text-amber-700'
+                  : 'bg-[#E8DFD0] text-[#7D6B5D]'
+              }`}>
+                {tierLabel}
+              </span>
+            )}
+            {isBidding && (
+              <span className="flex items-center gap-1 text-xs px-2 py-0.5 bg-[#C67B5C]/10 text-[#C67B5C] rounded-full font-medium">
+                <Gavel size={10} />
+                Bidding{question.bidCount ? ` · ${question.bidCount} bid${question.bidCount !== 1 ? 's' : ''}` : ''}
+              </span>
+            )}
             {isDirect ? (
               <span className="flex items-center gap-1 text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full font-medium">
                 <Target size={10} />
@@ -70,10 +112,6 @@ export default function QAQuestionCard({ question, onClaim, showClaim = false }:
                 Pool
               </span>
             )}
-            <span className="flex items-center gap-1 text-xs font-medium text-[#4A7C59]">
-              <DollarSign size={12} />
-              {isFree ? 'Free' : `${(question.priceCents / 100).toFixed(2)}`}
-            </span>
             <span className="flex items-center gap-1 text-xs text-[#B0A696]">
               <Clock size={12} />
               {formatTimeAgo(question.createdAt)}
@@ -81,17 +119,59 @@ export default function QAQuestionCard({ question, onClaim, showClaim = false }:
           </div>
         </div>
 
-        {showClaim && onClaim && (
-          <div className="flex flex-col items-end gap-1 flex-shrink-0">
-            <button
-              onClick={onClaim}
-              className="px-4 py-2 bg-[#C67B5C] text-white text-sm font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors whitespace-nowrap"
-            >
-              Claim
-            </button>
-            {!isFree && (
-              <span className="text-[10px] text-[#7D6B5D]">Charges DIYer on claim</span>
+        {showClaim && (isBidding ? onBid : onClaim) && (
+          <div className="flex flex-col items-end gap-2 flex-shrink-0">
+            {isBidding ? (
+              <>
+                {/* Bidding mode: show reference price + deadline */}
+                <div className="text-right">
+                  <span className="text-xs font-medium text-[#C67B5C]">Specialist</span>
+                  {bidTimeLeft > 0 && (
+                    <p className="text-[10px] text-[#7D6B5D]">
+                      {bidHoursLeft > 0 ? `${bidHoursLeft}h ` : ''}{bidMinsLeft}m left
+                    </p>
+                  )}
+                  {bidTimeLeft === 0 && question.bidDeadline && (
+                    <p className="text-[10px] text-red-500">Deadline passed</p>
+                  )}
+                </div>
+                <button
+                  onClick={onBid}
+                  className="px-4 py-2 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[#4A6578] transition-colors whitespace-nowrap"
+                >
+                  Submit Proposal
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Fixed mode: show earnings + claim button */}
+                {!isFree && expertEarnings && (
+                  <div className="text-right">
+                    <span className="text-lg font-bold text-[#4A7C59]">${expertEarnings}</span>
+                    <p className="text-[10px] text-[#7D6B5D]">You earn · Est. {estMinutes}</p>
+                  </div>
+                )}
+                {isFree && (
+                  <span className="text-xs font-medium text-[#7D6B5D]">Free question</span>
+                )}
+                <button
+                  onClick={onClaim}
+                  className="px-4 py-2 bg-[#C67B5C] text-white text-sm font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors whitespace-nowrap"
+                >
+                  Claim
+                </button>
+              </>
             )}
+          </div>
+        )}
+
+        {/* Non-claim view: still show price */}
+        {!showClaim && !isFree && (
+          <div className="flex-shrink-0">
+            <span className="flex items-center gap-1 text-sm font-bold text-[#4A7C59]">
+              <DollarSign size={14} />
+              {expertEarnings || (question.priceCents / 100).toFixed(2)}
+            </span>
           </div>
         )}
       </div>

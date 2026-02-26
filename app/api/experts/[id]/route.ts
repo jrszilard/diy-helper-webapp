@@ -29,6 +29,13 @@ export async function GET(
       ));
     }
 
+    // Fetch reputation data separately (not in ExpertProfile type)
+    const { data: repData } = await adminClient
+      .from('expert_profiles')
+      .select('reputation_score, expert_level, acceptance_rate, avg_response_minutes, total_questions_answered')
+      .eq('id', id)
+      .single();
+
     // Return public profile (exclude sensitive fields)
     const publicProfile = {
       id: profile.id,
@@ -49,6 +56,12 @@ export async function GET(
       isAvailable: profile.isAvailable,
       specialties: profile.specialties,
       createdAt: profile.createdAt,
+      // Reputation data
+      reputationScore: Number(repData?.reputation_score) || 0,
+      expertLevel: repData?.expert_level || 'bronze',
+      acceptanceRate: Number(repData?.acceptance_rate) || 0,
+      avgResponseMinutes: repData?.avg_response_minutes || null,
+      totalQuestionsAnswered: repData?.total_questions_answered || 0,
     };
 
     return applyCorsHeaders(req, new Response(

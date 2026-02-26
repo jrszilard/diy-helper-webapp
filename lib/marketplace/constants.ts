@@ -40,6 +40,10 @@ export const QA_PRICING = {
   platformFeeRate: 0.20,     // 20%
 } as const;
 
+// ── Q&A Pricing V2 (Dynamic) ──────────────────────────────────────────────
+
+export { QA_PRICING_V2 } from '@/lib/marketplace/pricing-engine';
+
 // ── Consultation Pricing ────────────────────────────────────────────────────
 
 export const CONSULTATION_PRICING = {

@@ -5,6 +5,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { parseRequestBody } from '@/lib/validation';
 import { SubmitReviewSchema } from '@/lib/marketplace/validation';
 import { updateExpertRating } from '@/lib/marketplace/review-helpers';
+import { recalculateReputation } from '@/lib/marketplace/reputation-engine';
 import { createNotification } from '@/lib/notifications';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { logger } from '@/lib/logger';
@@ -117,8 +118,9 @@ export async function POST(
       ));
     }
 
-    // Update expert rating
+    // Update expert rating and recalculate reputation
     await updateExpertRating(adminClient, question.expert_id);
+    try { await recalculateReputation(adminClient, question.expert_id); } catch { /* best-effort */ }
 
     // Notify expert about the review
     const { data: expertProfile } = await adminClient

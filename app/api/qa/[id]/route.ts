@@ -96,8 +96,31 @@ export async function GET(
       refundedAt: question.refunded_at,
       paymentIntentId: question.payment_intent_id,
       payoutStatus: question.payout_status,
+      // Bidding fields
+      pricingMode: question.pricing_mode || 'fixed',
+      bidDeadline: question.bid_deadline || null,
+      bidCount: question.bid_count || 0,
+      acceptedBidId: question.accepted_bid_id || null,
+      difficultyScore: question.difficulty_score || null,
+      priceTier: question.price_tier || null,
+      graduatedToRfpId: question.graduated_to_rfp_id || null,
+      parentQuestionId: question.parent_question_id || null,
+      isSecondOpinion: question.is_second_opinion || false,
       createdAt: question.created_at,
     };
+
+    // Check for a child second-opinion question
+    if (!question.is_second_opinion) {
+      const { data: childQuestion } = await auth.supabaseClient
+        .from('qa_questions')
+        .select('id')
+        .eq('parent_question_id', id)
+        .eq('is_second_opinion', true)
+        .single();
+      if (childQuestion) {
+        response.secondOpinionId = childQuestion.id;
+      }
+    }
 
     // Include expert profile if claimed
     if (question.expert_id) {
