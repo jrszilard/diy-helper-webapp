@@ -73,6 +73,7 @@ export async function GET(req: NextRequest) {
           totalReviews: expert.totalReviews,
           isAvailable: expert.isAvailable,
           verificationLevel: expert.verificationLevel,
+          stripeOnboardingComplete: expert.stripeOnboardingComplete ?? false,
         },
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }

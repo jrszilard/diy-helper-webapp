@@ -156,10 +156,10 @@ export default function QASubmitForm({
       const data = await res.json();
       setCustomerId(data.customerId);
 
-      // In test mode, the clientSecret is a fake — auto-confirm
-      if (data.clientSecret.includes('_test_')) {
+      // In test mode, the server provides a fake payment method — auto-confirm
+      if (data.testMode) {
         setIsTestMode(true);
-        setPaymentMethodId(`pm_test_${Date.now()}`);
+        setPaymentMethodId(data.paymentMethodId);
         setSavingCard(false);
         return;
       }

@@ -3,7 +3,7 @@ import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { getExpertByUserId } from '@/lib/marketplace/expert-helpers';
-import { createConnectAccount, createOnboardingLink } from '@/lib/stripe';
+import { createConnectAccount, createOnboardingLink, isTestMode } from '@/lib/stripe';
 import { logger } from '@/lib/logger';
 
 export async function POST(req: NextRequest) {
@@ -46,16 +46,30 @@ export async function POST(req: NextRequest) {
       accountId = account.id;
 
       // Save account ID to profile
+      const updateData: Record<string, unknown> = { stripe_connect_account_id: accountId };
+      if (isTestMode()) {
+        updateData.stripe_onboarding_complete = true;
+      }
       await auth.supabaseClient
         .from('expert_profiles')
-        .update({ stripe_connect_account_id: accountId })
+        .update(updateData)
+        .eq('id', expert.id);
+    }
+
+    const testMode = isTestMode();
+
+    // In test mode, auto-complete onboarding for existing accounts too
+    if (testMode) {
+      await auth.supabaseClient
+        .from('expert_profiles')
+        .update({ stripe_onboarding_complete: true })
         .eq('id', expert.id);
     }
 
     const onboardingUrl = await createOnboardingLink(accountId, returnUrl);
 
     return applyCorsHeaders(req, new Response(
-      JSON.stringify({ url: onboardingUrl }),
+      JSON.stringify({ url: onboardingUrl, testMode }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     ));
   } catch (error) {

@@ -17,6 +17,7 @@ interface DashboardApiResponse {
     totalReviews: number;
     isAvailable: boolean;
     verificationLevel: number;
+    stripeOnboardingComplete: boolean;
   };
 }
 
@@ -76,7 +77,7 @@ export default function ExpertDashboardPage() {
     <div className="space-y-6 max-w-4xl">
       <h1 className="text-xl font-bold text-[#3E2723]">Dashboard</h1>
 
-      <StripeOnboardBanner stripeOnboardingComplete={false} />
+      <StripeOnboardBanner stripeOnboardingComplete={d.stripeOnboardingComplete} />
       <DashboardStats stats={stats} />
       <DashboardQAQueue questions={[]} />
     </div>

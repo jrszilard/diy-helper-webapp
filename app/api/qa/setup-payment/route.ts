@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { createOrGetStripeCustomer, createQASetupIntent } from '@/lib/stripe';
+import { createOrGetStripeCustomer, createQASetupIntent, isTestMode } from '@/lib/stripe';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { logger } from '@/lib/logger';
 
@@ -38,8 +38,15 @@ export async function POST(req: NextRequest) {
       user_id: auth.userId,
     });
 
+    const testMode = isTestMode();
     return applyCorsHeaders(req, new Response(
-      JSON.stringify({ clientSecret, customerId, setupIntentId }),
+      JSON.stringify({
+        clientSecret,
+        customerId,
+        setupIntentId,
+        testMode,
+        ...(testMode ? { paymentMethodId: `pm_test_${customerId.slice(-8)}` } : {}),
+      }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     ));
   } catch (error) {

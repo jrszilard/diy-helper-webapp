@@ -15,11 +15,14 @@ export function getStripeClient(): Stripe {
   return _stripeClient;
 }
 
-function isTestMode(): boolean {
+export function isTestMode(): boolean {
   return marketplaceConfig.testMode;
 }
 
 export async function createConnectAccount(email: string): Promise<Stripe.Account> {
+  if (isTestMode()) {
+    return { id: `acct_test_${randomUUID().slice(0, 8)}` } as unknown as Stripe.Account;
+  }
   return getStripeClient().accounts.create({
     type: 'express',
     email,
@@ -31,6 +34,9 @@ export async function createConnectAccount(email: string): Promise<Stripe.Accoun
 }
 
 export async function createOnboardingLink(accountId: string, returnUrl: string): Promise<string> {
+  if (isTestMode()) {
+    return returnUrl;
+  }
   const link = await getStripeClient().accountLinks.create({
     account: accountId,
     refresh_url: returnUrl,

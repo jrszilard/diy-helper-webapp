@@ -96,6 +96,31 @@ export default function ConsultationBooking({
       // Build the scheduled start datetime
       const scheduledStart = `${selectedDate}T${selectedSlot.startTime}`;
 
+      // Get or create payment method via setup-payment endpoint
+      const setupRes = await fetch('/api/qa/setup-payment', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!setupRes.ok) {
+        setError('Failed to set up payment. Please try again.');
+        setBooking(false);
+        return;
+      }
+
+      const setupData = await setupRes.json();
+      const pmId = setupData.paymentMethodId || setupData.setupIntentId;
+      const cusId = setupData.customerId;
+
+      if (!pmId || !cusId) {
+        setError('Payment setup incomplete. Please save a payment method first.');
+        setBooking(false);
+        return;
+      }
+
       const res = await fetch('/api/consultations', {
         method: 'POST',
         headers: {
@@ -111,9 +136,8 @@ export default function ConsultationBooking({
           reportId,
           projectId,
           qaQuestionId,
-          // These would come from stored payment method — placeholder
-          paymentMethodId: 'pm_placeholder',
-          stripeCustomerId: 'cus_placeholder',
+          paymentMethodId: pmId,
+          stripeCustomerId: cusId,
         }),
       });
 

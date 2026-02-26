@@ -26,6 +26,11 @@ export default function StripeOnboardBanner({ stripeOnboardingComplete }: Stripe
 
       if (res.ok) {
         const data = await res.json();
+        if (data.testMode) {
+          // Test mode: onboarding auto-completed server-side, reload to reflect
+          window.location.reload();
+          return;
+        }
         if (data.url) {
           window.open(data.url, '_blank');
         }
