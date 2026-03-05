@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { Package, X, Trash2, FolderPlus, MessageSquare, Sparkles } from 'lucide-react';
 import ChatMessages from './ChatMessages';
 import ChatInput from './ChatInput';
+import GuestExpertCallout from './GuestExpertCallout';
 import SaveMaterialsDialog from './SaveMaterialsDialog';
 import ConversationList from './ConversationList';
 import ProjectPlanner from './ProjectPlanner';
@@ -281,6 +282,14 @@ export default function ChatInterface({
             onRetry={chat.handleRetry}
             messagesEndRef={chat.messagesEndRef}
           />
+
+          {/* Guest expert upsell */}
+          {!userId && (
+            <GuestExpertCallout
+              messageCount={chat.messages.length}
+              onRequestAuth={onRequestAuth}
+            />
+          )}
 
           {/* Input area with banners */}
           <ChatInput

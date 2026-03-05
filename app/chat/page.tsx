@@ -6,6 +6,7 @@ import ProjectsSidebar from '@/components/ProjectsSidebar';
 import ShoppingListView from '@/components/ShoppingListView';
 import Link from 'next/link';
 import { Home, Wrench, Menu, FolderOpen, ShoppingCart, X, Users, MessageSquare } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { guestStorage } from '@/lib/guestStorage';
 import AuthButton from '@/components/AuthButton';
@@ -17,6 +18,7 @@ import { Project } from '@/types';
 import type { User } from '@supabase/supabase-js';
 
 export default function ChatPage() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const { isExpert } = useExpertStatus();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -57,6 +59,13 @@ export default function ChatPage() {
           } catch (err) {
             console.error('Migration error:', err);
           }
+        }
+
+        // Redirect to Q&A if user signed up via expert callout
+        const referral = localStorage.getItem('expert-callout-referral');
+        if (referral) {
+          localStorage.removeItem('expert-callout-referral');
+          router.push('/marketplace/qa');
         }
       }
     });

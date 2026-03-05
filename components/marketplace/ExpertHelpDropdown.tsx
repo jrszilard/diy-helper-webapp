@@ -86,18 +86,29 @@ export default function ExpertHelpDropdown({
 
             if (!isAuthenticated) {
               return (
-                <a
+                <div
                   key={label}
-                  href="/chat"
-                  className="flex items-start gap-3 px-4 py-3 border-b border-[#D4C8B8]/50 hover:bg-[#E8DFD0]/50 transition-colors"
-                  onClick={() => setIsOpen(false)}
+                  className="px-4 py-3 border-b border-[#D4C8B8]/50"
                 >
-                  <Icon size={18} className="text-[#5D7B93] mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-[#3E2723]">{label}</p>
-                    <p className="text-xs text-[#7D6B5D]">Sign in required</p>
+                  <div className="flex items-start gap-3">
+                    <Icon size={18} className="text-[#5D7B93] mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-[#3E2723]">{label}</p>
+                      <p className="text-xs text-[#4A7C59] font-medium mt-0.5">First question free with a new account</p>
+                      <a
+                        href="/chat"
+                        onClick={() => {
+                          localStorage.setItem('expert-callout-referral', 'true');
+                          setIsOpen(false);
+                        }}
+                        className="inline-flex items-center gap-1 mt-1.5 text-xs font-semibold text-[#5D7B93] hover:text-[#4A6578] transition-colors"
+                      >
+                        Sign up to ask
+                        <span aria-hidden="true">&rarr;</span>
+                      </a>
+                    </div>
                   </div>
-                </a>
+                </div>
               );
             }
 

@@ -21,6 +21,7 @@ export default function AuthButton({
   const [loading, setLoading] = useState(false);
   const [internalShowAuth, setInternalShowAuth] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isExpertReferral, setIsExpertReferral] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -41,6 +42,15 @@ export default function AuthButton({
 
   const showAuth = externalShowAuth !== undefined ? externalShowAuth : internalShowAuth;
   const setShowAuth = (show: boolean) => {
+    if (show) {
+      const referral = localStorage.getItem('expert-callout-referral');
+      if (referral) {
+        setIsSignUp(true);
+        setIsExpertReferral(true);
+      }
+    } else {
+      setIsExpertReferral(false);
+    }
     if (onAuthToggle) {
       onAuthToggle(show);
     } else {
@@ -225,7 +235,9 @@ export default function AuthButton({
               {/* Header text */}
               <p className="text-sm text-[#7D6B5D] mb-5 text-center">
                 {isSignUp
-                  ? 'Create a free account to get started'
+                  ? isExpertReferral
+                    ? 'Sign up to ask a verified expert — your first question is free!'
+                    : 'Create a free account to get started'
                   : 'Welcome back! Sign in to continue'}
               </p>
 
