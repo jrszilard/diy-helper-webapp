@@ -321,7 +321,7 @@ export async function POST(req: NextRequest) {
 
   try {
     // Rate limiting (per-IP, no auth required for this endpoint)
-    const rateLimitResult = checkRateLimit(req, null, 'searchStores');
+    const rateLimitResult = await checkRateLimit(req, null, 'searchStores');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),

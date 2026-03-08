@@ -8,7 +8,7 @@ import { logger } from '@/lib/logger';
 
 export async function GET(req: NextRequest) {
   try {
-    const rateLimitResult = checkRateLimit(req, null, 'marketplace');
+    const rateLimitResult = await checkRateLimit(req, null, 'marketplace');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),
@@ -49,7 +49,38 @@ export async function GET(req: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      logger.error('Expert search error', error);
+      logger.error('Expert search error', { message: error.message, code: error.code, details: error.details, hint: error.hint });
+
+      // If the join on expert_specialties failed, retry without it
+      if (error.message?.includes('expert_specialties') || error.code === 'PGRST200') {
+        const fallbackQuery = adminClient
+          .from('expert_profiles')
+          .select('*', { count: 'exact' })
+          .eq('is_active', true);
+        if (state) fallbackQuery.ilike('state', state);
+        if (city) fallbackQuery.ilike('city', `%${city}%`);
+        if (minRating) fallbackQuery.gte('avg_rating', parseFloat(minRating));
+        fallbackQuery.order('avg_rating', { ascending: false }).range(offset, offset + limit - 1);
+
+        const { data: fallbackData, error: fallbackError, count: fallbackCount } = await fallbackQuery;
+        if (!fallbackError && fallbackData) {
+          const experts = fallbackData.map(row => {
+            const profile = toExpertProfile(row as ExpertProfileRow);
+            return {
+              id: profile.id, displayName: profile.displayName, bio: profile.bio,
+              profilePhotoUrl: profile.profilePhotoUrl, city: profile.city, state: profile.state,
+              verificationLevel: profile.verificationLevel, hourlyRateCents: profile.hourlyRateCents,
+              qaRateCents: profile.qaRateCents, avgRating: profile.avgRating, totalReviews: profile.totalReviews,
+              responseTimeHours: profile.responseTimeHours, isAvailable: profile.isAvailable, specialties: [],
+            };
+          });
+          return applyCorsHeaders(req, new Response(
+            JSON.stringify({ experts, pagination: { page, limit, total: fallbackCount ?? 0, totalPages: Math.ceil((fallbackCount ?? 0) / limit) } }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          ));
+        }
+      }
+
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Search failed' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }

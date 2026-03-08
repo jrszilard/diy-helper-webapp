@@ -6,6 +6,7 @@ import { getExpertById } from '@/lib/marketplace/expert-helpers';
 import { transferToExpert } from '@/lib/stripe';
 import { createNotification } from '@/lib/notifications';
 import { getAdminClient } from '@/lib/supabase-admin';
+import { isValidUUID } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 
 export async function POST(
@@ -21,7 +22,7 @@ export async function POST(
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'marketplace');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'marketplace');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),
@@ -30,6 +31,14 @@ export async function POST(
     }
 
     const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
     const adminClient = getAdminClient();
 
     // Get the question
@@ -84,32 +93,12 @@ export async function POST(
       })
       .eq('id', id);
 
-    // Give DIYer platform credit
+    // Give DIYer platform credit (atomic upsert to prevent race conditions)
     if (creditAmountCents > 0) {
-      // Upsert user_credits
-      const { data: existing } = await adminClient
-        .from('user_credits')
-        .select('balance_cents')
-        .eq('user_id', auth.userId)
-        .single();
-
-      if (existing) {
-        await adminClient
-          .from('user_credits')
-          .update({
-            balance_cents: existing.balance_cents + creditAmountCents,
-            updated_at: now,
-          })
-          .eq('user_id', auth.userId);
-      } else {
-        await adminClient
-          .from('user_credits')
-          .insert({
-            user_id: auth.userId,
-            balance_cents: creditAmountCents,
-            updated_at: now,
-          });
-      }
+      await adminClient.rpc('increment_user_credits', {
+        p_user_id: auth.userId,
+        p_amount_cents: creditAmountCents,
+      });
 
       // Record credit transaction
       await adminClient

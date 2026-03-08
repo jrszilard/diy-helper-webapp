@@ -5,6 +5,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { getExpertById } from '@/lib/marketplace/expert-helpers';
 import { releaseExpiredClaims } from '@/lib/marketplace/qa-helpers';
 import { getAdminClient } from '@/lib/supabase-admin';
+import { isValidUUID } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 
 export async function GET(
@@ -20,7 +21,7 @@ export async function GET(
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'marketplace');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'marketplace');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),
@@ -29,6 +30,13 @@ export async function GET(
     }
 
     const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
 
     // Release any expired claims on-demand
     try { await releaseExpiredClaims(getAdminClient()); } catch { /* best-effort */ }

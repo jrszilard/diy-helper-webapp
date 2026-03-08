@@ -8,6 +8,7 @@ import { applyCredits } from '@/lib/marketplace/qa-helpers';
 import { createNotification } from '@/lib/notifications';
 import { validateBidPrice, calculateBidPricing, checkBidWindowStatus } from '@/lib/marketplace/bidding';
 import { CLAIM_EXPIRY_HOURS } from '@/lib/marketplace/constants';
+import { isValidUUID } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 import { z } from 'zod';
 
@@ -38,6 +39,14 @@ export async function GET(
     }
 
     const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
     const adminClient = getAdminClient();
 
     // Get question to verify access
@@ -52,6 +61,38 @@ export async function GET(
         JSON.stringify({ error: 'Question not found' }),
         { status: 404, headers: { 'Content-Type': 'application/json' } }
       ));
+    }
+
+    // Verify the requesting user is the question owner or a participating expert
+    const isQuestionOwner = question.diyer_user_id === auth.userId;
+    if (!isQuestionOwner) {
+      const { data: userExpertProfile } = await adminClient
+        .from('expert_profiles')
+        .select('id')
+        .eq('user_id', auth.userId)
+        .single();
+
+      if (!userExpertProfile) {
+        return applyCorsHeaders(req, new Response(
+          JSON.stringify({ error: 'Access denied' }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        ));
+      }
+
+      // Check if this expert has a bid on this question
+      const { data: userBid } = await adminClient
+        .from('qa_bids')
+        .select('id')
+        .eq('question_id', id)
+        .eq('expert_id', userExpertProfile.id)
+        .single();
+
+      if (!userBid) {
+        return applyCorsHeaders(req, new Response(
+          JSON.stringify({ error: 'Access denied' }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        ));
+      }
     }
 
     // Fetch bids with expert info
@@ -153,7 +194,7 @@ export async function POST(
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'marketplace');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'marketplace');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests.' }),
@@ -162,6 +203,14 @@ export async function POST(
     }
 
     const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
     const body = await req.json();
     const adminClient = getAdminClient();
 

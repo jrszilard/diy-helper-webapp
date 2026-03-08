@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     ));
   }
 
-  const rateLimitResult = checkRateLimit(req, auth.userId, 'conversations');
+  const rateLimitResult = await checkRateLimit(req, auth.userId, 'conversations');
   if (!rateLimitResult.allowed) {
     return applyCorsHeaders(req, new Response(
       JSON.stringify({ error: 'Too many requests' }),
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     ));
   }
 
-  const rateLimitResult = checkRateLimit(req, auth.userId, 'conversations');
+  const rateLimitResult = await checkRateLimit(req, auth.userId, 'conversations');
   if (!rateLimitResult.allowed) {
     return applyCorsHeaders(req, new Response(
       JSON.stringify({ error: 'Too many requests' }),

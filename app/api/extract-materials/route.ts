@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
   try {
     // Rate limiting (per-IP, 10/min)
-    const rateLimitResult = checkRateLimit(req, null, 'extractMaterials');
+    const rateLimitResult = await checkRateLimit(req, null, 'extractMaterials');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),

@@ -4,6 +4,7 @@ import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { createNotification } from '@/lib/notifications';
+import { isValidUUID } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 import { z } from 'zod';
 
@@ -27,6 +28,13 @@ export async function GET(
     }
 
     const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
 
     // Use user's client so RLS applies (participants only)
     const { data: messages, error } = await auth.supabaseClient
@@ -70,7 +78,7 @@ export async function POST(
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'messages');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'messages');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests.' }),
@@ -79,6 +87,14 @@ export async function POST(
     }
 
     const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
     const body = await req.json();
     const parsed = SendMessageSchema.safeParse(body);
     if (!parsed.success) {

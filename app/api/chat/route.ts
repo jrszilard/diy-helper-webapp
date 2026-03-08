@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     const auth = await getAuthFromRequest(req);
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'chat');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'chat');
     if (!rateLimitResult.allowed) {
       logger.warn('Rate limited', { requestId, userId: auth.userId });
       return applyCorsHeaders(req, new Response(

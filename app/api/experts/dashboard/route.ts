@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'experts');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'experts');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),

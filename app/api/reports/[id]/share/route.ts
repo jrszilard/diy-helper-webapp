@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { isValidUUID } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 
 // POST /api/reports/[id]/share — Generate a share link
@@ -11,6 +12,14 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
     const auth = await getAuthFromRequest(req);
 
     if (!auth.userId) {
@@ -20,7 +29,7 @@ export async function POST(
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'agents');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'agents');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),

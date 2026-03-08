@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { isValidUUID } from '@/lib/validation';
 import { getAdminClient } from '@/lib/supabase-admin';
 
 /**
@@ -10,6 +11,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+
+  if (!isValidUUID(id)) {
+    return new Response(
+      JSON.stringify({ error: 'Invalid ID format' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
   const adminClient = getAdminClient();
 
   const { data: expert } = await adminClient

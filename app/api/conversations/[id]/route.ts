@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
 import { handleCorsOptions, applyCorsHeaders } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { UpdateConversationSchema, parseRequestBody } from '@/lib/validation';
+import { UpdateConversationSchema, parseRequestBody, isValidUUID } from '@/lib/validation';
 
 export async function GET(
   req: NextRequest,
@@ -16,7 +16,7 @@ export async function GET(
     ));
   }
 
-  const rateLimitResult = checkRateLimit(req, auth.userId, 'conversations');
+  const rateLimitResult = await checkRateLimit(req, auth.userId, 'conversations');
   if (!rateLimitResult.allowed) {
     return applyCorsHeaders(req, new Response(
       JSON.stringify({ error: 'Too many requests' }),
@@ -25,6 +25,13 @@ export async function GET(
   }
 
   const { id } = await params;
+
+  if (!isValidUUID(id)) {
+    return applyCorsHeaders(req, new Response(
+      JSON.stringify({ error: 'Invalid ID format' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    ));
+  }
 
   const { data, error } = await auth.supabaseClient
     .from('conversations')
@@ -59,7 +66,7 @@ export async function DELETE(
     ));
   }
 
-  const rateLimitResult = checkRateLimit(req, auth.userId, 'conversations');
+  const rateLimitResult = await checkRateLimit(req, auth.userId, 'conversations');
   if (!rateLimitResult.allowed) {
     return applyCorsHeaders(req, new Response(
       JSON.stringify({ error: 'Too many requests' }),
@@ -68,6 +75,13 @@ export async function DELETE(
   }
 
   const { id } = await params;
+
+  if (!isValidUUID(id)) {
+    return applyCorsHeaders(req, new Response(
+      JSON.stringify({ error: 'Invalid ID format' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    ));
+  }
 
   // DB FK has ON DELETE CASCADE — messages are removed automatically
   const { error } = await auth.supabaseClient
@@ -101,7 +115,7 @@ export async function PATCH(
     ));
   }
 
-  const rateLimitResult = checkRateLimit(req, auth.userId, 'conversations');
+  const rateLimitResult = await checkRateLimit(req, auth.userId, 'conversations');
   if (!rateLimitResult.allowed) {
     return applyCorsHeaders(req, new Response(
       JSON.stringify({ error: 'Too many requests' }),
@@ -110,6 +124,14 @@ export async function PATCH(
   }
 
   const { id } = await params;
+
+  if (!isValidUUID(id)) {
+    return applyCorsHeaders(req, new Response(
+      JSON.stringify({ error: 'Invalid ID format' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    ));
+  }
+
   const body = await req.json();
   const parsed = parseRequestBody(UpdateConversationSchema, body);
   if (!parsed.success) {

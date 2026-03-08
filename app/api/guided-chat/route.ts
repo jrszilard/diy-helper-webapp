@@ -7,7 +7,7 @@ const TEMPLATE_IDS = projectTemplates.map(t => t.id).join(', ');
 
 export async function POST(req: NextRequest) {
   // Rate limit by IP (no auth required)
-  const rateLimitResult = checkRateLimit(req, null, 'guided-chat');
+  const rateLimitResult = await checkRateLimit(req, null, 'guided-chat');
   if (!rateLimitResult.allowed) {
     return NextResponse.json(
       { error: 'Too many requests. Please try again later.' },

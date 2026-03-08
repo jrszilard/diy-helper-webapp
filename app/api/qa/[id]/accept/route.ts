@@ -6,6 +6,7 @@ import { getExpertById } from '@/lib/marketplace/expert-helpers';
 import { transferToExpert } from '@/lib/stripe';
 import { createNotification } from '@/lib/notifications';
 import { getAdminClient } from '@/lib/supabase-admin';
+import { isValidUUID } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 
 export async function POST(
@@ -21,7 +22,7 @@ export async function POST(
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'marketplace');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'marketplace');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),
@@ -30,6 +31,13 @@ export async function POST(
     }
 
     const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
 
     // Get the question
     const { data: question, error: fetchError } = await auth.supabaseClient

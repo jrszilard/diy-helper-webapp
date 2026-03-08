@@ -3,6 +3,7 @@ import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { getAdminClient } from '@/lib/supabase-admin';
+import { isValidUUID } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 import { z } from 'zod';
 
@@ -29,6 +30,14 @@ export async function GET(
     }
 
     const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
     const adminClient = getAdminClient();
 
     const { data: question } = await adminClient
@@ -71,7 +80,7 @@ export async function PUT(
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'marketplace');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'marketplace');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests.' }),
@@ -80,6 +89,14 @@ export async function PUT(
     }
 
     const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
     const body = await req.json();
     const parsed = NotesSchema.safeParse(body);
     if (!parsed.success) {

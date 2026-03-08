@@ -1,3 +1,5 @@
+import { escapeHtml, sanitizeHref } from '@/lib/security';
+
 interface EmailContent {
   subject: string;
   html: string;
@@ -30,7 +32,9 @@ function wrapInLayout(content: string): string {
 }
 
 function actionButton(label: string, url: string): string {
-  return `<a href="${url}" style="display:inline-block;padding:10px 24px;background-color:#2563eb;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:500;font-size:14px;margin-top:16px;">${label}</a>`;
+  const safeUrl = escapeHtml(sanitizeHref(url));
+  const safeLabel = escapeHtml(label);
+  return `<a href="${safeUrl}" style="display:inline-block;padding:10px 24px;background-color:#2563eb;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:500;font-size:14px;margin-top:16px;">${safeLabel}</a>`;
 }
 
 export function qaQuestionClaimed(params: { title: string; link?: string }): EmailContent {
@@ -39,7 +43,7 @@ export function qaQuestionClaimed(params: { title: string; link?: string }): Ema
     html: wrapInLayout(`
       <h2 style="margin:0 0 12px;font-size:18px;color:#111827;">Your Question Has Been Claimed</h2>
       <p style="color:#374151;font-size:14px;line-height:1.6;">
-        An expert is now working on your question: <strong>${params.title}</strong>
+        An expert is now working on your question: <strong>${escapeHtml(params.title)}</strong>
       </p>
       <p style="color:#374151;font-size:14px;line-height:1.6;">
         You'll receive an answer soon. We'll notify you as soon as it's ready.
@@ -55,7 +59,7 @@ export function qaAnswerReceived(params: { title: string; link?: string }): Emai
     html: wrapInLayout(`
       <h2 style="margin:0 0 12px;font-size:18px;color:#111827;">Expert Answer Received</h2>
       <p style="color:#374151;font-size:14px;line-height:1.6;">
-        An expert has answered your question: <strong>${params.title}</strong>
+        An expert has answered your question: <strong>${escapeHtml(params.title)}</strong>
       </p>
       <p style="color:#374151;font-size:14px;line-height:1.6;">
         Review the answer and mark it as accepted if it resolved your issue.
@@ -71,7 +75,7 @@ export function qaAnswerAccepted(params: { title: string; link?: string }): Emai
     html: wrapInLayout(`
       <h2 style="margin:0 0 12px;font-size:18px;color:#111827;">Answer Accepted</h2>
       <p style="color:#374151;font-size:14px;line-height:1.6;">
-        Your answer to <strong>${params.title}</strong> has been accepted by the DIYer.
+        Your answer to <strong>${escapeHtml(params.title)}</strong> has been accepted by the DIYer.
       </p>
       <p style="color:#374151;font-size:14px;line-height:1.6;">
         Payment will be released to your account shortly.
@@ -87,9 +91,9 @@ export function messageReceived(params: { title: string; body?: string; link?: s
     html: wrapInLayout(`
       <h2 style="margin:0 0 12px;font-size:18px;color:#111827;">New Message</h2>
       <p style="color:#374151;font-size:14px;line-height:1.6;">
-        ${params.title}
+        ${escapeHtml(params.title)}
       </p>
-      ${params.body ? `<p style="color:#374151;font-size:14px;line-height:1.6;">${params.body}</p>` : ''}
+      ${params.body ? `<p style="color:#374151;font-size:14px;line-height:1.6;">${escapeHtml(params.body)}</p>` : ''}
       ${params.link ? actionButton('View Message', params.link) : ''}
     `),
   };
@@ -101,9 +105,9 @@ export function paymentReceived(params: { title: string; body?: string; link?: s
     html: wrapInLayout(`
       <h2 style="margin:0 0 12px;font-size:18px;color:#111827;">Payment Received</h2>
       <p style="color:#374151;font-size:14px;line-height:1.6;">
-        ${params.title}
+        ${escapeHtml(params.title)}
       </p>
-      ${params.body ? `<p style="color:#374151;font-size:14px;line-height:1.6;">${params.body}</p>` : ''}
+      ${params.body ? `<p style="color:#374151;font-size:14px;line-height:1.6;">${escapeHtml(params.body)}</p>` : ''}
       ${params.link ? actionButton('View Details', params.link) : ''}
     `),
   };

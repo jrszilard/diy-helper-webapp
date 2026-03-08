@@ -197,7 +197,8 @@ export async function checkAutoAccept(
 }
 
 /**
- * Apply user credits toward a question. Deducts min(balance, priceCents)
+ * Apply user credits toward a question. Atomically deducts min(balance, priceCents)
+ * using a database function with row-level locking to prevent race conditions,
  * and records a credit transaction.
  */
 export async function applyCredits(
@@ -206,45 +207,38 @@ export async function applyCredits(
   questionId: string,
   priceCents: number,
 ): Promise<{ effectiveChargeCents: number; creditAppliedCents: number }> {
-  // Get current balance
-  const { data: credits } = await adminClient
-    .from('user_credits')
-    .select('balance_cents')
-    .eq('user_id', userId)
-    .single();
+  // Atomically deduct credits (row-level lock prevents concurrent deductions)
+  const { data: deducted, error: rpcError } = await adminClient.rpc('deduct_user_credits', {
+    p_user_id: userId,
+    p_max_deduct_cents: priceCents,
+  });
 
-  const balance = credits?.balance_cents ?? 0;
-  if (balance <= 0) {
+  if (rpcError) {
+    logger.error('Failed to deduct credits via RPC', rpcError, { userId, questionId });
+    // Fall through with no credits applied rather than blocking the purchase
     return { effectiveChargeCents: priceCents, creditAppliedCents: 0 };
   }
 
-  const creditAppliedCents = Math.min(balance, priceCents);
+  const creditAppliedCents = deducted ?? 0;
   const effectiveChargeCents = priceCents - creditAppliedCents;
 
-  // Deduct credits
-  await adminClient
-    .from('user_credits')
-    .update({
-      balance_cents: balance - creditAppliedCents,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('user_id', userId);
+  if (creditAppliedCents > 0) {
+    // Record transaction
+    await adminClient
+      .from('credit_transactions')
+      .insert({
+        user_id: userId,
+        amount_cents: -creditAppliedCents,
+        reason: 'credit_used',
+        qa_question_id: questionId,
+      });
 
-  // Record transaction
-  await adminClient
-    .from('credit_transactions')
-    .insert({
-      user_id: userId,
-      amount_cents: -creditAppliedCents,
-      reason: 'credit_used',
-      qa_question_id: questionId,
-    });
-
-  // Store on question
-  await adminClient
-    .from('qa_questions')
-    .update({ credit_applied_cents: creditAppliedCents })
-    .eq('id', questionId);
+    // Store on question
+    await adminClient
+      .from('qa_questions')
+      .update({ credit_applied_cents: creditAppliedCents })
+      .eq('id', questionId);
+  }
 
   return { effectiveChargeCents, creditAppliedCents };
 }

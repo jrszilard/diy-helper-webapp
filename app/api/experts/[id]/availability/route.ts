@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { getAdminClient } from '@/lib/supabase-admin';
+import { isValidUUID } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 
 /**
@@ -14,6 +15,14 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
     const adminClient = getAdminClient();
 
     // Get expert's active slots
@@ -98,6 +107,14 @@ export async function PUT(
     }
 
     const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
     const adminClient = getAdminClient();
 
     // Verify ownership

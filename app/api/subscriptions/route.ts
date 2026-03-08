@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
-import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
+import { applyCorsHeaders, handleCorsOptions, getSafeOrigin, validateRedirectUrl } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { parseRequestBody } from '@/lib/validation';
 import { CreateCheckoutSchema } from '@/lib/marketplace/validation';
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'subscriptions');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'subscriptions');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'subscriptions');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'subscriptions');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),
@@ -84,9 +84,15 @@ export async function POST(req: NextRequest) {
       ));
     }
 
-    const origin = req.headers.get('origin') || 'http://localhost:3000';
-    const successUrl = parsed.data.successUrl || `${origin}/settings?session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = parsed.data.cancelUrl || `${origin}/settings`;
+    const origin = getSafeOrigin(req);
+    const defaultSuccess = `${origin}/settings?session_id={CHECKOUT_SESSION_ID}`;
+    const defaultCancel = `${origin}/settings`;
+    const successUrl = parsed.data.successUrl
+      ? validateRedirectUrl(parsed.data.successUrl, defaultSuccess)
+      : defaultSuccess;
+    const cancelUrl = parsed.data.cancelUrl
+      ? validateRedirectUrl(parsed.data.cancelUrl, defaultCancel)
+      : defaultCancel;
 
     // Check if user already has an active subscription
     const { data: existingSub } = await auth.supabaseClient

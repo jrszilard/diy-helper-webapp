@@ -1,11 +1,6 @@
 import { NextRequest } from 'next/server';
 import { rateLimits } from '@/lib/config';
 
-interface TokenBucket {
-  tokens: number;
-  lastRefill: number;
-}
-
 interface RateLimitConfig {
   maxTokens: number;
   refillRate: number; // tokens per second
@@ -19,12 +14,53 @@ export interface RateLimitResult {
 
 const ENDPOINT_LIMITS: Record<string, RateLimitConfig> = rateLimits;
 
+// ── Upstash Redis rate limiting (distributed, survives cold starts) ──────────
+
+let redisRatelimit: import('@upstash/ratelimit').Ratelimit | null = null;
+let redisInitAttempted = false;
+
+function getRedisRatelimiter(endpoint: string): import('@upstash/ratelimit').Ratelimit | null {
+  if (redisInitAttempted) return redisRatelimit;
+  redisInitAttempted = true;
+
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+
+  try {
+    // Dynamic imports are resolved at build time for Next.js,
+    // but the packages are optional — if not installed, we fall back to in-memory.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Ratelimit } = require('@upstash/ratelimit');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Redis } = require('@upstash/redis');
+
+    const redis = new Redis({ url, token });
+    const config = ENDPOINT_LIMITS[endpoint];
+    if (!config) return null;
+
+    redisRatelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.tokenBucket(config.maxTokens, `${Math.ceil(1 / config.refillRate)}s`, config.maxTokens),
+      prefix: 'rl',
+    });
+    return redisRatelimit;
+  } catch {
+    // Package not installed or Redis connection failed — fall back to in-memory
+    return null;
+  }
+}
+
+// ── In-memory fallback (for local dev and when Upstash is not configured) ───
+
+interface TokenBucket {
+  tokens: number;
+  lastRefill: number;
+}
+
 const buckets = new Map<string, TokenBucket>();
 
 // Global per-endpoint circuit breaker — defense against coordinated attacks
-// (many different IPs hitting the same endpoint).
-// TODO post-launch: migrate to Upstash Redis for distributed rate limiting
-
 interface CircuitBreakerConfig {
   maxRequests: number;
   windowMs: number;
@@ -88,7 +124,7 @@ function getClientIdentifier(req: NextRequest, userId: string | null): string {
   return `ip:${ip}`;
 }
 
-export function checkRateLimit(
+function checkRateLimitInMemory(
   req: NextRequest,
   userId: string | null,
   endpoint: string
@@ -139,4 +175,36 @@ export function checkRateLimit(
     remaining: 0,
     retryAfter,
   };
+}
+
+// ── Public API ──────────────────────────────────────────────────────────────
+
+/**
+ * Check rate limit for a request. Uses Upstash Redis when configured
+ * (distributed, survives serverless cold starts), falls back to in-memory
+ * token bucket for local development.
+ */
+export async function checkRateLimit(
+  req: NextRequest,
+  userId: string | null,
+  endpoint: string
+): Promise<RateLimitResult> {
+  // Try Upstash Redis first
+  const limiter = getRedisRatelimiter(endpoint);
+  if (limiter) {
+    try {
+      const identifier = `${getClientIdentifier(req, userId)}:${endpoint}`;
+      const { success, remaining, reset } = await limiter.limit(identifier);
+      return {
+        allowed: success,
+        remaining,
+        retryAfter: success ? null : Math.ceil((reset - Date.now()) / 1000),
+      };
+    } catch {
+      // Redis error — fall through to in-memory
+    }
+  }
+
+  // Fallback to in-memory
+  return checkRateLimitInMemory(req, userId, endpoint);
 }

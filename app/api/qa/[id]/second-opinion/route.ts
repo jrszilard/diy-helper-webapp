@@ -6,6 +6,7 @@ import { chargeQAQuestion } from '@/lib/stripe';
 import { applyCredits } from '@/lib/marketplace/qa-helpers';
 import { createNotification } from '@/lib/notifications';
 import { getAdminClient } from '@/lib/supabase-admin';
+import { isValidUUID } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 
 const SECOND_OPINION_PRICE_CENTS = 1500; // $15
@@ -29,7 +30,7 @@ export async function POST(
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'marketplace');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'marketplace');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests.' }),
@@ -38,6 +39,14 @@ export async function POST(
     }
 
     const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
     const adminClient = getAdminClient();
 
     // Fetch the original question

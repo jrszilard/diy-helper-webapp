@@ -3,6 +3,7 @@ import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { markCancelled } from '@/lib/agents/cancellation';
+import { isValidUUID } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 
 export async function POST(
@@ -11,6 +12,14 @@ export async function POST(
 ) {
   try {
     const { id: runId } = await params;
+
+    if (!isValidUUID(runId)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
     const auth = await getAuthFromRequest(req);
 
     if (!auth.userId) {
@@ -20,7 +29,7 @@ export async function POST(
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'agents');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'agents');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),

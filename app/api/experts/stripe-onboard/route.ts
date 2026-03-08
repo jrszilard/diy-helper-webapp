@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
-import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
+import { applyCorsHeaders, handleCorsOptions, getSafeOrigin } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { getExpertByUserId } from '@/lib/marketplace/expert-helpers';
 import { createConnectAccount, createOnboardingLink, isTestMode } from '@/lib/stripe';
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'experts');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'experts');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       ));
     }
 
-    const origin = req.headers.get('origin') || 'http://localhost:3000';
+    const origin = getSafeOrigin(req);
     const returnUrl = `${origin}/experts/dashboard`;
 
     let accountId = expert.stripeConnectAccountId;

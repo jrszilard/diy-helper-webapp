@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
 import { handleCorsOptions, applyCorsHeaders } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { AddMessageSchema, parseRequestBody } from '@/lib/validation';
+import { AddMessageSchema, parseRequestBody, isValidUUID } from '@/lib/validation';
 import { addMessage, getConversationMessages } from '@/lib/chat-history';
 
 export async function GET(
@@ -17,7 +17,7 @@ export async function GET(
     ));
   }
 
-  const rateLimitResult = checkRateLimit(req, auth.userId, 'conversations');
+  const rateLimitResult = await checkRateLimit(req, auth.userId, 'conversations');
   if (!rateLimitResult.allowed) {
     return applyCorsHeaders(req, new Response(
       JSON.stringify({ error: 'Too many requests' }),
@@ -26,6 +26,14 @@ export async function GET(
   }
 
   const { id } = await params;
+
+  if (!isValidUUID(id)) {
+    return applyCorsHeaders(req, new Response(
+      JSON.stringify({ error: 'Invalid ID format' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    ));
+  }
+
   const url = new URL(req.url);
   const limit = parseInt(url.searchParams.get('limit') || '100', 10);
   const before = url.searchParams.get('before') || undefined;
@@ -63,7 +71,7 @@ export async function POST(
     ));
   }
 
-  const rateLimitResult = checkRateLimit(req, auth.userId, 'conversations');
+  const rateLimitResult = await checkRateLimit(req, auth.userId, 'conversations');
   if (!rateLimitResult.allowed) {
     return applyCorsHeaders(req, new Response(
       JSON.stringify({ error: 'Too many requests' }),
@@ -72,6 +80,14 @@ export async function POST(
   }
 
   const { id } = await params;
+
+  if (!isValidUUID(id)) {
+    return applyCorsHeaders(req, new Response(
+      JSON.stringify({ error: 'Invalid ID format' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    ));
+  }
+
   const body = await req.json();
   const parsed = parseRequestBody(AddMessageSchema, body);
   if (!parsed.success) {

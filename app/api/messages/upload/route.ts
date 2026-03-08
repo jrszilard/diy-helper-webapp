@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'messages');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'messages');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),

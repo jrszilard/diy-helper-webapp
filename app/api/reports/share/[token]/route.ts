@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { isValidUUID } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 
 // GET /api/reports/share/[token] — Public report access (bypasses RLS)
@@ -11,7 +12,7 @@ export async function GET(
   try {
     const { token } = await params;
 
-    const rateLimitResult = checkRateLimit(req, null, 'share-public');
+    const rateLimitResult = await checkRateLimit(req, null, 'share-public');
     if (!rateLimitResult.allowed) {
       return new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),
@@ -19,9 +20,9 @@ export async function GET(
       );
     }
 
-    if (!token || token.length < 10) {
+    if (!isValidUUID(token)) {
       return new Response(
-        JSON.stringify({ error: 'Invalid share token' }),
+        JSON.stringify({ error: 'Invalid token format' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }

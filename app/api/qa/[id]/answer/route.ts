@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { parseRequestBody } from '@/lib/validation';
+import { parseRequestBody, isValidUUID } from '@/lib/validation';
 import { AnswerQuestionSchema } from '@/lib/marketplace/validation';
 import { getExpertByUserId } from '@/lib/marketplace/expert-helpers';
 import { createNotification } from '@/lib/notifications';
@@ -21,7 +21,7 @@ export async function POST(
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'marketplace');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'marketplace');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),
@@ -30,6 +30,13 @@ export async function POST(
     }
 
     const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
 
     const body = await req.json();
     const parsed = parseRequestBody(AnswerQuestionSchema, body);

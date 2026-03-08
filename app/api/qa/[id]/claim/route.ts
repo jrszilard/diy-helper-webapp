@@ -8,6 +8,7 @@ import { chargeQAQuestion } from '@/lib/stripe';
 import { createNotification } from '@/lib/notifications';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { CLAIM_EXPIRY_HOURS } from '@/lib/marketplace/constants';
+import { isValidUUID } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 
 export async function POST(
@@ -23,7 +24,7 @@ export async function POST(
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'marketplace');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'marketplace');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),
@@ -32,6 +33,14 @@ export async function POST(
     }
 
     const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
     const adminClient = getAdminClient();
 
     // Verify user is an expert
@@ -81,11 +90,39 @@ export async function POST(
       }
     }
 
+    const now = new Date();
+    const claimExpiresAt = new Date(now.getTime() + CLAIM_EXPIRY_HOURS * 60 * 60 * 1000);
+
+    // STEP 1: Atomically claim the question BEFORE charging.
+    // The .eq('status', 'open') acts as an optimistic lock — only one concurrent
+    // request can succeed. This prevents the double-charge race condition where
+    // two experts both pass the status check and both charge the DIYer.
+    const { data: claimed, error: claimError } = await adminClient
+      .from('qa_questions')
+      .update({
+        expert_id: expert.id,
+        status: 'claimed',
+        claimed_at: now.toISOString(),
+        claim_expires_at: claimExpiresAt.toISOString(),
+        updated_at: now.toISOString(),
+      })
+      .eq('id', id)
+      .eq('status', 'open')
+      .select('id')
+      .single();
+
+    if (claimError || !claimed) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Question was claimed by another expert' }),
+        { status: 409, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
+    // STEP 2: Now charge — only one expert reaches here per question.
     let paymentIntentId: string | null = null;
 
-    // Charge the DIYer if this is a paid question
     if (question.payout_status !== 'free' && question.price_cents > 0) {
-      // Apply credits first
+      // Apply credits first (atomic deduction)
       const { effectiveChargeCents } = await applyCredits(
         adminClient,
         question.diyer_user_id,
@@ -93,9 +130,20 @@ export async function POST(
         question.price_cents,
       );
 
-      // Only charge if there's still an amount after credits
       if (effectiveChargeCents > 0) {
         if (!question.payment_method_id || !question.stripe_customer_id) {
+          // ROLLBACK: release the claim so the question returns to open
+          await adminClient
+            .from('qa_questions')
+            .update({
+              status: 'open',
+              expert_id: null,
+              claimed_at: null,
+              claim_expires_at: null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', id);
+
           return applyCorsHeaders(req, new Response(
             JSON.stringify({ error: 'Payment method not saved. DIYer needs to re-submit with payment.' }),
             { status: 409, headers: { 'Content-Type': 'application/json' } }
@@ -115,6 +163,18 @@ export async function POST(
           });
           paymentIntentId = chargeResult.paymentIntentId;
         } catch (chargeError) {
+          // ROLLBACK: release the claim so another expert can try
+          await adminClient
+            .from('qa_questions')
+            .update({
+              status: 'open',
+              expert_id: null,
+              claimed_at: null,
+              claim_expires_at: null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', id);
+
           logger.error('Failed to charge DIYer on claim', chargeError, { questionId: id });
           return applyCorsHeaders(req, new Response(
             JSON.stringify({ error: 'Payment failed. The question remains open.' }),
@@ -124,28 +184,12 @@ export async function POST(
       }
     }
 
-    const now = new Date();
-    const claimExpiresAt = new Date(now.getTime() + CLAIM_EXPIRY_HOURS * 60 * 60 * 1000);
-
-    const { error: updateError } = await adminClient
-      .from('qa_questions')
-      .update({
-        expert_id: expert.id,
-        status: 'claimed',
-        claimed_at: now.toISOString(),
-        claim_expires_at: claimExpiresAt.toISOString(),
-        payment_intent_id: paymentIntentId,
-        updated_at: now.toISOString(),
-      })
-      .eq('id', id)
-      .eq('status', 'open');
-
-    if (updateError) {
-      logger.error('Failed to claim question', updateError);
-      return applyCorsHeaders(req, new Response(
-        JSON.stringify({ error: 'Failed to claim question' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      ));
+    // STEP 3: Update with payment intent ID (claim already set in step 1)
+    if (paymentIntentId) {
+      await adminClient
+        .from('qa_questions')
+        .update({ payment_intent_id: paymentIntentId })
+        .eq('id', id);
     }
 
     // Notify DIYer

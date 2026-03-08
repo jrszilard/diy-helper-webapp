@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { parseRequestBody } from '@/lib/validation';
+import { parseRequestBody, isValidUUID } from '@/lib/validation';
 import { ThreadMessageSchema } from '@/lib/marketplace/validation';
 import { sendMessage } from '@/lib/marketplace/messaging';
 import { getAdminClient } from '@/lib/supabase-admin';
@@ -64,7 +64,7 @@ export async function GET(
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'messages');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'messages');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),
@@ -73,6 +73,13 @@ export async function GET(
     }
 
     const { threadId } = await params;
+
+    if (!isValidUUID(threadId)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
 
     // First try context-based lookup
     let { data: messages, error } = await auth.supabaseClient
@@ -190,7 +197,7 @@ export async function POST(
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'messages');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'messages');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),
@@ -199,6 +206,13 @@ export async function POST(
     }
 
     const { threadId } = await params;
+
+    if (!isValidUUID(threadId)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
 
     const body = await req.json();
     const parsed = parseRequestBody(ThreadMessageSchema, body);

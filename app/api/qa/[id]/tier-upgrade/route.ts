@@ -7,6 +7,7 @@ import { chargeQAQuestion } from '@/lib/stripe';
 import { createNotification } from '@/lib/notifications';
 import { TIER_DEFINITIONS, MAX_TIER } from '@/lib/marketplace/tier-gate';
 import { marketplace as marketplaceConfig } from '@/lib/config';
+import { isValidUUID } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 import { z } from 'zod';
 
@@ -28,7 +29,7 @@ export async function POST(
       ));
     }
 
-    const rateLimitResult = checkRateLimit(req, auth.userId, 'marketplace');
+    const rateLimitResult = await checkRateLimit(req, auth.userId, 'marketplace');
     if (!rateLimitResult.allowed) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Too many requests.' }),
@@ -37,6 +38,14 @@ export async function POST(
     }
 
     const { id } = await params;
+
+    if (!isValidUUID(id)) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Invalid ID format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
     const body = await req.json();
     const parsed = TierUpgradeSchema.safeParse(body);
     if (!parsed.success) {
