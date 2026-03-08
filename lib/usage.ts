@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { getAdminClient } from '@/lib/supabase-admin';
-import { freemium } from '@/lib/config';
+import { freemium, beta } from '@/lib/config';
 import { logger } from '@/lib/logger';
 import type { UsageType, SubscriptionTier } from '@/lib/marketplace/types';
 
@@ -20,6 +20,11 @@ export async function checkUsageLimit(
   userId: string,
   type: UsageType,
 ): Promise<{ allowed: boolean; current: number; limit: number }> {
+  // Beta mode: unlimited usage
+  if (beta.enabled) {
+    return { allowed: true, current: 0, limit: Infinity };
+  }
+
   // Check subscription tier
   const { data: sub } = await supabaseClient
     .from('user_subscriptions')

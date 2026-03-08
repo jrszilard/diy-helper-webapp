@@ -5,7 +5,8 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { parseRequestBody } from '@/lib/validation';
 import { CreateCheckoutSchema } from '@/lib/marketplace/validation';
 import { createCheckoutSession } from '@/lib/stripe';
-import { freemium } from '@/lib/config';
+import { freemium, beta } from '@/lib/config';
+import { getAdminClient } from '@/lib/supabase-admin';
 import { logger } from '@/lib/logger';
 
 export async function GET(req: NextRequest) {
@@ -105,6 +106,25 @@ export async function POST(req: NextRequest) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'You already have an active Pro subscription' }),
         { status: 409, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
+    // Beta mode: auto-activate pro without Stripe
+    if (beta.enabled) {
+      const adminClient = getAdminClient();
+      await adminClient.from('user_subscriptions').upsert({
+        user_id: auth.userId,
+        tier: 'pro',
+        status: 'active',
+        stripe_customer_id: `cus_beta_${auth.userId.slice(0, 8)}`,
+        stripe_subscription_id: `sub_beta_${auth.userId.slice(0, 8)}`,
+        current_period_start: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' });
+
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ url: successUrl.replace('{CHECKOUT_SESSION_ID}', 'beta_session'), betaMode: true }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
       ));
     }
 

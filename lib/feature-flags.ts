@@ -44,6 +44,9 @@ export const flags = {
 
   /** Phase 0: AI chatbot escalation prompts to expert Q&A */
   aiEscalation: envBool('FEATURE_AI_ESCALATION', true),
+
+  /** Beta mode: bypasses payments, shows beta banner, enables feedback widget */
+  betaMode: envBool('NEXT_PUBLIC_BETA_MODE', false),
 } as const;
 
 // ── Percentage Rollout ────────────────────────────────────────────────────────
@@ -91,5 +94,6 @@ export function getClientFlags(userId?: string): Record<string, boolean> {
     progressivePayments: isFeatureEnabled('progressivePayments', userId),
     qaValueMessaging: isFeatureEnabled('qaValueMessaging', userId),
     aiEscalation: isFeatureEnabled('aiEscalation', userId),
+    betaMode: isFeatureEnabled('betaMode', userId),
   };
 }

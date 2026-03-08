@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { stripe as stripeConfig, marketplace as marketplaceConfig } from '@/lib/config';
+import { stripe as stripeConfig, marketplace as marketplaceConfig, beta } from '@/lib/config';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 
@@ -16,7 +16,7 @@ export function getStripeClient(): Stripe {
 }
 
 export function isTestMode(): boolean {
-  return marketplaceConfig.testMode;
+  return marketplaceConfig.testMode || beta.enabled;
 }
 
 export async function createConnectAccount(email: string): Promise<Stripe.Account> {

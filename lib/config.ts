@@ -25,6 +25,11 @@ function envList(key: string, fallback: string[]): string[] {
   return v.split(',').map(s => s.trim()).filter(Boolean);
 }
 
+// ── Beta Mode ────────────────────────────────────────────────────────────────
+export const beta = {
+  enabled: envString('NEXT_PUBLIC_BETA_MODE', '') === 'true',
+} as const;
+
 // ── Anthropic ────────────────────────────────────────────────────────────────
 export const anthropic = {
   model: envString('ANTHROPIC_MODEL', 'claude-sonnet-4-6'),
@@ -178,5 +183,5 @@ export const expertSubscriptions = {
 } as const;
 
 // Re-export everything as a single default for convenience
-const config = { anthropic, rateLimits, cors, storeSearch, streaming, pruning, freemium, stripe, marketplace, expertSubscriptions } as const;
+const config = { beta, anthropic, rateLimits, cors, storeSearch, streaming, pruning, freemium, stripe, marketplace, expertSubscriptions } as const;
 export default config;
