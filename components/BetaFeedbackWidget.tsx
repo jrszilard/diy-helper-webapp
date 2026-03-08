@@ -59,10 +59,10 @@ export default function BetaFeedbackWidget() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-5 right-5 z-50 bg-[var(--terracotta)] hover:bg-[var(--terracotta-dark)] text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition-colors"
+          className="fixed bottom-5 right-5 z-50 bg-[var(--terracotta)] hover:bg-[var(--terracotta-dark)] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition-colors"
           aria-label="Send feedback"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
         </button>
@@ -114,7 +114,7 @@ export default function BetaFeedbackWidget() {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="What's on your mind? (min 5 characters)"
-                  className="w-full h-24 px-3 py-2 text-sm bg-white border border-[var(--earth-sand)] rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[var(--terracotta)] text-[var(--foreground)] placeholder:text-[var(--earth-brown-light)]"
+                  className="w-full h-24 px-3 py-2 text-sm bg-white border border-[var(--earth-sand)] rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[var(--terracotta)] text-[var(--earth-brown-dark)] placeholder:text-[var(--earth-brown)]"
                 />
 
                 {status === 'error' && (
