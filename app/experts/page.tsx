@@ -17,6 +17,7 @@ interface Filters {
 export default function ExpertsBrowsePage() {
   const [experts, setExperts] = useState<ExpertProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     specialty: '',
     state: '',
@@ -35,9 +36,14 @@ export default function ExpertsBrowsePage() {
       if (res.ok) {
         const data = await res.json();
         setExperts(data.experts || []);
+        setError(false);
+      } else {
+        setError(true);
+        setExperts([]);
       }
     } catch {
-      // ignore
+      setError(true);
+      setExperts([]);
     } finally {
       setLoading(false);
     }
@@ -79,6 +85,13 @@ export default function ExpertsBrowsePage() {
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 size={32} className="animate-spin text-[#C67B5C]" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-sm text-[#B8593B] mb-3">Something went wrong loading experts.</p>
+            <button onClick={fetchExperts} className="text-sm font-medium text-[#5D7B93] hover:underline">
+              Try again
+            </button>
           </div>
         ) : experts.length === 0 ? (
           <div className="text-center py-12">

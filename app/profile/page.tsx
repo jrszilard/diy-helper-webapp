@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { redirectToSignIn } from '@/lib/auth-redirect';
 import AuthButton from '@/components/AuthButton';
 import NotificationBell from '@/components/NotificationBell';
 import { useExpertStatus } from '@/hooks/useExpertStatus';
@@ -33,7 +34,7 @@ export default function ProfilePage() {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.push('/');
+        redirectToSignIn(router, '/profile');
         return;
       }
       setUser({ id: user.id, email: user.email ?? undefined });

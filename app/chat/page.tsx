@@ -236,11 +236,11 @@ export default function ChatPage() {
                 </Link>
                 <Link href="/marketplace/qa" className="hidden sm:flex items-center gap-2 text-[#3E2723] hover:text-[#C67B5C] transition">
                   <MessageSquare className="w-5 h-5" />
-                  <span className="hidden md:inline font-medium">Ask Expert</span>
+                  <span className="hidden md:inline font-medium">Ask an Expert</span>
                 </Link>
                 <Link href="/experts" className="hidden sm:flex items-center gap-2 text-[#3E2723] hover:text-[#C67B5C] transition">
                   <Users className="w-5 h-5" />
-                  <span className="hidden md:inline font-medium">Experts</span>
+                  <span className="hidden md:inline font-medium">Find an Expert</span>
                 </Link>
                 <AuthButton
                   user={user}

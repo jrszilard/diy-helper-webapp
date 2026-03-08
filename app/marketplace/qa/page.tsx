@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { redirectToSignIn } from '@/lib/auth-redirect';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import QASubmitForm from '@/components/marketplace/QASubmitForm';
@@ -41,7 +42,7 @@ function QAPageContent() {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.push('/chat');
+        redirectToSignIn(router, '/marketplace/qa');
         return;
       }
       setAuthenticated(true);

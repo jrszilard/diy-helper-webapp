@@ -32,6 +32,7 @@ import { supabase } from '@/lib/supabase';
 export default function LandingPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const [showAuth, setShowAuth] = useState(false);
   const { isExpert, expert, openQueueCount } = useExpertStatus();
 
   useEffect(() => {
@@ -45,6 +46,14 @@ export default function LandingPage() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Auto-open auth modal when redirected from protected route
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('signIn') === 'true' && !user) {
+      setShowAuth(true);
+    }
+  }, [user]);
 
   const features = [
     {
@@ -103,7 +112,7 @@ export default function LandingPage() {
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <AuthButton user={user} variant="dark" isExpert={isExpert} />
+              <AuthButton user={user} variant="dark" isExpert={isExpert} externalShowAuth={showAuth} onAuthToggle={setShowAuth} />
               <Link
                 href="/marketplace/qa"
                 className="hidden md:inline-flex text-[#D4C8B8] hover:text-white font-medium transition-colors"

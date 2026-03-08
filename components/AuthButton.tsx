@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { User, LogOut, X, ChevronDown, FolderOpen, MessageSquare, Mail, Users, Award, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
@@ -26,6 +28,8 @@ export default function AuthButton({
   const [password, setPassword] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [portalMounted, setPortalMounted] = useState(false);
+  const router = useRouter();
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -39,6 +43,23 @@ export default function AuthButton({
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showDropdown]);
+
+  // SSR-safe portal mount
+  useEffect(() => setPortalMounted(true), []);
+
+  // Escape key to close auth modal
+  useEffect(() => {
+    const showAuth = externalShowAuth !== undefined ? externalShowAuth : internalShowAuth;
+    if (!showAuth) return;
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (onAuthToggle) onAuthToggle(false);
+        else setInternalShowAuth(false);
+      }
+    };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [externalShowAuth, internalShowAuth, onAuthToggle]);
 
   const showAuth = externalShowAuth !== undefined ? externalShowAuth : internalShowAuth;
   const setShowAuth = (show: boolean) => {
@@ -72,6 +93,12 @@ export default function AuthButton({
       setShowAuth(false);
       setEmail('');
       setPassword('');
+      // Redirect to return URL if set by auth redirect
+      const returnTo = sessionStorage.getItem('authReturnTo');
+      if (returnTo) {
+        sessionStorage.removeItem('authReturnTo');
+        router.push(returnTo);
+      }
     }
     setLoading(false);
   };
@@ -193,8 +220,11 @@ export default function AuthButton({
         Sign In
       </button>
 
-      {showAuth && (
-        <div className="fixed inset-0 bg-[#3E2723]/50 flex items-center justify-center z-50 p-4">
+      {showAuth && portalMounted && createPortal(
+        <div
+          className="fixed inset-0 bg-[#3E2723]/50 flex items-center justify-center z-50 p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowAuth(false); }}
+        >
           <div className="bg-[#FDFBF7] rounded-2xl max-w-md w-full shadow-2xl border border-[#D4C8B8] overflow-hidden">
             {/* Close button */}
             <div className="flex justify-end p-3 pb-0">
@@ -273,6 +303,19 @@ export default function AuthButton({
                   {isSignUp && (
                     <p className="text-xs text-[#7D6B5D] mt-1">At least 8 characters</p>
                   )}
+                  {!isSignUp && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!email) { alert('Enter your email first'); return; }
+                        await supabase.auth.resetPasswordForEmail(email);
+                        alert('Check your email for a password reset link');
+                      }}
+                      className="text-xs text-[#5D7B93] hover:underline mt-1"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
                 </div>
 
                 <button
@@ -285,7 +328,8 @@ export default function AuthButton({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

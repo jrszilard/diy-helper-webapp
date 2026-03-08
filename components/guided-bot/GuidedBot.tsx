@@ -65,8 +65,9 @@ export default function GuidedBot() {
   };
 
   // Render the interactive component for a message
-  const renderComponent = (componentKey: string | undefined, messageIndex: number) => {
+  const renderComponent = (componentKey: string | undefined, messageIndex: number, completed?: boolean) => {
     if (!componentKey) return null;
+    if (completed) return null; // Collapsed — user message already shows the response
 
     // Only render interactive components on the last message with that key
     const isLatest = bot.messages
@@ -169,13 +170,13 @@ export default function GuidedBot() {
       {/* Message thread */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[70vh] min-h-[300px]"
+        className="flex-1 overflow-y-auto overscroll-y-contain p-4 space-y-4 max-h-[70vh] min-h-[300px]"
       >
         {bot.messages.map((message, i) => {
           if (message.sender === 'bot') {
             return (
               <BotMessage key={message.id} content={message.content} animate={i > 0}>
-                {renderComponent(message.component, i)}
+                {renderComponent(message.component, i, message.completed)}
               </BotMessage>
             );
           }

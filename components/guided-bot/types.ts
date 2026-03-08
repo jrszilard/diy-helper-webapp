@@ -9,6 +9,7 @@ export interface BotMessage {
   sender: MessageSender;
   content: string;
   component?: string; // component key to render below text
+  completed?: boolean; // collapsed after user advances past this step
   timestamp: number;
 }
 

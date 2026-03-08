@@ -40,6 +40,17 @@ export function useGuidedBot() {
   });
 
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isSubmitting = useRef(false);
+
+  // Helper: mark all interactive messages as completed (collapses their components)
+  const markCompleted = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      messages: prev.messages.map(m =>
+        m.component ? { ...m, completed: true } : m
+      ),
+    }));
+  }, []);
 
   // Helper: add a user message
   const addUserMessage = useCallback((content: string) => {
@@ -78,6 +89,9 @@ export function useGuidedBot() {
   // ── Phase Handlers ──
 
   const handleProjectSelect = useCallback(async (type: string, description: string, _templateId?: string) => {
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
+    markCompleted();
     addUserMessage(description.length > 80 ? description.slice(0, 80) + '...' : description);
     setState(prev => ({
       ...prev,
@@ -86,9 +100,13 @@ export function useGuidedBot() {
     await addBotMessage(msg.projectConfirmation(type.charAt(0).toUpperCase() + type.slice(1)));
     await addBotMessage(msg.scopePrompt(type), 'scope-input');
     setState(prev => ({ ...prev, phase: 'scope' }));
-  }, [addUserMessage, addBotMessage]);
+    isSubmitting.current = false;
+  }, [addUserMessage, addBotMessage, markCompleted]);
 
   const handleFreeformProject = useCallback(async (text: string) => {
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
+    markCompleted();
     addUserMessage(text);
     setState(prev => ({ ...prev, isParsingFreeform: true }));
 
@@ -128,9 +146,13 @@ export function useGuidedBot() {
       await addBotMessage(msg.scopePrompt('general'), 'scope-input');
       setState(prev => ({ ...prev, phase: 'scope' }));
     }
-  }, [addUserMessage, addBotMessage]);
+    isSubmitting.current = false;
+  }, [addUserMessage, addBotMessage, markCompleted]);
 
   const handleScopeSubmit = useCallback(async (dimensions: string, details: string) => {
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
+    markCompleted();
     const summary = details ? `${dimensions} — ${details}` : dimensions;
     addUserMessage(summary);
     setState(prev => ({
@@ -139,9 +161,13 @@ export function useGuidedBot() {
     }));
     await addBotMessage(msg.locationPrompt, 'location-input');
     setState(prev => ({ ...prev, phase: 'location' }));
-  }, [addUserMessage, addBotMessage]);
+    isSubmitting.current = false;
+  }, [addUserMessage, addBotMessage, markCompleted]);
 
   const handleLocationSubmit = useCallback(async (city: string, stateName: string) => {
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
+    markCompleted();
     addUserMessage(`${city}, ${stateName}`);
     setState(prev => ({
       ...prev,
@@ -149,9 +175,13 @@ export function useGuidedBot() {
     }));
     await addBotMessage(msg.toolsPrompt, 'tools-input');
     setState(prev => ({ ...prev, phase: 'tools' }));
-  }, [addUserMessage, addBotMessage]);
+    isSubmitting.current = false;
+  }, [addUserMessage, addBotMessage, markCompleted]);
 
   const handleToolsSubmit = useCallback(async (tools: string) => {
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
+    markCompleted();
     addUserMessage(tools);
     setState(prev => ({
       ...prev,
@@ -159,9 +189,13 @@ export function useGuidedBot() {
     }));
     await addBotMessage(msg.experiencePrompt, 'experience-cards');
     setState(prev => ({ ...prev, phase: 'preferences-experience' }));
-  }, [addUserMessage, addBotMessage]);
+    isSubmitting.current = false;
+  }, [addUserMessage, addBotMessage, markCompleted]);
 
   const handleToolsSkip = useCallback(async () => {
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
+    markCompleted();
     addUserMessage("I don't have any yet");
     setState(prev => ({
       ...prev,
@@ -169,9 +203,13 @@ export function useGuidedBot() {
     }));
     await addBotMessage(msg.experiencePrompt, 'experience-cards');
     setState(prev => ({ ...prev, phase: 'preferences-experience' }));
-  }, [addUserMessage, addBotMessage]);
+    isSubmitting.current = false;
+  }, [addUserMessage, addBotMessage, markCompleted]);
 
   const handleExperienceSelect = useCallback(async (value: string) => {
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
+    markCompleted();
     const labels: Record<string, string> = { beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced' };
     addUserMessage(labels[value] || value);
     setState(prev => ({
@@ -180,9 +218,13 @@ export function useGuidedBot() {
     }));
     await addBotMessage(msg.budgetPrompt, 'budget-cards');
     setState(prev => ({ ...prev, phase: 'preferences-budget' }));
-  }, [addUserMessage, addBotMessage]);
+    isSubmitting.current = false;
+  }, [addUserMessage, addBotMessage, markCompleted]);
 
   const handleBudgetSelect = useCallback(async (value: string) => {
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
+    markCompleted();
     const labels: Record<string, string> = { budget: 'Budget', 'mid-range': 'Mid-Range', premium: 'Premium' };
     addUserMessage(labels[value] || value);
     setState(prev => ({
@@ -191,7 +233,8 @@ export function useGuidedBot() {
     }));
     await addBotMessage(msg.summaryIntro, 'project-brief');
     setState(prev => ({ ...prev, phase: 'summary' }));
-  }, [addUserMessage, addBotMessage]);
+    isSubmitting.current = false;
+  }, [addUserMessage, addBotMessage, markCompleted]);
 
   const handleEdit = useCallback(async (field: string) => {
     // Map field to the corresponding phase

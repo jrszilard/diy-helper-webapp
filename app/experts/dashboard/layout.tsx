@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { redirectToSignIn } from '@/lib/auth-redirect';
 import NotificationBell from '@/components/NotificationBell';
 import AuthButton from '@/components/AuthButton';
 import {
@@ -30,7 +31,7 @@ export default function ExpertDashboardLayout({ children }: { children: React.Re
     async function check() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.push('/chat');
+        redirectToSignIn(router, '/experts/dashboard');
         return;
       }
 
