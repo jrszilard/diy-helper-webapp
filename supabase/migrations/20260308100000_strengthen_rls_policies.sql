@@ -8,6 +8,14 @@ drop policy if exists "Users can update own credits" on user_credits;
 
 -- Add service_role full access policy for qa_bids (needed for admin operations
 -- like accepting/rejecting bids on behalf of the system).
-create policy "Service role full access on qa_bids"
-  on qa_bids for all
-  using (auth.role() = 'service_role');
+-- Wrapped in DO block so it's safe to run even if qa_bids hasn't been created yet.
+do $$
+begin
+  if exists (select 1 from pg_tables where tablename = 'qa_bids') then
+    execute $policy$
+      create policy "Service role full access on qa_bids"
+        on qa_bids for all
+        using (auth.role() = 'service_role')
+    $policy$;
+  end if;
+end $$;
