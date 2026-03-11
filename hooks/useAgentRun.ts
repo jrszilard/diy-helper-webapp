@@ -21,7 +21,7 @@ export interface AgentRunState {
   isCancelling: boolean;
   runId: string | null;
   reportId: string | null;
-  report: ProjectReportRecord | null;
+  report: ProjectReportRecord | ReportOutput | null;
   phases: PhaseProgress[];
   overallProgress: number;
   error: string | null;

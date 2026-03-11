@@ -8,13 +8,13 @@ import {
   ClipboardCopy, CheckCircle2, Share2, Link, LogIn, X,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import type { ReportSection, ProjectReportRecord } from '@/lib/agents/types';
+import type { ReportSection, ProjectReportRecord, ReportOutput } from '@/lib/agents/types';
 import { sanitizeHref } from '@/lib/security';
 import ExpertHelpDropdown from '@/components/marketplace/ExpertHelpDropdown';
 import ProjectTimeline from '@/components/marketplace/ProjectTimeline';
 
 interface ReportViewProps {
-  report: ProjectReportRecord;
+  report: ProjectReportRecord | ReportOutput;
   onBack: () => void;
   reportId?: string;
   applyToProject?: (reportId: string) => Promise<{ success: boolean; projectId: string; itemCount: number; message: string } | null>;
@@ -50,6 +50,10 @@ export default function ReportView({
   isSharedView = false,
   isAuthenticated = true,
 }: ReportViewProps) {
+  // Normalize fields between ProjectReportRecord (snake_case) and ReportOutput (camelCase)
+  const totalCost = 'total_cost' in report ? (report as ProjectReportRecord).total_cost : ('totalCost' in report ? (report as ReportOutput).totalCost : null);
+  const createdAt = 'created_at' in report ? report.created_at : ('generatedAt' in report ? report.generatedAt : null);
+
   const sections = (report.sections as ReportSection[]).sort((a, b) => a.order - b.order);
   const [activeTab, setActiveTab] = useState(sections[0]?.id || 'overview');
   const [copied, setCopied] = useState(false);
@@ -198,9 +202,9 @@ export default function ReportView({
         {report.summary && (
           <p className="text-sm text-[#7D6B5D] mt-1">{report.summary}</p>
         )}
-        {report.total_cost && (
+        {totalCost && (
           <p className="text-sm font-semibold text-[#5D7B93] mt-1">
-            Estimated Total: ${Number(report.total_cost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            Estimated Total: ${Number(totalCost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         )}
 
@@ -230,9 +234,9 @@ export default function ReportView({
         {report.summary && (
           <p className="text-sm text-gray-600 mt-1">{report.summary}</p>
         )}
-        {report.total_cost && (
+        {totalCost && (
           <p className="text-sm font-semibold text-gray-800 mt-1">
-            Estimated Total: ${Number(report.total_cost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            Estimated Total: ${Number(totalCost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         )}
       </div>
@@ -298,15 +302,15 @@ export default function ReportView({
       <div className="bg-[#FDFBF7] border-t border-[#D4C8B8] p-4 print:hidden">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <p className="text-xs text-[#B0A696]">
-            Generated {new Date(report.created_at).toLocaleDateString('en-US', {
+            Generated {createdAt ? new Date(createdAt).toLocaleDateString('en-US', {
               month: 'long', day: 'numeric', year: 'numeric',
-            })}
+            }) : 'just now'}
           </p>
           <div className="flex items-center gap-3">
             {!isSharedView && report.id && (
               <ExpertHelpDropdown
                 reportId={report.id}
-                totalCost={report.total_cost ?? undefined}
+                totalCost={totalCost ?? undefined}
                 isAuthenticated={isAuthenticated}
               />
             )}
