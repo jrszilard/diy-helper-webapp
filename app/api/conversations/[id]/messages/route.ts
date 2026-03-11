@@ -4,6 +4,7 @@ import { handleCorsOptions, applyCorsHeaders } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { AddMessageSchema, parseRequestBody, isValidUUID } from '@/lib/validation';
 import { addMessage, getConversationMessages } from '@/lib/chat-history';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   req: NextRequest,
@@ -51,7 +52,7 @@ export async function GET(
       { headers: { 'Content-Type': 'application/json' } }
     ));
   } catch (error: unknown) {
-    console.error('Error fetching messages:', error);
+    logger.error('Error fetching messages', error);
     return applyCorsHeaders(req, new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
@@ -111,7 +112,7 @@ export async function POST(
       { status: 201, headers: { 'Content-Type': 'application/json' } }
     ));
   } catch (error: unknown) {
-    console.error('Error adding message:', error);
+    logger.error('Error adding message', error);
     return applyCorsHeaders(req, new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

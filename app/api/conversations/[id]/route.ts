@@ -3,6 +3,7 @@ import { getAuthFromRequest } from '@/lib/auth';
 import { handleCorsOptions, applyCorsHeaders } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { UpdateConversationSchema, parseRequestBody, isValidUUID } from '@/lib/validation';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   req: NextRequest,
@@ -41,7 +42,7 @@ export async function GET(
 
   if (error) {
     const status = error.code === 'PGRST116' ? 404 : 500;
-    if (status === 500) console.error('Error fetching conversation:', error);
+    if (status === 500) logger.error('Error fetching conversation', error);
     return applyCorsHeaders(req, new Response(
       JSON.stringify({ error: status === 404 ? 'Conversation not found' : 'Internal server error' }),
       { status, headers: { 'Content-Type': 'application/json' } }
@@ -90,7 +91,7 @@ export async function DELETE(
     .eq('id', id);
 
   if (error) {
-    console.error('Error deleting conversation:', error);
+    logger.error('Error deleting conversation', error);
     return applyCorsHeaders(req, new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
@@ -150,7 +151,7 @@ export async function PATCH(
 
   if (error) {
     const status = error.code === 'PGRST116' ? 404 : 500;
-    if (status === 500) console.error('Error updating conversation:', error);
+    if (status === 500) logger.error('Error updating conversation', error);
     return applyCorsHeaders(req, new Response(
       JSON.stringify({ error: status === 404 ? 'Conversation not found' : 'Internal server error' }),
       { status, headers: { 'Content-Type': 'application/json' } }

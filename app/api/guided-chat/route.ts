@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { projectTemplates } from '@/lib/templates/index';
+import { anthropic as anthropicConfig } from '@/lib/config';
+import { logger } from '@/lib/logger';
 
 const TEMPLATE_IDS = projectTemplates.map(t => t.id).join(', ');
 
@@ -38,7 +40,7 @@ export async function POST(req: NextRequest) {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
     const response = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
+      model: anthropicConfig.model,
       max_tokens: 200,
       system: `Given a freeform DIY project description, extract:
 1. projectType: one of [electrical, plumbing, flooring, outdoor, structural, painting, general]
@@ -66,7 +68,7 @@ Return JSON only, no markdown fences. Example: {"projectType":"plumbing","descri
       });
     }
   } catch (error) {
-    console.error('Guided chat API error:', error);
+    logger.error('Guided chat API error', error);
     // Graceful fallback
     return NextResponse.json({
       projectType: 'general',

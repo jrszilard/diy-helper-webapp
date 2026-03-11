@@ -54,6 +54,24 @@ export async function GET(
       ));
     }
 
+    // Verify the requesting user is a participant (DIYer or assigned expert)
+    let isParticipant = question.diyer_user_id === auth.userId;
+    if (!isParticipant && question.expert_id) {
+      const { data: expertProfile } = await adminClient
+        .from('expert_profiles')
+        .select('user_id')
+        .eq('id', question.expert_id)
+        .single();
+      isParticipant = expertProfile?.user_id === auth.userId;
+    }
+
+    if (!isParticipant) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Access denied' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
     // Fetch corrections for this report (from any Q&A source)
     const { data: corrections, error } = await adminClient
       .from('report_corrections')

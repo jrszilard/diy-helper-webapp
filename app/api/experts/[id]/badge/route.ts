@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { isValidUUID } from '@/lib/validation';
 import { getAdminClient } from '@/lib/supabase-admin';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 /**
  * GET /api/experts/[id]/badge — Returns an SVG badge for embedding on expert websites.
@@ -11,6 +12,12 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+
+  // Rate limit by IP to prevent DB hammering on cache miss
+  const rateLimitResult = await checkRateLimit(_req, id, 'experts');
+  if (!rateLimitResult.allowed) {
+    return new Response('Too many requests', { status: 429 });
+  }
 
   if (!isValidUUID(id)) {
     return new Response(

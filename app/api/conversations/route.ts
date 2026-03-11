@@ -4,6 +4,7 @@ import { handleCorsOptions, applyCorsHeaders } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { CreateConversationSchema, parseRequestBody } from '@/lib/validation';
 import { createConversation, generateTitle } from '@/lib/chat-history';
+import { logger } from '@/lib/logger';
 
 export async function GET(req: NextRequest) {
   const auth = await getAuthFromRequest(req);
@@ -29,7 +30,7 @@ export async function GET(req: NextRequest) {
     .limit(50);
 
   if (error) {
-    console.error('Error fetching conversations:', error);
+    logger.error('Error fetching conversations', error);
     return applyCorsHeaders(req, new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
       { status: 201, headers: { 'Content-Type': 'application/json' } }
     ));
   } catch (error: unknown) {
-    console.error('Error creating conversation:', error);
+    logger.error('Error creating conversation', error);
     return applyCorsHeaders(req, new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getAuthFromRequest } from '@/lib/auth';
-import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
+import { applyCorsHeaders, handleCorsOptions, getSafeOrigin, validateRedirectUrl } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { getStripeClient, createOrGetStripeCustomer } from '@/lib/stripe';
@@ -110,6 +110,11 @@ export async function POST(req: NextRequest) {
       ));
     }
 
+    // Validate redirect URLs to prevent open redirect attacks
+    const safeOrigin = getSafeOrigin(req);
+    const safeSuccessUrl = validateRedirectUrl(successUrl, `${safeOrigin}/experts/dashboard`);
+    const safeCancelUrl = validateRedirectUrl(cancelUrl, `${safeOrigin}/experts/dashboard`);
+
     const adminClient = getAdminClient();
 
     // Get expert profile
@@ -144,7 +149,7 @@ export async function POST(req: NextRequest) {
           if (user?.stripe_customer_id) {
             const portalSession = await stripe.billingPortal.sessions.create({
               customer: user.stripe_customer_id,
-              return_url: successUrl,
+              return_url: safeSuccessUrl,
             });
 
             return applyCorsHeaders(req, new Response(
@@ -187,8 +192,8 @@ export async function POST(req: NextRequest) {
         },
         quantity: 1,
       }],
-      success_url: successUrl,
-      cancel_url: cancelUrl,
+      success_url: safeSuccessUrl,
+      cancel_url: safeCancelUrl,
       metadata: {
         expert_id: expert.id,
         user_id: auth.userId,

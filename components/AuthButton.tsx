@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { User, LogOut, X, ChevronDown, FolderOpen, MessageSquare, Mail, Users, Award, LayoutDashboard } from 'lucide-react';
+import { User, LogOut, X, ChevronDown, FolderOpen, MessageSquare, Mail, Users, Award, LayoutDashboard, Settings } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AuthButton({
@@ -151,6 +151,14 @@ export default function AuthButton({
             >
               <User className="w-4 h-4 text-[#7D6B5D]" />
               My Profile
+            </Link>
+            <Link
+              href="/settings"
+              className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#3E2723] hover:bg-[#F5F0E6] transition-colors"
+              onClick={() => setShowDropdown(false)}
+            >
+              <Settings className="w-4 h-4 text-[#7D6B5D]" />
+              Settings
             </Link>
             <Link
               href="/messages"

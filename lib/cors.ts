@@ -15,7 +15,7 @@ export function isOriginAllowed(origin: string | null): boolean {
 export function getSafeOrigin(req: NextRequest): string {
   const origin = req.headers.get('origin');
   if (origin && isOriginAllowed(origin)) return origin;
-  return corsConfig.allowedOrigins[0] || 'http://localhost:3000';
+  return process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || corsConfig.allowedOrigins[0] || 'http://localhost:3000';
 }
 
 /**

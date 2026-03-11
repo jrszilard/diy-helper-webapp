@@ -93,11 +93,18 @@ export const rateLimits = {
 } as const;
 
 // ── CORS ─────────────────────────────────────────────────────────────────────
+const defaultOrigins = [
+  'http://localhost:3000',
+  'https://localhost:3000',
+];
+// Auto-include the production site URL if set
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL;
+if (siteUrl && !defaultOrigins.includes(siteUrl)) {
+  defaultOrigins.push(siteUrl);
+}
+
 export const cors = {
-  allowedOrigins: envList('CORS_ALLOWED_ORIGINS', [
-    'http://localhost:3000',
-    'https://localhost:3000',
-  ]),
+  allowedOrigins: envList('CORS_ALLOWED_ORIGINS', defaultOrigins),
   vercelRegex: /^https:\/\/diy-helper[a-z0-9-]*\.vercel\.app$/,
 } as const;
 

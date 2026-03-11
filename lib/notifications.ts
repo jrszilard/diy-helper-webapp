@@ -84,7 +84,7 @@ async function sendEmailNotification(params: {
       Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
     },
     body: JSON.stringify({
-      from: 'DIY Helper <notifications@diyhelper.com>',
+      from: `DIY Helper <notifications@${process.env.EMAIL_DOMAIN || 'diyhelper.app'}>`,
       to: email,
       subject: content.subject,
       html: content.html,

@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     images: ['/og-image.png'],
   },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
   icons: { icon: '/favicon.ico', apple: '/apple-touch-icon.png' },
 };
 
