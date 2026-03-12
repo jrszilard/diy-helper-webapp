@@ -145,6 +145,21 @@ const ChatMessages = React.memo(function ChatMessages({
   onRetry,
   messagesEndRef,
 }: ChatMessagesProps) {
+  const [feedbackSent, setFeedbackSent] = React.useState<Set<number>>(new Set());
+
+  const handleAlreadyKnew = async (messageIndex: number) => {
+    try {
+      await fetch('/api/skill-profile/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain: 'general' }),
+      });
+      setFeedbackSent(prev => new Set(prev).add(messageIndex));
+    } catch {
+      // Silent fail — non-critical feature
+    }
+  };
+
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       {messages.length === 0 && !isStreaming && (
@@ -195,6 +210,20 @@ const ChatMessages = React.memo(function ChatMessages({
                     <RefreshCw size={14} />
                     Retry
                   </button>
+                )}
+                {msg.role === 'assistant' && !feedbackSent.has(idx) && (
+                  <button
+                    onClick={() => handleAlreadyKnew(idx)}
+                    className="mt-1 text-xs text-[#A89880] hover:text-[#7D6B5D] transition-colors"
+                    title="Let us know so we can adjust our explanations"
+                  >
+                    I already knew this
+                  </button>
+                )}
+                {msg.role === 'assistant' && feedbackSent.has(idx) && (
+                  <span className="mt-1 text-xs text-[#A89880]">
+                    Got it, noted for next time
+                  </span>
                 )}
               </div>
             </div>
