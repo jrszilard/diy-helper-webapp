@@ -7,7 +7,9 @@ import { ChatRequestSchema, parseRequestBody } from '@/lib/validation';
 import config from '@/lib/config';
 import { pruneConversation } from '@/lib/conversation-pruner';
 import { createConversation, addMessage, generateTitle } from '@/lib/chat-history';
-import { systemPrompt } from '@/lib/system-prompt';
+import { getSystemPrompt, systemPrompt } from '@/lib/system-prompt';
+import { classifyIntent } from '@/lib/intelligence/intent-router';
+import type { IntentType } from '@/lib/intelligence/types';
 import { tools, progressMessages } from '@/lib/tools/definitions';
 import { executeTool } from '@/lib/tools/executor';
 import { StreamEvent } from '@/lib/tools/types';
@@ -124,8 +126,45 @@ export async function POST(req: NextRequest) {
     }
     userContent.push({ type: 'text', text: message });
 
+    // ── Intent Classification ─────────────────────────────────────
+    // Classify on first message OR load cached intent for existing conversations
+    let intentType: IntentType | undefined;
+    if (!existingConversationId && prunedHistory.length === 0) {
+      // New conversation — classify intent
+      const classification = await classifyIntent(message, {
+        hasActiveProjects: false, // TODO: query active projects for user
+      });
+      if (classification.confidence >= config.intelligence.confidenceThreshold) {
+        intentType = classification.intent;
+      }
+      // Low confidence — let it fall through to full_project (default behavior).
+      // Clarification UX ("Are you looking for a quick answer?") deferred to UI chunk.
+      logger.info('Intent classified', {
+        requestId,
+        intent: classification.intent,
+        confidence: classification.confidence,
+        reasoning: classification.reasoning,
+      });
+    } else if (existingConversationId && auth.userId) {
+      // Existing conversation — load cached intent_type
+      try {
+        const { data: convData } = await auth.supabaseClient
+          .from('conversations')
+          .select('intent_type')
+          .eq('id', existingConversationId)
+          .single();
+        if (convData?.intent_type) {
+          intentType = convData.intent_type as IntentType;
+        }
+      } catch {
+        // Failed to load — fall through to default prompt
+      }
+    }
+
+    const activeSystemPrompt = intentType ? getSystemPrompt(intentType) : systemPrompt;
+
     if (!streaming) {
-      return handleNonStreamingRequest(auth, message, prunedHistory, image ? userContent : undefined);
+      return handleNonStreamingRequest(auth, message, prunedHistory, image ? userContent : undefined, intentType);
     }
 
     const stream = new ReadableStream({
@@ -156,7 +195,7 @@ export async function POST(req: NextRequest) {
             () => anthropic.messages.create({
               model: config.anthropic.model,
               max_tokens: config.anthropic.maxTokens,
-              system: systemPrompt,
+              system: activeSystemPrompt,
               tools: tools as Anthropic.Tool[],
               messages
             }),
@@ -239,7 +278,7 @@ export async function POST(req: NextRequest) {
               () => anthropic.messages.create({
                 model: config.anthropic.model,
                 max_tokens: config.anthropic.maxTokens,
-                system: systemPrompt,
+                system: activeSystemPrompt,
                 tools: tools as Anthropic.Tool[],
                 messages
               }),
@@ -281,7 +320,8 @@ export async function POST(req: NextRequest) {
                   auth.supabaseClient,
                   auth.userId,
                   generateTitle(message),
-                  parsed.data.project_id
+                  parsed.data.project_id,
+                  intentType
                 );
                 responseConversationId = conv.id;
               }
@@ -351,18 +391,21 @@ async function handleNonStreamingRequest(
   auth: Awaited<ReturnType<typeof getAuthFromRequest>>,
   message: string,
   history: Array<{ role: string; content: string | Array<Record<string, unknown>> }>,
-  multiModalContent?: Anthropic.ContentBlockParam[]
+  multiModalContent?: Anthropic.ContentBlockParam[],
+  intentType?: IntentType
 ) {
   const messages: Anthropic.MessageParam[] = [
     ...(history as Anthropic.MessageParam[]),
     { role: 'user' as const, content: multiModalContent || message }
   ];
 
+  const nonStreamingPrompt = getSystemPrompt(intentType);
+
   let response = await withRetry(
     () => anthropic.messages.create({
       model: config.anthropic.model,
       max_tokens: config.anthropic.maxTokens,
-      system: systemPrompt,
+      system: nonStreamingPrompt,
       tools: tools as Anthropic.Tool[],
       messages
     }),
@@ -408,7 +451,7 @@ async function handleNonStreamingRequest(
       () => anthropic.messages.create({
         model: config.anthropic.model,
         max_tokens: config.anthropic.maxTokens,
-        system: systemPrompt,
+        system: nonStreamingPrompt,
         tools: tools as Anthropic.Tool[],
         messages
       }),
