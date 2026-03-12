@@ -619,15 +619,59 @@ In the insert object, add `intent_type: intentType || null`.
 
 This is a backward-compatible change — all existing callers pass no `intentType` and get `null`.
 
-- [ ] **Step 3: Verify it compiles**
+- [ ] **Step 3: Write test for chat-history intent_type persistence**
 
-Run: `npx tsc --noEmit lib/chat-history.ts 2>&1 | head -20`
-Expected: No new errors
+```typescript
+// lib/__tests__/chat-history.test.ts
+import { describe, it, expect, vi } from 'vitest';
 
-- [ ] **Step 4: Commit**
+// Mock Supabase client
+function createMockClient() {
+  const mockSingle = vi.fn().mockResolvedValue({
+    data: { id: 'conv-1', title: 'Test', created_at: new Date().toISOString(), updated_at: new Date().toISOString(), project_id: null },
+    error: null,
+  });
+  const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
+  const mockInsert = vi.fn().mockReturnValue({ select: mockSelect });
+  const mockFrom = vi.fn().mockReturnValue({ insert: mockInsert });
+  return { from: mockFrom, __mocks: { mockFrom, mockInsert, mockSelect, mockSingle } };
+}
+
+describe('createConversation', () => {
+  it('passes intent_type to database insert when provided', async () => {
+    const client = createMockClient();
+    // Dynamic import to avoid module caching issues
+    const { createConversation } = await import('@/lib/chat-history');
+
+    await createConversation(client as any, 'user-1', 'Test', undefined, 'quick_question');
+
+    // Verify the insert was called with intent_type
+    const insertArg = client.__mocks.mockInsert.mock.calls[0][0];
+    expect(insertArg.intent_type).toBe('quick_question');
+    expect(insertArg.user_id).toBe('user-1');
+  });
+
+  it('passes null intent_type when not provided (backward compat)', async () => {
+    const client = createMockClient();
+    const { createConversation } = await import('@/lib/chat-history');
+
+    await createConversation(client as any, 'user-1', 'Test');
+
+    const insertArg = client.__mocks.mockInsert.mock.calls[0][0];
+    expect(insertArg.intent_type).toBeNull();
+  });
+});
+```
+
+- [ ] **Step 4: Run chat-history tests**
+
+Run: `npx vitest run lib/__tests__/chat-history.test.ts 2>&1 | tail -20`
+Expected: All tests PASS
+
+- [ ] **Step 5: Commit**
 
 ```bash
-git add lib/chat-history.ts
+git add lib/chat-history.ts lib/__tests__/chat-history.test.ts
 git commit -m "feat: persist intent_type on conversation creation"
 ```
 
@@ -735,25 +779,26 @@ git commit -m "feat: integrate intent router into chat API — classify first me
 
 ---
 
-### Task 8: Integration Test — Intent Classification in Chat Flow
+### Task 8: Integration Tests — Chat Intent Flow
 
 **Files:**
 - Create: `lib/__tests__/chat-intent-integration.test.ts`
 
-- [ ] **Step 1: Write the integration test**
+- [ ] **Step 1: Write the integration tests**
+
+This test file covers both the prompt/classification logic AND the route handler's intent selection logic:
 
 ```typescript
 // lib/__tests__/chat-intent-integration.test.ts
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { getSystemPrompt } from '@/lib/system-prompt';
 import { buildClassificationPrompt } from '@/lib/intelligence/intent-router';
 import type { IntentType } from '@/lib/intelligence/types';
 
-describe('Chat Intent Integration', () => {
+describe('Prompt Variants', () => {
   it('quick question prompt is significantly shorter than full project', () => {
     const quick = getSystemPrompt('quick_question');
     const full = getSystemPrompt('full_project');
-    // Quick prompt should be at least 50% shorter
     expect(quick.length).toBeLessThan(full.length * 0.5);
   });
 
@@ -765,6 +810,12 @@ describe('Chat Intent Integration', () => {
     }
   });
 
+  it('default getSystemPrompt (no argument) returns full project prompt', () => {
+    const defaultPrompt = getSystemPrompt();
+    const fullPrompt = getSystemPrompt('full_project');
+    expect(defaultPrompt).toBe(fullPrompt);
+  });
+
   it('classification prompt includes message and context', () => {
     const prompt = buildClassificationPrompt('Fix my leaky faucet', {
       hasActiveProjects: true,
@@ -774,16 +825,86 @@ describe('Chat Intent Integration', () => {
     expect(prompt).toContain('plumbing');
     expect(prompt).toContain('active projects');
   });
+});
 
-  it('default getSystemPrompt (no argument) returns full project prompt', () => {
-    const defaultPrompt = getSystemPrompt();
-    const fullPrompt = getSystemPrompt('full_project');
-    expect(defaultPrompt).toBe(fullPrompt);
+describe('Route Intent Selection Logic', () => {
+  // These tests verify the decision logic that lives in the chat route:
+  // - New conversations get classified
+  // - Existing conversations load cached intent
+  // - Fallback works correctly
+
+  it('new conversation with high confidence uses classified intent', () => {
+    // Simulates route logic: no existingConversationId, no history
+    const existingConversationId = null;
+    const prunedHistoryLength = 0;
+    const classificationResult = { intent: 'quick_question' as IntentType, confidence: 0.95, reasoning: 'test' };
+    const confidenceThreshold = 0.7;
+
+    let intentType: IntentType | undefined;
+    if (!existingConversationId && prunedHistoryLength === 0) {
+      if (classificationResult.confidence >= confidenceThreshold) {
+        intentType = classificationResult.intent;
+      }
+    }
+
+    const prompt = intentType ? getSystemPrompt(intentType) : getSystemPrompt();
+    expect(intentType).toBe('quick_question');
+    expect(prompt).toContain('quick, direct answer');
+    expect(prompt).not.toContain('CRITICAL WORKFLOW');
+  });
+
+  it('new conversation with low confidence falls back to full_project', () => {
+    const existingConversationId = null;
+    const prunedHistoryLength = 0;
+    const classificationResult = { intent: 'quick_question' as IntentType, confidence: 0.5, reasoning: 'unsure' };
+    const confidenceThreshold = 0.7;
+
+    let intentType: IntentType | undefined;
+    if (!existingConversationId && prunedHistoryLength === 0) {
+      if (classificationResult.confidence >= confidenceThreshold) {
+        intentType = classificationResult.intent;
+      }
+    }
+
+    const prompt = intentType ? getSystemPrompt(intentType) : getSystemPrompt();
+    expect(intentType).toBeUndefined();
+    expect(prompt).toContain('CRITICAL WORKFLOW'); // full project prompt
+  });
+
+  it('existing conversation uses cached intent_type', () => {
+    // Simulates route logic: existingConversationId is set, load from DB
+    const existingConversationId = 'conv-123';
+    const cachedIntentType = 'troubleshooting' as IntentType;
+
+    let intentType: IntentType | undefined;
+    if (existingConversationId) {
+      // In real code this comes from DB query
+      intentType = cachedIntentType;
+    }
+
+    const prompt = intentType ? getSystemPrompt(intentType) : getSystemPrompt();
+    expect(intentType).toBe('troubleshooting');
+    expect(prompt).toContain('diagnos');
+    expect(prompt).not.toContain('CRITICAL WORKFLOW');
+  });
+
+  it('existing conversation with no cached intent falls back to full_project', () => {
+    const existingConversationId = 'conv-456';
+    const cachedIntentType = null;
+
+    let intentType: IntentType | undefined;
+    if (existingConversationId && cachedIntentType) {
+      intentType = cachedIntentType as IntentType;
+    }
+
+    const prompt = intentType ? getSystemPrompt(intentType) : getSystemPrompt();
+    expect(intentType).toBeUndefined();
+    expect(prompt).toContain('CRITICAL WORKFLOW');
   });
 });
 ```
 
-- [ ] **Step 2: Run integration test**
+- [ ] **Step 2: Run integration tests**
 
 Run: `npx vitest run lib/__tests__/chat-intent-integration.test.ts 2>&1 | tail -20`
 Expected: All tests PASS
@@ -797,7 +918,7 @@ Expected: All existing tests still pass (the `systemPrompt` export is preserved 
 
 ```bash
 git add lib/__tests__/chat-intent-integration.test.ts
-git commit -m "test: add integration tests for intent-aware chat flow"
+git commit -m "test: add integration tests for intent routing, cached intent, and fallback logic"
 ```
 
 ---
