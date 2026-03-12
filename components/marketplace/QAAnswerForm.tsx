@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Send, Loader2, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import ExpertCoPilot from './ExpertCoPilot';
 
 interface QAAnswerFormProps {
   questionId: string;
@@ -16,6 +17,12 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
   const [proReason, setProReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [usedDraft, setUsedDraft] = useState(false);
+
+  const handleInsertDraft = (draft: string) => {
+    setAnswerText(draft);
+    setUsedDraft(true);
+  };
 
   const charCount = answerText.length;
   const isValid = charCount >= 50 && charCount <= 2000;
@@ -49,6 +56,7 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
           photoUrls: photos,
           recommendsProfessional: recommendsPro,
           proRecommendationReason: recommendsPro ? proReason.trim() : null,
+          ai_assisted: usedDraft,
         }),
       });
 
@@ -75,6 +83,8 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
           {error}
         </div>
       )}
+
+      <ExpertCoPilot questionId={questionId} onInsertDraft={handleInsertDraft} />
 
       <div className="space-y-4">
         <div>
