@@ -9,7 +9,9 @@ import { pruneConversation } from '@/lib/conversation-pruner';
 import { createConversation, addMessage, generateTitle } from '@/lib/chat-history';
 import { getSystemPrompt, systemPrompt } from '@/lib/system-prompt';
 import { classifyIntent } from '@/lib/intelligence/intent-router';
+import { calibratePrompt } from '@/lib/intelligence/prompt-calibrator';
 import type { IntentType } from '@/lib/intelligence/types';
+import { getAdminClient } from '@/lib/supabase-admin';
 import { tools, progressMessages } from '@/lib/tools/definitions';
 import { executeTool } from '@/lib/tools/executor';
 import { StreamEvent } from '@/lib/tools/types';
@@ -163,8 +165,33 @@ export async function POST(req: NextRequest) {
 
     const activeSystemPrompt = intentType ? getSystemPrompt(intentType) : systemPrompt;
 
+    // ── Skill Calibration ─────────────────────────────────────────
+    let calibratedPrompt = activeSystemPrompt;
+    if (auth.userId) {
+      try {
+        const adminClient = getAdminClient();
+        const { data: profileData } = await adminClient
+          .from('user_skill_profiles')
+          .select('domain_familiarity, communication_level, known_topics')
+          .eq('user_id', auth.userId)
+          .single();
+
+        if (profileData) {
+          calibratedPrompt = calibratePrompt(activeSystemPrompt, {
+            userId: auth.userId,
+            domainFamiliarity: profileData.domain_familiarity,
+            communicationLevel: profileData.communication_level,
+            knownTopics: profileData.known_topics || [],
+            lastCalibrated: new Date(),
+          });
+        }
+      } catch {
+        // No profile yet or DB error — use uncalibrated prompt
+      }
+    }
+
     if (!streaming) {
-      return handleNonStreamingRequest(auth, message, prunedHistory, image ? userContent : undefined, intentType);
+      return handleNonStreamingRequest(auth, message, prunedHistory, image ? userContent : undefined, intentType, calibratedPrompt);
     }
 
     const stream = new ReadableStream({
@@ -195,7 +222,7 @@ export async function POST(req: NextRequest) {
             () => anthropic.messages.create({
               model: config.anthropic.model,
               max_tokens: config.anthropic.maxTokens,
-              system: activeSystemPrompt,
+              system: calibratedPrompt,
               tools: tools as Anthropic.Tool[],
               messages
             }),
@@ -278,7 +305,7 @@ export async function POST(req: NextRequest) {
               () => anthropic.messages.create({
                 model: config.anthropic.model,
                 max_tokens: config.anthropic.maxTokens,
-                system: activeSystemPrompt,
+                system: calibratedPrompt,
                 tools: tools as Anthropic.Tool[],
                 messages
               }),
@@ -392,14 +419,15 @@ async function handleNonStreamingRequest(
   message: string,
   history: Array<{ role: string; content: string | Array<Record<string, unknown>> }>,
   multiModalContent?: Anthropic.ContentBlockParam[],
-  intentType?: IntentType
+  intentType?: IntentType,
+  calibratedSystemPrompt?: string,
 ) {
   const messages: Anthropic.MessageParam[] = [
     ...(history as Anthropic.MessageParam[]),
     { role: 'user' as const, content: multiModalContent || message }
   ];
 
-  const nonStreamingPrompt = getSystemPrompt(intentType);
+  const nonStreamingPrompt = calibratedSystemPrompt || getSystemPrompt(intentType);
 
   let response = await withRetry(
     () => anthropic.messages.create({
