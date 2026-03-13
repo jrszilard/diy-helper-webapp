@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import WhyDIYHelper from '@/components/WhyDIYHelper';
 import ProjectTemplates from '@/components/ProjectTemplates';
-import GuidedBot from '@/components/guided-bot/GuidedBot';
+import LandingHero from '@/components/LandingHero';
 import AuthButton from '@/components/AuthButton';
 import ExpertBar from '@/components/ExpertBar';
 import ExpertQuickBar from '@/components/ExpertQuickBar';
@@ -160,15 +160,8 @@ export default function LandingPage() {
 
         <div className="relative max-w-4xl mx-auto">
           <div className="content-card">
-            <GuidedBot />
+            <LandingHero />
           </div>
-          {/* Skip link */}
-          <p className="text-center mt-4 text-sm text-[#5C4D42]">
-            Already know what you need?{' '}
-            <Link href="/chat" className="text-[#C67B5C] hover:underline">
-              Skip to full chat →
-            </Link>
-          </p>
         </div>
       </section>
 

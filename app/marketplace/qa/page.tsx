@@ -16,6 +16,8 @@ function QAPageContent() {
   const reportId = searchParams.get('reportId') || undefined;
   const targetExpertId = searchParams.get('targetExpertId') || undefined;
   const targetExpertName = searchParams.get('targetExpertName') || undefined;
+  const prefillQuestion = searchParams.get('question') || undefined;
+  const prefillTrade = searchParams.get('trade') || undefined;
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [reportContext, setReportContext] = useState<{ projectSummary?: string; projectType?: string } | undefined>();
@@ -116,6 +118,8 @@ function QAPageContent() {
           expertContext={expertContext}
           targetExpertId={targetExpertId}
           targetExpertName={targetExpertName}
+          initialQuestion={prefillQuestion}
+          initialCategory={prefillTrade}
           onSuccess={handleSuccess}
         />
 

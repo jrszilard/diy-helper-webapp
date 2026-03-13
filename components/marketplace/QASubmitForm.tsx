@@ -13,6 +13,8 @@ interface QASubmitFormProps {
   onSuccess: (questionId: string) => void;
   targetExpertId?: string;
   targetExpertName?: string;
+  initialQuestion?: string;
+  initialCategory?: string;
 }
 
 const CATEGORIES = [
@@ -37,9 +39,11 @@ export default function QASubmitForm({
   onSuccess,
   targetExpertId,
   targetExpertName,
+  initialQuestion,
+  initialCategory,
 }: QASubmitFormProps) {
-  const [category, setCategory] = useState('general');
-  const [questionText, setQuestionText] = useState('');
+  const [category, setCategory] = useState(initialCategory || 'general');
+  const [questionText, setQuestionText] = useState(initialQuestion || '');
   const [photoUrls, setPhotoUrls] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
