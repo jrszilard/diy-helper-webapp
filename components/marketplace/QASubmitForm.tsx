@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Send, Loader2, CreditCard, Wallet, Shield, CheckCircle2, Zap, MessageSquare, FileCheck, Users, TrendingUp } from 'lucide-react';
+import { Send, Loader2, CreditCard, Wallet, Shield, CheckCircle2, Zap, MessageSquare, FileCheck, Users, TrendingUp, Camera, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { ExpertContext } from '@/lib/marketplace/types';
 import ProjectContextCard from '@/components/marketplace/ProjectContextCard';
@@ -44,7 +44,9 @@ export default function QASubmitForm({
 }: QASubmitFormProps) {
   const [category, setCategory] = useState(initialCategory || 'general');
   const [questionText, setQuestionText] = useState(initialQuestion || '');
-  const [photoUrls, setPhotoUrls] = useState('');
+  const [uploadedPhotos, setUploadedPhotos] = useState<Array<{ url: string; name: string }>>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFirstQuestion, setIsFirstQuestion] = useState(false);
@@ -125,11 +127,10 @@ export default function QASubmitForm({
     if (questionText.trim().length < 20) return;
     if (priceFetchTimer.current) clearTimeout(priceFetchTimer.current);
     priceFetchTimer.current = setTimeout(() => {
-      const photoCount = photoUrls.split('\n').filter(u => u.trim()).length;
-      fetchPrice(category, questionText.trim(), photoCount);
+      fetchPrice(category, questionText.trim(), uploadedPhotos.length);
     }, 800);
     return () => { if (priceFetchTimer.current) clearTimeout(priceFetchTimer.current); };
-  }, [category, questionText, photoUrls, fetchPrice]);
+  }, [category, questionText, uploadedPhotos.length, fetchPrice]);
 
   const handleSetupPayment = async () => {
     setSavingCard(true);
@@ -224,10 +225,7 @@ export default function QASubmitForm({
         return;
       }
 
-      const photos = photoUrls
-        .split('\n')
-        .map(u => u.trim())
-        .filter(Boolean);
+      const photos = uploadedPhotos.map(p => p.url);
 
       const res = await fetch('/api/qa', {
         method: 'POST',
@@ -288,7 +286,7 @@ export default function QASubmitForm({
         <div className="mb-4">
           <ProjectContextCard
             context={expertContext}
-            photoCount={photoUrls.split('\n').filter(u => u.trim()).length || undefined}
+            photoCount={uploadedPhotos.length || undefined}
             compact
           />
         </div>
@@ -367,16 +365,100 @@ export default function QASubmitForm({
           <p className="text-xs text-[#B0A696] mt-1">{questionText.length} characters (minimum 20)</p>
         </div>
 
-        {/* Photo URLs */}
+        {/* Photo Upload */}
         <div>
-          <label className="block text-sm font-medium text-[#3E2723] mb-1">Photo URLs (optional)</label>
-          <textarea
-            value={photoUrls}
-            onChange={e => setPhotoUrls(e.target.value)}
-            rows={2}
-            className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
-            placeholder="One URL per line"
+          <label className="block text-sm font-medium text-[#3E2723] mb-1">Photos (optional)</label>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {uploadedPhotos.map((photo, idx) => (
+              <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-[#D4C8B8] group">
+                <img src={photo.url} alt={photo.name} className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setUploadedPhotos(prev => prev.filter((_, i) => i !== idx))}
+                  className="absolute top-0 right-0 bg-[#3E2723]/70 text-white p-1 rounded-bl-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X size={12} />
+                </button>
+                <div className="absolute bottom-0 left-0 right-0 bg-[#3E2723]/60 px-1 py-0.5">
+                  <p className="text-[9px] text-white truncate">{photo.name}</p>
+                </div>
+              </div>
+            ))}
+            {uploadedPhotos.length < 3 && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="w-20 h-20 rounded-lg border-2 border-dashed border-[#D4C8B8] flex flex-col items-center justify-center text-[#A89880] hover:border-[#C67B5C] hover:text-[#C67B5C] transition-colors disabled:opacity-50"
+              >
+                {uploading ? (
+                  <Loader2 size={20} className="animate-spin" />
+                ) : (
+                  <>
+                    <Camera size={20} />
+                    <span className="text-[10px] mt-1">Add photo</span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            multiple
+            onChange={async (e) => {
+              const files = e.target.files;
+              if (!files || files.length === 0) return;
+
+              const token = (await supabase.auth.getSession()).data.session?.access_token;
+              if (!token) {
+                setError('Please sign in to upload photos.');
+                return;
+              }
+
+              setUploading(true);
+              setError(null);
+
+              try {
+                const remaining = 3 - uploadedPhotos.length;
+                const filesToUpload = Array.from(files).slice(0, remaining);
+
+                for (const file of filesToUpload) {
+                  if (file.size > 5 * 1024 * 1024) {
+                    setError(`${file.name} is too large (max 5MB). Skipped.`);
+                    continue;
+                  }
+
+                  const formData = new FormData();
+                  formData.append('file', file);
+
+                  const res = await fetch('/api/messages/upload', {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${token}` },
+                    body: formData,
+                  });
+
+                  if (res.ok) {
+                    const { url } = await res.json();
+                    setUploadedPhotos(prev => [...prev, { url, name: file.name }]);
+                  } else {
+                    const data = await res.json().catch(() => ({}));
+                    setError(data.error || `Failed to upload ${file.name}`);
+                  }
+                }
+              } catch {
+                setError('Photo upload failed. Please try again.');
+              } finally {
+                setUploading(false);
+                if (fileInputRef.current) fileInputRef.current.value = '';
+              }
+            }}
+            className="hidden"
           />
+          <p className="text-xs text-[#B0A696]">
+            Add up to 3 photos (JPEG, PNG, WebP, GIF — max 5MB each)
+          </p>
         </div>
 
         {/* ── Payment Section (always visible) ── */}
