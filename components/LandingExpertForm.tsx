@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Star, MessageSquare, Zap } from 'lucide-react';
+import { ArrowRight, Star, MessageSquare, Zap, Camera, X } from 'lucide-react';
 
 const CATEGORIES = [
   'electrical', 'plumbing', 'hvac', 'carpentry', 'flooring',
@@ -10,11 +10,38 @@ const CATEGORIES = [
   'landscaping', 'general',
 ];
 
+const SESSION_KEY = 'diy-expert-question-draft';
+
 export default function LandingExpertForm() {
   const router = useRouter();
   const [questionText, setQuestionText] = useState('');
   const [tradeCategory, setTradeCategory] = useState('general');
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setPhotoUrls(prev => [...prev, reader.result as string]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Reset input so same file can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotoUrls(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = () => {
     if (questionText.trim().length < 20) {
@@ -22,6 +49,13 @@ export default function LandingExpertForm() {
       return;
     }
     setValidationError(null);
+
+    // Persist to sessionStorage so data survives auth redirect
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+      question: questionText.trim(),
+      trade: tradeCategory,
+      photoUrls,
+    }));
 
     const params = new URLSearchParams();
     params.set('question', questionText.trim());
@@ -44,6 +78,40 @@ export default function LandingExpertForm() {
         {validationError && (
           <p className="text-xs text-red-600 mt-1">{validationError}</p>
         )}
+      </div>
+
+      {/* Photo upload */}
+      <div>
+        <label className="block text-sm font-medium text-[#3E2723] mb-1">Photos (optional)</label>
+        <div className="flex flex-wrap gap-2 mb-2">
+          {photoUrls.map((url, idx) => (
+            <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-[#D4C8B8]">
+              <img src={url} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
+              <button
+                onClick={() => removePhoto(idx)}
+                className="absolute top-0 right-0 bg-[#3E2723]/70 text-white p-0.5 rounded-bl-lg"
+              >
+                <X size={12} />
+              </button>
+            </div>
+          ))}
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="w-16 h-16 rounded-lg border-2 border-dashed border-[#D4C8B8] flex flex-col items-center justify-center text-[#A89880] hover:border-[#C67B5C] hover:text-[#C67B5C] transition-colors"
+          >
+            <Camera size={18} />
+            <span className="text-[10px] mt-0.5">Add</span>
+          </button>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handlePhotoSelect}
+          className="hidden"
+        />
+        <p className="text-xs text-[#A89880]">Add photos of your project for better expert advice</p>
       </div>
 
       <div>

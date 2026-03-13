@@ -16,8 +16,26 @@ function QAPageContent() {
   const reportId = searchParams.get('reportId') || undefined;
   const targetExpertId = searchParams.get('targetExpertId') || undefined;
   const targetExpertName = searchParams.get('targetExpertName') || undefined;
-  const prefillQuestion = searchParams.get('question') || undefined;
-  const prefillTrade = searchParams.get('trade') || undefined;
+
+  // Read prefill from URL params first, then fall back to sessionStorage
+  // (sessionStorage survives auth redirect, URL params may not)
+  let prefillQuestion = searchParams.get('question') || undefined;
+  let prefillTrade = searchParams.get('trade') || undefined;
+
+  if (!prefillQuestion) {
+    try {
+      const draft = sessionStorage.getItem('diy-expert-question-draft');
+      if (draft) {
+        const parsed = JSON.parse(draft);
+        prefillQuestion = parsed.question || undefined;
+        prefillTrade = prefillTrade || parsed.trade || undefined;
+        // Clear after reading so it doesn't persist across visits
+        sessionStorage.removeItem('diy-expert-question-draft');
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [reportContext, setReportContext] = useState<{ projectSummary?: string; projectType?: string } | undefined>();
@@ -44,7 +62,10 @@ function QAPageContent() {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        redirectToSignIn(router, '/marketplace/qa');
+        // Preserve query params through auth redirect
+        const currentParams = searchParams.toString();
+        const returnPath = currentParams ? `/marketplace/qa?${currentParams}` : '/marketplace/qa';
+        redirectToSignIn(router, returnPath);
         return;
       }
       setAuthenticated(true);
