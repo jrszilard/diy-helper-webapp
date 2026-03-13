@@ -24,7 +24,10 @@ The three paths appear as selectable cards/tabs at the top of the hero. Clicking
 ┌─────────────────────────────────────────────────────┐
 │  Nav Bar (unchanged)                                │
 ├─────────────────────────────────────────────────────┤
-│  Headline                                           │
+│  Headline: "Your DIY project starts here"           │
+│  Sub: "From quick answers to complete projects,     │
+│        backed by real experts"                      │
+│                                                     │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐  │
 │  │ Quick Answer │ │ Plan Project│ │ Ask Expert  │  │
 │  └──────┬──────┘ └──────┬──────┘ └──────┬──────┘  │
@@ -60,12 +63,19 @@ Serves users who have a specific question and want an immediate answer. Demonstr
 - AI response streams in below the user message (uses existing `/api/chat` with intent classification)
 - Input repositions below the response for follow-up questions
 - "Continue this conversation" button appears below the response
-- Clicking "Continue this conversation" navigates to `/chat` with the conversation ID preserved via URL param or sessionStorage
+- Clicking "Continue this conversation" stores `conversationId` and messages in `sessionStorage` (using existing keys `diy-helper-conversation-id` and `diy-helper-chat-messages`), then navigates to `/chat`. The chat page's `useChat` hook already reads these keys on mount.
 
 **Conversation persistence:**
 - The `/api/chat` route already creates a conversation record and returns a `conversationId` in the `done` SSE event
 - Store this ID in component state
-- When navigating to `/chat`, pass it so the chat page loads the existing conversation
+- On "Continue" click: write to sessionStorage, then `router.push('/chat')`
+
+**SSE stream handling:**
+LandingQuickChat handles only these SSE event types from the `/api/chat` response:
+- `text` — append to streaming content
+- `error` — show error message, stop streaming
+- `done` — extract `conversationId` from event data, stop streaming, show "Continue" button
+- All other event types (`progress`, `tool_result`, `warning`) are ignored
 
 ### Error Handling
 - API failure: show error message below input, allow retry
@@ -86,9 +96,9 @@ Serves users planning a larger project. Provides the full guided planning experi
 - All GuidedBot functionality works identically to today
 
 ### Technical Notes
-- GuidedBot is imported and mounted conditionally when this tab is active
-- No props changes needed — GuidedBot manages its own state via `useGuidedBot` hook
-- If the user switches tabs mid-flow, GuidedBot state is preserved (component stays mounted but hidden via CSS, or state is lifted)
+- GuidedBot is lazy-mounted on first tab selection (not eager-mounted on page load) to avoid unnecessary auth listeners and renders
+- Once mounted, GuidedBot stays mounted (hidden via CSS `display: none` with `aria-hidden="true"`) to preserve state if the user switches tabs and comes back
+- LandingQuickChat and LandingExpertForm are lightweight enough to mount eagerly
 
 ---
 
@@ -100,22 +110,22 @@ Serves users who want a professional opinion. Provides a lightweight entry into 
 ### Behavior
 
 **Form fields:**
-- Question text (textarea, required, placeholder: "Describe your question or project...")
-- Trade category (dropdown: Electrical, Plumbing, HVAC, Carpentry, General, Roofing, Painting, Landscaping)
-- State (dropdown, 2-letter state codes)
+- Question text (textarea, required, min 20 chars, placeholder: "Describe your question or project...")
+- Trade category (dropdown — import the `CATEGORIES` array from `components/marketplace/QASubmitForm.tsx` or extract to a shared constant at `lib/marketplace/constants.ts` to avoid drift)
 
 **Social proof below form:**
 - Average expert rating (e.g., "4.9 avg rating")
 - Questions answered count
 - "First question free" callout
+- Hard-coded initially; can be made dynamic later
 
 **Submit behavior:**
-- Clicking "Submit to Expert Marketplace" navigates to `/marketplace/qa` with query params: `?question=<text>&trade=<category>&state=<state>`
-- The marketplace Q&A page reads these params and pre-populates the full submission form
+- Clicking "Submit to Expert Marketplace" navigates to `/marketplace/qa` with query params: `?question=<text>&trade=<category>`
+- The marketplace Q&A page reads these params and pre-populates the submission form
 - User completes the submission there (pricing, payment, etc.)
 
 ### Error Handling
-- Client-side validation: question text required (min 20 chars), trade and state required
+- Client-side validation: question text required (min 20 chars), trade required
 - No API calls on the landing page — all submission happens on `/marketplace/qa`
 
 ---
@@ -128,14 +138,15 @@ Serves users who want a professional opinion. Provides a lightweight entry into 
 |-----------|------|---------------|
 | `LandingHero` | `components/LandingHero.tsx` | Three-tab container, manages active path state, renders headline and path cards |
 | `LandingQuickChat` | `components/LandingQuickChat.tsx` | Mini chat for Quick Answer — input, streaming response, popular question chips, "Continue" button |
-| `LandingExpertForm` | `components/LandingExpertForm.tsx` | Simplified expert question form with trade/state dropdowns and social proof |
+| `LandingExpertForm` | `components/LandingExpertForm.tsx` | Simplified expert question form with trade dropdown and social proof |
 
 ### Modified Files
 
 | File | Change |
 |------|--------|
 | `app/page.tsx` | Replace `<GuidedBot>` in hero section with `<LandingHero>` |
-| `app/marketplace/qa/page.tsx` | Read URL query params to pre-populate the Q&A submission form |
+| `app/marketplace/qa/page.tsx` | Read URL query params (`question`, `trade`) to pre-populate the Q&A submission form |
+| `components/marketplace/QASubmitForm.tsx` | Add optional `initialQuestion?: string` and `initialCategory?: string` props; use them to initialize form state |
 
 ### Reused Components (No Changes)
 
@@ -153,17 +164,19 @@ interface LandingHeroProps {}
 
 // Internal state:
 // activePath: 'quick' | 'plan' | 'expert' (default: 'quick')
+// planMounted: boolean (starts false, set true on first 'plan' selection)
 
 // Renders:
-// 1. Headline text
-// 2. Three path cards as tabs (with icons, titles, descriptions)
-// 3. Content area that conditionally renders:
-//    - activePath === 'quick': <LandingQuickChat />
-//    - activePath === 'plan': <GuidedBot />
-//    - activePath === 'expert': <LandingExpertForm />
+// 1. Headline: "Your DIY project starts here"
+// 2. Subheadline: "From quick answers to complete projects, backed by real experts"
+// 3. Three path cards as tabs (with icons, titles, descriptions)
+// 4. Content area:
+//    - activePath === 'quick': <LandingQuickChat /> (always mounted)
+//    - activePath === 'plan': <GuidedBot /> (lazy-mounted on first selection, then hidden/shown)
+//    - activePath === 'expert': <LandingExpertForm /> (always mounted)
 ```
 
-Tab switching: all three components stay mounted (hidden via CSS `display: none` when inactive) to preserve state. This prevents the GuidedBot from resetting if the user switches tabs and comes back.
+**Tab switching:** LandingQuickChat and LandingExpertForm are always mounted. GuidedBot is lazy-mounted (rendered only after `planMounted` is true) and then hidden/shown via CSS. Hidden tabs get `aria-hidden="true"` and their interactive elements get `tabIndex={-1}` for accessibility.
 
 ---
 
@@ -181,12 +194,16 @@ interface LandingQuickChatProps {}
 
 // Behavior:
 // 1. On send: POST to /api/chat with { message, streaming: true, history: [] }
-// 2. Parse SSE stream (same format as existing chat)
-// 3. On 'done' event: store conversationId from response
-// 4. Show "Continue this conversation" button linking to /chat?conversationId=<id>
+// 2. Parse SSE stream — handle only 'text', 'error', 'done' events
+// 3. On 'done' event: extract conversationId, finalize message
+// 4. Show "Continue this conversation" button
+// 5. On "Continue" click:
+//    - sessionStorage.setItem('diy-helper-conversation-id', conversationId)
+//    - sessionStorage.setItem('diy-helper-chat-messages', JSON.stringify(messages))
+//    - router.push('/chat')
 ```
 
-**Streaming implementation:** Reuse the SSE parsing pattern from `hooks/useChat.ts`. The LandingQuickChat component needs a simplified version — no tool handling, no materials extraction, just text streaming. The intent router and calibration happen server-side automatically.
+**Streaming implementation:** Implement a minimal SSE parser inline — no need to import the full `useChat` hook. The parser reads `data:` lines from the response stream, parses JSON, and switches on the `type` field. Only `text` (append content), `error` (show error), and `done` (extract conversationId, finalize) are handled. All other event types are ignored.
 
 **Popular question chips:** Hard-coded array of 4-6 common DIY questions. Clicking one sets the input value. Not fetched from an API.
 
@@ -200,14 +217,13 @@ interface LandingExpertFormProps {}
 // Internal state:
 // questionText: string
 // tradeCategory: string
-// state: string
 
 // Behavior:
-// 1. Client-side validation (question min 20 chars, trade + state required)
-// 2. On submit: router.push(`/marketplace/qa?question=${encodeURIComponent(text)}&trade=${trade}&state=${state}`)
+// 1. Client-side validation (question min 20 chars, trade required)
+// 2. On submit: router.push(`/marketplace/qa?question=${encodeURIComponent(text)}&trade=${trade}`)
 ```
 
-**Trade categories:** Use the same list from the existing Q&A submission form for consistency.
+**Trade categories:** Import from the same source as `QASubmitForm` (either import the constant directly or extract to `lib/marketplace/constants.ts`). Do not hard-code a separate list.
 
 **Social proof stats:** Hard-coded initially. Can be made dynamic later by querying expert/Q&A counts.
 
@@ -215,31 +231,37 @@ interface LandingExpertFormProps {}
 
 ## Marketplace Q&A Page Update
 
-The existing Q&A submission page at `app/marketplace/qa/page.tsx` needs to read URL query params and pre-populate the form:
+The existing Q&A page at `app/marketplace/qa/page.tsx` reads URL query params and passes them as props to `QASubmitForm`:
 
 ```typescript
 const searchParams = useSearchParams();
 const prefillQuestion = searchParams.get('question') || '';
 const prefillTrade = searchParams.get('trade') || '';
-const prefillState = searchParams.get('state') || '';
+
+// Pass to QASubmitForm:
+<QASubmitForm
+  initialQuestion={prefillQuestion}
+  initialCategory={prefillTrade}
+  // ... existing props
+/>
 ```
 
-These values initialize the form state. The user can edit before submitting.
+`QASubmitForm` uses these new optional props to initialize its form state. If not provided, behavior is unchanged (backward compatible).
 
 ---
 
 ## Path Card Design
 
 Each card shows:
-- Icon (Lightning bolt, Clipboard, Hard hat)
+- Icon (Zap for Quick Answer, ClipboardList for Plan, HardHat for Expert)
 - Title ("Quick Answer", "Plan a Project", "Ask an Expert")
 - 2-line description highlighting differentiators:
   - Quick Answer: "Get instant help with local codes & safety"
   - Plan a Project: "Full plan with costs, codes, and materials"
   - Ask an Expert: "Get a pro's verified opinion on your project"
 
-Active card: highlighted border/background (using existing accent colors)
-Inactive cards: muted border, clickable
+Active card: `border-[#C67B5C] bg-[#FFF8F2]`
+Inactive cards: `border-[#D4C8B8] bg-white hover:bg-[#FDFBF7]`
 
 ---
 
@@ -258,8 +280,7 @@ Follow existing palette:
 ## Out of Scope
 
 - Changes to the GuidedBot component itself
-- Changes to the chat page (`/chat`)
-- Changes to the expert marketplace submission flow (beyond reading query params)
+- Changes to the chat page (`/chat`) — conversation handoff uses existing sessionStorage pattern
 - Mobile-specific layouts (responsive handled by Tailwind, no mobile-first redesign)
 - Analytics/tracking for path selection
 - A/B testing infrastructure
