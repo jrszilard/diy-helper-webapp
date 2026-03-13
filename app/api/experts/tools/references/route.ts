@@ -66,7 +66,11 @@ export async function POST(req: NextRequest) {
     }
 
     const advisory = gap.hasGap
-      ? buildLicensingAdvisory({ ...gap, licensingRule })
+      ? buildLicensingAdvisory({
+          hasGap: gap.hasGap,
+          questionTrade: gap.questionTrade || question.trade_category || 'general',
+          licensingRule,
+        })
       : null;
 
     return NextResponse.json({

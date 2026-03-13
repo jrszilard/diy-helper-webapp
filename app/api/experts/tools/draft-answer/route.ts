@@ -40,7 +40,10 @@ export async function POST(req: NextRequest) {
     if (question.report_id) {
       try {
         const { buildExpertContext } = await import('@/lib/marketplace/context-builder');
-        projectContext = await buildExpertContext(adminClient, question.report_id);
+        const ctx = await buildExpertContext(adminClient, question.report_id);
+        if (ctx) {
+          projectContext = ctx as unknown as Record<string, unknown>;
+        }
       } catch {
         // No context available
       }
