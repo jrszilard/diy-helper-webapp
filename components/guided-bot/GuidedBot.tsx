@@ -109,7 +109,11 @@ export default function GuidedBot() {
               error={agentRun.error}
               isCancelling={agentRun.isCancelling}
               onCancel={() => agentRun.cancel()}
-              onRetry={agentRun.runId ? () => agentRun.retryRun(agentRun.runId!) : undefined}
+              onRetry={agentRun.runId ? (
+                isAuthenticated
+                  ? () => agentRun.retryRun(agentRun.runId!)
+                  : () => agentRun.startRun(toAgentRequest(bot.gathered))
+              ) : undefined}
             />
           </div>
         );
