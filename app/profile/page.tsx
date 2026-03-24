@@ -8,7 +8,10 @@ import { redirectToSignIn } from '@/lib/auth-redirect';
 import AuthButton from '@/components/AuthButton';
 import NotificationBell from '@/components/NotificationBell';
 import { useExpertStatus } from '@/hooks/useExpertStatus';
-import { Wrench, ArrowLeft, Loader2, Save, CheckCircle, AlertCircle } from 'lucide-react';
+import { Wrench, ArrowLeft, Save, CheckCircle, AlertCircle } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
+import TextInput from '@/components/ui/TextInput';
+import SectionHeader from '@/components/ui/SectionHeader';
 
 interface UserProfile {
   email: string | null;
@@ -90,7 +93,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F5F0E6] flex items-center justify-center">
-        <Loader2 size={32} className="animate-spin text-[#C67B5C]" />
+        <Spinner size="lg" className="text-[#C67B5C]" />
       </div>
     );
   }
@@ -98,7 +101,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-[#F5F0E6]">
       {/* Header */}
-      <header className="bg-[#FDFBF7] border-b border-[#D4C8B8] shadow-sm">
+      <header className="bg-surface border-b border-[#D4C8B8] shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="bg-gradient-to-br from-[#C67B5C] to-[#A65D3F] p-1.5 rounded-lg">
@@ -123,10 +126,9 @@ export default function ProfilePage() {
           Back to Chat
         </Link>
 
-        <div className="bg-[#FDFBF7] rounded-2xl border border-[#D4C8B8] shadow-sm overflow-hidden">
+        <div className="bg-surface rounded-2xl border border-[#D4C8B8] shadow-sm overflow-hidden">
           <div className="px-6 py-5 border-b border-[#E8DFD0]">
-            <h1 className="text-xl font-bold text-[#3E2723]">My Profile</h1>
-            <p className="text-sm text-[#7D6B5D] mt-1">Manage your account information</p>
+            <SectionHeader size="lg" title="My Profile" subtitle="Manage your account information" />
           </div>
 
           <div className="p-6 space-y-5">
@@ -135,12 +137,12 @@ export default function ProfilePage() {
               <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">
                 Display Name
               </label>
-              <input
+              <TextInput
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="Your name"
-                className="w-full border border-[#D4C8B8] rounded-lg px-4 py-2.5 text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white placeholder-[#A89880]"
+                fullWidth
                 maxLength={100}
               />
             </div>
@@ -150,11 +152,12 @@ export default function ProfilePage() {
               <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">
                 Email
               </label>
-              <input
+              <TextInput
                 type="email"
                 value={profile?.email || ''}
                 readOnly
-                className="w-full border border-[#E8DFD0] rounded-lg px-4 py-2.5 text-[#7D6B5D] bg-[#F5F0E6] cursor-not-allowed"
+                fullWidth
+                className="border-[#E8DFD0] text-[#7D6B5D] bg-[#F5F0E6] cursor-not-allowed"
               />
               <p className="text-xs text-[#A89880] mt-1">Email cannot be changed here</p>
             </div>
@@ -164,12 +167,12 @@ export default function ProfilePage() {
               <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">
                 Phone
               </label>
-              <input
+              <TextInput
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="(555) 123-4567"
-                className="w-full border border-[#D4C8B8] rounded-lg px-4 py-2.5 text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white placeholder-[#A89880]"
+                fullWidth
                 maxLength={20}
               />
             </div>
@@ -179,11 +182,12 @@ export default function ProfilePage() {
               <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">
                 Account Created
               </label>
-              <input
+              <TextInput
                 type="text"
                 value={profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
                 readOnly
-                className="w-full border border-[#E8DFD0] rounded-lg px-4 py-2.5 text-[#7D6B5D] bg-[#F5F0E6] cursor-not-allowed"
+                fullWidth
+                className="border-[#E8DFD0] text-[#7D6B5D] bg-[#F5F0E6] cursor-not-allowed"
               />
             </div>
 
@@ -210,7 +214,7 @@ export default function ProfilePage() {
               className="inline-flex items-center gap-2 bg-[#C67B5C] text-white px-6 py-2.5 rounded-lg hover:bg-[#A65D3F] font-semibold disabled:opacity-50 transition"
             >
               {saving ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Spinner size="sm" />
               ) : (
                 <Save className="w-4 h-4" />
               )}

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Loader2, ArrowLeft, LogIn } from 'lucide-react';
+import { ArrowLeft, LogIn } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import Link from 'next/link';
 import MessageList from '@/components/marketplace/MessageList';
 import AuthButton from '@/components/AuthButton';
@@ -72,15 +73,15 @@ export default function DIYerMessagesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center">
-        <Loader2 size={32} className="animate-spin text-[#C67B5C]" />
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <Spinner size="lg" className="text-[#C67B5C]" />
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7]">
+      <div className="min-h-screen bg-surface">
         <div className="max-w-2xl mx-auto px-4 py-12">
           <div className="text-center">
             <LogIn size={40} className="mx-auto text-[#D4C8B8] mb-4" />
@@ -100,7 +101,7 @@ export default function DIYerMessagesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7]">
+    <div className="min-h-screen bg-surface">
       <div className="max-w-2xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">

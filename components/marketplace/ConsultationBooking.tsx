@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Loader2, Calendar, Clock, DollarSign, Video, CheckCircle } from 'lucide-react';
+import { Calendar, Clock, Video, CheckCircle } from 'lucide-react';
+import { formatPrice } from '@/lib/formatPrice';
+import Spinner from '@/components/ui/Spinner';
+import Button from '@/components/ui/Button';
 
 interface AvailabilitySlot {
   id: string;
@@ -159,7 +162,7 @@ export default function ConsultationBooking({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 size={20} className="animate-spin text-[#5D7B93]" />
+        <Spinner className="text-[#5D7B93]" />
       </div>
     );
   }
@@ -182,9 +185,9 @@ export default function ConsultationBooking({
   if (slots.length === 0) {
     return (
       <div className="bg-white border border-[#D4C8B8] rounded-lg p-6 text-center">
-        <Calendar size={24} className="text-[#B0A696] mx-auto mb-2" />
+        <Calendar size={24} className="text-[var(--muted)] mx-auto mb-2" />
         <p className="text-sm text-[#7D6B5D]">{expertName} hasn&apos;t set up availability yet.</p>
-        <p className="text-xs text-[#B0A696] mt-1">Try sending them a message to schedule directly.</p>
+        <p className="text-xs text-[var(--muted)] mt-1">Try sending them a message to schedule directly.</p>
       </div>
     );
   }
@@ -228,8 +231,7 @@ export default function ConsultationBooking({
                   </div>
                   <div className="flex items-center gap-1 mt-0.5 text-[10px] text-[#7D6B5D]">
                     <span>{slot.durationMinutes}min</span>
-                    <DollarSign size={10} />
-                    <span>${(slot.priceCents / 100).toFixed(0)}</span>
+                    <span>{formatPrice(slot.priceCents)}</span>
                   </div>
                 </button>
               ))}
@@ -276,7 +278,7 @@ export default function ConsultationBooking({
           <div className="bg-[#F5F0E6] rounded-lg p-3 text-xs">
             <div className="flex justify-between">
               <span className="text-[#7D6B5D]">{selectedSlot.durationMinutes}-minute consultation</span>
-              <span className="font-semibold text-[#3E2723]">${(selectedSlot.priceCents / 100).toFixed(2)}</span>
+              <span className="font-semibold text-[#3E2723]">{formatPrice(selectedSlot.priceCents, true)}</span>
             </div>
           </div>
 
@@ -284,17 +286,13 @@ export default function ConsultationBooking({
             <p className="text-xs text-red-600">{error}</p>
           )}
 
-          <button
-            onClick={handleBook}
-            disabled={booking}
-            className="w-full px-4 py-2.5 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[#4A6578] transition-colors disabled:opacity-50"
-          >
+          <Button variant="tertiary" fullWidth onClick={handleBook} disabled={booking}>
             {booking ? (
-              <Loader2 size={16} className="animate-spin mx-auto" />
+              <Spinner size="sm" />
             ) : (
-              `Book for $${(selectedSlot.priceCents / 100).toFixed(0)}`
+              `Book for ${formatPrice(selectedSlot.priceCents)}`
             )}
-          </button>
+          </Button>
         </div>
       )}
     </div>

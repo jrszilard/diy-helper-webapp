@@ -36,7 +36,7 @@ export default function DashboardQAQueue({ questions }: DashboardQAQueueProps) {
         </div>
         <Link
           href="/experts/dashboard/qa"
-          className="flex items-center gap-1 text-xs text-[#5D7B93] hover:text-[#4A6578] font-medium"
+          className="flex items-center gap-1 text-xs text-[#5D7B93] hover:text-[var(--slate-blue-dark)] font-medium"
         >
           View Queue
           <ArrowRight size={14} />
@@ -60,7 +60,7 @@ export default function DashboardQAQueue({ questions }: DashboardQAQueueProps) {
                 <span className="text-xs font-medium text-[#4A7C59]">
                   ${(q.priceCents / 100).toFixed(2)}
                 </span>
-                <span className="flex items-center gap-1 text-xs text-[#B0A696]">
+                <span className="flex items-center gap-1 text-xs text-[var(--muted)]">
                   <Clock size={12} />
                   {formatTimeAgo(q.createdAt)}
                 </span>

@@ -144,7 +144,7 @@ export default function ProjectContextCard({ context, photoCount, compact }: Pro
               </div>
             ))}
             {steps.length > 5 && (
-              <p className="text-xs text-[#B0A696] pl-7">+{steps.length - 5} more steps</p>
+              <p className="text-xs text-[var(--muted)] pl-7">+{steps.length - 5} more steps</p>
             )}
           </div>
         </div>

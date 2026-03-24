@@ -1,6 +1,9 @@
 'use client';
 
 import { Clock, DollarSign, Image, Target, Users, Gavel } from 'lucide-react';
+import Button from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
+import Card from '@/components/ui/Card';
 
 interface QAQuestionCardProps {
   question: {
@@ -58,7 +61,7 @@ export default function QAQuestionCard({ question, onClaim, onBid, showClaim = f
   const bidMinsLeft = Math.floor((bidTimeLeft % (60 * 60 * 1000)) / (60 * 1000));
 
   return (
-    <div className="bg-white border border-[#D4C8B8] rounded-lg p-4">
+    <Card>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <p className="text-sm text-[#3E2723] line-clamp-3">{question.questionText}</p>
@@ -81,38 +84,27 @@ export default function QAQuestionCard({ question, onClaim, onBid, showClaim = f
           )}
 
           <div className="flex flex-wrap items-center gap-2 mt-3">
-            <span className="text-xs px-2 py-0.5 bg-[#5D7B93]/10 text-[#5D7B93] rounded-full font-medium">
-              {question.category}
-            </span>
+            <Badge>{question.category}</Badge>
             {tierLabel && (
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                question.priceTier === 'specialist'
-                  ? 'bg-[#C67B5C]/10 text-[#C67B5C]'
-                  : question.priceTier === 'complex'
-                  ? 'bg-amber-100 text-amber-700'
-                  : 'bg-[#E8DFD0] text-[#7D6B5D]'
-              }`}>
+              <Badge variant={
+                question.priceTier === 'specialist' ? 'primary'
+                : question.priceTier === 'complex' ? 'warning'
+                : 'neutral'
+              }>
                 {tierLabel}
-              </span>
+              </Badge>
             )}
             {isBidding && (
-              <span className="flex items-center gap-1 text-xs px-2 py-0.5 bg-[#C67B5C]/10 text-[#C67B5C] rounded-full font-medium">
-                <Gavel size={10} />
+              <Badge variant="primary" icon={Gavel}>
                 Bidding{question.bidCount ? ` · ${question.bidCount} bid${question.bidCount !== 1 ? 's' : ''}` : ''}
-              </span>
+              </Badge>
             )}
             {isDirect ? (
-              <span className="flex items-center gap-1 text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full font-medium">
-                <Target size={10} />
-                Direct
-              </span>
+              <Badge variant="purple" icon={Target}>Direct</Badge>
             ) : (
-              <span className="flex items-center gap-1 text-xs px-2 py-0.5 bg-[#E8DFD0] text-[#7D6B5D] rounded-full font-medium">
-                <Users size={10} />
-                Pool
-              </span>
+              <Badge variant="neutral" icon={Users}>Pool</Badge>
             )}
-            <span className="flex items-center gap-1 text-xs text-[#B0A696]">
+            <span className="flex items-center gap-1 text-xs text-[var(--muted)]">
               <Clock size={12} />
               {formatTimeAgo(question.createdAt)}
             </span>
@@ -135,12 +127,9 @@ export default function QAQuestionCard({ question, onClaim, onBid, showClaim = f
                     <p className="text-[10px] text-red-500">Deadline passed</p>
                   )}
                 </div>
-                <button
-                  onClick={onBid}
-                  className="px-4 py-2 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[#4A6578] transition-colors whitespace-nowrap"
-                >
+                <Button variant="tertiary" size="sm" onClick={onBid}>
                   Submit Proposal
-                </button>
+                </Button>
               </>
             ) : (
               <>
@@ -154,12 +143,9 @@ export default function QAQuestionCard({ question, onClaim, onBid, showClaim = f
                 {isFree && (
                   <span className="text-xs font-medium text-[#7D6B5D]">Free question</span>
                 )}
-                <button
-                  onClick={onClaim}
-                  className="px-4 py-2 bg-[#C67B5C] text-white text-sm font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors whitespace-nowrap"
-                >
+                <Button variant="primary" size="sm" onClick={onClaim}>
                   Claim
-                </button>
+                </Button>
               </>
             )}
           </div>
@@ -175,6 +161,6 @@ export default function QAQuestionCard({ question, onClaim, onBid, showClaim = f
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

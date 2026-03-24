@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Send, Loader2, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import Button from '@/components/ui/Button';
+import Textarea from '@/components/ui/Textarea';
 
 interface QAAnswerFormProps {
   questionId: string;
@@ -78,30 +80,30 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
 
       <div className="space-y-4">
         <div>
-          <textarea
+          <Textarea
             value={answerText}
             onChange={e => setAnswerText(e.target.value)}
             rows={6}
-            className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
+            fullWidth
+            resize="none"
             placeholder="Provide a detailed answer..."
           />
           <p className={`text-xs mt-1 ${
-            charCount < 50 ? 'text-[#C67B5C]' : charCount > 2000 ? 'text-red-600' : 'text-[#B0A696]'
+            charCount < 50 ? 'text-[#C67B5C]' : charCount > 2000 ? 'text-red-600' : 'text-[var(--muted)]'
           }`}>
             {charCount}/2000 characters (minimum 50)
           </p>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-[#3E2723] mb-1">Photo URLs (optional)</label>
-          <textarea
-            value={photoUrls}
-            onChange={e => setPhotoUrls(e.target.value)}
-            rows={2}
-            className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
-            placeholder="One URL per line"
-          />
-        </div>
+        <Textarea
+          label="Photo URLs (optional)"
+          value={photoUrls}
+          onChange={e => setPhotoUrls(e.target.value)}
+          rows={2}
+          fullWidth
+          resize="none"
+          placeholder="One URL per line"
+        />
 
         <div className="border border-[#D4C8B8] rounded-lg p-3">
           <label className="flex items-center gap-3 cursor-pointer">
@@ -117,33 +119,30 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
             </div>
           </label>
           {recommendsPro && (
-            <textarea
+            <Textarea
               value={proReason}
               onChange={e => setProReason(e.target.value)}
               rows={2}
-              className="w-full mt-2 px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
+              fullWidth
+              resize="none"
               placeholder="Why should they hire a professional?"
+              className="mt-2"
             />
           )}
         </div>
 
         <div className="flex justify-end pt-2">
-          <button
+          <Button
+            variant="secondary"
+            size="lg"
+            leftIcon={submitting ? Loader2 : Send}
+            iconSize={16}
             onClick={handleSubmit}
             disabled={submitting || !isValid}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-white transition-colors ${
-              submitting || !isValid
-                ? 'bg-[#B0A696] cursor-not-allowed'
-                : 'bg-[#4A7C59] hover:bg-[#2D5A3B]'
-            }`}
+            className={submitting ? '[&>svg:first-child]:animate-spin' : ''}
           >
-            {submitting ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <Send size={16} />
-            )}
             {submitting ? 'Submitting...' : 'Submit Answer'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

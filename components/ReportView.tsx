@@ -144,11 +144,11 @@ export default function ReportView({
       )}
 
       {/* Header */}
-      <div className="bg-[#FDFBF7] border-b border-[#D4C8B8] p-4 print:hidden">
+      <div className="bg-surface border-b border-[#D4C8B8] p-4 print:hidden">
         <div className="flex items-center justify-between mb-2">
           <button
             onClick={onBack}
-            className="flex items-center gap-1.5 text-sm text-[#5D7B93] hover:text-[#4A6578] transition-colors"
+            className="flex items-center gap-1.5 text-sm text-[#5D7B93] hover:text-[var(--slate-blue-dark)] transition-colors"
           >
             <ArrowLeft size={16} />
             {isSharedView ? 'Home' : 'Back'}
@@ -275,7 +275,7 @@ export default function ReportView({
           <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
             <div className="flex-1">
               <p className="text-sm font-semibold text-[#3E2723]">Sign in to save your plan</p>
-              <p className="text-xs text-[#5C4D42] mt-0.5">
+              <p className="text-xs text-[var(--warm-brown)] mt-0.5">
                 Create a free account to save this project, track materials, and access your plans anytime.
               </p>
             </div>
@@ -299,9 +299,9 @@ export default function ReportView({
       )}
 
       {/* Action bar */}
-      <div className="bg-[#FDFBF7] border-t border-[#D4C8B8] p-4 print:hidden">
+      <div className="bg-surface border-t border-[#D4C8B8] p-4 print:hidden">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
-          <p className="text-xs text-[#B0A696]">
+          <p className="text-xs text-[var(--muted)]">
             Generated {createdAt ? new Date(createdAt).toLocaleDateString('en-US', {
               month: 'long', day: 'numeric', year: 'numeric',
             }) : 'just now'}
@@ -333,7 +333,7 @@ export default function ReportView({
                 disabled={isApplying}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white transition-colors shadow-md ${
                   isApplying
-                    ? 'bg-[#B0A696] cursor-not-allowed'
+                    ? 'bg-[var(--muted)] cursor-not-allowed'
                     : 'bg-[#C67B5C] hover:bg-[#A65D3F]'
                 }`}
               >

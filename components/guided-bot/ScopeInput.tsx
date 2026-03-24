@@ -69,24 +69,24 @@ export default function ScopeInput({ projectType, onSubmit }: ScopeInputProps) {
   return (
     <form onSubmit={handleSubmit} className="bg-white border border-[#D4C8B8] rounded-xl p-4 space-y-3">
       <div>
-        <label className="block text-xs font-medium text-[#5C4D42] mb-1">{fields.dimensionLabel}</label>
+        <label className="block text-xs font-medium text-[var(--warm-brown)] mb-1">{fields.dimensionLabel}</label>
         <input
           type="text"
           value={dimensions}
           onChange={(e) => setDimensions(e.target.value)}
           placeholder={fields.dimensionPlaceholder}
-          className="w-full px-3 py-2.5 text-sm text-[#3E2723] placeholder-[#7D6B5D] bg-[#FDFBF7] border border-[#D4C8B8] rounded-lg focus:outline-none focus:border-[#C67B5C]"
+          className="w-full px-3 py-2.5 text-sm text-[#3E2723] placeholder-[#7D6B5D] bg-surface border border-[#D4C8B8] rounded-lg focus:outline-none focus:border-[#C67B5C]"
           autoFocus
         />
       </div>
       <div>
-        <label className="block text-xs font-medium text-[#5C4D42] mb-1">{fields.detailLabel}</label>
+        <label className="block text-xs font-medium text-[var(--warm-brown)] mb-1">{fields.detailLabel}</label>
         <input
           type="text"
           value={details}
           onChange={(e) => setDetails(e.target.value)}
           placeholder={fields.detailPlaceholder}
-          className="w-full px-3 py-2.5 text-sm text-[#3E2723] placeholder-[#7D6B5D] bg-[#FDFBF7] border border-[#D4C8B8] rounded-lg focus:outline-none focus:border-[#C67B5C]"
+          className="w-full px-3 py-2.5 text-sm text-[#3E2723] placeholder-[#7D6B5D] bg-surface border border-[#D4C8B8] rounded-lg focus:outline-none focus:border-[#C67B5C]"
         />
       </div>
       <button

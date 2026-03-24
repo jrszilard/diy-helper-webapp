@@ -1,8 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, AlertTriangle, CheckCircle2, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import { supabase } from '@/lib/supabase';
+import TextInput from '@/components/ui/TextInput';
+import Textarea from '@/components/ui/Textarea';
+import Select from '@/components/ui/Select';
 
 interface Correction {
   id: string;
@@ -139,7 +143,7 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
         <div className="px-4 py-3 space-y-3">
           {loading ? (
             <div className="flex items-center justify-center py-4">
-              <Loader2 size={16} className="animate-spin text-[#C67B5C]" />
+              <Spinner size="sm" className="text-[#C67B5C]" />
             </div>
           ) : (
             <>
@@ -150,7 +154,7 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
                     <span className="text-xs font-semibold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">
                       {SECTION_TYPES.find(s => s.value === c.section_type)?.label || c.section_type}
                     </span>
-                    <span className="text-[10px] text-[#B0A696]">
+                    <span className="text-[10px] text-[var(--muted)]">
                       {new Date(c.created_at).toLocaleDateString()}
                     </span>
                   </div>
@@ -167,7 +171,7 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
               ))}
 
               {corrections.length === 0 && userRole === 'diyer' && (
-                <p className="text-xs text-[#B0A696] text-center py-2">
+                <p className="text-xs text-[var(--muted)] text-center py-2">
                   No corrections yet. Your project report gets smarter with every expert interaction.
                 </p>
               )}
@@ -184,7 +188,7 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
               {userRole === 'expert' && !showForm && (
                 <button
                   onClick={() => setShowForm(true)}
-                  className="flex items-center gap-1.5 text-xs font-medium text-[#5D7B93] hover:text-[#4A6578] transition-colors"
+                  className="flex items-center gap-1.5 text-xs font-medium text-[#5D7B93] hover:text-[var(--slate-blue-dark)] transition-colors"
                 >
                   <Plus size={12} />
                   Flag a correction to the AI report
@@ -195,52 +199,48 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
                 <div className="space-y-3 border-t border-[#D4C8B8] pt-3">
                   <div>
                     <label className="text-xs font-medium text-[#7D6B5D] block mb-1">Section</label>
-                    <select
+                    <Select
                       value={sectionType}
                       onChange={e => setSectionType(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-sm text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50"
+                      fullWidth
                     >
                       <option value="">Select section...</option>
                       {SECTION_TYPES.map(s => (
                         <option key={s.value} value={s.value}>{s.label}</option>
                       ))}
-                    </select>
+                    </Select>
                   </div>
 
-                  <div>
-                    <label className="text-xs font-medium text-[#7D6B5D] block mb-1">What the AI said (optional)</label>
-                    <textarea
-                      value={originalContent}
-                      onChange={e => setOriginalContent(e.target.value)}
-                      placeholder="Quote the AI report text that needs correction..."
-                      rows={2}
-                      className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-sm text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
-                      maxLength={2000}
-                    />
-                  </div>
+                  <Textarea
+                    label="What the AI said (optional)"
+                    value={originalContent}
+                    onChange={e => setOriginalContent(e.target.value)}
+                    placeholder="Quote the AI report text that needs correction..."
+                    rows={2}
+                    fullWidth
+                    resize="none"
+                    maxLength={2000}
+                  />
 
-                  <div>
-                    <label className="text-xs font-medium text-[#7D6B5D] block mb-1">Correct information *</label>
-                    <textarea
-                      value={correctedContent}
-                      onChange={e => setCorrectedContent(e.target.value)}
-                      placeholder="What should it say instead..."
-                      rows={3}
-                      className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-sm text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
-                      maxLength={2000}
-                    />
-                  </div>
+                  <Textarea
+                    label="Correct information *"
+                    value={correctedContent}
+                    onChange={e => setCorrectedContent(e.target.value)}
+                    placeholder="What should it say instead..."
+                    rows={3}
+                    fullWidth
+                    resize="none"
+                    maxLength={2000}
+                  />
 
-                  <div>
-                    <label className="text-xs font-medium text-[#7D6B5D] block mb-1">Reason (optional)</label>
-                    <input
-                      value={correctionReason}
-                      onChange={e => setCorrectionReason(e.target.value)}
-                      placeholder="Why this correction matters..."
-                      className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-sm text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50"
-                      maxLength={500}
-                    />
-                  </div>
+                  <TextInput
+                    label="Reason (optional)"
+                    value={correctionReason}
+                    onChange={e => setCorrectionReason(e.target.value)}
+                    placeholder="Why this correction matters..."
+                    fullWidth
+                    maxLength={500}
+                  />
 
                   {error && <p className="text-xs text-red-600">{error}</p>}
 
@@ -250,7 +250,7 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
                       disabled={submitting || !sectionType || !correctedContent.trim()}
                       className="px-4 py-2 bg-amber-600 text-white text-sm font-semibold rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50"
                     >
-                      {submitting ? <Loader2 size={14} className="animate-spin" /> : 'Submit Correction'}
+                      {submitting ? <Spinner size="sm" /> : 'Submit Correction'}
                     </button>
                     <button
                       onClick={() => setShowForm(false)}

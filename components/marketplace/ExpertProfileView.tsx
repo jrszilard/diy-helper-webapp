@@ -1,6 +1,8 @@
 'use client';
 
 import { Star, MapPin, DollarSign, Clock, Shield, MessageSquare, HelpCircle, CheckCircle, TrendingUp } from 'lucide-react';
+import Button from '@/components/ui/Button';
+import Select from '@/components/ui/Select';
 import type { ExpertProfile } from '@/lib/marketplace/types';
 import ExpertLevelBadge from './ExpertLevelBadge';
 import type { ExpertLevel } from './ExpertLevelBadge';
@@ -202,25 +204,29 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
 
         {/* Action buttons */}
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          <button
+          <Button
+            variant="primary"
+            size="lg"
+            leftIcon={MessageSquare}
+            iconSize={16}
             onClick={() => {
               const willShow = !showMessageBox;
               setShowMessageBox(willShow);
               if (willShow) fetchProjects();
             }}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[#C67B5C] text-white text-sm font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors"
           >
-            <MessageSquare size={16} />
             Contact {expert.displayName}
-          </button>
+          </Button>
           {expert.qaRateCents && (
-            <Link
+            <Button
+              variant="tertiary"
+              size="lg"
+              leftIcon={HelpCircle}
+              iconSize={16}
               href={`/marketplace/qa?targetExpertId=${expert.id}&targetExpertName=${encodeURIComponent(expert.displayName)}`}
-              className="flex items-center gap-2 px-6 py-2.5 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[#4A6578] transition-colors"
             >
-              <HelpCircle size={16} />
               Ask a Paid Question — ${(expert.qaRateCents / 100).toFixed(0)}
-            </Link>
+            </Button>
           )}
         </div>
 
@@ -242,20 +248,20 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
                     Link a project for context (optional)
                   </label>
                   {projectsLoaded && projects.length === 0 ? (
-                    <p className="text-xs text-[#B0A696] italic">
+                    <p className="text-xs text-[var(--muted)] italic">
                       No projects yet. <Link href="/chat" className="text-[#5D7B93] hover:underline">Start a project</Link> first to share details with an expert.
                     </p>
                   ) : (
-                    <select
+                    <Select
                       value={selectedProjectId}
                       onChange={e => setSelectedProjectId(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50"
+                      fullWidth
                     >
                       <option value="">Select a project...</option>
                       {projects.map(p => (
                         <option key={p.id} value={p.id}>{p.name}</option>
                       ))}
-                    </select>
+                    </Select>
                   )}
                   {selectedProjectId && (
                     <p className="text-xs text-[#4A7C59] mt-1">
@@ -277,17 +283,14 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
                 )}
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-xs text-[#7D6B5D]">{messageText.length}/2000</span>
-                  <button
+                  <Button
+                    variant="primary"
+                    size="sm"
                     onClick={handleSendMessage}
                     disabled={messageSending || !messageText.trim()}
-                    className={`px-4 py-2 text-sm font-semibold rounded-lg text-white transition-colors ${
-                      messageSending || !messageText.trim()
-                        ? 'bg-[#B0A696] cursor-not-allowed'
-                        : 'bg-[#C67B5C] hover:bg-[#A65D3F]'
-                    }`}
                   >
                     {messageSending ? 'Sending...' : 'Send Message'}
-                  </button>
+                  </Button>
                 </div>
               </>
             )}

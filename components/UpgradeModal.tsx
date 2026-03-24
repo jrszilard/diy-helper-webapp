@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Zap, FileText, MessageSquare, Shield, Star } from 'lucide-react';
+import { Zap, FileText, MessageSquare, Shield, Star } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import Button from '@/components/ui/Button';
+import Modal from '@/components/ui/Modal';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -57,17 +59,8 @@ export default function UpgradeModal({ isOpen, onClose, feature }: UpgradeModalP
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[#3E2723]/50" onClick={onClose} />
-      <div className="relative bg-[#FDFBF7] rounded-xl shadow-2xl max-w-md w-full p-6 border border-[#D4C8B8]">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-1 text-[#7D6B5D] hover:text-[#3E2723] transition-colors"
-        >
-          <X size={20} />
-        </button>
-
-        <div className="text-center mb-6">
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-12 h-12 bg-[#C67B5C]/10 rounded-full mb-3">
             <Zap size={24} className="text-[#C67B5C]" />
           </div>
@@ -99,22 +92,13 @@ export default function UpgradeModal({ isOpen, onClose, feature }: UpgradeModalP
           <p className="text-sm text-red-600 text-center mb-3">{error}</p>
         )}
 
-        <button
-          onClick={handleUpgrade}
-          disabled={loading}
-          className={`w-full py-3 rounded-lg font-semibold text-white transition-colors ${
-            loading
-              ? 'bg-[#B0A696] cursor-not-allowed'
-              : 'bg-[#C67B5C] hover:bg-[#A65D3F]'
-          }`}
-        >
+        <Button variant="primary" fullWidth onClick={handleUpgrade} disabled={loading}>
           {loading ? 'Redirecting...' : 'Upgrade Now'}
-        </button>
+        </Button>
 
         <p className="text-xs text-center text-[#7D6B5D] mt-3">
           Cancel anytime. Secure checkout via Stripe.
         </p>
-      </div>
-    </div>
+    </Modal>
   );
 }

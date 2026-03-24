@@ -453,7 +453,7 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
           <button
             onClick={printList}
             className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-xl
-                       hover:border-[#5D7B93] hover:bg-[#E8F0F5] transition-all group"
+                       hover:border-[#5D7B93] hover:bg-[var(--status-research-bg)] transition-all group"
           >
             <Printer className="w-8 h-8 text-gray-500 group-hover:text-[#5D7B93]" />
             <span className="font-medium text-[#3E2723]">Print</span>
@@ -463,7 +463,7 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
           <button
             onClick={copyToClipboard}
             className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-xl
-                       hover:border-[#4A7C59] hover:bg-[#E8F3EC] transition-all group"
+                       hover:border-[#4A7C59] hover:bg-[var(--status-complete-bg)] transition-all group"
           >
             {copied ? (
               <Check className="w-8 h-8 text-[#4A7C59]" />
@@ -477,7 +477,7 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
           <button
             onClick={downloadText}
             className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-xl
-                       hover:border-[#C67B5C] hover:bg-[#FDF3ED] transition-all group"
+                       hover:border-[#C67B5C] hover:bg-[var(--status-progress-bg)] transition-all group"
           >
             <FileText className="w-8 h-8 text-gray-500 group-hover:text-[#C67B5C]" />
             <span className="font-medium text-[#3E2723]">Text</span>
@@ -507,7 +507,7 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
           <button
             onClick={generateShareLink}
             className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-xl
-                       hover:border-[#5D7B93] hover:bg-[#E8F0F5] transition-all group"
+                       hover:border-[#5D7B93] hover:bg-[var(--status-research-bg)] transition-all group"
           >
             <Share2 className="w-8 h-8 text-gray-500 group-hover:text-[#5D7B93]" />
             <span className="font-medium text-[#3E2723]">Share</span>
@@ -517,7 +517,7 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
 
         {/* Share link display */}
         {shareUrl && (
-          <div className="mb-4 p-3 bg-[#E8F0F5] rounded-xl">
+          <div className="mb-4 p-3 bg-[var(--status-research-bg)] rounded-xl">
             <p className="text-xs text-[#5D7B93] font-medium mb-2">Shareable link:</p>
             <div className="flex gap-2">
               <input
@@ -540,7 +540,7 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
         <button
           onClick={onClose}
           className="w-full py-3 border-2 border-gray-200 rounded-xl font-medium
-                     hover:bg-gray-50 transition text-[#5C4D42]"
+                     hover:bg-gray-50 transition text-[var(--warm-brown)]"
         >
           Close
         </button>

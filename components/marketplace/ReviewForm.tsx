@@ -1,8 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, Loader2 } from 'lucide-react';
+import { Star } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import { supabase } from '@/lib/supabase';
+import TextInput from '@/components/ui/TextInput';
+import Textarea from '@/components/ui/Textarea';
 
 interface ReviewFormProps {
   expertId: string;
@@ -102,27 +105,24 @@ export default function ReviewForm({ expertId, questionId, onSuccess }: ReviewFo
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-[#3E2723] mb-1">Title (optional)</label>
-          <input
-            type="text"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50"
-            placeholder="Summarize your experience"
-          />
-        </div>
+        <TextInput
+          label="Title (optional)"
+          type="text"
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          fullWidth
+          placeholder="Summarize your experience"
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-[#3E2723] mb-1">Review (optional)</label>
-          <textarea
-            value={body}
-            onChange={e => setBody(e.target.value)}
-            rows={4}
-            className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
-            placeholder="Tell others about your experience..."
-          />
-        </div>
+        <Textarea
+          label="Review (optional)"
+          value={body}
+          onChange={e => setBody(e.target.value)}
+          rows={4}
+          fullWidth
+          resize="none"
+          placeholder="Tell others about your experience..."
+        />
 
         <div className="flex justify-end">
           <button
@@ -130,11 +130,11 @@ export default function ReviewForm({ expertId, questionId, onSuccess }: ReviewFo
             disabled={submitting || rating === 0}
             className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-white transition-colors ${
               submitting || rating === 0
-                ? 'bg-[#B0A696] cursor-not-allowed'
+                ? 'bg-[var(--muted)] cursor-not-allowed'
                 : 'bg-[#C67B5C] hover:bg-[#A65D3F]'
             }`}
           >
-            {submitting && <Loader2 size={16} className="animate-spin" />}
+            {submitting && <Spinner size="sm" />}
             {submitting ? 'Submitting...' : 'Submit Review'}
           </button>
         </div>

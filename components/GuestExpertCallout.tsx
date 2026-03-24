@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Users, ArrowRight, X } from 'lucide-react';
+import Button from '@/components/ui/Button';
 
 const DISMISS_KEY = 'guest-expert-callout-dismissed';
 const SHOW_AFTER_MESSAGES = 3;
@@ -44,13 +45,16 @@ export default function GuestExpertCallout({ messageCount, onRequestAuth }: Gues
           <p className="text-xs text-[#7D6B5D] mt-0.5">
             Create a free account and your first question to a real trade pro is on us.
           </p>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleSignUp}
-            className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-[#5D7B93] hover:text-[#4A6578] transition-colors"
+            rightIcon={ArrowRight}
+            iconSize={12}
+            className="mt-2 text-xs text-[#5D7B93] hover:text-[var(--slate-blue-dark)] hover:bg-transparent px-0 py-0"
           >
             Sign up free
-            <ArrowRight size={12} />
-          </button>
+          </Button>
         </div>
         <button
           onClick={handleDismiss}

@@ -123,8 +123,8 @@ export default function GuidedBot() {
     return (
       <div className="flex flex-col">
         {/* Compact conversation summary */}
-        <div className="bg-[#FDFBF7] border-b border-[#D4C8B8] p-4">
-          <p className="text-sm text-[#5C4D42]">
+        <div className="bg-surface border-b border-[#D4C8B8] p-4">
+          <p className="text-sm text-[var(--warm-brown)]">
             Your project plan for <strong>{bot.gathered.projectType || 'DIY Project'}</strong> in{' '}
             <strong>{bot.gathered.city}, {bot.gathered.state}</strong> is ready!
           </p>
@@ -148,7 +148,7 @@ export default function GuidedBot() {
         {!isAuthenticated && (
           <div className="bg-[#FDF8F3] border-t border-[#D4C8B8] p-4">
             <div className="flex items-center justify-between gap-4">
-              <p className="text-sm text-[#5C4D42]">
+              <p className="text-sm text-[var(--warm-brown)]">
                 Sign in to save your project plan, track materials, and access it later.
               </p>
               <a

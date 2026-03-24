@@ -31,22 +31,22 @@ export default function LocationInput({ onSubmit }: LocationInputProps) {
   return (
     <form onSubmit={handleSubmit} className="bg-white border border-[#D4C8B8] rounded-xl p-4 space-y-3">
       <div>
-        <label className="block text-xs font-medium text-[#5C4D42] mb-1">City</label>
+        <label className="block text-xs font-medium text-[var(--warm-brown)] mb-1">City</label>
         <input
           type="text"
           value={city}
           onChange={(e) => setCity(e.target.value)}
           placeholder="e.g., Austin"
-          className="w-full px-3 py-2.5 text-sm text-[#3E2723] placeholder-[#7D6B5D] bg-[#FDFBF7] border border-[#D4C8B8] rounded-lg focus:outline-none focus:border-[#C67B5C]"
+          className="w-full px-3 py-2.5 text-sm text-[#3E2723] placeholder-[#7D6B5D] bg-surface border border-[#D4C8B8] rounded-lg focus:outline-none focus:border-[#C67B5C]"
           autoFocus
         />
       </div>
       <div>
-        <label className="block text-xs font-medium text-[#5C4D42] mb-1">State</label>
+        <label className="block text-xs font-medium text-[var(--warm-brown)] mb-1">State</label>
         <select
           value={state}
           onChange={(e) => setState(e.target.value)}
-          className="w-full px-3 py-2.5 text-sm text-[#3E2723] bg-[#FDFBF7] border border-[#D4C8B8] rounded-lg focus:outline-none focus:border-[#C67B5C]"
+          className="w-full px-3 py-2.5 text-sm text-[#3E2723] bg-surface border border-[#D4C8B8] rounded-lg focus:outline-none focus:border-[#C67B5C]"
         >
           <option value="">Select a state</option>
           {US_STATES.map(s => (

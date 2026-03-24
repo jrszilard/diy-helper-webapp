@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Loader2 } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import StripeOnboardBanner from '@/components/marketplace/StripeOnboardBanner';
 import DashboardStats from '@/components/marketplace/DashboardStats';
 import DashboardQAQueue from '@/components/marketplace/DashboardQAQueue';
@@ -50,7 +50,7 @@ export default function ExpertDashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 size={32} className="animate-spin text-[#C67B5C]" />
+        <Spinner size="lg" color="primary" />
       </div>
     );
   }

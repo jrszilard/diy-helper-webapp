@@ -130,7 +130,7 @@ export default function WhyDIYHelper() {
             <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
               Why DIY Helper?
             </h2>
-            <p className="text-lg text-[#5C4D42] max-w-2xl mx-auto">
+            <p className="text-lg text-[var(--warm-brown)] max-w-2xl mx-auto">
               See how DIY Helper compares to other options for your home improvement projects
             </p>
           </div>
@@ -144,7 +144,7 @@ export default function WhyDIYHelper() {
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   idx === activeScenario
                     ? 'bg-[#C67B5C] text-white shadow-lg'
-                    : 'bg-white text-[#5C4D42] hover:bg-[#F5F0E6] border border-[#E8DFD0]'
+                    : 'bg-white text-[var(--warm-brown)] hover:bg-[#F5F0E6] border border-[#E8DFD0]'
                 }`}
               >
                 {s.id === 'electrical' && 'Electrical'}
@@ -170,12 +170,12 @@ export default function WhyDIYHelper() {
                 </div>
                 <h3 className="font-bold text-[#3E2723]">Generic AI</h3>
               </div>
-              <p className="text-[#5C4D42] text-sm mb-4">{scenario.chatgpt.answer}</p>
+              <p className="text-[var(--warm-brown)] text-sm mb-4">{scenario.chatgpt.answer}</p>
               <div className="space-y-2">
                 {scenario.chatgpt.issues.map((issue, idx) => (
                   <div key={idx} className="flex items-start gap-2">
                     <XCircle className="w-4 h-4 text-[#B8593B] flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-[#5C4D42]">{issue}</span>
+                    <span className="text-sm text-[var(--warm-brown)]">{issue}</span>
                   </div>
                 ))}
               </div>
@@ -189,36 +189,36 @@ export default function WhyDIYHelper() {
                 </div>
                 <h3 className="font-bold text-[#3E2723]">Google Search</h3>
               </div>
-              <p className="text-[#5C4D42] text-sm mb-4">{scenario.google.answer}</p>
+              <p className="text-[var(--warm-brown)] text-sm mb-4">{scenario.google.answer}</p>
               <div className="space-y-2">
                 {scenario.google.issues.map((issue, idx) => (
                   <div key={idx} className="flex items-start gap-2">
                     <XCircle className="w-4 h-4 text-[#B8593B] flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-[#5C4D42]">{issue}</span>
+                    <span className="text-sm text-[var(--warm-brown)]">{issue}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* DIY Helper */}
-            <div className="bg-gradient-to-br from-[#FDF8F3] to-[#FDF3ED] rounded-xl p-6 border-2 border-[#C67B5C] relative">
+            <div className="bg-gradient-to-br from-[#FDF8F3] to-[var(--status-progress-bg)] rounded-xl p-6 border-2 border-[#C67B5C] relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <span className="bg-[#C67B5C] text-white text-xs font-bold px-3 py-1 rounded-full">
                   BEST OPTION
                 </span>
               </div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-[#FDF3ED] rounded-lg">
+                <div className="p-2 bg-[var(--status-progress-bg)] rounded-lg">
                   <Zap className="w-5 h-5 text-[#C67B5C]" />
                 </div>
                 <h3 className="font-bold text-[#3E2723]">DIY Helper</h3>
               </div>
-              <p className="text-[#5C4D42] text-sm mb-4 font-medium">{scenario.diyHelper.answer}</p>
+              <p className="text-[var(--warm-brown)] text-sm mb-4 font-medium">{scenario.diyHelper.answer}</p>
               <div className="space-y-2">
                 {scenario.diyHelper.benefits.map((benefit, idx) => (
                   <div key={idx} className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 text-[#4A7C59] flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-[#5C4D42]">{benefit}</span>
+                    <span className="text-sm text-[var(--warm-brown)]">{benefit}</span>
                   </div>
                 ))}
               </div>

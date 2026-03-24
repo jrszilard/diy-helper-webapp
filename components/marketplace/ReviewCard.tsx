@@ -33,7 +33,7 @@ export default function ReviewCard({ review }: ReviewCardProps) {
             />
           ))}
         </div>
-        <span className="text-xs text-[#B0A696]">{formatDate(review.createdAt)}</span>
+        <span className="text-xs text-[var(--muted)]">{formatDate(review.createdAt)}</span>
       </div>
 
       {review.title && (

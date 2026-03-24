@@ -1,9 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronRight, ChevronLeft, CheckCircle2, Loader2 } from 'lucide-react';
+import { ChevronRight, ChevronLeft, CheckCircle2 } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import { supabase } from '@/lib/supabase';
 import type { Specialty } from '@/lib/marketplace/types';
+import TextInput from '@/components/ui/TextInput';
+import Textarea from '@/components/ui/Textarea';
 
 const SPECIALTIES: { value: Specialty; label: string }[] = [
   { value: 'electrical', label: 'Electrical' },
@@ -159,58 +162,49 @@ export default function ExpertRegistrationForm() {
       {step === 1 && (
         <div className="space-y-4">
           <h2 className="text-lg font-bold text-[#3E2723]">Basic Information</h2>
-          <div>
-            <label className="block text-sm font-medium text-[#3E2723] mb-1">Display Name *</label>
-            <input
-              type="text"
-              value={displayName}
-              onChange={e => setDisplayName(e.target.value)}
-              className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50"
-              placeholder="Your professional name"
-            />
-          </div>
+          <TextInput
+            label="Display Name *"
+            type="text"
+            value={displayName}
+            onChange={e => setDisplayName(e.target.value)}
+            fullWidth
+            placeholder="Your professional name"
+          />
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-[#3E2723] mb-1">City *</label>
-              <input
-                type="text"
-                value={city}
-                onChange={e => setCity(e.target.value)}
-                className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#3E2723] mb-1">State *</label>
-              <input
-                type="text"
-                value={state}
-                onChange={e => setState(e.target.value)}
-                className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50"
-                maxLength={2}
-                placeholder="CA"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#3E2723] mb-1">Zip Code</label>
-            <input
+            <TextInput
+              label="City *"
               type="text"
-              value={zipCode}
-              onChange={e => setZipCode(e.target.value)}
-              className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50"
-              maxLength={5}
+              value={city}
+              onChange={e => setCity(e.target.value)}
+              fullWidth
+            />
+            <TextInput
+              label="State *"
+              type="text"
+              value={state}
+              onChange={e => setState(e.target.value)}
+              fullWidth
+              maxLength={2}
+              placeholder="CA"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-[#3E2723] mb-1">Bio</label>
-            <textarea
-              value={bio}
-              onChange={e => setBio(e.target.value)}
-              rows={4}
-              className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
-              placeholder="Tell homeowners about your experience..."
-            />
-          </div>
+          <TextInput
+            label="Zip Code"
+            type="text"
+            value={zipCode}
+            onChange={e => setZipCode(e.target.value)}
+            fullWidth
+            maxLength={5}
+          />
+          <Textarea
+            label="Bio"
+            value={bio}
+            onChange={e => setBio(e.target.value)}
+            rows={4}
+            fullWidth
+            resize="none"
+            placeholder="Tell homeowners about your experience..."
+          />
         </div>
       )}
 
@@ -237,13 +231,14 @@ export default function ExpertRegistrationForm() {
                   {selected && (
                     <div className="mt-1 px-1">
                       <label className="text-xs text-[#7D6B5D]">Years exp:</label>
-                      <input
+                      <TextInput
                         type="number"
                         min={1}
                         max={50}
                         value={selected.yearsExperience}
                         onChange={e => setSpecialtyYears(value, parseInt(e.target.value) || 1)}
-                        className="ml-1 w-14 px-1 py-0.5 text-xs border border-[#D4C8B8] rounded bg-white text-[#3E2723]"
+                        className="ml-1 w-14 text-xs"
+                        inputSize="sm"
                       />
                     </div>
                   )}
@@ -259,27 +254,25 @@ export default function ExpertRegistrationForm() {
         <div className="space-y-4">
           <h2 className="text-lg font-bold text-[#3E2723]">Set Your Rates</h2>
           <p className="text-sm text-[#7D6B5D]">These can be updated later from your dashboard.</p>
+          <TextInput
+            label="Hourly Rate ($)"
+            type="number"
+            min={0}
+            step={0.01}
+            value={hourlyRate}
+            onChange={e => setHourlyRate(e.target.value)}
+            fullWidth
+            placeholder="75.00"
+          />
           <div>
-            <label className="block text-sm font-medium text-[#3E2723] mb-1">Hourly Rate ($)</label>
-            <input
-              type="number"
-              min={0}
-              step={0.01}
-              value={hourlyRate}
-              onChange={e => setHourlyRate(e.target.value)}
-              className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50"
-              placeholder="75.00"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#3E2723] mb-1">Q&A Rate ($)</label>
-            <input
+            <TextInput
+              label="Q&A Rate ($)"
               type="number"
               min={0}
               step={0.01}
               value={qaRate}
               onChange={e => setQaRate(e.target.value)}
-              className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50"
+              fullWidth
               placeholder="10.00"
             />
             <p className="text-xs text-[#7D6B5D] mt-1">Rate for answering Q&A questions from homeowners.</p>
@@ -356,7 +349,7 @@ export default function ExpertRegistrationForm() {
             className={`flex items-center gap-1 px-6 py-2 rounded-lg font-semibold text-white transition-colors ${
               canProceed()
                 ? 'bg-[#C67B5C] hover:bg-[#A65D3F]'
-                : 'bg-[#B0A696] cursor-not-allowed'
+                : 'bg-[var(--muted)] cursor-not-allowed'
             }`}
           >
             Next
@@ -368,11 +361,11 @@ export default function ExpertRegistrationForm() {
             disabled={submitting}
             className={`flex items-center gap-2 px-6 py-2 rounded-lg font-semibold text-white transition-colors ${
               submitting
-                ? 'bg-[#B0A696] cursor-not-allowed'
-                : 'bg-[#4A7C59] hover:bg-[#2D5A3B]'
+                ? 'bg-[var(--muted)] cursor-not-allowed'
+                : 'bg-[#4A7C59] hover:bg-[var(--forest-green-dark)]'
             }`}
           >
-            {submitting && <Loader2 size={16} className="animate-spin" />}
+            {submitting && <Spinner size="sm" />}
             {submitting ? 'Submitting...' : 'Submit Registration'}
           </button>
         )}

@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Loader2, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import Link from 'next/link';
 import { Wrench } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import ExpertSearchFilters from '@/components/marketplace/ExpertSearchFilters';
 import ExpertCard from '@/components/marketplace/ExpertCard';
 import type { ExpertProfile } from '@/lib/marketplace/types';
@@ -55,7 +56,7 @@ export default function ExpertsBrowsePage() {
 
   return (
     <div className="min-h-screen bg-[#F5F0E6]">
-      <header className="bg-[#FDFBF7] border-b border-[#D4C8B8] shadow-sm">
+      <header className="bg-surface border-b border-[#D4C8B8] shadow-sm">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="bg-gradient-to-br from-[#C67B5C] to-[#A65D3F] p-1.5 rounded-lg">
@@ -65,7 +66,7 @@ export default function ExpertsBrowsePage() {
           </Link>
           <Link
             href="/experts/register"
-            className="text-sm font-medium text-[#5D7B93] hover:text-[#4A6578] transition-colors"
+            className="text-sm font-medium text-[#5D7B93] hover:text-[var(--slate-blue-dark)] transition-colors"
           >
             Become an Expert
           </Link>
@@ -84,7 +85,7 @@ export default function ExpertsBrowsePage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 size={32} className="animate-spin text-[#C67B5C]" />
+            <Spinner size="lg" className="text-[#C67B5C]" />
           </div>
         ) : error ? (
           <div className="text-center py-12">

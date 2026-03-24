@@ -75,7 +75,7 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
           </div>
           <p className={`text-xl font-bold ${color}`}>{value}</p>
           {subtitle && (
-            <p className="text-xs text-[#B0A696] mt-0.5">{subtitle}</p>
+            <p className="text-xs text-[var(--muted)] mt-0.5">{subtitle}</p>
           )}
         </div>
       ))}

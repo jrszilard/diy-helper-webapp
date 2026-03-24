@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import type { GatheredData } from './types';
 
 interface ProjectBriefProps {
@@ -78,7 +78,7 @@ export default function ProjectBrief({ gathered, onEdit, onSubmit, isSubmitting 
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Spinner />
               Starting...
             </>
           ) : (
@@ -104,7 +104,7 @@ function SummaryRow({
   return (
     <div className="flex items-start justify-between gap-3 px-4 py-3">
       <div className="flex-1 min-w-0">
-        <span className="block text-[10px] font-semibold text-[#5C4D42] uppercase tracking-wider">{label}</span>
+        <span className="block text-[10px] font-semibold text-[var(--warm-brown)] uppercase tracking-wider">{label}</span>
         <span className={`block text-sm text-[#3E2723] mt-0.5 ${truncate ? 'line-clamp-2' : ''}`}>
           {value}
         </span>

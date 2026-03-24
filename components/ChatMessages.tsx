@@ -111,7 +111,7 @@ const MarkdownComponents = (role: 'user' | 'assistant') => ({
     <strong className={`font-bold ${role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>{children}</strong>
   ),
   em: ({ children }: { children?: React.ReactNode }) => (
-    <em className={`italic ${role === 'user' ? 'text-white' : 'text-[#5C4D42]'}`}>{children}</em>
+    <em className={`italic ${role === 'user' ? 'text-white' : 'text-[var(--warm-brown)]'}`}>{children}</em>
   ),
   code: ({ children }: { children?: React.ReactNode }) => (
     <code className={`px-1 py-0.5 rounded text-sm ${
@@ -121,14 +121,14 @@ const MarkdownComponents = (role: 'user' | 'assistant') => ({
   a: ({ children, href }: { children?: React.ReactNode; href?: string }) => (
     <a
       href={sanitizeHref(href)}
-      className={`underline ${role === 'user' ? 'text-white hover:text-[#FFE0D0]' : 'text-[#5D7B93] hover:text-[#4A6275]'}`}
+      className={`underline ${role === 'user' ? 'text-white hover:text-[#FFE0D0]' : 'text-[#5D7B93] hover:text-[var(--slate-blue-dark)]'}`}
       target="_blank"
       rel="noopener noreferrer"
     >{children}</a>
   ),
   blockquote: ({ children }: { children?: React.ReactNode }) => (
     <blockquote className={`border-l-4 pl-4 italic ${
-      role === 'user' ? 'border-[#A65D3F] text-white' : 'border-[#C67B5C] text-[#5C4D42]'
+      role === 'user' ? 'border-[#A65D3F] text-white' : 'border-[#C67B5C] text-[var(--warm-brown)]'
     }`}>{children}</blockquote>
   ),
   del: ({ children }: { children?: React.ReactNode }) => (
@@ -179,7 +179,7 @@ const ChatMessages = React.memo(function ChatMessages({
                 </div>
               )}
 
-              <div className={msg.role === 'user' ? '' : 'bg-[#FDFBF7] border border-[#D4C8B8] text-[#3E2723] rounded-lg p-4'}>
+              <div className={msg.role === 'user' ? '' : 'bg-surface border border-[#D4C8B8] text-[#3E2723] rounded-lg p-4'}>
                 <div className={`prose prose-sm max-w-none ${
                   msg.role === 'user' ? 'prose-invert' : 'prose-stone'
                 }`}>
@@ -211,7 +211,7 @@ const ChatMessages = React.memo(function ChatMessages({
             )}
 
             {streamingContent && (
-              <div className="bg-[#FDFBF7] border border-[#D4C8B8] text-[#3E2723] rounded-lg p-4">
+              <div className="bg-surface border border-[#D4C8B8] text-[#3E2723] rounded-lg p-4">
                 <div className="prose prose-sm max-w-none prose-stone">
                   <ReactMarkdown>
                     {cleanMessageContent(streamingContent)}
@@ -221,7 +221,7 @@ const ChatMessages = React.memo(function ChatMessages({
             )}
 
             {!streamingContent && progressSteps.length === 0 && (
-              <div className="bg-[#FDFBF7] border border-[#D4C8B8] rounded-lg p-4">
+              <div className="bg-surface border border-[#D4C8B8] rounded-lg p-4">
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-[#C67B5C] rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-[#C67B5C] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>

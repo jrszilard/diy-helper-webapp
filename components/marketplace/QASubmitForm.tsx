@@ -2,7 +2,12 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Send, Loader2, CreditCard, Wallet, Shield, CheckCircle2, Zap, MessageSquare, FileCheck, Users, TrendingUp } from 'lucide-react';
+import { formatPrice } from '@/lib/formatPrice';
+import Spinner from '@/components/ui/Spinner';
 import { supabase } from '@/lib/supabase';
+import Button from '@/components/ui/Button';
+import Select from '@/components/ui/Select';
+import Textarea from '@/components/ui/Textarea';
 import type { ExpertContext } from '@/lib/marketplace/types';
 import ProjectContextCard from '@/components/marketplace/ProjectContextCard';
 
@@ -337,43 +342,43 @@ export default function QASubmitForm({
         {/* Category */}
         <div>
           <label className="block text-sm font-medium text-[#3E2723] mb-1">Category</label>
-          <select
+          <Select
             value={category}
             onChange={e => setCategory(e.target.value)}
-            className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50"
+            fullWidth
           >
             {CATEGORIES.map(c => (
               <option key={c} value={c}>
                 {c.charAt(0).toUpperCase() + c.slice(1)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         {/* Question */}
         <div>
-          <label className="block text-sm font-medium text-[#3E2723] mb-1">Your Question</label>
-          <textarea
+          <Textarea
+            label="Your Question"
             value={questionText}
             onChange={e => setQuestionText(e.target.value)}
             rows={5}
-            className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
+            fullWidth
+            resize="none"
             placeholder="Describe your question in detail..."
           />
-          <p className="text-xs text-[#B0A696] mt-1">{questionText.length} characters (minimum 20)</p>
+          <p className="text-xs text-[var(--muted)] mt-1">{questionText.length} characters (minimum 20)</p>
         </div>
 
         {/* Photo URLs */}
-        <div>
-          <label className="block text-sm font-medium text-[#3E2723] mb-1">Photo URLs (optional)</label>
-          <textarea
-            value={photoUrls}
-            onChange={e => setPhotoUrls(e.target.value)}
-            rows={2}
-            className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
-            placeholder="One URL per line"
-          />
-        </div>
+        <Textarea
+          label="Photo URLs (optional)"
+          value={photoUrls}
+          onChange={e => setPhotoUrls(e.target.value)}
+          rows={2}
+          fullWidth
+          resize="none"
+          placeholder="One URL per line"
+        />
 
         {/* ── Payment Section (always visible) ── */}
         {needsPayment && (
@@ -410,22 +415,17 @@ export default function QASubmitForm({
                 <p className="text-xs text-[#7D6B5D]">
                   Save a payment method to submit your question. You won&apos;t be charged now — only when an expert claims it.
                 </p>
-                <button
+                <Button
+                  variant="tertiary"
+                  size="sm"
+                  leftIcon={savingCard ? Loader2 : CreditCard}
+                  iconSize={16}
                   onClick={handleSetupPayment}
                   disabled={savingCard}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-white text-sm transition-colors ${
-                    savingCard
-                      ? 'bg-[#B0A696] cursor-not-allowed'
-                      : 'bg-[#5D7B93] hover:bg-[#4A6578]'
-                  }`}
+                  className={savingCard ? '[&>svg:first-child]:animate-spin' : ''}
                 >
-                  {savingCard ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    <CreditCard size={16} />
-                  )}
                   {savingCard ? 'Saving...' : 'Save Payment Method'}
-                </button>
+                </Button>
               </div>
             )}
 
@@ -433,7 +433,7 @@ export default function QASubmitForm({
               <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-[#D4C8B8]/50">
                 <Wallet size={14} className="text-[#4A7C59]" />
                 <span className="text-sm text-[#4A7C59] font-medium">
-                  ${(creditBalanceCents / 100).toFixed(2)} in credits will be applied first
+                  {formatPrice(creditBalanceCents, true)} in credits will be applied first
                 </span>
               </div>
             )}
@@ -447,24 +447,24 @@ export default function QASubmitForm({
               <div className="flex items-center gap-2">
                 <TrendingUp size={14} className="text-[#C67B5C]" />
                 <span className="text-sm font-semibold text-[#3E2723]">
-                  {dynamicPricing.tierLabel} Question — ${(dynamicPricing.priceCents / 100).toFixed(0)}
+                  {dynamicPricing.tierLabel} Question — {formatPrice(dynamicPricing.priceCents)}
                 </span>
               </div>
-              {pricingLoading && <Loader2 size={12} className="animate-spin text-[#B0A696]" />}
+              {pricingLoading && <Spinner size="sm" className="text-[var(--muted)]" />}
             </div>
             <div className="flex items-center gap-4 text-xs text-[#7D6B5D]">
-              <span>You pay <strong>${(dynamicPricing.priceCents / 100).toFixed(2)}</strong></span>
-              <span className="text-[#B0A696]">&rarr;</span>
-              <span>Expert earns <strong className="text-[#4A7C59]">${(dynamicPricing.expertPayoutCents / 100).toFixed(2)}</strong></span>
-              <span className="text-[#B0A696]">&rarr;</span>
+              <span>You pay <strong>{formatPrice(dynamicPricing.priceCents, true)}</strong></span>
+              <span className="text-[var(--muted)]">&rarr;</span>
+              <span>Expert earns <strong className="text-[#4A7C59]">{formatPrice(dynamicPricing.expertPayoutCents, true)}</strong></span>
+              <span className="text-[var(--muted)]">&rarr;</span>
               <span>Protected by escrow</span>
             </div>
             {dynamicPricing.factors && dynamicPricing.factors.length > 0 && (
-              <p className="text-[10px] text-[#B0A696] mt-1.5">
+              <p className="text-[10px] text-[var(--muted)] mt-1.5">
                 Based on: {dynamicPricing.factors.join(' · ')}
               </p>
             )}
-            <p className="text-[10px] text-[#B0A696] mt-0.5">
+            <p className="text-[10px] text-[var(--muted)] mt-0.5">
               A service call for this would cost $75-150
             </p>
           </div>
@@ -481,7 +481,7 @@ export default function QASubmitForm({
             ) : dynamicPricing?.tier ? (
               <div>
                 <span className="text-sm font-medium text-[#3E2723]">
-                  {dynamicPricing.tierLabel}: ${(dynamicPricing.priceCents / 100).toFixed(0)}
+                  {dynamicPricing.tierLabel}: {formatPrice(dynamicPricing.priceCents)}
                 </span>
                 <p className="text-xs text-[#7D6B5D] mt-0.5">Charged only when an expert claims</p>
               </div>
@@ -492,22 +492,17 @@ export default function QASubmitForm({
               </div>
             )}
           </div>
-          <button
+          <Button
+            variant="primary"
+            size="lg"
+            leftIcon={submitting ? Loader2 : Send}
+            iconSize={16}
             onClick={handleSubmit}
             disabled={submitting || questionText.trim().length < 20 || (needsPayment && !paymentMethodId)}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-white transition-colors ${
-              submitting || questionText.trim().length < 20 || (needsPayment && !paymentMethodId)
-                ? 'bg-[#B0A696] cursor-not-allowed'
-                : 'bg-[#C67B5C] hover:bg-[#A65D3F]'
-            }`}
+            className={submitting ? '[&>svg:first-child]:animate-spin' : ''}
           >
-            {submitting ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <Send size={16} />
-            )}
             {submitting ? 'Submitting...' : 'Submit Question'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

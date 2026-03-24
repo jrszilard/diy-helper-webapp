@@ -1,6 +1,7 @@
 'use client';
 
-import { CheckCircle2, Circle, Loader2, AlertCircle, X, RotateCcw, SkipForward } from 'lucide-react';
+import { CheckCircle2, Circle, AlertCircle, X, RotateCcw, SkipForward } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import type { PhaseProgress } from '@/hooks/useAgentRun';
 
 interface AgentProgressProps {
@@ -30,18 +31,18 @@ export default function AgentProgress({
   return (
     <div className="flex-1 flex flex-col bg-[#F5F0E6] overflow-y-auto">
       {/* Header */}
-      <div className="bg-[#FDFBF7] border-b border-[#D4C8B8] p-5">
+      <div className="bg-surface border-b border-[#D4C8B8] p-5">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="text-lg font-bold text-[#3E2723]">
               {isCancelling ? 'Cancelling...' : 'Planning Your Project'}
             </h2>
-            <p className="text-sm text-[#5C4D42]">
+            <p className="text-sm text-[var(--warm-brown)]">
               {projectDescription.length > 80
                 ? projectDescription.slice(0, 80) + '...'
                 : projectDescription}
             </p>
-            <p className="text-xs text-[#5C4D42] mt-0.5">{location}</p>
+            <p className="text-xs text-[var(--warm-brown)] mt-0.5">{location}</p>
           </div>
           {(isRunning || isCancelling) && (
             <button
@@ -50,12 +51,12 @@ export default function AgentProgress({
               className={`p-2 rounded-lg transition-colors ${
                 isCancelling
                   ? 'bg-[#E8E0D4] cursor-not-allowed'
-                  : 'hover:bg-[#FDF3ED]'
+                  : 'hover:bg-[var(--status-progress-bg)]'
               }`}
               title={isCancelling ? 'Cancelling...' : 'Cancel'}
             >
               {isCancelling ? (
-                <Loader2 size={20} className="text-[#7D6B5D] animate-spin" />
+                <Spinner className="text-[#7D6B5D]" />
               ) : (
                 <X size={20} className="text-[#7D6B5D]" />
               )}
@@ -70,7 +71,7 @@ export default function AgentProgress({
             style={{ width: `${overallProgress}%` }}
           />
         </div>
-        <p className="text-xs text-[#5C4D42] mt-1.5 text-right">
+        <p className="text-xs text-[var(--warm-brown)] mt-1.5 text-right">
           {isCancelling ? 'Cancelling...' : `${overallProgress}% complete`}
         </p>
       </div>
@@ -83,22 +84,22 @@ export default function AgentProgress({
 
         {/* Error message */}
         {hasError && (
-          <div className="bg-[#FDF3ED] border border-[#E8B4A0] rounded-lg p-4 flex items-start gap-3">
+          <div className="bg-[var(--status-progress-bg)] border border-[#E8B4A0] rounded-lg p-4 flex items-start gap-3">
             <AlertCircle size={20} className="text-[#B8593B] flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="text-sm font-semibold text-[#B8593B]">Something went wrong</p>
-              <p className="text-sm text-[#5C4D42] mt-1">{error}</p>
+              <p className="text-sm text-[var(--warm-brown)] mt-1">{error}</p>
             </div>
           </div>
         )}
       </div>
 
       {/* Action bar */}
-      <div className="p-5 border-t border-[#D4C8B8] bg-[#FDFBF7]">
+      <div className="p-5 border-t border-[#D4C8B8] bg-surface">
         {hasError && onRetry ? (
           <button
             onClick={onRetry}
-            className="w-full py-2.5 rounded-lg bg-[#5D7B93] text-white hover:bg-[#4A6578] transition-colors text-sm font-medium flex items-center justify-center gap-2"
+            className="w-full py-2.5 rounded-lg bg-[#5D7B93] text-white hover:bg-[var(--slate-blue-dark)] transition-colors text-sm font-medium flex items-center justify-center gap-2"
           >
             <RotateCcw size={16} />
             Retry from Failed Phase
@@ -153,15 +154,15 @@ function PhaseCard({ phase, index }: { phase: PhaseProgress; index: number }) {
     <div className={`rounded-lg border p-4 transition-all ${
       isActive ? 'bg-white border-[#5D7B93] shadow-md' :
       isComplete ? 'bg-[#F0F7F2] border-[#B5D4BE]' :
-      isError ? 'bg-[#FDF3ED] border-[#E8B4A0]' :
+      isError ? 'bg-[var(--status-progress-bg)] border-[#E8B4A0]' :
       isSkipped ? 'bg-[#F5F0E6] border-[#E8E0D4] opacity-60' :
-      'bg-[#FDFBF7] border-[#E8E0D4]'
+      'bg-surface border-[#E8E0D4]'
     }`}>
       <div className="flex items-center gap-3">
         {/* Status icon */}
         <div className="flex-shrink-0">
           {isComplete && <CheckCircle2 size={24} className="text-[#4A7C59]" />}
-          {isActive && <Loader2 size={24} className="text-[#5D7B93] animate-spin" />}
+          {isActive && <Spinner size="lg" className="text-[#5D7B93]" />}
           {isError && <AlertCircle size={24} className="text-[#B8593B]" />}
           {isSkipped && <SkipForward size={24} className="text-[#7D6B5D]" />}
           {phase.status === 'pending' && (
@@ -182,12 +183,12 @@ function PhaseCard({ phase, index }: { phase: PhaseProgress; index: number }) {
               isComplete ? 'text-[#4A7C59]' :
               isError ? 'text-[#B8593B]' :
               isSkipped ? 'text-[#7D6B5D]' :
-              'text-[#5C4D42]'
+              'text-[var(--warm-brown)]'
             }`}>
               Phase {index + 1}: {phaseLabels[phase.phase]}
             </h3>
             {isComplete && phase.durationMs && (
-              <span className="text-xs text-[#5C4D42]">
+              <span className="text-xs text-[var(--warm-brown)]">
                 {Math.round(phase.durationMs / 1000)}s
               </span>
             )}
@@ -205,7 +206,7 @@ function PhaseCard({ phase, index }: { phase: PhaseProgress; index: number }) {
           <p className={`text-xs mt-0.5 ${
             isActive ? 'text-[#5D7B93]' :
             isSkipped ? 'text-[#7D6B5D]' :
-            'text-[#5C4D42]'
+            'text-[var(--warm-brown)]'
           }`}>
             {isActive ? phase.message : phaseDescriptions[phase.phase]}
           </p>

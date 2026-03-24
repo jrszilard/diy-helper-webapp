@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, ExternalLink, Loader2 } from 'lucide-react';
+import { AlertTriangle, ExternalLink } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import { supabase } from '@/lib/supabase';
 
 interface StripeOnboardBannerProps {
@@ -59,7 +60,7 @@ export default function StripeOnboardBanner({ stripeOnboardingComplete }: Stripe
         className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white text-sm font-semibold rounded-lg hover:bg-amber-700 transition-colors whitespace-nowrap"
       >
         {loading ? (
-          <Loader2 size={14} className="animate-spin" />
+          <Spinner size="sm" />
         ) : (
           <ExternalLink size={14} />
         )}

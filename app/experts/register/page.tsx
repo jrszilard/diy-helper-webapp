@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import ExpertRegistrationForm from '@/components/marketplace/ExpertRegistrationForm';
 import AuthButton from '@/components/AuthButton';
-import { Wrench, Loader2, DollarSign, Award, CheckCircle, ArrowRight } from 'lucide-react';
+import { Wrench, DollarSign, Award, CheckCircle, ArrowRight } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import Link from 'next/link';
 
 export default function ExpertRegisterPage() {
@@ -63,7 +64,7 @@ export default function ExpertRegisterPage() {
   }, [checkExpertStatus]);
 
   const header = (
-    <header className="bg-[#FDFBF7] border-b border-[#D4C8B8] shadow-sm">
+    <header className="bg-surface border-b border-[#D4C8B8] shadow-sm">
       <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <div className="bg-gradient-to-br from-[#C67B5C] to-[#A65D3F] p-1.5 rounded-lg">
@@ -79,10 +80,10 @@ export default function ExpertRegisterPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7]">
+      <div className="min-h-screen bg-surface">
         {header}
         <div className="flex items-center justify-center py-32">
-          <Loader2 size={32} className="animate-spin text-[#C67B5C]" />
+          <Spinner size="lg" className="text-[#C67B5C]" />
         </div>
       </div>
     );
@@ -91,7 +92,7 @@ export default function ExpertRegisterPage() {
   // Authenticated + ready for registration
   if (user && showRegistration) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7]">
+      <div className="min-h-screen bg-surface">
         {header}
         <main className="max-w-3xl mx-auto px-4 py-8">
           <div className="text-center mb-8">
@@ -108,7 +109,7 @@ export default function ExpertRegisterPage() {
 
   // Unauthenticated — show value prop + sign-in CTA
   return (
-    <div className="min-h-screen bg-[#FDFBF7]">
+    <div className="min-h-screen bg-surface">
       {header}
 
       <main className="max-w-3xl mx-auto px-4 py-8">
@@ -120,7 +121,7 @@ export default function ExpertRegisterPage() {
           <h1 className="text-3xl font-bold text-[#3E2723] mb-3">
             Become an Expert on DIY Helper
           </h1>
-          <p className="text-lg text-[#5C4D42] max-w-xl mx-auto">
+          <p className="text-lg text-[var(--warm-brown)] max-w-xl mx-auto">
             Share your trade knowledge, help DIYers succeed, and earn money on your own schedule.
           </p>
         </div>
@@ -132,7 +133,7 @@ export default function ExpertRegisterPage() {
               icon: DollarSign,
               title: 'Answer Questions & Earn',
               desc: 'Get paid for sharing your expertise. Answer DIY questions and provide consultations.',
-              color: 'from-[#4A7C59] to-[#2D5A3B]',
+              color: 'from-[#4A7C59] to-[var(--forest-green-dark)]',
             },
             {
               icon: Award,
@@ -144,7 +145,7 @@ export default function ExpertRegisterPage() {
               icon: CheckCircle,
               title: 'Set Your Terms',
               desc: 'Choose your own rates, availability, and areas of expertise. Work when it suits you.',
-              color: 'from-[#5D7B93] to-[#4A6275]',
+              color: 'from-[#5D7B93] to-[var(--slate-blue-dark)]',
             },
           ].map((item, idx) => (
             <div
@@ -155,7 +156,7 @@ export default function ExpertRegisterPage() {
                 <item.icon className="w-6 h-6 text-white" />
               </div>
               <h3 className="text-lg font-bold text-[#3E2723] mb-2">{item.title}</h3>
-              <p className="text-sm text-[#5C4D42] leading-relaxed">{item.desc}</p>
+              <p className="text-sm text-[var(--warm-brown)] leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </div>
@@ -174,7 +175,7 @@ export default function ExpertRegisterPage() {
                   {item.step}
                 </div>
                 <h3 className="font-semibold text-[#3E2723] mb-1">{item.title}</h3>
-                <p className="text-sm text-[#5C4D42]">{item.desc}</p>
+                <p className="text-sm text-[var(--warm-brown)]">{item.desc}</p>
               </div>
             ))}
           </div>

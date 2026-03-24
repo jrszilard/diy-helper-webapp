@@ -140,7 +140,7 @@ export default function SharePage() {
           </div>
 
           {/* Footer */}
-          <div className="bg-[#FDFBF7] p-4 border-t border-[#E8DFD0] flex items-center justify-between">
+          <div className="bg-surface p-4 border-t border-[#E8DFD0] flex items-center justify-between">
             <span className="text-xs text-[#A89880]">Shared via DIY Helper</span>
             <Link
               href="/"

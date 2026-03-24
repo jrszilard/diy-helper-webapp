@@ -1,8 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { Star, MapPin, DollarSign } from 'lucide-react';
+import { Star, MapPin } from 'lucide-react';
+import { formatPrice } from '@/lib/formatPrice';
 import type { ExpertProfile } from '@/lib/marketplace/types';
+import Badge from '@/components/ui/Badge';
+import Avatar from '@/components/ui/Avatar';
 
 interface ExpertCardProps {
   expert: ExpertProfile;
@@ -12,22 +15,10 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
   return (
     <Link
       href={`/experts/${expert.id}`}
-      className="block bg-white border border-[#D4C8B8] rounded-lg p-4 hover:shadow-md hover:border-[#C67B5C]/30 transition-all"
+      className="block bg-white border border-[var(--earth-sand)] rounded-lg p-4 hover:shadow-md hover:border-[var(--terracotta)]/30 transition-all"
     >
       <div className="flex items-start gap-3">
-        <div className="w-12 h-12 bg-[#5D7B93]/10 rounded-full flex items-center justify-center flex-shrink-0">
-          {expert.profilePhotoUrl ? (
-            <img
-              src={expert.profilePhotoUrl}
-              alt={expert.displayName}
-              className="w-12 h-12 rounded-full object-cover"
-            />
-          ) : (
-            <span className="text-lg font-bold text-[#5D7B93]">
-              {expert.displayName.charAt(0).toUpperCase()}
-            </span>
-          )}
-        </div>
+        <Avatar name={expert.displayName} src={expert.profilePhotoUrl} />
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-bold text-[#3E2723] truncate">{expert.displayName}</h3>
 
@@ -52,12 +43,9 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
           </div>
 
           {expert.hourlyRateCents && (
-            <div className="flex items-center gap-1 mt-1">
-              <DollarSign size={12} className="text-[#4A7C59]" />
-              <span className="text-xs font-medium text-[#4A7C59]">
-                ${(expert.hourlyRateCents / 100).toFixed(0)}/hr
-              </span>
-            </div>
+            <span className="text-xs font-medium text-[#4A7C59] mt-1">
+              {formatPrice(expert.hourlyRateCents)}/hr
+            </span>
           )}
         </div>
       </div>
@@ -65,15 +53,10 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
       {expert.specialties.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-3">
           {expert.specialties.slice(0, 4).map(s => (
-            <span
-              key={s.specialty}
-              className="px-2 py-0.5 text-xs bg-[#5D7B93]/10 text-[#5D7B93] rounded-full font-medium"
-            >
-              {s.specialty.replace('_', ' ')}
-            </span>
+            <Badge key={s.specialty}>{s.specialty.replace('_', ' ')}</Badge>
           ))}
           {expert.specialties.length > 4 && (
-            <span className="px-2 py-0.5 text-xs text-[#B0A696]">
+            <span className="px-2 py-0.5 text-xs text-[var(--muted)]">
               +{expert.specialties.length - 4} more
             </span>
           )}

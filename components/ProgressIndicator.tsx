@@ -1,6 +1,7 @@
 'use client';
 
-import { CheckCircle2, Loader2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 
 export interface ProgressStep {
   step: string;
@@ -40,7 +41,7 @@ export default function ProgressIndicator({ steps, className = '' }: ProgressInd
               {step.message}
             </span>
             {!step.completed && idx === steps.length - 1 && (
-              <Loader2 className="h-4 w-4 animate-spin text-[#C67B5C] ml-auto flex-shrink-0" />
+              <Spinner size="sm" className="text-[#C67B5C] ml-auto" />
             )}
           </div>
         ))}

@@ -27,7 +27,7 @@ export default function BotMessage({ content, children, animate = true }: BotMes
       }`}
     >
       <div className="max-w-[90%] sm:max-w-[85%]">
-        <div className="bg-[#FDFBF7] border border-[#D4C8B8] rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
+        <div className="bg-surface border border-[#D4C8B8] rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
           <div className="prose prose-sm max-w-none prose-p:leading-relaxed [&_a]:!text-[#5D7B93]">
             <ReactMarkdown
               components={{
@@ -59,7 +59,7 @@ export default function BotMessage({ content, children, animate = true }: BotMes
 export function TypingIndicator() {
   return (
     <div className="flex justify-start">
-      <div className="bg-[#FDFBF7] border border-[#D4C8B8] rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
+      <div className="bg-surface border border-[#D4C8B8] rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-[#7D6B5D] animate-bounce" style={{ animationDelay: '0ms' }} />
           <span className="w-2 h-2 rounded-full bg-[#7D6B5D] animate-bounce" style={{ animationDelay: '150ms' }} />

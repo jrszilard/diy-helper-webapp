@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import MaterialsExport from './MaterialsExport';
 import { ShoppingSearchSkeleton } from './SkeletonLoader';
+import TextInput from '@/components/ui/TextInput';
 import { useStoreSearch } from '@/hooks/useStoreSearch';
 import type { StoreResult } from '@/hooks/useStoreSearch';
 
@@ -244,7 +245,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
           <DollarSign className="w-5 h-5 flex-shrink-0" />
           <p className="font-medium text-sm">{priceSyncNotification}</p>
           <button onClick={() => setPriceSyncNotification(null)}
-            className="ml-2 hover:bg-[#2D5A3B] p-1 rounded flex-shrink-0" aria-label="Dismiss">
+            className="ml-2 hover:bg-[var(--forest-green-dark)] p-1 rounded flex-shrink-0" aria-label="Dismiss">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -267,7 +268,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
             </div>
             {items.length > 0 && (
               <button onClick={() => setShowExportModal(true)}
-                className="flex items-center gap-2 px-3 py-2 text-[#5D7B93] hover:bg-[#E8F0F5] rounded-lg transition"
+                className="flex items-center gap-2 px-3 py-2 text-[#5D7B93] hover:bg-[var(--status-research-bg)] rounded-lg transition"
                 title="Export shopping list" aria-label="Export shopping list">
                 <Download className="w-5 h-5" /><span className="hidden lg:inline">Export</span>
               </button>
@@ -298,18 +299,18 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
 
           <div className={`mb-4 ${isMobile ? 'space-y-3' : 'flex gap-2'}`}>
             <button onClick={() => setShowSearchPanel(!showSearchPanel)}
-              className={`flex items-center justify-center gap-2 px-4 py-3 bg-[#5D7B93] text-white rounded-xl hover:bg-[#4A6275] active:bg-[#3D5160] transition ${isMobile ? 'w-full text-base' : ''}`}>
+              className={`flex items-center justify-center gap-2 px-4 py-3 bg-[#5D7B93] text-white rounded-xl hover:bg-[var(--slate-blue-dark)] active:bg-[#3D5160] transition ${isMobile ? 'w-full text-base' : ''}`}>
               <Search className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />
               {showSearchPanel ? 'Hide Search' : 'Search Local Stores'}
             </button>
             {isMobile && (
               <button onClick={() => setShowExportModal(true)}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-[#E8F0F5] text-[#5D7B93] rounded-xl hover:bg-[#D4E4F0] transition w-full">
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-[var(--status-research-bg)] text-[#5D7B93] rounded-xl hover:bg-[#D4E4F0] transition w-full">
                 <Download className="w-5 h-5" /> Export List
               </button>
             )}
             {selectedItems.size > 0 && (
-              <div className={`flex items-center justify-center gap-2 px-4 py-2 bg-[#E8F0F5] text-[#5D7B93] rounded-xl font-medium ${isMobile ? 'w-full' : ''}`}>
+              <div className={`flex items-center justify-center gap-2 px-4 py-2 bg-[var(--status-research-bg)] text-[#5D7B93] rounded-xl font-medium ${isMobile ? 'w-full' : ''}`}>
                 {selectedItems.size} item(s) selected
               </div>
             )}
@@ -322,9 +323,14 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                 <h3 className="font-semibold text-[#3E2723]">Search Local Stores</h3>
               </div>
               <div className={`${isMobile ? 'space-y-3' : 'flex gap-2'} mb-3`}>
-                <input type="text" value={location} onChange={(e) => setLocation(e.target.value)}
+                <TextInput
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
                   placeholder="Enter location (e.g., Portsmouth, NH)"
-                  className={`flex-1 px-4 py-3 border border-[#D4C8B8] rounded-xl focus:ring-2 focus:ring-[#C67B5C] focus:border-[#C67B5C] text-[#3E2723] bg-white placeholder-[#A89880] ${isMobile ? 'w-full text-base' : ''}`} />
+                  inputSize="lg"
+                  className={`flex-1 rounded-xl ${isMobile ? 'w-full text-base' : ''}`}
+                />
                 <button onClick={handleSearchStores}
                   disabled={selectedItems.size === 0 || !location.trim() || storeSearch.isSearching}
                   className={`px-6 py-3 bg-[#C67B5C] text-white rounded-xl hover:bg-[#A65D3F] active:bg-[#8B4D33] disabled:bg-[#D4C8B8] disabled:cursor-not-allowed transition ${isMobile ? 'w-full text-base font-medium' : ''}`}>
@@ -385,9 +391,16 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                             </div>
                             {editingItem === item.id ? (
                               <div className="flex items-center gap-2 mt-1">
-                                <input type="number" value={editQuantity} onChange={(e) => setEditQuantity(parseInt(e.target.value) || 1)}
-                                  min={1} className="w-16 px-2 py-1 border border-[#D4C8B8] rounded text-sm text-[#3E2723]" autoFocus
-                                  onKeyDown={(e) => { if (e.key === 'Enter') updateItemQuantity(item.id, editQuantity); else if (e.key === 'Escape') setEditingItem(null); }} />
+                                <TextInput
+                                  type="number"
+                                  value={editQuantity}
+                                  onChange={(e) => setEditQuantity(parseInt(e.target.value) || 1)}
+                                  min={1}
+                                  className="w-16"
+                                  inputSize="sm"
+                                  autoFocus
+                                  onKeyDown={(e) => { if (e.key === 'Enter') updateItemQuantity(item.id, editQuantity); else if (e.key === 'Escape') setEditingItem(null); }}
+                                />
                                 <button onClick={() => updateItemQuantity(item.id, editQuantity)} className="text-[#4A7C59] text-sm font-medium hover:underline">Save</button>
                                 <button onClick={() => setEditingItem(null)} className="text-[#7D6B5D] text-sm hover:underline">Cancel</button>
                               </div>
@@ -463,7 +476,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
 function TotalBar({ icon, label, value, color, isMobile, strikethrough }: {
   icon: React.ReactNode; label: string; value: number; color: 'blue' | 'muted' | 'green'; isMobile?: boolean; strikethrough?: boolean;
 }) {
-  const bgColors = { blue: 'bg-[#E8F0F5] border-[#B8D0E4]', muted: 'bg-[#F5F0E6] border-[#D4C8B8]', green: 'bg-[#E8F3EC] border-[#B8D8C4]' };
+  const bgColors = { blue: 'bg-[var(--status-research-bg)] border-[#B8D0E4]', muted: 'bg-[#F5F0E6] border-[#D4C8B8]', green: 'bg-[var(--status-complete-bg)] border-[#B8D8C4]' };
   const textColors = { blue: 'text-[#5D7B93]', muted: 'text-[#7D6B5D]', green: 'text-[#4A7C59]' };
   return (
     <div className={`${bgColors[color]} border rounded-xl p-4 flex items-center justify-between`}>
@@ -536,9 +549,9 @@ function StoreSearchResults({ results, priceRange }: {
                   )}
                   <div className="flex items-center justify-end gap-1 mt-1">
                     <span className={`text-xs px-2 py-0.5 rounded font-medium ${
-                      result.availability === 'in-stock' ? 'bg-[#E8F3EC] text-[#4A7C59]' :
-                      result.availability === 'limited' ? 'bg-[#FDF3ED] text-[#C67B5C]' :
-                      result.availability === 'out-of-stock' ? 'bg-[#FADDD0] text-[#B8593B]' : 'bg-[#E8F0F5] text-[#5D7B93]'
+                      result.availability === 'in-stock' ? 'bg-[var(--status-complete-bg)] text-[#4A7C59]' :
+                      result.availability === 'limited' ? 'bg-[var(--status-progress-bg)] text-[#C67B5C]' :
+                      result.availability === 'out-of-stock' ? 'bg-[#FADDD0] text-[#B8593B]' : 'bg-[var(--status-research-bg)] text-[#5D7B93]'
                     }`}>
                       {result.availability.replace(/-/g, ' ').toUpperCase()}
                     </span>
@@ -551,13 +564,13 @@ function StoreSearchResults({ results, priceRange }: {
                   <span className="flex-shrink-0">!</span><span>{result.priceWarning}</span>
                 </div>
               )}
-              <div className="text-xs text-[#5C4D42] mb-2">
+              <div className="text-xs text-[var(--warm-brown)] mb-2">
                 <div>{result.address}</div>
                 <div>{result.phone}</div>
                 {result.notes && !result.priceWarning && <div className="text-[#7D6B5D] italic mt-1">{result.notes}</div>}
               </div>
               <a href={result.link} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-[#5D7B93] hover:text-[#4A6275] font-medium">
+                className="inline-flex items-center gap-1 text-xs text-[#5D7B93] hover:text-[var(--slate-blue-dark)] font-medium">
                 {isOutOfStock ? 'Check for Updates' : 'View Product'} <ExternalLink className="w-3 h-3" />
               </a>
             </div>

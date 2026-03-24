@@ -29,11 +29,75 @@
   --sage: #7D9A6F;
   --slate-blue: #5D7B93;
 
+  /* Extended Brown Scale */
+  --warm-brown: #5C4D42;
+  --muted: #B0A696;
+
+  /* Hover / Dark Variants */
+  --slate-blue-dark: #4A6578;
+
   /* Status Colors - Earthy versions */
   --status-research: #5D7B93;
   --status-progress: #C67B5C;
   --status-waiting: #9B7BA6;
   --status-complete: #4A7C59;
+
+  /* Status Badge Backgrounds */
+  --status-research-bg: #E8F0F5;
+  --status-progress-bg: #FDF3ED;
+  --status-waiting-bg: #F5EEF8;
+  --status-complete-bg: #E8F3EC;
+
+  /* Accent Gold (Expert/Award) */
+  --gold: #D4A574;
+  --gold-dark: #C6943E;
+
+  /* Surface Hierarchy */
+  --surface: #FDFBF7;
+  --surface-raised: #FFFFFF;
+
+  /* Fluid Space Scale — Utopia */
+  /* @link https://utopia.fyi/space/calculator?c=360,18,1.125,1240,16,1.333,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=s,l,xl,12 */
+  --space-3xs: clamp(0.25rem, 0.3381rem + -0.1136vw, 0.3125rem);
+  --space-2xs: clamp(0.5rem, 0.5881rem + -0.1136vw, 0.5625rem);
+  --space-xs: clamp(0.75rem, 0.9261rem + -0.2273vw, 0.875rem);
+  --space-s: clamp(1rem, 1.1761rem + -0.2273vw, 1.125rem);
+  --space-m: clamp(1.5rem, 1.7642rem + -0.3409vw, 1.6875rem);
+  --space-l: clamp(2rem, 2.3523rem + -0.4545vw, 2.25rem);
+  --space-xl: clamp(3rem, 3.5284rem + -0.6818vw, 3.375rem);
+  --space-2xl: clamp(4rem, 4.7045rem + -0.9091vw, 4.5rem);
+  --space-3xl: clamp(6rem, 7.0568rem + -1.3636vw, 6.75rem);
+
+  /* One-up pairs */
+  --space-3xs-2xs: clamp(0.3125rem, 0.2358rem + 0.3409vw, 0.5rem);
+  --space-2xs-xs: clamp(0.5625rem, 0.4858rem + 0.3409vw, 0.75rem);
+  --space-xs-s: clamp(0.875rem, 0.8239rem + 0.2273vw, 1rem);
+  --space-s-m: clamp(1.125rem, 0.9716rem + 0.6818vw, 1.5rem);
+  --space-m-l: clamp(1.6875rem, 1.5597rem + 0.5682vw, 2rem);
+  --space-l-xl: clamp(2.25rem, 1.9432rem + 1.3636vw, 3rem);
+  --space-xl-2xl: clamp(3.375rem, 3.1193rem + 1.1364vw, 4rem);
+  --space-2xl-3xl: clamp(4.5rem, 3.8864rem + 2.7273vw, 6rem);
+
+  /* Custom pairs */
+  --space-s-l: clamp(1.125rem, 0.767rem + 1.5909vw, 2rem);
+
+  /* Fluid Grid — Utopia */
+  /* @link https://utopia.fyi/grid/calculator?c=360,18,1.125,1240,16,1.333,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=s,l,xl,12 */
+  --grid-max-width: 62rem;
+  --grid-gutter: var(--space-s-l, clamp(1.125rem, 0.6266rem + 2.2152vw, 2rem));
+  --grid-columns: 12;
+
+  /* Fluid Typographic Scale — Utopia */
+  /* @link https://utopia.fyi/type/calculator?c=360,18,1.125,1240,18,1.333,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=s,l,xl,12 */
+
+  --step--2: clamp(0.6331rem, 0.9935rem + -0.465vw, 0.8889rem);
+  --step--1: clamp(0.844rem, 1.0638rem + -0.2837vw, 1rem);
+  --step-0: clamp(1.125rem, 1.125rem + 0vw, 1.125rem);
+  --step-1: clamp(1.2656rem, 1.1699rem + 0.4255vw, 1.4996rem);
+  --step-2: clamp(1.4238rem, 1.1885rem + 1.0458vw, 1.999rem);
+  --step-3: clamp(1.6018rem, 1.167rem + 1.9325vw, 2.6647rem);
+  --step-4: clamp(1.802rem, 1.0861rem + 3.1818vw, 3.552rem);
+  --step-5: clamp(2.0273rem, 0.9197rem + 4.9228vw, 4.7348rem);
 }
 
 @theme inline {
@@ -41,6 +105,64 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --color-earth-cream: var(--earth-cream);
+  --color-earth-tan: var(--earth-tan);
+  --color-earth-sand: var(--earth-sand);
+  --color-earth-brown-light: var(--earth-brown-light);
+  --color-earth-brown: var(--earth-brown);
+  --color-earth-brown-dark: var(--earth-brown-dark);
+  --color-terracotta: var(--terracotta);
+  --color-terracotta-dark: var(--terracotta-dark);
+  --color-rust: var(--rust);
+  --color-copper: var(--copper);
+  --color-forest-green: var(--forest-green);
+  --color-forest-green-dark: var(--forest-green-dark);
+  --color-sage: var(--sage);
+  --color-slate-blue: var(--slate-blue);
+  --color-slate-blue-dark: var(--slate-blue-dark);
+  --color-warm-brown: var(--warm-brown);
+  --color-muted: var(--muted);
+  --color-gold: var(--gold);
+  --color-gold-dark: var(--gold-dark);
+  --color-foreground: var(--foreground);
+
+  --nav-surface: #FDFBF7;
+  --color-nav-surface: var(--nav-surface);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+
+  /* 2xs font size (10px) */
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: 1rem;
+
+  /* Fluid type scale steps */
+  --text-step--2: var(--step--2);
+  --text-step--1: var(--step--1);
+  --text-step-0: var(--step-0);
+  --text-step-1: var(--step-1);
+  --text-step-2: var(--step-2);
+  --text-step-3: var(--step-3);
+  --text-step-4: var(--step-4);
+  --text-step-5: var(--step-5);
+
+  /* Remap Tailwind text sizes to fluid scale */
+  --text-xs: var(--step--2);
+  --text-xs--line-height: 1.2;
+  --text-sm: var(--step--1);
+  --text-sm--line-height: 1.2;
+  --text-base: var(--step-0);
+  --text-base--line-height: 1.2;
+  --text-lg: var(--step-1);
+  --text-lg--line-height: 1.2;
+  --text-xl: var(--step-2);
+  --text-xl--line-height: 1.2;
+  --text-2xl: var(--step-3);
+  --text-2xl--line-height: 1.2;
+  --text-3xl: var(--step-4);
+  --text-3xl--line-height: 1.2;
+  --text-4xl: var(--step-5);
+  --text-4xl--line-height: 1.2;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -95,6 +217,19 @@ body {
     linear-gradient(90deg, var(--blueprint-grid) 0.5px, transparent 0.5px);
   background-size: 25px 25px;
   background-position: -0.5px -0.5px;
+}
+
+/* Fluid layout utilities */
+.u-container {
+  max-width: var(--grid-max-width);
+  padding-inline: var(--grid-gutter);
+  margin-inline: auto;
+}
+
+.u-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), 1fr);
+  gap: var(--grid-gutter);
 }
 
 /* Construction paper texture overlay */
@@ -245,8 +380,8 @@ body {
   --tw-prose-body: #3E2723;
   --tw-prose-headings: #3E2723;
   --tw-prose-bold: #3E2723;
-  --tw-prose-counters: #5C4D42;
-  --tw-prose-bullets: #5C4D42;
+  --tw-prose-counters: var(--warm-brown);
+  --tw-prose-bullets: var(--warm-brown);
   --tw-prose-quotes: #3E2723;
   --tw-prose-code: #3E2723;
   --tw-prose-th-borders: #D4C8B8;

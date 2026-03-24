@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Clock, CheckCircle2, MessageSquare, UserCheck, XCircle, RotateCcw, Target } from 'lucide-react';
+import EmptyState from '@/components/ui/EmptyState';
 import type { QAQuestion } from '@/lib/marketplace/types';
 
 interface QAQuestionListProps {
@@ -18,12 +19,7 @@ const STATUS_STYLES: Record<string, { label: string; bg: string; text: string; i
 
 export default function QAQuestionList({ questions }: QAQuestionListProps) {
   if (questions.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <MessageSquare size={32} className="mx-auto text-[#D4C8B8] mb-3" />
-        <p className="text-sm text-[#7D6B5D]">You haven&apos;t asked any questions yet</p>
-      </div>
-    );
+    return <EmptyState icon={MessageSquare} size="sm" description="You haven't asked any questions yet" className="py-12" />;
   }
 
   const formatDate = (dateStr: string) => {
@@ -65,7 +61,7 @@ export default function QAQuestionList({ questions }: QAQuestionListProps) {
                       Refunded
                     </span>
                   )}
-                  <span className="text-xs text-[#B0A696]">{formatDate(q.createdAt)}</span>
+                  <span className="text-xs text-[var(--muted)]">{formatDate(q.createdAt)}</span>
                 </div>
               </div>
               <span className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${style.bg} ${style.text} whitespace-nowrap`}>

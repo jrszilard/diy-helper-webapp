@@ -8,6 +8,7 @@ import GuestExpertCallout from './GuestExpertCallout';
 import SaveMaterialsDialog from './SaveMaterialsDialog';
 import ConversationList from './ConversationList';
 import ProjectPlanner from './ProjectPlanner';
+import Button from '@/components/ui/Button';
 import { useChat } from '@/hooks/useChat';
 import { useProjectActions } from '@/hooks/useProjectActions';
 import type { Message } from '@/hooks/useChat';
@@ -191,7 +192,7 @@ export default function ChatInterface({
           </div>
           <button
             onClick={() => chat.setInventoryNotification(null)}
-            className="ml-2 hover:bg-[#2D5A3B] p-1 rounded flex-shrink-0"
+            className="ml-2 hover:bg-[var(--forest-green-dark)] p-1 rounded flex-shrink-0"
             aria-label="Dismiss notification"
           >
             <X size={16} />
@@ -200,7 +201,7 @@ export default function ChatInterface({
       )}
 
       {/* Header */}
-      <div className="bg-[#FDFBF7] border-b border-[#D4C8B8] p-4 flex items-center justify-between">
+      <div className="bg-surface border-b border-[#D4C8B8] p-4 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-[#3E2723]">DIY Helper Chat</h1>
           {projectId && (
@@ -211,58 +212,66 @@ export default function ChatInterface({
         </div>
         <div className="flex items-center gap-2">
           {userId && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setShowConversationList(true)}
-              className="flex items-center gap-2 px-3 py-2 text-[#7D6B5D] hover:text-[#5D7B93] hover:bg-[#E8F0F5] rounded-lg transition-colors"
+              leftIcon={MessageSquare}
+              iconSize={18}
               aria-label="Conversation history"
               title="Conversation history"
             >
-              <MessageSquare size={18} />
-              <span className="hidden sm:inline text-sm">History</span>
-            </button>
+              <span className="hidden sm:inline">History</span>
+            </Button>
           )}
           {chat.messages.length > 0 && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => {
                 if (confirm('Clear chat history? This cannot be undone.')) {
                   chat.handleNewChat();
                 }
               }}
-              className="flex items-center gap-2 px-3 py-2 text-[#7D6B5D] hover:text-[#B8593B] hover:bg-[#FDF3ED] rounded-lg transition-colors"
+              leftIcon={Trash2}
+              iconSize={18}
+              className="hover:text-[#B8593B] hover:bg-[var(--status-progress-bg)]"
               aria-label="Clear chat history"
               title="Clear chat history"
             >
-              <Trash2 size={18} />
-              <span className="hidden sm:inline text-sm">Clear</span>
-            </button>
+              <span className="hidden sm:inline">Clear</span>
+            </Button>
           )}
           {chat.messages.length > 0 && !projectId && (
-            <button
+            <Button
+              variant="primary"
               onClick={handleSaveToProjectButton}
-              className="flex items-center gap-2 px-4 py-2 bg-[#C67B5C] text-white rounded-lg hover:bg-[#A65D3F] transition-colors shadow-sm"
+              leftIcon={FolderPlus}
+              iconSize={18}
               title="Save this conversation to a new project"
             >
-              <FolderPlus size={18} />
               <span className="hidden sm:inline">Save to Project</span>
-            </button>
+            </Button>
           )}
-          <button
+          <Button
+            variant="tertiary"
             onClick={() => planner.handleOpenIntake(chat.input)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#5D7B93] text-white rounded-lg hover:bg-[#4A6578] transition-colors shadow-sm"
+            leftIcon={Sparkles}
+            iconSize={18}
             title="AI agents will research, design, and price your project"
           >
-            <Sparkles size={18} />
             <span className="hidden sm:inline">Plan My Project</span>
-          </button>
+          </Button>
           {onOpenInventory && (
-            <button
+            <Button
+              variant="secondary"
               onClick={onOpenInventory}
-              className="flex items-center gap-2 px-4 py-2 bg-[#4A7C59] text-white rounded-lg hover:bg-[#2D5A3B] transition-colors"
+              leftIcon={Package}
+              iconSize={18}
               title="View your tool inventory"
             >
-              <Package size={18} />
               <span className="hidden sm:inline">My Tools</span>
-            </button>
+            </Button>
           )}
         </div>
       </div>

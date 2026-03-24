@@ -4,10 +4,12 @@ import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { redirectToSignIn } from '@/lib/auth-redirect';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import Link from 'next/link';
 import QASubmitForm from '@/components/marketplace/QASubmitForm';
 import QAQuestionList from '@/components/marketplace/QAQuestionList';
+import SectionHeader from '@/components/ui/SectionHeader';
 import type { QAQuestion, ExpertContext } from '@/lib/marketplace/types';
 
 function QAPageContent() {
@@ -84,7 +86,7 @@ function QAPageContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F5F0E6] flex items-center justify-center">
-        <Loader2 size={32} className="animate-spin text-[#C67B5C]" />
+        <Spinner size="lg" className="text-[#C67B5C]" />
       </div>
     );
   }
@@ -97,11 +99,11 @@ function QAPageContent() {
 
   return (
     <div className="min-h-screen bg-[#F5F0E6]">
-      <header className="bg-[#FDFBF7] border-b border-[#D4C8B8] shadow-sm">
+      <header className="bg-surface border-b border-[#D4C8B8] shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-4">
           <Link
             href="/chat"
-            className="flex items-center gap-1.5 text-sm text-[#5D7B93] hover:text-[#4A6578] transition-colors"
+            className="flex items-center gap-1.5 text-sm text-[#5D7B93] hover:text-[var(--slate-blue-dark)] transition-colors"
           >
             <ArrowLeft size={16} />
             Back to Chat
@@ -121,7 +123,7 @@ function QAPageContent() {
 
         {myQuestions.length > 0 && (
           <div>
-            <h2 className="text-lg font-bold text-[#3E2723] mb-4">Your Questions</h2>
+            <SectionHeader title="Your Questions" className="mb-4" />
             <QAQuestionList questions={myQuestions} />
           </div>
         )}
@@ -134,7 +136,7 @@ export default function QAPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-[#F5F0E6] flex items-center justify-center">
-        <Loader2 size={32} className="animate-spin text-[#C67B5C]" />
+        <Spinner size="lg" className="text-[#C67B5C]" />
       </div>
     }>
       <QAPageContent />

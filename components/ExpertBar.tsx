@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Award, ArrowRight, X } from 'lucide-react';
-import Link from 'next/link';
+import Button from '@/components/ui/Button';
 
 const DISMISS_KEY = 'expert-bar-dismissed';
 const DISMISS_DAYS = 30;
@@ -29,7 +29,7 @@ export default function ExpertBar({ user }: { user: { id: string } | null }) {
   };
 
   return (
-    <div className="bg-gradient-to-r from-[#D4A574] to-[#C6943E] text-[#3E2723]">
+    <div className="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-dark)] text-[#3E2723]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-2.5 sm:py-3 gap-3">
           {/* Desktop */}
@@ -41,13 +41,15 @@ export default function ExpertBar({ user }: { user: { id: string } | null }) {
             </p>
           </div>
           <div className="hidden sm:flex items-center gap-3 flex-shrink-0">
-            <Link
+            <Button
+              variant="primary"
+              size="sm"
               href="/experts/register"
-              className="inline-flex items-center gap-1.5 bg-[#3E2723] text-white text-sm font-semibold px-4 py-1.5 rounded-lg hover:bg-[#2A1B17] transition-colors"
+              rightIcon={ArrowRight}
+              iconSize={14}
             >
-              <span>Become an Expert</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+              Become an Expert
+            </Button>
             <button
               onClick={handleDismiss}
               className="p-1 hover:bg-black/10 rounded transition-colors"
@@ -65,13 +67,15 @@ export default function ExpertBar({ user }: { user: { id: string } | null }) {
             </p>
           </div>
           <div className="flex sm:hidden items-center gap-2 flex-shrink-0">
-            <Link
+            <Button
+              variant="primary"
+              size="xs"
               href="/experts/register"
-              className="inline-flex items-center gap-1 bg-[#3E2723] text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-[#2A1B17] transition-colors"
+              rightIcon={ArrowRight}
+              iconSize={12}
             >
-              <span>Apply</span>
-              <ArrowRight className="w-3 h-3" />
-            </Link>
+              Apply
+            </Button>
             <button
               onClick={handleDismiss}
               className="p-0.5 hover:bg-black/10 rounded transition-colors"

@@ -7,12 +7,9 @@ import {
   User,
 } from 'lucide-react';
 import { Project } from '@/types';
-
-interface StatusStyle {
-  bg: string;
-  text: string;
-  icon: React.ReactNode;
-}
+import Button from '@/components/ui/Button';
+import TextInput from '@/components/ui/TextInput';
+import StatusBadge from '@/components/ui/StatusBadge';
 
 interface ProjectCardProps {
   project: Project;
@@ -21,7 +18,6 @@ interface ProjectCardProps {
   isEditing: boolean;
   editName: string;
   editDescription: string;
-  statusStyle: StatusStyle;
   categoryIcon: React.ReactNode;
   onSelect: () => void;
   onStartEditing: (e: React.MouseEvent) => void;
@@ -39,7 +35,6 @@ export default function ProjectCard({
   isEditing,
   editName,
   editDescription,
-  statusStyle,
   categoryIcon,
   onSelect,
   onStartEditing,
@@ -55,8 +50,8 @@ export default function ProjectCard({
         onClick={onSelect}
         className={`relative p-4 rounded-xl cursor-pointer transition active:scale-[0.98] ${
           isSelected
-            ? 'bg-[#FDF3ED] border-2 border-[#C67B5C]'
-            : 'bg-[#FDFBF7] border-2 border-transparent active:bg-[#F5F0E6]'
+            ? 'bg-[var(--status-progress-bg)] border-2 border-[#C67B5C]'
+            : 'bg-surface border-2 border-transparent active:bg-[#F5F0E6]'
         }`}
       >
         <div className="flex items-start justify-between gap-3">
@@ -84,7 +79,7 @@ export default function ProjectCard({
             )}
             <div className="flex items-center gap-2 mt-2 ml-6 flex-wrap">
               {project.isGuest && <GuestBadge />}
-              <StatusBadge statusStyle={statusStyle} status={project.status} />
+              <StatusBadge status={project.status} />
               <span className="text-xs text-[#A89880]">
                 {new Date(project.created_at).toLocaleDateString()}
               </span>
@@ -94,7 +89,7 @@ export default function ProjectCard({
             {!isEditing && (
               <button
                 onClick={onStartEditing}
-                className="p-2 hover:bg-[#E8F0F5] active:bg-[#D4E4ED] rounded-lg transition"
+                className="p-2 hover:bg-[var(--status-research-bg)] active:bg-[#D4E4ED] rounded-lg transition"
                 title="Edit project"
                 aria-label="Edit project"
               >
@@ -103,7 +98,7 @@ export default function ProjectCard({
             )}
             <button
               onClick={onDelete}
-              className="p-2 hover:bg-[#FDF3ED] active:bg-[#FADDD0] rounded-lg transition"
+              className="p-2 hover:bg-[var(--status-progress-bg)] active:bg-[#FADDD0] rounded-lg transition"
               title="Delete project"
               aria-label="Delete project"
             >
@@ -121,7 +116,7 @@ export default function ProjectCard({
       onClick={onSelect}
       className={`group relative p-3 rounded-lg cursor-pointer transition ${
         isSelected
-          ? 'bg-[#FDF3ED] border-2 border-[#C67B5C]'
+          ? 'bg-[var(--status-progress-bg)] border-2 border-[#C67B5C]'
           : 'bg-[#F5F0E6] hover:bg-[#E8DFD0] border-2 border-transparent'
       }`}
     >
@@ -153,17 +148,14 @@ export default function ProjectCard({
                 Local
               </span>
             )}
-            <span className={`inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full ${statusStyle.bg} ${statusStyle.text}`}>
-              {statusStyle.icon}
-              {(project.status || 'research').replace('_', ' ')}
-            </span>
+            <StatusBadge status={project.status} size="sm" />
           </div>
         </div>
         <div className="opacity-0 group-hover:opacity-100 flex gap-0.5 transition">
           {!isEditing && (
             <button
               onClick={onStartEditing}
-              className="p-1 hover:bg-[#E8F0F5] rounded transition"
+              className="p-1 hover:bg-[var(--status-research-bg)] rounded transition"
               title="Edit project"
               aria-label="Edit project"
             >
@@ -172,7 +164,7 @@ export default function ProjectCard({
           )}
           <button
             onClick={onDelete}
-            className="p-1 hover:bg-[#FDF3ED] rounded transition"
+            className="p-1 hover:bg-[var(--status-progress-bg)] rounded transition"
             title="Delete project"
             aria-label="Delete project"
           >
@@ -193,14 +185,6 @@ function GuestBadge() {
   );
 }
 
-function StatusBadge({ statusStyle, status }: { statusStyle: StatusStyle; status?: string }) {
-  return (
-    <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${statusStyle.bg} ${statusStyle.text}`}>
-      {statusStyle.icon}
-      {status?.replace('_', ' ') || 'Research'}
-    </span>
-  );
-}
 
 function EditForm({
   editName,
@@ -221,41 +205,38 @@ function EditForm({
 }) {
   return (
     <div className={`space-y-${isMobile ? '2' : '1'} ${isMobile ? 'ml-6' : ''}`} onClick={e => e.stopPropagation()}>
-      <input
+      <TextInput
         type="text"
         value={editName}
         onChange={(e) => onEditNameChange(e.target.value)}
-        className={`w-full ${isMobile ? 'px-3 py-2' : 'px-2 py-1'} ${isMobile ? 'text-sm' : 'text-sm'} border border-[#D4C8B8] rounded${isMobile ? '-lg' : ''} focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] bg-white`}
+        inputSize={isMobile ? 'md' : 'sm'}
+        fullWidth
         autoFocus
         onKeyDown={(e) => {
           if (e.key === 'Enter') onSave(e);
           if (e.key === 'Escape') onCancel(e);
         }}
       />
-      <input
+      <TextInput
         type="text"
         value={editDescription}
         onChange={(e) => onEditDescriptionChange(e.target.value)}
         placeholder="Description (optional)"
-        className={`w-full ${isMobile ? 'px-3 py-2' : 'px-2 py-1'} ${isMobile ? 'text-xs' : 'text-xs'} border border-[#D4C8B8] rounded${isMobile ? '-lg' : ''} focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] placeholder-[#A89880] bg-white`}
+        inputSize={isMobile ? 'md' : 'sm'}
+        fullWidth
+        className="text-xs"
         onKeyDown={(e) => {
           if (e.key === 'Enter') onSave(e);
           if (e.key === 'Escape') onCancel(e);
         }}
       />
-      <div className="flex gap-${isMobile ? '2' : '1'}">
-        <button
-          onClick={onSave}
-          className={`${isMobile ? 'px-3 py-1.5 text-sm' : 'px-2 py-0.5 text-xs'} bg-[#4A7C59] text-white rounded${isMobile ? '-lg' : ''} hover:bg-[#2D5A3B]`}
-        >
+      <div className={`flex gap-${isMobile ? '2' : '1'}`}>
+        <Button variant="secondary" size={isMobile ? 'sm' : 'xs'} onClick={onSave}>
           Save
-        </button>
-        <button
-          onClick={onCancel}
-          className={`${isMobile ? 'px-3 py-1.5 text-sm' : 'px-2 py-0.5 text-xs'} bg-[#E8DFD0] text-[#5C4D42] rounded${isMobile ? '-lg' : ''} hover:bg-[#D4C8B8]`}
-        >
+        </Button>
+        <Button variant="ghost" size={isMobile ? 'sm' : 'xs'} onClick={onCancel}>
           Cancel
-        </button>
+        </Button>
       </div>
     </div>
   );

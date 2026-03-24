@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { CheckCircle2, Star, AlertTriangle, Image, ThumbsDown, Loader2 } from 'lucide-react';
+import Button from '@/components/ui/Button';
 
 interface QAAnswerViewProps {
   question: {
@@ -87,30 +88,24 @@ export default function QAAnswerView({ question, onAccept, onReview, onNotHelpfu
           {/* Action buttons */}
           <div className="flex items-center gap-3 mt-4">
             {canAccept && (
-              <button
-                onClick={onAccept}
-                className="flex items-center gap-2 px-4 py-2 bg-[#4A7C59] text-white text-sm font-semibold rounded-lg hover:bg-[#2D5A3B] transition-colors"
-              >
-                <CheckCircle2 size={16} />
+              <Button variant="secondary" leftIcon={CheckCircle2} iconSize={16} onClick={onAccept}>
                 Accept Answer
-              </button>
+              </Button>
             )}
             {canMarkNotHelpful && (
               <>
                 {confirmNotHelpful ? (
                   <div className="flex items-center gap-2">
-                    <button
+                    <Button
+                      variant="danger"
+                      leftIcon={notHelpfulLoading ? Loader2 : ThumbsDown}
+                      iconSize={16}
                       onClick={handleNotHelpful}
                       disabled={notHelpfulLoading}
-                      className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors"
+                      className={notHelpfulLoading ? '[&>svg:first-child]:animate-spin' : ''}
                     >
-                      {notHelpfulLoading ? (
-                        <Loader2 size={16} className="animate-spin" />
-                      ) : (
-                        <ThumbsDown size={16} />
-                      )}
                       Confirm: Not Helpful
-                    </button>
+                    </Button>
                     <button
                       onClick={() => setConfirmNotHelpful(false)}
                       className="text-sm text-[#7D6B5D] hover:text-[#3E2723]"
@@ -124,24 +119,22 @@ export default function QAAnswerView({ question, onAccept, onReview, onNotHelpfu
                     )}
                   </div>
                 ) : (
-                  <button
+                  <Button
+                    variant="outline"
+                    leftIcon={ThumbsDown}
+                    iconSize={16}
                     onClick={handleNotHelpful}
-                    className="flex items-center gap-2 px-4 py-2 border border-red-300 text-red-600 text-sm font-semibold rounded-lg hover:bg-red-50 transition-colors"
+                    className="border-red-300 text-red-600 hover:bg-red-50"
                   >
-                    <ThumbsDown size={16} />
                     Not Helpful
-                  </button>
+                  </Button>
                 )}
               </>
             )}
             {canReview && (
-              <button
-                onClick={onReview}
-                className="flex items-center gap-2 px-4 py-2 bg-[#C67B5C] text-white text-sm font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors"
-              >
-                <Star size={16} />
+              <Button variant="primary" leftIcon={Star} iconSize={16} onClick={onReview}>
                 Leave a Review
-              </button>
+              </Button>
             )}
           </div>
 

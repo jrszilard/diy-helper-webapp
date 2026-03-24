@@ -32,7 +32,7 @@ export default function ProjectCards({ onSelectProject }: ProjectCardsProps) {
             <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${DIFFICULTY_COLORS[template.difficulty]}`}>
               {template.difficulty}
             </span>
-            <span className="text-[10px] text-[#5C4D42]">{template.estimatedTime}</span>
+            <span className="text-[10px] text-[var(--warm-brown)]">{template.estimatedTime}</span>
           </div>
         </button>
       ))}

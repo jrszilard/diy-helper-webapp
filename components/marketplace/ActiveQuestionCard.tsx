@@ -2,6 +2,10 @@
 
 import { useState } from 'react';
 import { Clock, DollarSign, Image, CheckCircle, Send, Loader2, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
+import Button from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
+import Card from '@/components/ui/Card';
+import { cn } from '@/lib/utils';
 
 interface ActiveQuestion {
   id: string;
@@ -75,25 +79,20 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
   const isUrgent = timeRemaining && !timeRemaining.includes('h') && timeRemaining !== 'Expired';
 
   return (
-    <div className={`bg-white border rounded-lg overflow-hidden ${
-      isClaimed ? 'border-[#C67B5C]' : 'border-[#4A7C59]'
-    }`}>
+    <Card
+      padding="none"
+      className={cn('overflow-hidden', isClaimed ? 'border-[#C67B5C]' : 'border-[#4A7C59]')}
+    >
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-[#F5F0E6]/50 transition-colors"
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-            isClaimed
-              ? 'bg-[#C67B5C]/10 text-[#C67B5C]'
-              : 'bg-[#4A7C59]/10 text-[#4A7C59]'
-          }`}>
+          <Badge variant={isClaimed ? 'primary' : 'success'}>
             {isClaimed ? 'Claimed' : 'Answered'}
-          </span>
-          <span className="text-xs px-2 py-0.5 bg-[#5D7B93]/10 text-[#5D7B93] rounded-full font-medium">
-            {question.category}
-          </span>
+          </Badge>
+          <Badge>{question.category}</Badge>
           <p className="text-sm text-[#3E2723] truncate">{question.questionText}</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0 ml-2">
@@ -148,7 +147,7 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
                 {question.diyerCity}, {question.diyerState}
               </span>
             )}
-            <span className="text-xs text-[#B0A696]">
+            <span className="text-xs text-[var(--muted)]">
               Asked {formatTimeAgo(question.createdAt)}
             </span>
           </div>
@@ -171,18 +170,16 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
                 <p className="text-xs text-[#A89880]">{answerText.length}/2000</p>
                 {error && <p className="text-xs text-[#C67B5C] font-medium">{error}</p>}
               </div>
-              <button
+              <Button
+                variant="primary"
+                leftIcon={submitting ? Loader2 : Send}
+                iconSize={16}
                 onClick={handleSubmit}
                 disabled={submitting || answerText.length < 50}
-                className="mt-2 inline-flex items-center gap-2 bg-[#C67B5C] text-white px-5 py-2 rounded-lg hover:bg-[#A65D3F] font-semibold text-sm disabled:opacity-50 transition"
+                className={`mt-2 ${submitting ? '[&>svg:first-child]:animate-spin' : ''}`}
               >
-                {submitting ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
                 {submitting ? 'Submitting...' : 'Submit Answer'}
-              </button>
+              </Button>
             </div>
           )}
 
@@ -197,6 +194,6 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
           )}
         </div>
       )}
-    </div>
+    </Card>
   );
 }

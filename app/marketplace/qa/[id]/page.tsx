@@ -3,7 +3,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Loader2, ArrowLeft, Target, Users, RotateCcw, XCircle, CreditCard, Shield, Zap, DollarSign, Clock, Gavel, ArrowUpRight } from 'lucide-react';
+import { ArrowLeft, Target, Users, RotateCcw, XCircle, CreditCard, Shield, Zap, DollarSign, Clock, Gavel, ArrowUpRight } from 'lucide-react';
+import { formatPrice } from '@/lib/formatPrice';
+import Spinner from '@/components/ui/Spinner';
 import Link from 'next/link';
 import QAAnswerView from '@/components/marketplace/QAAnswerView';
 import QAAnswerForm from '@/components/marketplace/QAAnswerForm';
@@ -197,7 +199,7 @@ export default function QADetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F5F0E6] flex items-center justify-center">
-        <Loader2 size={32} className="animate-spin text-[#C67B5C]" />
+        <Spinner size="lg" className="text-[#C67B5C]" />
       </div>
     );
   }
@@ -329,9 +331,9 @@ export default function QADetailPage() {
     : q.refundId
     ? { label: 'Refunded', color: 'green', detail: `Refund issued${q.refundedAt ? ` on ${new Date(q.refundedAt).toLocaleDateString()}` : ''}` }
     : q.markedNotHelpful
-    ? { label: 'Credit issued', color: 'green', detail: `$${((q.priceCents - q.creditAppliedCents) / 100).toFixed(2)} added as platform credit` }
+    ? { label: 'Credit issued', color: 'green', detail: `${formatPrice(q.priceCents - q.creditAppliedCents, true)} added as platform credit` }
     : q.paymentIntentId
-    ? { label: 'Charged', color: 'amber', detail: `$${(q.priceCents / 100).toFixed(2)} charged when expert claimed${q.creditAppliedCents > 0 ? ` ($${(q.creditAppliedCents / 100).toFixed(2)} covered by credits)` : ''}` }
+    ? { label: 'Charged', color: 'amber', detail: `${formatPrice(q.priceCents, true)} charged when expert claimed${q.creditAppliedCents > 0 ? ` (${formatPrice(q.creditAppliedCents, true)} covered by credits)` : ''}` }
     : q.status === 'open'
     ? { label: 'Not charged', color: 'blue', detail: 'Your card will only be charged when an expert claims this question' }
     : q.status === 'expired'
@@ -346,11 +348,11 @@ export default function QADetailPage() {
 
   return (
     <div className="min-h-screen bg-[#F5F0E6]">
-      <header className="bg-[#FDFBF7] border-b border-[#D4C8B8] shadow-sm">
+      <header className="bg-surface border-b border-[#D4C8B8] shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link
             href="/marketplace/qa"
-            className="flex items-center gap-1.5 text-sm text-[#5D7B93] hover:text-[#4A6578] transition-colors"
+            className="flex items-center gap-1.5 text-sm text-[#5D7B93] hover:text-[var(--slate-blue-dark)] transition-colors"
           >
             <ArrowLeft size={16} />
             Back to Q&A
@@ -418,13 +420,13 @@ export default function QADetailPage() {
                 <span className="text-sm font-semibold">{paymentStatus.label}</span>
               </div>
               {!isFree && question.priceCents > 0 && (
-                <span className="text-sm font-bold">${(question.priceCents / 100).toFixed(2)}</span>
+                <span className="text-sm font-bold">{formatPrice(question.priceCents, true)}</span>
               )}
             </div>
             <p className="text-xs mt-1 opacity-80">{paymentStatus.detail}</p>
             {(question.currentTier || 1) > 1 && (
               <p className="text-xs mt-1 opacity-80">
-                Tier {question.currentTier} &middot; Total: ${(question.priceCents / 100).toFixed(2)}
+                Tier {question.currentTier} &middot; Total: {formatPrice(question.priceCents, true)}
               </p>
             )}
             {isTestPayment && question.paymentIntentId && (
@@ -555,7 +557,7 @@ export default function QADetailPage() {
             </p>
             <button
               onClick={handleGraduateToProject}
-              className="px-4 py-2 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[#4A6578] transition-colors"
+              className="px-4 py-2 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[var(--slate-blue-dark)] transition-colors"
             >
               Graduate to Project
             </button>

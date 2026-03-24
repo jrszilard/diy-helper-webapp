@@ -1,7 +1,11 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { GuestProject } from '@/lib/guestStorage';
+import Button from '@/components/ui/Button';
+import TextInput from '@/components/ui/TextInput';
+import Select from '@/components/ui/Select';
+import Modal from '@/components/ui/Modal';
 
 interface ExtractedMaterials {
   project_description: string;
@@ -58,34 +62,13 @@ export default function SaveMaterialsDialog({
   onCloseAuthPrompt,
   onRequestAuth,
 }: SaveMaterialsDialogProps) {
-  // Escape key handler for modals
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (showAuthPrompt) {
-          onCloseAuthPrompt();
-        } else if (showCreateProjectDialog) {
-          onCloseCreateDialog();
-        } else if (showSaveDialog) {
-          onCloseSaveDialog();
-        }
-      }
-    };
-
-    if (showSaveDialog || showCreateProjectDialog || showAuthPrompt) {
-      window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
-    }
-  }, [showSaveDialog, showCreateProjectDialog, showAuthPrompt, onCloseSaveDialog, onCloseCreateDialog, onCloseAuthPrompt]);
-
   return (
     <>
       {/* Save to Project Dialog */}
       {showSaveDialog && extractedMaterials && !showCreateProjectDialog && (
-        <div className="fixed inset-0 bg-[#3E2723] bg-opacity-50 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-label="Save materials to project">
-          <div className="bg-[#FDFBF7] rounded-lg p-6 max-w-md w-full mx-4 border border-[#D4C8B8]">
-            <h3 className="text-xl font-bold mb-4 text-[#3E2723]">Save Materials to Project</h3>
-            <p className="text-[#5C4D42] mb-2">
+      <Modal isOpen onClose={onCloseSaveDialog} title="Save Materials to Project">
+            <div>
+            <p className="text-[var(--warm-brown)] mb-2">
               I found {extractedMaterials.materials.length} items to purchase for &quot;{extractedMaterials.project_description}&quot;.
             </p>
             {extractedMaterials.owned_items && extractedMaterials.owned_items.length > 0 && (
@@ -102,13 +85,13 @@ export default function SaveMaterialsDialog({
             {/* Show authenticated user's projects */}
             {!isGuestMode && projects.length > 0 && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-[#5C4D42] mb-2">
+                <label className="block text-sm font-medium text-[var(--warm-brown)] mb-2">
                   Select existing project:
                 </label>
-                <select
-                  className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] bg-white"
+                <Select
                   onChange={(e) => e.target.value && onSaveToProject(e.target.value, false)}
                   defaultValue=""
+                  fullWidth
                 >
                   <option value="">Choose a project...</option>
                   {projects.map((project) => (
@@ -116,7 +99,7 @@ export default function SaveMaterialsDialog({
                       {project.name}
                     </option>
                   ))}
-                </select>
+                </Select>
 
                 <div className="text-center text-[#A89880] text-sm my-3">or</div>
               </div>
@@ -125,13 +108,13 @@ export default function SaveMaterialsDialog({
             {/* Show guest projects */}
             {isGuestMode && guestProjects.length > 0 && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-[#5C4D42] mb-2">
+                <label className="block text-sm font-medium text-[var(--warm-brown)] mb-2">
                   Select existing project:
                 </label>
-                <select
-                  className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] bg-white"
+                <Select
                   onChange={(e) => e.target.value && onSaveToProject(e.target.value, true)}
                   defaultValue=""
+                  fullWidth
                 >
                   <option value="">Choose a project...</option>
                   {guestProjects.map((project) => (
@@ -139,25 +122,19 @@ export default function SaveMaterialsDialog({
                       {project.name}
                     </option>
                   ))}
-                </select>
+                </Select>
 
                 <div className="text-center text-[#A89880] text-sm my-3">or</div>
               </div>
             )}
 
             <div className="flex gap-2">
-              <button
-                onClick={onCreateNewProjectAndSave}
-                className="flex-1 bg-[#5D7B93] text-white py-2 px-4 rounded-lg hover:bg-[#4A6275]"
-              >
+              <Button variant="tertiary" fullWidth onClick={onCreateNewProjectAndSave}>
                 Create New Project
-              </button>
-              <button
-                onClick={onCloseSaveDialog}
-                className="flex-1 bg-[#E8DFD0] text-[#5C4D42] py-2 px-4 rounded-lg hover:bg-[#D4C8B8]"
-              >
+              </Button>
+              <Button variant="ghost" fullWidth onClick={onCloseSaveDialog}>
                 Skip for Now
-              </button>
+              </Button>
             </div>
 
             {/* Guest mode notice */}
@@ -166,84 +143,72 @@ export default function SaveMaterialsDialog({
                 Projects are saved locally. Sign in to sync across devices.
               </p>
             )}
-          </div>
-        </div>
+            </div>
+      </Modal>
       )}
 
       {/* Create New Project Dialog */}
-      {showCreateProjectDialog && (
-        <div className="fixed inset-0 bg-[#3E2723] bg-opacity-50 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-label="Create new project">
-          <div className="bg-[#FDFBF7] rounded-lg p-6 max-w-md w-full mx-4 border border-[#D4C8B8]">
-            <h3 className="text-xl font-bold mb-4 text-[#3E2723]">
-              {extractedMaterials ? 'Create New Project' : 'Save to New Project'}
-            </h3>
-            <p className="text-[#5C4D42] mb-4">
+      <Modal
+        isOpen={showCreateProjectDialog}
+        onClose={onCloseCreateDialog}
+        title={extractedMaterials ? 'Create New Project' : 'Save to New Project'}
+      >
+            <div>
+            <p className="text-[var(--warm-brown)] mb-4">
               {extractedMaterials
                 ? 'Enter a name for your project:'
                 : 'Save this conversation to a new project. You can add materials later.'}
             </p>
 
-            <input
+            <TextInput
               type="text"
               value={newProjectName}
               onChange={(e) => onNewProjectNameChange(e.target.value)}
               placeholder={extractedMaterials?.project_description || 'My DIY Project'}
-              className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] placeholder-[#A89880] mb-4 bg-white"
+              fullWidth
+              className="mb-4"
               onKeyPress={(e) => e.key === 'Enter' && onConfirmCreateProject()}
               autoFocus
             />
 
             <div className="flex gap-2">
-              <button
-                onClick={onConfirmCreateProject}
-                disabled={!newProjectName.trim()}
-                className="flex-1 bg-[#C67B5C] text-white py-2 px-4 rounded-lg hover:bg-[#A65D3F] disabled:bg-[#D4C8B8] disabled:cursor-not-allowed"
-              >
+              <Button variant="primary" fullWidth onClick={onConfirmCreateProject} disabled={!newProjectName.trim()}>
                 {extractedMaterials ? 'Create & Save' : 'Create Project'}
-              </button>
-              <button
-                onClick={onCloseCreateDialog}
-                className="flex-1 bg-[#E8DFD0] text-[#5C4D42] py-2 px-4 rounded-lg hover:bg-[#D4C8B8]"
-              >
+              </Button>
+              <Button variant="ghost" fullWidth onClick={onCloseCreateDialog}>
                 Cancel
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
-      )}
+            </div>
+      </Modal>
 
       {/* Auth Prompt Dialog */}
-      {showAuthPrompt && (
-        <div className="fixed inset-0 bg-[#3E2723] bg-opacity-50 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-label="Sign in required">
-          <div className="bg-[#FDFBF7] rounded-lg p-6 max-w-md w-full mx-4 border border-[#D4C8B8]">
-            <h3 className="text-xl font-bold mb-4 text-[#3E2723]">Sign In Required</h3>
-            <p className="text-[#5C4D42] mb-6">
+      <Modal isOpen={showAuthPrompt} onClose={onCloseAuthPrompt} title="Sign In Required">
+            <div>
+            <p className="text-[var(--warm-brown)] mb-6">
               You need to be signed in to save materials and create projects.
               Create a free account to get started!
             </p>
 
             <div className="flex flex-col gap-3">
-              <button
+              <Button
+                variant="tertiary"
+                fullWidth
                 onClick={() => {
                   onCloseAuthPrompt();
                   if (onRequestAuth) {
                     onRequestAuth();
                   }
                 }}
-                className="bg-[#5D7B93] text-white py-3 px-4 rounded-lg hover:bg-[#4A6275] font-semibold"
               >
                 Create Account / Sign In
-              </button>
-              <button
-                onClick={onCloseAuthPrompt}
-                className="bg-[#E8DFD0] text-[#5C4D42] py-2 px-4 rounded-lg hover:bg-[#D4C8B8]"
-              >
+              </Button>
+              <Button variant="ghost" fullWidth onClick={onCloseAuthPrompt}>
                 Cancel
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
-      )}
+            </div>
+      </Modal>
     </>
   );
 }

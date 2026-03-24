@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import MessageThread from '@/components/marketplace/MessageThread';
 
 interface ApiMessage {
@@ -115,14 +116,14 @@ export default function DIYerThreadPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center">
-        <Loader2 size={32} className="animate-spin text-[#C67B5C]" />
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <Spinner size="lg" className="text-[#C67B5C]" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7]">
+    <div className="min-h-screen bg-surface">
       <div className="max-w-2xl mx-auto px-4 py-6 h-screen flex flex-col">
         {/* Header */}
         <div className="flex items-center gap-3 pb-4 border-b border-[#D4C8B8]">

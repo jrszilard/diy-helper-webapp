@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Bell } from 'lucide-react';
+import EmptyState from '@/components/ui/EmptyState';
 import { useNotifications } from '@/hooks/useNotifications';
 
 interface NotificationBellProps {
@@ -59,13 +60,13 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-[#FDFBF7] border border-[#D4C8B8] rounded-lg shadow-xl z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-80 bg-surface border border-[#D4C8B8] rounded-lg shadow-xl z-50 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-[#D4C8B8]">
             <h3 className="text-sm font-semibold text-[#3E2723]">Notifications</h3>
             {unreadCount > 0 && (
               <button
                 onClick={() => markAllAsRead()}
-                className="text-xs text-[#5D7B93] hover:text-[#4A6578] font-medium"
+                className="text-xs text-[#5D7B93] hover:text-[var(--slate-blue-dark)] font-medium"
               >
                 Mark all as read
               </button>
@@ -74,10 +75,7 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
 
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="px-4 py-8 text-center">
-                <Bell size={24} className="mx-auto text-[#D4C8B8] mb-2" />
-                <p className="text-sm text-[#7D6B5D]">No notifications yet</p>
-              </div>
+              <EmptyState icon={Bell} iconSize={24} size="sm" description="No notifications yet" className="px-4 py-8" />
             ) : (
               notifications.slice(0, 10).map(notification => (
                 <button
@@ -100,7 +98,7 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
                           {notification.body}
                         </p>
                       )}
-                      <p className="text-xs text-[#B0A696] mt-1">
+                      <p className="text-xs text-[var(--muted)] mt-1">
                         {formatTimeAgo(notification.createdAt)}
                       </p>
                     </div>

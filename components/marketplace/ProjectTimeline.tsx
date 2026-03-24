@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import {
-  Loader2, MessageCircle, CheckCircle, PenLine, StickyNote,
+  MessageCircle, CheckCircle, PenLine, StickyNote,
   ArrowUpRight, Users, Clock,
 } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import Link from 'next/link';
 
 interface TimelineEvent {
@@ -90,7 +91,7 @@ export default function ProjectTimeline({ reportId }: ProjectTimelineProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 size={20} className="animate-spin text-[#5D7B93]" />
+        <Spinner className="text-[#5D7B93]" />
       </div>
     );
   }
@@ -142,7 +143,7 @@ export default function ProjectTimeline({ reportId }: ProjectTimelineProps) {
                   <p className="text-xs text-[#7D6B5D] mt-0.5 line-clamp-2">{event.detail}</p>
                 )}
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] text-[#B0A696]">
+                  <span className="text-[10px] text-[var(--muted)]">
                     {new Date(event.date).toLocaleDateString('en-US', {
                       month: 'short', day: 'numeric', year: 'numeric',
                       hour: 'numeric', minute: '2-digit',

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Send, Loader2, CheckCircle2, MessageSquare, AlertCircle, ArrowRight } from 'lucide-react';
+import { Send, CheckCircle2, MessageSquare, AlertCircle, ArrowRight } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import { supabase } from '@/lib/supabase';
 import ExpertIdentityCard from '@/components/marketplace/ExpertIdentityCard';
 import TierUpgradeModal from '@/components/marketplace/TierUpgradeModal';
@@ -271,10 +272,10 @@ export default function ConversationView({
       <div className="max-h-[500px] overflow-y-auto px-4 py-3 space-y-3">
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 size={20} className="animate-spin text-[#C67B5C]" />
+            <Spinner className="text-[#C67B5C]" />
           </div>
         ) : messages.length === 0 && !answerText ? (
-          <p className="text-center text-sm text-[#B0A696] py-8">
+          <p className="text-center text-sm text-[var(--muted)] py-8">
             No messages yet. {userRole === 'expert' ? 'Send your first response.' : 'Waiting for expert response.'}
           </p>
         ) : (
@@ -292,7 +293,7 @@ export default function ConversationView({
                     }`}>
                       {msg.senderRole === 'expert' ? 'Expert' : 'You'}
                     </span>
-                    <span className="text-[10px] text-[#B0A696]">{formatTime(msg.createdAt)}</span>
+                    <span className="text-[10px] text-[var(--muted)]">{formatTime(msg.createdAt)}</span>
                   </div>
                   <div className={`px-3 py-2 rounded-lg text-sm ${
                     isOwn
@@ -342,7 +343,7 @@ export default function ConversationView({
             <button
               onClick={() => handleResolveAction('continue')}
               disabled={resolving}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[#4A6578] transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[var(--slate-blue-dark)] transition-colors disabled:opacity-50"
             >
               <ArrowRight size={14} />
               Continue Conversation
@@ -364,7 +365,7 @@ export default function ConversationView({
           <button
             onClick={() => handleResolveAction('propose_resolve')}
             disabled={resolving}
-            className="text-xs text-[#5D7B93] hover:text-[#4A6578] font-medium disabled:opacity-50"
+            className="text-xs text-[#5D7B93] hover:text-[var(--slate-blue-dark)] font-medium disabled:opacity-50"
           >
             {resolving ? 'Submitting...' : 'Propose Resolution'}
           </button>
@@ -392,14 +393,14 @@ export default function ConversationView({
               disabled={sending || !newMessage.trim()}
               className={`flex items-center justify-center w-10 h-10 rounded-lg text-white transition-colors ${
                 sending || !newMessage.trim()
-                  ? 'bg-[#B0A696] cursor-not-allowed'
+                  ? 'bg-[var(--muted)] cursor-not-allowed'
                   : 'bg-[#C67B5C] hover:bg-[#A65D3F]'
               }`}
             >
-              {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+              {sending ? <Spinner size="sm" /> : <Send size={16} />}
             </button>
           </div>
-          <p className="text-[10px] text-[#B0A696] mt-1">
+          <p className="text-[10px] text-[var(--muted)] mt-1">
             Press Enter to send, Shift+Enter for new line
           </p>
         </div>

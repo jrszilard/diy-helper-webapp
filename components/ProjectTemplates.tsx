@@ -35,8 +35,8 @@ const categoryIcons: Record<string, React.ReactNode> = {
 
 // Difficulty badges - earthy colors
 const difficultyStyles: Record<string, { bg: string; text: string }> = {
-  beginner: { bg: 'bg-[#E8F3EC]', text: 'text-[#4A7C59]' },
-  intermediate: { bg: 'bg-[#FDF3ED]', text: 'text-[#C67B5C]' },
+  beginner: { bg: 'bg-[var(--status-complete-bg)]', text: 'text-[#4A7C59]' },
+  intermediate: { bg: 'bg-[var(--status-progress-bg)]', text: 'text-[#C67B5C]' },
   advanced: { bg: 'bg-[#FADDD0]', text: 'text-[#B8593B]' }
 };
 
@@ -81,7 +81,7 @@ export default function ProjectTemplates({
           <button
             key={template.id}
             onClick={() => handleStartProject(template)}
-            className="w-full flex items-center gap-3 p-3 bg-[#FDFBF7] rounded-lg border border-[#D4C8B8] hover:border-[#C67B5C] hover:bg-[#FDF8F3] transition-all text-left"
+            className="w-full flex items-center gap-3 p-3 bg-surface rounded-lg border border-[#D4C8B8] hover:border-[#C67B5C] hover:bg-[#FDF8F3] transition-all text-left"
           >
             <span className="text-2xl">{template.icon}</span>
             <div className="flex-1 min-w-0">
@@ -104,7 +104,7 @@ export default function ProjectTemplates({
             <div
               key={template.id}
               onClick={() => handleStartProject(template)}
-              className="bg-[#FDFBF7] rounded-xl border border-[#D4C8B8] p-5 hover:border-[#C67B5C] hover:shadow-md transition-all cursor-pointer group"
+              className="bg-surface rounded-xl border border-[#D4C8B8] p-5 hover:border-[#C67B5C] hover:shadow-md transition-all cursor-pointer group"
             >
               <div className="flex items-start justify-between mb-3">
                 <span className="text-3xl">{template.icon}</span>
@@ -142,7 +142,7 @@ export default function ProjectTemplates({
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
               selectedCategory === null
                 ? 'bg-[#C67B5C] text-white'
-                : 'bg-[#FDFBF7] text-[#5C4D42] border border-[#D4C8B8] hover:border-[#C67B5C]'
+                : 'bg-surface text-[var(--warm-brown)] border border-[#D4C8B8] hover:border-[#C67B5C]'
             }`}
           >
             <Sparkles className="w-4 h-4" />
@@ -155,7 +155,7 @@ export default function ProjectTemplates({
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all capitalize ${
                 selectedCategory === category
                   ? 'bg-[#C67B5C] text-white'
-                  : 'bg-[#FDFBF7] text-[#5C4D42] border border-[#D4C8B8] hover:border-[#C67B5C]'
+                  : 'bg-surface text-[var(--warm-brown)] border border-[#D4C8B8] hover:border-[#C67B5C]'
               }`}
             >
               {categoryIcons[category]}
@@ -174,7 +174,7 @@ export default function ProjectTemplates({
           return (
             <div
               key={template.id}
-              className="bg-[#FDFBF7] rounded-xl border border-[#D4C8B8] overflow-hidden hover:border-[#C67B5C] transition-all"
+              className="bg-surface rounded-xl border border-[#D4C8B8] overflow-hidden hover:border-[#C67B5C] transition-all"
             >
               {/* Header */}
               <div
@@ -212,7 +212,7 @@ export default function ProjectTemplates({
                   <div className="grid sm:grid-cols-2 gap-4 mb-4">
                     {template.commonMaterials && (
                       <div>
-                        <h4 className="text-sm font-semibold text-[#5C4D42] mb-2">Common Materials:</h4>
+                        <h4 className="text-sm font-semibold text-[var(--warm-brown)] mb-2">Common Materials:</h4>
                         <ul className="text-sm text-[#7D6B5D] space-y-1">
                           {template.commonMaterials.map((material, idx) => (
                             <li key={idx} className="flex items-center gap-2">
@@ -225,7 +225,7 @@ export default function ProjectTemplates({
                     )}
                     {template.safetyNotes && (
                       <div>
-                        <h4 className="text-sm font-semibold text-[#5C4D42] mb-2 flex items-center gap-1">
+                        <h4 className="text-sm font-semibold text-[var(--warm-brown)] mb-2 flex items-center gap-1">
                           <AlertTriangle className="w-4 h-4 text-[#C67B5C]" />
                           Safety Notes:
                         </h4>

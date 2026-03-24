@@ -1,7 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Clock, Star, CheckCircle, DollarSign, Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, Star, CheckCircle } from 'lucide-react';
+import { formatPrice } from '@/lib/formatPrice';
+import Spinner from '@/components/ui/Spinner';
+import Button from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
+import Card from '@/components/ui/Card';
+import Avatar from '@/components/ui/Avatar';
+import { cn } from '@/lib/utils';
 
 interface BidCardProps {
   bid: {
@@ -47,31 +54,21 @@ export default function BidCard({ bid, expert, canSelect, onSelect, isAccepted }
   const pitchPreview = bid.pitch.length > 120 ? bid.pitch.slice(0, 120) + '...' : bid.pitch;
 
   return (
-    <div className={`border rounded-lg overflow-hidden transition-colors ${
-      isAccepted
-        ? 'border-[#4A7C59] bg-[#4A7C59]/5'
-        : bid.status === 'rejected'
-        ? 'border-[#D4C8B8] bg-gray-50 opacity-60'
-        : 'border-[#D4C8B8] bg-white hover:border-[#C67B5C]/30'
-    }`}>
+    <Card
+      padding="none"
+      className={cn(
+        'overflow-hidden transition-colors',
+        isAccepted && 'border-[#4A7C59] bg-[#4A7C59]/5',
+        bid.status === 'rejected' && 'bg-gray-50 opacity-60',
+        !isAccepted && bid.status !== 'rejected' && 'hover:border-[var(--terracotta)]/30',
+      )}
+    >
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           {/* Expert info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1.5">
-              {expert?.profilePhotoUrl ? (
-                <img
-                  src={expert.profilePhotoUrl}
-                  alt=""
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-[#5D7B93]/20 flex items-center justify-center">
-                  <span className="text-xs font-bold text-[#5D7B93]">
-                    {expert?.displayName?.charAt(0) || '?'}
-                  </span>
-                </div>
-              )}
+              <Avatar name={expert?.displayName || '?'} src={expert?.profilePhotoUrl} size="sm" />
               <div>
                 <span className="text-sm font-semibold text-[#3E2723]">
                   {expert?.displayName || 'Expert'}
@@ -86,20 +83,17 @@ export default function BidCard({ bid, expert, canSelect, onSelect, isAccepted }
                 )}
               </div>
               {isAccepted && (
-                <span className="flex items-center gap-1 text-xs font-medium text-[#4A7C59] bg-[#4A7C59]/10 px-2 py-0.5 rounded-full">
-                  <CheckCircle size={10} />
-                  Selected
-                </span>
+                <Badge variant="success" icon={CheckCircle}>Selected</Badge>
               )}
             </div>
 
             {/* Specialty & experience */}
             <div className="flex flex-wrap items-center gap-2 mb-2">
               {primarySpecialty && (
-                <span className="text-xs px-2 py-0.5 bg-[#5D7B93]/10 text-[#5D7B93] rounded-full font-medium">
+                <Badge>
                   {primarySpecialty.specialty}
                   {primarySpecialty.yearsExperience ? ` · ${primarySpecialty.yearsExperience}yr` : ''}
-                </span>
+                </Badge>
               )}
               {bid.estimatedMinutes && (
                 <span className="flex items-center gap-1 text-xs text-[#7D6B5D]">
@@ -117,7 +111,7 @@ export default function BidCard({ bid, expert, canSelect, onSelect, isAccepted }
             {bid.pitch.length > 120 && (
               <button
                 onClick={() => setExpanded(!expanded)}
-                className="flex items-center gap-1 text-xs text-[#5D7B93] hover:text-[#4A6578] mt-1 font-medium"
+                className="flex items-center gap-1 text-xs text-[#5D7B93] hover:text-[var(--slate-blue-dark)] mt-1 font-medium"
               >
                 {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                 {expanded ? 'Show less' : 'Read full pitch'}
@@ -137,33 +131,28 @@ export default function BidCard({ bid, expert, canSelect, onSelect, isAccepted }
           {/* Price & action */}
           <div className="flex flex-col items-end gap-2 flex-shrink-0">
             <div className="text-right">
-              <span className="flex items-center gap-0.5 text-lg font-bold text-[#4A7C59]">
-                <DollarSign size={14} />
-                {(bid.proposedPriceCents / 100).toFixed(0)}
+              <span className="text-lg font-bold text-[#4A7C59]">
+                {formatPrice(bid.proposedPriceCents)}
               </span>
-              <p className="text-[10px] text-[#B0A696]">DIYer pays</p>
+              <p className="text-[10px] text-[var(--muted)]">DIYer pays</p>
             </div>
 
             {canSelect && bid.status === 'pending' && (
-              <button
-                onClick={handleSelect}
-                disabled={selecting}
-                className="px-4 py-2 bg-[#C67B5C] text-white text-sm font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors disabled:opacity-50 whitespace-nowrap"
-              >
+              <Button variant="primary" size="sm" onClick={handleSelect} disabled={selecting}>
                 {selecting ? (
-                  <Loader2 size={14} className="animate-spin" />
+                  <Spinner size="sm" />
                 ) : (
                   'Select Expert'
                 )}
-              </button>
+              </Button>
             )}
 
             {bid.status === 'withdrawn' && (
-              <span className="text-xs text-[#B0A696]">Withdrawn</span>
+              <span className="text-xs text-[var(--muted)]">Withdrawn</span>
             )}
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

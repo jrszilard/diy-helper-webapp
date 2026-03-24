@@ -1,6 +1,7 @@
 'use client';
 
 import { MessageSquare, Paperclip } from 'lucide-react';
+import EmptyState from '@/components/ui/EmptyState';
 import Link from 'next/link';
 
 interface Thread {
@@ -36,11 +37,13 @@ export default function MessageList({ threads, basePath }: MessageListProps) {
 
   if (threads.length === 0) {
     return (
-      <div className="text-center py-12">
-        <MessageSquare size={32} className="mx-auto text-[#D4C8B8] mb-3" />
-        <p className="text-sm text-[#7D6B5D]">No messages yet</p>
-        <p className="text-xs text-[#B0A696] mt-1">Your conversations will appear here</p>
-      </div>
+      <EmptyState
+        icon={MessageSquare}
+        size="sm"
+        description="No messages yet"
+        subtext="Your conversations will appear here"
+        className="py-12"
+      />
     );
   }
 
@@ -68,7 +71,7 @@ export default function MessageList({ threads, basePath }: MessageListProps) {
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-[#3E2723]">{thread.otherUserName}</span>
-                <span className="text-xs text-[#B0A696]">{formatTimeAgo(thread.lastMessage.createdAt)}</span>
+                <span className="text-xs text-[var(--muted)]">{formatTimeAgo(thread.lastMessage.createdAt)}</span>
               </div>
               <p className="text-xs text-[#7D6B5D] truncate mt-0.5 flex items-center gap-1">
                 {hasAttachments && <Paperclip size={10} className="flex-shrink-0" />}

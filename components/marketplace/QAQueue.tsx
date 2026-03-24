@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Filter, DollarSign, Zap } from 'lucide-react';
+import EmptyState from '@/components/ui/EmptyState';
 import type { QAQuestion } from '@/lib/marketplace/types';
 import QAQuestionCard from './QAQuestionCard';
 
@@ -75,9 +76,7 @@ export default function QAQueue({ questions, onClaim, onBid }: QAQueueProps) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-sm text-[#7D6B5D]">No questions match your filter</p>
-        </div>
+        <EmptyState description="No questions match your filter" className="py-12" />
       ) : (
         <div className="space-y-3">
           {filtered.map(q => (

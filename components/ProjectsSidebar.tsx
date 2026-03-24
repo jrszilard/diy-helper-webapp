@@ -3,6 +3,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { guestStorage } from '@/lib/guestStorage';
+import TextInput from '@/components/ui/TextInput';
+import Select from '@/components/ui/Select';
 import {
   FolderOpen,
   Search,
@@ -14,13 +16,11 @@ import {
   PaintBucket,
   Fence,
   LayoutGrid,
-  CheckCircle2,
-  Clock,
-  Package,
-  FlaskConical,
+
 } from 'lucide-react';
 import { Project } from '@/types';
 import ProjectCard from './ProjectCard';
+import EmptyState from '@/components/ui/EmptyState';
 
 interface ProjectsSidebarProps {
   user: { id: string; email?: string } | null;
@@ -58,15 +58,6 @@ function getCategoryIcon(category: string) {
   return icons[category] || icons.other;
 }
 
-function getStatusStyle(status: string) {
-  const styles: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
-    research: { bg: 'bg-[#E8F0F5]', text: 'text-[#5D7B93]', icon: <FlaskConical className="w-3 h-3" /> },
-    in_progress: { bg: 'bg-[#FDF3ED]', text: 'text-[#C67B5C]', icon: <Clock className="w-3 h-3" /> },
-    waiting_parts: { bg: 'bg-[#F3EDF5]', text: 'text-[#9B7BA6]', icon: <Package className="w-3 h-3" /> },
-    completed: { bg: 'bg-[#E8F3EC]', text: 'text-[#4A7C59]', icon: <CheckCircle2 className="w-3 h-3" /> }
-  };
-  return styles[status] || styles.research;
-}
 
 const statusOptions = [
   { value: 'all', label: 'All Status' },
@@ -197,17 +188,16 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
   // Shared search + filter UI
   const searchAndFilters = (
     <>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A89880]" />
-        <input
-          type="text"
-          placeholder={isMobile ? 'Search projects...' : 'Search...'}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className={`w-full pl-9 ${isMobile ? 'pr-4 py-2' : 'pr-3 py-1.5'} border border-[#D4C8B8] rounded-lg text-sm focus:ring-2 focus:ring-[#C67B5C] focus:border-[#C67B5C] text-[#3E2723] placeholder-[#A89880] bg-white`}
-          aria-label="Search projects"
-        />
-      </div>
+      <TextInput
+        type="text"
+        placeholder={isMobile ? 'Search projects...' : 'Search...'}
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        leftIcon={Search}
+        inputSize={isMobile ? 'md' : 'sm'}
+        fullWidth
+        aria-label="Search projects"
+      />
 
       <button
         onClick={() => setShowFilters(!showFilters)}
@@ -227,39 +217,40 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
 
       {showFilters && (
         <div className={isMobile ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
-          <select
+          <Select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className={`${isMobile ? '' : 'w-full'} px-${isMobile ? '3' : '2'} py-${isMobile ? '2' : '1'} border border-[#D4C8B8] rounded${isMobile ? '-lg' : ''} text-${isMobile ? 'sm' : 'xs'} focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] bg-white`}
+            inputSize={isMobile ? 'md' : 'sm'}
+            fullWidth={!isMobile}
           >
             {statusOptions.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
-          </select>
-          <select
+          </Select>
+          <Select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className={`${isMobile ? '' : 'w-full'} px-${isMobile ? '3' : '2'} py-${isMobile ? '2' : '1'} border border-[#D4C8B8] rounded${isMobile ? '-lg' : ''} text-${isMobile ? 'sm' : 'xs'} focus:ring-2 focus:ring-[#C67B5C] text-[#3E2723] bg-white`}
+            inputSize={isMobile ? 'md' : 'sm'}
+            fullWidth={!isMobile}
           >
             {categoryOptions.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
-          </select>
+          </Select>
         </div>
       )}
     </>
   );
 
   const emptyState = (
-    <div className={`text-center ${isMobile ? 'py-12' : 'py-8'} text-[#A89880] ${isMobile ? '' : 'text-sm'}`}>
-      <FolderOpen className={`${isMobile ? 'w-16 h-16' : 'w-12 h-12'} mx-auto mb-${isMobile ? '3' : '2'} opacity-50`} />
-      <p className={`${isMobile ? 'text-lg' : ''} font-medium text-[#7D6B5D]`}>
-        {searchQuery || hasActiveFilters ? 'No matching projects' : 'No projects yet'}
-      </p>
-      <p className={`text-${isMobile ? 'sm' : 'xs'} mt-1`}>
-        {searchQuery || hasActiveFilters ? 'Try different filters' : 'Save your first conversation!'}
-      </p>
-    </div>
+    <EmptyState
+      icon={FolderOpen}
+      iconSize={isMobile ? 64 : 48}
+      iconClassName="opacity-50"
+      title={searchQuery || hasActiveFilters ? 'No matching projects' : 'No projects yet'}
+      description={searchQuery || hasActiveFilters ? 'Try different filters' : 'Save your first conversation!'}
+      className={isMobile ? 'py-12' : 'py-8'}
+    />
   );
 
   const renderProjectCard = (project: Project) => (
@@ -271,7 +262,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
       isEditing={editingProject === project.id}
       editName={editName}
       editDescription={editDescription}
-      statusStyle={getStatusStyle(project.status || 'research')}
+
       categoryIcon={getCategoryIcon(project.category || 'other')}
       onSelect={() => selectProject(project)}
       onStartEditing={(e) => startEditing(project, e)}
@@ -286,7 +277,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
   if (isMobile) {
     return (
       <div className="flex-1 overflow-y-auto">
-        <div className="p-4 space-y-3 bg-[#FDFBF7] border-b border-[#D4C8B8] sticky top-0 z-10">
+        <div className="p-4 space-y-3 bg-surface border-b border-[#D4C8B8] sticky top-0 z-10">
           {searchAndFilters}
         </div>
         <div className="p-4 space-y-3">
@@ -298,7 +289,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
 
   // Desktop view
   return (
-    <div className="w-64 bg-[#FDFBF7] border-r border-[#D4C8B8] flex flex-col h-full">
+    <div className="w-64 bg-surface border-r border-[#D4C8B8] flex flex-col h-full">
       <div className="p-4 border-b border-[#D4C8B8]">
         <h2 className="font-bold text-lg text-[#3E2723]">My Projects</h2>
         <p className="text-xs text-[#7D6B5D] mt-1">Saved conversations</p>

@@ -1,5 +1,8 @@
 'use client';
 
+import Badge from '@/components/ui/Badge';
+import Card from '@/components/ui/Card';
+
 interface UsageCategory {
   used: number;
   limit: number;
@@ -21,13 +24,11 @@ export default function UsageBanner({ usage, tier }: UsageBannerProps) {
   const isMessagesWarning = messagesPercent > 80;
 
   return (
-    <div className="bg-[#FDFBF7] border border-[#D4C8B8] rounded-lg px-4 py-3">
+    <Card surface padding="none" className="px-4 py-3">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-[#3E2723]">Usage</span>
         {tier === 'pro' && (
-          <span className="text-xs font-bold text-white bg-[#5D7B93] px-2 py-0.5 rounded-full">
-            Pro
-          </span>
+          <Badge variant="solid">Pro</Badge>
         )}
       </div>
       <div className="space-y-2">
@@ -60,6 +61,6 @@ export default function UsageBanner({ usage, tier }: UsageBannerProps) {
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

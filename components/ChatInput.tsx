@@ -4,6 +4,8 @@ import React, { useRef, useState, useCallback } from 'react';
 import { Search, Package, ShoppingCart, Loader2, Camera } from 'lucide-react';
 import ImagePreview from './ImagePreview';
 import { processImage, isValidImageType, type ProcessedImage } from '@/lib/image-utils';
+import Button from '@/components/ui/Button';
+import TextInput from '@/components/ui/TextInput';
 
 interface ChatInputProps {
   input: string;
@@ -95,7 +97,7 @@ const ChatInput = React.memo(function ChatInput({
     <>
       {/* Google Search Fallback */}
       {showGoogleFallback && isLoading && (
-        <div className="px-4 py-2 bg-[#FDF3ED] border-t border-[#E8D5CC]">
+        <div className="px-4 py-2 bg-[var(--status-progress-bg)] border-t border-[#E8D5CC]">
           <div className="flex items-center justify-center gap-2">
             <span className="text-sm text-[#B8593B]">Taking too long?</span>
             <button
@@ -124,32 +126,23 @@ const ChatInput = React.memo(function ChatInput({
                 Save to your project to track purchases and find local prices
               </p>
             </div>
-            <button
+            <Button
+              variant="secondary"
               onClick={onAutoExtractMaterials}
               disabled={isAutoExtracting}
-              className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl hover:bg-emerald-700
-                         text-sm font-semibold whitespace-nowrap shadow-sm transition-all
-                         disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 flex-shrink-0"
+              leftIcon={isAutoExtracting ? Loader2 : Package}
+              iconSize={16}
+              className={`flex-shrink-0 whitespace-nowrap ${isAutoExtracting ? '[&>svg]:animate-spin' : ''}`}
             >
-              {isAutoExtracting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Package className="w-4 h-4" />
-                  Save Materials
-                </>
-              )}
-            </button>
+              {isAutoExtracting ? 'Processing...' : 'Save Materials'}
+            </Button>
           </div>
         </div>
       )}
 
       {/* Input */}
       <div
-        className={`bg-[#FDFBF7] border-t border-[#D4C8B8] p-4 ${isDragOver ? 'ring-2 ring-[#C67B5C] ring-inset bg-[#FDF3ED]' : ''}`}
+        className={`bg-surface border-t border-[#D4C8B8] p-4 ${isDragOver ? 'ring-2 ring-[#C67B5C] ring-inset bg-[var(--status-progress-bg)]' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -168,7 +161,7 @@ const ChatInput = React.memo(function ChatInput({
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isLoading}
-            className="p-2 text-[#7D6B5D] hover:text-[#C67B5C] hover:bg-[#FDF3ED] rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 text-[#7D6B5D] hover:text-[#C67B5C] hover:bg-[var(--status-progress-bg)] rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Attach image"
             title="Attach a photo for analysis"
           >
@@ -181,22 +174,23 @@ const ChatInput = React.memo(function ChatInput({
             onChange={handleFileChange}
             className="hidden"
           />
-          <input
+          <TextInput
             type="text"
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && !isLoading && handleSend()}
             placeholder={imagePreview ? 'Describe what you want to know about this image...' : 'Ask me anything about your DIY project...'}
-            className="flex-1 px-4 py-2 border border-[#D4C8B8] rounded-lg focus:ring-2 focus:ring-[#C67B5C] focus:border-[#C67B5C] text-[#3E2723] placeholder-[#A89880] bg-white"
             disabled={isLoading}
+            fullWidth
+            className="flex-1"
           />
-          <button
+          <Button
+            variant="primary"
             onClick={handleSend}
             disabled={isLoading || (!input.trim() && !processedImage)}
-            className="bg-[#C67B5C] text-white px-6 py-2 rounded-lg hover:bg-[#A65D3F] disabled:bg-[#D4C8B8] disabled:cursor-not-allowed"
           >
             Send
-          </button>
+          </Button>
         </div>
       </div>
     </>

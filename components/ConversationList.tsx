@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { MessageSquare, Plus, Trash2, X, Clock, Loader2 } from 'lucide-react';
+import { MessageSquare, Plus, Trash2, X, Clock } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
+import Modal from '@/components/ui/Modal';
+import EmptyState from '@/components/ui/EmptyState';
+import Button from '@/components/ui/Button';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -122,13 +126,8 @@ export default function ConversationList({
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-[#3E2723]/50 z-50 flex justify-end">
-      <div className="absolute inset-0" onClick={onClose} />
-
-      <div className="w-full max-w-md bg-[#FDFBF7] h-full overflow-hidden flex flex-col shadow-xl relative animate-slide-in-right">
+    <Modal isOpen={isOpen} onClose={onClose} position="right">
         {/* Header */}
         <div className="bg-[#5D7B93] text-white p-4 flex items-center justify-between">
           <div>
@@ -137,7 +136,7 @@ export default function ConversationList({
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-[#4A6275] rounded-lg transition-colors"
+            className="p-2 hover:bg-[var(--slate-blue-dark)] rounded-lg transition-colors"
             aria-label="Close conversation history"
           >
             <X size={24} />
@@ -146,32 +145,34 @@ export default function ConversationList({
 
         {/* New Chat Button */}
         <div className="p-4 border-b border-[#D4C8B8]">
-          <button
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            leftIcon={Plus}
+            iconSize={20}
             onClick={() => {
               onNewChat();
               onClose();
             }}
-            className="w-full flex items-center justify-center gap-2 bg-[#C67B5C] text-white py-3 rounded-xl hover:bg-[#A65D3F] transition-colors font-medium"
           >
-            <Plus size={20} />
             New Chat
-          </button>
+          </Button>
         </div>
 
         {/* Conversations List */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-6 h-6 animate-spin text-[#7D6B5D]" />
+              <Spinner className="text-[#7D6B5D]" />
             </div>
           ) : conversations.length === 0 ? (
-            <div className="p-8 text-center">
-              <MessageSquare className="mx-auto text-[#D4C8B8] mb-4" size={48} />
-              <p className="text-[#3E2723] mb-2 font-medium">No conversations yet</p>
-              <p className="text-sm text-[#7D6B5D]">
-                Start chatting to see your history here
-              </p>
-            </div>
+            <EmptyState
+              icon={MessageSquare}
+              title="No conversations yet"
+              description="Start chatting to see your history here"
+              className="p-8"
+            />
           ) : (
             <div className="p-4 space-y-2">
               {conversations.map((conversation) => (
@@ -180,7 +181,7 @@ export default function ConversationList({
                   onClick={() => handleSelectConversation(conversation.id)}
                   className={`group relative p-4 rounded-xl cursor-pointer transition ${
                     currentConversationId === conversation.id
-                      ? 'bg-[#E8F0F5] border-2 border-[#5D7B93]'
+                      ? 'bg-[var(--status-research-bg)] border-2 border-[#5D7B93]'
                       : 'bg-white border-2 border-transparent hover:bg-[#F5F0E6] border-[#D4C8B8]'
                   }`}
                 >
@@ -188,7 +189,7 @@ export default function ConversationList({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         {loadingConversationId === conversation.id ? (
-                          <Loader2 size={16} className="animate-spin text-[#5D7B93] flex-shrink-0" />
+                          <Spinner size="sm" className="text-[#5D7B93]" />
                         ) : (
                           <MessageSquare size={16} className="text-[#5D7B93] flex-shrink-0" />
                         )}
@@ -221,7 +222,6 @@ export default function ConversationList({
             </div>
           )}
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

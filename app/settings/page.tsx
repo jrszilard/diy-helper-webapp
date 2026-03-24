@@ -11,9 +11,10 @@ import UsageBanner from '@/components/UsageBanner';
 import UpgradeModal from '@/components/UpgradeModal';
 import { useExpertStatus } from '@/hooks/useExpertStatus';
 import {
-  Wrench, ArrowLeft, Loader2, CheckCircle, AlertCircle,
+  Wrench, ArrowLeft, CheckCircle, AlertCircle,
   CreditCard, Zap, Settings, Crown,
 } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 
 interface Subscription {
   tier: string;
@@ -31,7 +32,7 @@ export default function SettingsPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-[#F5F0E6] flex items-center justify-center">
-        <Loader2 size={32} className="animate-spin text-[#C67B5C]" />
+        <Spinner size="lg" className="text-[#C67B5C]" />
       </div>
     }>
       <SettingsContent />
@@ -102,7 +103,7 @@ function SettingsContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F5F0E6] flex items-center justify-center">
-        <Loader2 size={32} className="animate-spin text-[#C67B5C]" />
+        <Spinner size="lg" className="text-[#C67B5C]" />
       </div>
     );
   }
@@ -110,7 +111,7 @@ function SettingsContent() {
   return (
     <div className="min-h-screen bg-[#F5F0E6]">
       {/* Header */}
-      <header className="bg-[#FDFBF7] border-b border-[#D4C8B8] shadow-sm">
+      <header className="bg-surface border-b border-[#D4C8B8] shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="bg-gradient-to-br from-[#C67B5C] to-[#A65D3F] p-1.5 rounded-lg">
@@ -153,7 +154,7 @@ function SettingsContent() {
           )}
 
           {/* Subscription Card */}
-          <div className="bg-[#FDFBF7] rounded-2xl border border-[#D4C8B8] shadow-sm overflow-hidden">
+          <div className="bg-surface rounded-2xl border border-[#D4C8B8] shadow-sm overflow-hidden">
             <div className="px-6 py-5 border-b border-[#E8DFD0] flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Settings className="w-5 h-5 text-[#7D6B5D]" />
@@ -255,7 +256,7 @@ function SettingsContent() {
                       <CreditCard className="w-4 h-4 text-[#7D6B5D]" />
                       <span className="text-sm font-medium text-[#3E2723]">Edit Profile</span>
                     </div>
-                    <ArrowLeft className="w-4 h-4 text-[#B0A696] rotate-180 group-hover:text-[#7D6B5D] transition-colors" />
+                    <ArrowLeft className="w-4 h-4 text-[var(--muted)] rotate-180 group-hover:text-[#7D6B5D] transition-colors" />
                   </Link>
                 </div>
               </div>

@@ -16,6 +16,9 @@ import { useExpertStatus } from '@/hooks/useExpertStatus';
 import { Package } from 'lucide-react';
 import { Project } from '@/types';
 import type { User } from '@supabase/supabase-js';
+import GlobalHeader from '@/components/GlobalHeader';
+import IconButton from '@/components/ui/IconButton';
+import Button from '@/components/ui/Button';
 
 export default function ChatPage() {
   const router = useRouter();
@@ -124,7 +127,7 @@ export default function ChatPage() {
           <p className="font-medium text-sm">{migrationToast}</p>
           <button
             onClick={() => setMigrationToast(null)}
-            className="ml-2 hover:bg-[#2D5A3B] p-1 rounded flex-shrink-0"
+            className="ml-2 hover:bg-[var(--forest-green-dark)] p-1 rounded flex-shrink-0"
             aria-label="Dismiss migration notification"
           >
             <X size={16} />
@@ -145,12 +148,12 @@ export default function ChatPage() {
       {showMobileProjects && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-[#3E2723] bg-opacity-50" onClick={closeMobilePanels} />
-          <div className="absolute left-0 top-0 bottom-0 w-[85vw] max-w-80 bg-[#FDFBF7] shadow-xl animate-slide-in-left">
+          <div className="absolute left-0 top-0 bottom-0 w-[85vw] max-w-80 bg-surface shadow-xl animate-slide-in-left">
             <div className="flex items-center justify-between p-4 border-b border-[#D4C8B8] bg-[#5D7B93] text-white">
               <h2 className="font-bold text-lg">{user ? 'My Projects' : 'Local Projects'}</h2>
               <button
                 onClick={() => setShowMobileProjects(false)}
-                className="p-2 hover:bg-[#4A6275] rounded-lg transition-colors"
+                className="p-2 hover:bg-[var(--slate-blue-dark)] rounded-lg transition-colors"
                 aria-label="Close projects panel"
               >
                 <X size={20} />
@@ -170,7 +173,7 @@ export default function ChatPage() {
       {showMobileShopping && selectedProject && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-[#3E2723] bg-opacity-50" onClick={closeMobilePanels} />
-          <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-[#FDFBF7] shadow-xl animate-slide-in-right overflow-y-auto">
+          <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-surface shadow-xl animate-slide-in-right overflow-y-auto">
             <div className="sticky top-0 flex items-center justify-between p-4 border-b border-[#D4C8B8] bg-[#4A7C59] text-white z-10">
               <div className="flex items-center gap-2">
                 <ShoppingCart size={20} />
@@ -178,7 +181,7 @@ export default function ChatPage() {
               </div>
               <button
                 onClick={() => setShowMobileShopping(false)}
-                className="p-2 hover:bg-[#2D5A3B] rounded-lg transition-colors"
+                className="p-2 hover:bg-[var(--forest-green-dark)] rounded-lg transition-colors"
                 aria-label="Close shopping list"
               >
                 <X size={20} />
@@ -190,7 +193,7 @@ export default function ChatPage() {
       )}
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-[#FDFBF7] border-b border-[#D4C8B8] shadow-sm">
+        <header className="bg-surface border-b border-[#D4C8B8] shadow-sm">
           <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-14 sm:h-16">
               {/* Left side: Menu button (mobile) + Logo */}
@@ -249,14 +252,16 @@ export default function ChatPage() {
                   isExpert={isExpert}
                 />
                 <NotificationBell userId={user?.id} />
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  leftIcon={Package}
+                  iconSize={18}
                   onClick={() => setShowInventory(true)}
-                  className="flex items-center gap-2 px-3 py-2 sm:px-4 bg-[#4A7C59] text-white rounded-lg hover:bg-[#2D5A3B] transition"
                   title="View your tool inventory"
                 >
-                  <Package size={18} />
                   <span className="hidden sm:inline">My Tools</span>
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -291,7 +296,7 @@ export default function ChatPage() {
 
           {/* Desktop Shopping List Sidebar - hidden on mobile */}
           {selectedProject && (
-            <div className="hidden md:block w-80 lg:w-96 bg-[#FDFBF7] border-l border-[#D4C8B8] overflow-y-auto flex-shrink-0">
+            <div className="hidden md:block w-80 lg:w-96 bg-surface border-l border-[#D4C8B8] overflow-y-auto flex-shrink-0">
               <ShoppingListView project={selectedProject} />
             </div>
           )}

@@ -42,7 +42,7 @@ export default function BotInput({ phase, onSend, disabled = false }: BotInputPr
   }, [text, disabled, onSend]);
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2 p-3 bg-[#FDFBF7] border-t border-[#D4C8B8]">
+    <form onSubmit={handleSubmit} className="flex items-center gap-2 p-3 bg-surface border-t border-[#D4C8B8]">
       <input
         type="text"
         value={text}

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, MessageSquarePlus, CheckCircle, X, ArrowUpCircle } from 'lucide-react';
+import { MessageSquarePlus, CheckCircle, X, ArrowUpCircle } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import { supabase } from '@/lib/supabase';
 
 interface TierUpgradeModalProps {
@@ -136,7 +137,7 @@ export default function TierUpgradeModal({
               <span className="text-3xl font-bold text-[#3E2723]">${(upgradeCostCents / 100).toFixed(0)}</span>
               <span className="text-sm text-[#7D6B5D]">one-time</span>
             </div>
-            <p className="text-xs text-[#B0A696] mt-1">
+            <p className="text-xs text-[var(--muted)] mt-1">
               Tier {currentTier} &rarr; Tier {nextTier} &middot; Same payment method
             </p>
           </div>
@@ -154,7 +155,7 @@ export default function TierUpgradeModal({
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#C67B5C] text-white font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors disabled:opacity-50"
           >
             {loading ? (
-              <Loader2 size={16} className="animate-spin" />
+              <Spinner size="sm" />
             ) : (
               <MessageSquarePlus size={16} />
             )}
@@ -167,7 +168,7 @@ export default function TierUpgradeModal({
           >
             No thanks, I&apos;m satisfied with the current answers
           </button>
-          <p className="text-[10px] text-center text-[#B0A696]">
+          <p className="text-[10px] text-center text-[var(--muted)]">
             If you decline, the conversation stays accessible as read-only.
             The expert can still mark it as resolved.
           </p>

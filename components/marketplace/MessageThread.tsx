@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Image, X, Loader2, FolderOpen, ExternalLink } from 'lucide-react';
+import { Send, Image, X, FolderOpen, ExternalLink } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
+import EmptyState from '@/components/ui/EmptyState';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 
@@ -156,7 +158,7 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
-          <p className="text-center text-sm text-[#7D6B5D] py-8">No messages yet. Start the conversation!</p>
+          <EmptyState description="No messages yet. Start the conversation!" className="py-8" />
         )}
         {messages.map(msg => {
           const isCurrentUser = msg.senderUserId === currentUserId;
@@ -197,7 +199,7 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
                           <Link
                             href={project.detailsLink}
                             className={`text-xs flex items-center gap-0.5 flex-shrink-0 ${
-                              isCurrentUser ? 'text-white/80 hover:text-white' : 'text-[#5D7B93] hover:text-[#4A6578]'
+                              isCurrentUser ? 'text-white/80 hover:text-white' : 'text-[#5D7B93] hover:text-[var(--slate-blue-dark)]'
                             }`}
                             onClick={e => e.stopPropagation()}
                           >
@@ -229,7 +231,7 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
                   </div>
                 )}
                 <p className={`text-xs mt-1 ${
-                  isCurrentUser ? 'text-white/70' : 'text-[#B0A696]'
+                  isCurrentUser ? 'text-white/70' : 'text-[var(--muted)]'
                 }`}>
                   {formatTime(msg.createdAt)}
                 </p>
@@ -265,14 +267,14 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
       )}
 
       {/* Input area */}
-      <div className="border-t border-[#D4C8B8] p-3 bg-[#FDFBF7]">
+      <div className="border-t border-[#D4C8B8] p-3 bg-surface">
         <div className="flex items-end gap-2">
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isBusy}
             className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
               isBusy
-                ? 'text-[#B0A696] cursor-not-allowed'
+                ? 'text-[var(--muted)] cursor-not-allowed'
                 : 'text-[#7D6B5D] hover:bg-[#E8DFD0] hover:text-[#5D7B93]'
             }`}
             aria-label="Attach image"
@@ -301,11 +303,11 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
             disabled={!canSend}
             className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
               canSend
-                ? 'bg-[#5D7B93] text-white hover:bg-[#4A6578]'
-                : 'bg-[#E8DFD0] text-[#B0A696] cursor-not-allowed'
+                ? 'bg-[#5D7B93] text-white hover:bg-[var(--slate-blue-dark)]'
+                : 'bg-[#E8DFD0] text-[var(--muted)] cursor-not-allowed'
             }`}
           >
-            {isBusy ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+            {isBusy ? <Spinner /> : <Send size={18} />}
           </button>
         </div>
       </div>

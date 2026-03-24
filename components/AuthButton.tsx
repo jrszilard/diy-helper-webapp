@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { User, LogOut, X, ChevronDown, FolderOpen, MessageSquare, Mail, Users, Award, LayoutDashboard, Settings } from 'lucide-react';
 import Link from 'next/link';
+import Button from '@/components/ui/Button';
+import TextInput from '@/components/ui/TextInput';
 
 export default function AuthButton({
   user,
@@ -128,7 +130,7 @@ export default function AuthButton({
         </button>
 
         {showDropdown && (
-          <div className="absolute right-0 mt-2 w-48 bg-[#FDFBF7] rounded-lg shadow-xl border border-[#D4C8B8] py-1 z-50">
+          <div className="absolute right-0 mt-2 w-48 bg-surface rounded-lg shadow-xl border border-[#D4C8B8] py-1 z-50">
             <a
               href="/chat"
               className="flex items-center gap-2 px-4 py-2.5 text-sm text-[#3E2723] hover:bg-[#F5F0E6] transition-colors"
@@ -208,7 +210,7 @@ export default function AuthButton({
             <div className="border-t border-[#E8DFD0] my-1" />
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-[#B8593B] hover:bg-[#FDF3ED] transition-colors"
+              className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-[#B8593B] hover:bg-[var(--status-progress-bg)] transition-colors"
             >
               <LogOut className="w-4 h-4" />
               Sign Out
@@ -221,19 +223,16 @@ export default function AuthButton({
 
   return (
     <>
-      <button
-        onClick={() => setShowAuth(true)}
-        className="bg-[#5D7B93] text-white px-6 py-2 rounded-lg hover:bg-[#4A6275] font-semibold transition"
-      >
+      <Button variant="tertiary" onClick={() => setShowAuth(true)}>
         Sign In
-      </button>
+      </Button>
 
       {showAuth && portalMounted && createPortal(
         <div
           className="fixed inset-0 bg-[#3E2723]/50 flex items-center justify-center z-50 p-4"
           onClick={(e) => { if (e.target === e.currentTarget) setShowAuth(false); }}
         >
-          <div className="bg-[#FDFBF7] rounded-2xl max-w-md w-full shadow-2xl border border-[#D4C8B8] overflow-hidden">
+          <div className="bg-surface rounded-2xl max-w-md w-full shadow-2xl border border-[#D4C8B8] overflow-hidden">
             {/* Close button */}
             <div className="flex justify-end p-3 pb-0">
               <button
@@ -285,12 +284,13 @@ export default function AuthButton({
                   <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">
                     Email
                   </label>
-                  <input
+                  <TextInput
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your@email.com"
-                    className="w-full border border-[#D4C8B8] rounded-lg px-4 py-3 text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white placeholder-[#A89880]"
+                    inputSize="lg"
+                    fullWidth
                     required
                   />
                 </div>
@@ -299,12 +299,13 @@ export default function AuthButton({
                   <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">
                     Password
                   </label>
-                  <input
+                  <TextInput
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full border border-[#D4C8B8] rounded-lg px-4 py-3 text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white placeholder-[#A89880]"
+                    inputSize="lg"
+                    fullWidth
                     required
                     minLength={8}
                   />
@@ -326,13 +327,9 @@ export default function AuthButton({
                   )}
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-[#C67B5C] text-white px-4 py-3 rounded-lg hover:bg-[#A65D3F] font-semibold disabled:opacity-50 transition"
-                >
+                <Button type="submit" variant="primary" fullWidth disabled={loading}>
                   {loading ? 'Loading...' : isSignUp ? 'Create Account' : 'Sign In'}
-                </button>
+                </Button>
               </form>
             </div>
           </div>

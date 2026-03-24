@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Button from '@/components/ui/Button';
 
 const FEEDBACK_TYPES = [
   { value: 'bug', label: 'Bug' },
@@ -122,13 +123,14 @@ export default function BetaFeedbackWidget() {
                 )}
 
                 {/* Submit */}
-                <button
+                <Button
+                  variant="primary"
+                  fullWidth
                   onClick={handleSubmit}
                   disabled={message.trim().length < 5 || status === 'sending'}
-                  className="w-full py-2 bg-[var(--terracotta)] hover:bg-[var(--terracotta-dark)] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors"
                 >
                   {status === 'sending' ? 'Sending...' : 'Send Feedback'}
-                </button>
+                </Button>
               </>
             )}
           </div>

@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { Wrench, ArrowRight } from 'lucide-react';
+import Button from '@/components/ui/Button';
 
 interface ExpertQuickBarProps {
   displayName: string;
@@ -10,7 +10,7 @@ interface ExpertQuickBarProps {
 
 export default function ExpertQuickBar({ displayName, openQueueCount }: ExpertQuickBarProps) {
   return (
-    <div className="bg-gradient-to-r from-[#D4A574] to-[#C6943E] text-[#3E2723]">
+    <div className="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-dark)] text-[#3E2723]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-2.5 sm:py-3 gap-3">
           {/* Left: Welcome */}
@@ -35,14 +35,16 @@ export default function ExpertQuickBar({ displayName, openQueueCount }: ExpertQu
             <span className="sm:hidden inline-flex items-center gap-1 bg-white/25 text-[#3E2723] text-xs font-semibold px-2 py-1 rounded-full">
               {openQueueCount} open
             </span>
-            <Link
+            <Button
+              variant="primary"
+              size="sm"
               href="/experts/dashboard"
-              className="inline-flex items-center gap-1.5 bg-[#3E2723] text-white text-sm font-semibold px-4 py-1.5 rounded-lg hover:bg-[#2A1B17] transition-colors"
+              rightIcon={ArrowRight}
+              iconSize={14}
             >
               <span className="hidden sm:inline">Go to Dashboard</span>
               <span className="sm:hidden">Dashboard</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+            </Button>
           </div>
         </div>
       </div>

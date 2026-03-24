@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, Lightbulb, Wrench, Clock, AlertOctagon, MapPin, Save, ChevronDown, ChevronUp, Plus, X } from 'lucide-react';
+import { Lightbulb, Wrench, Clock, AlertOctagon, MapPin, Save, ChevronDown, ChevronUp, Plus, X } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import { supabase } from '@/lib/supabase';
+import TextInput from '@/components/ui/TextInput';
 
 interface InsightNotesPanelProps {
   questionId: string;
@@ -138,7 +140,7 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
             Expert Insights
           </h4>
           {!hasNotes && userRole === 'expert' && (
-            <span className="text-xs text-[#B0A696]">(add notes for the DIYer)</span>
+            <span className="text-xs text-[var(--muted)]">(add notes for the DIYer)</span>
           )}
         </div>
         {expanded ? <ChevronUp size={14} className="text-[#7D6B5D]" /> : <ChevronDown size={14} className="text-[#7D6B5D]" />}
@@ -148,7 +150,7 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
         <div className="px-4 py-3">
           {loading ? (
             <div className="flex items-center justify-center py-4">
-              <Loader2 size={16} className="animate-spin text-[#C67B5C]" />
+              <Spinner size="sm" className="text-[#C67B5C]" />
             </div>
           ) : editing ? (
             /* Edit mode */
@@ -170,15 +172,16 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
                   ))}
                 </div>
                 <div className="flex gap-1.5">
-                  <input
+                  <TextInput
                     value={newTool}
                     onChange={e => setNewTool(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTool())}
                     placeholder="Add tool..."
-                    className="flex-1 px-2 py-1.5 border border-[#D4C8B8] rounded text-xs text-[#3E2723] focus:outline-none focus:ring-1 focus:ring-[#C67B5C]/50"
+                    className="flex-1 text-xs"
+                    inputSize="sm"
                     maxLength={200}
                   />
-                  <button onClick={addTool} className="text-xs text-[#5D7B93] hover:text-[#4A6578]">
+                  <button onClick={addTool} className="text-xs text-[#5D7B93] hover:text-[var(--slate-blue-dark)]">
                     <Plus size={14} />
                   </button>
                 </div>
@@ -190,11 +193,13 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
                   <Clock size={12} />
                   Estimated Time
                 </label>
-                <input
+                <TextInput
                   value={estimatedTime}
                   onChange={e => setEstimatedTime(e.target.value)}
                   placeholder="e.g., 2-3 hours for an experienced DIYer"
-                  className="w-full px-2 py-1.5 border border-[#D4C8B8] rounded text-xs text-[#3E2723] focus:outline-none focus:ring-1 focus:ring-[#C67B5C]/50"
+                  fullWidth
+                  className="text-xs"
+                  inputSize="sm"
                   maxLength={200}
                 />
               </div>
@@ -216,15 +221,16 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
                   ))}
                 </div>
                 <div className="flex gap-1.5">
-                  <input
+                  <TextInput
                     value={newMistake}
                     onChange={e => setNewMistake(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addMistake())}
                     placeholder="Add common mistake..."
-                    className="flex-1 px-2 py-1.5 border border-[#D4C8B8] rounded text-xs text-[#3E2723] focus:outline-none focus:ring-1 focus:ring-[#C67B5C]/50"
+                    className="flex-1 text-xs"
+                    inputSize="sm"
                     maxLength={500}
                   />
-                  <button onClick={addMistake} className="text-xs text-[#5D7B93] hover:text-[#4A6578]">
+                  <button onClick={addMistake} className="text-xs text-[#5D7B93] hover:text-[var(--slate-blue-dark)]">
                     <Plus size={14} />
                   </button>
                 </div>
@@ -265,9 +271,9 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
                 <button
                   onClick={handleSave}
                   disabled={saving || !hasContent}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[#4A6578] transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[var(--slate-blue-dark)] transition-colors disabled:opacity-50"
                 >
-                  {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                  {saving ? <Spinner size="sm" /> : <Save size={14} />}
                   Save Notes
                 </button>
                 <button
@@ -349,14 +355,14 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
               {userRole === 'expert' && (
                 <button
                   onClick={() => setEditing(true)}
-                  className="text-xs text-[#5D7B93] hover:text-[#4A6578] font-medium transition-colors"
+                  className="text-xs text-[#5D7B93] hover:text-[var(--slate-blue-dark)] font-medium transition-colors"
                 >
                   Edit notes
                 </button>
               )}
 
               {userRole === 'diyer' && (
-                <p className="text-[10px] text-[#B0A696]">
+                <p className="text-[10px] text-[var(--muted)]">
                   These expert insights stay with your project forever — not lost after a phone call.
                 </p>
               )}
@@ -367,13 +373,13 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
               {userRole === 'expert' ? (
                 <button
                   onClick={() => setEditing(true)}
-                  className="flex items-center gap-1.5 mx-auto text-xs font-medium text-[#5D7B93] hover:text-[#4A6578] transition-colors"
+                  className="flex items-center gap-1.5 mx-auto text-xs font-medium text-[#5D7B93] hover:text-[var(--slate-blue-dark)] transition-colors"
                 >
                   <Plus size={12} />
                   Add insight notes (tools, time estimate, tips)
                 </button>
               ) : (
-                <p className="text-xs text-[#B0A696]">No expert insights yet.</p>
+                <p className="text-xs text-[var(--muted)]">No expert insights yet.</p>
               )}
             </div>
           )}

@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Loader2, Inbox, ClipboardList, X } from 'lucide-react';
+import { Inbox, ClipboardList, X } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import QAQueue from '@/components/marketplace/QAQueue';
 import ActiveQuestionCard from '@/components/marketplace/ActiveQuestionCard';
 import type { QAQuestion } from '@/lib/marketplace/types';
@@ -186,7 +187,7 @@ export default function ExpertQAQueuePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 size={32} className="animate-spin text-[#C67B5C]" />
+        <Spinner size="lg" className="text-[#C67B5C]" />
       </div>
     );
   }
@@ -282,7 +283,7 @@ export default function ExpertQAQueuePage() {
               {/* Pitch */}
               <div>
                 <label className="block text-sm font-medium text-[#3E2723] mb-1">
-                  Your Pitch <span className="text-[#B0A696] font-normal">(why you&apos;re the right expert)</span>
+                  Your Pitch <span className="text-[var(--muted)] font-normal">(why you&apos;re the right expert)</span>
                 </label>
                 <textarea
                   rows={3}
@@ -296,7 +297,7 @@ export default function ExpertQAQueuePage() {
               {/* Estimated time */}
               <div>
                 <label className="block text-sm font-medium text-[#3E2723] mb-1">
-                  Estimated Response Time <span className="text-[#B0A696] font-normal">(minutes, optional)</span>
+                  Estimated Response Time <span className="text-[var(--muted)] font-normal">(minutes, optional)</span>
                 </label>
                 <input
                   type="number"
@@ -312,7 +313,7 @@ export default function ExpertQAQueuePage() {
               {/* Relevant experience */}
               <div>
                 <label className="block text-sm font-medium text-[#3E2723] mb-1">
-                  Relevant Experience <span className="text-[#B0A696] font-normal">(optional)</span>
+                  Relevant Experience <span className="text-[var(--muted)] font-normal">(optional)</span>
                 </label>
                 <textarea
                   rows={2}
@@ -330,10 +331,10 @@ export default function ExpertQAQueuePage() {
               <button
                 onClick={handleSubmitBid}
                 disabled={bidSubmitting || !bidPitch.trim() || !bidPriceDollars}
-                className="w-full py-3 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[#4A6578] transition-colors disabled:opacity-50"
+                className="w-full py-3 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[var(--slate-blue-dark)] transition-colors disabled:opacity-50"
               >
                 {bidSubmitting ? (
-                  <Loader2 size={16} className="animate-spin mx-auto" />
+                  <Spinner size="sm" className="mx-auto" />
                 ) : (
                   'Submit Proposal'
                 )}

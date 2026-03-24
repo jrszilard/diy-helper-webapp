@@ -56,7 +56,7 @@ export default function ExpertHelpDropdown({
     <div className="relative" ref={ref}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-white bg-[#5D7B93] hover:bg-[#4A6578] transition-colors shadow-md"
+        className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-white bg-[#5D7B93] hover:bg-[var(--slate-blue-dark)] transition-colors shadow-md"
       >
         {proRequired && (
           <span className="w-2 h-2 bg-[#C67B5C] rounded-full animate-pulse" />
@@ -66,7 +66,7 @@ export default function ExpertHelpDropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-72 bg-[#FDFBF7] border border-[#D4C8B8] rounded-lg shadow-xl z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-72 bg-surface border border-[#D4C8B8] rounded-lg shadow-xl z-50 overflow-hidden">
           {options.map(({ label, description, icon: Icon, href, comingSoon }) => {
             if (comingSoon) {
               return (
@@ -78,7 +78,7 @@ export default function ExpertHelpDropdown({
                   <div>
                     <p className="text-sm font-medium text-[#3E2723]">{label}</p>
                     <p className="text-xs text-[#7D6B5D]">{description}</p>
-                    <span className="text-xs text-[#B0A696] italic">Coming Soon</span>
+                    <span className="text-xs text-[var(--muted)] italic">Coming Soon</span>
                   </div>
                 </div>
               );
@@ -101,7 +101,7 @@ export default function ExpertHelpDropdown({
                           localStorage.setItem('expert-callout-referral', 'true');
                           setIsOpen(false);
                         }}
-                        className="inline-flex items-center gap-1 mt-1.5 text-xs font-semibold text-[#5D7B93] hover:text-[#4A6578] transition-colors"
+                        className="inline-flex items-center gap-1 mt-1.5 text-xs font-semibold text-[#5D7B93] hover:text-[var(--slate-blue-dark)] transition-colors"
                       >
                         Sign up to ask
                         <span aria-hidden="true">&rarr;</span>

@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import MessageThread from '@/components/marketplace/MessageThread';
 
 interface ApiMessage {
@@ -116,7 +117,7 @@ export default function ExpertThreadPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 size={32} className="animate-spin text-[#C67B5C]" />
+        <Spinner size="lg" className="text-[#C67B5C]" />
       </div>
     );
   }
@@ -139,7 +140,7 @@ export default function ExpertThreadPage() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 bg-[#FDFBF7] rounded-xl border border-[#D4C8B8] mt-4 overflow-hidden">
+      <div className="flex-1 bg-surface rounded-xl border border-[#D4C8B8] mt-4 overflow-hidden">
         <MessageThread
           messages={messages}
           currentUserId={currentUserId}

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Loader2, Users, Star, CheckCircle, ArrowRight } from 'lucide-react';
+import { Users, Star, CheckCircle, ArrowRight } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
 import Link from 'next/link';
 
 interface ExpertAnswer {
@@ -110,10 +111,10 @@ export default function TriangulationView({
             <button
               onClick={handleRequest}
               disabled={requesting}
-              className="mt-3 px-4 py-2 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[#4A6578] transition-colors disabled:opacity-50"
+              className="mt-3 px-4 py-2 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[var(--slate-blue-dark)] transition-colors disabled:opacity-50"
             >
               {requesting ? (
-                <Loader2 size={14} className="animate-spin" />
+                <Spinner size="sm" />
               ) : (
                 'Request Second Opinion — $15'
               )}
@@ -128,7 +129,7 @@ export default function TriangulationView({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-6">
-        <Loader2 size={20} className="animate-spin text-[#5D7B93]" />
+        <Spinner className="text-[#5D7B93]" />
       </div>
     );
   }
@@ -196,7 +197,7 @@ export default function TriangulationView({
           ) : secondAnswer?.status === 'claimed' || secondAnswer?.status === 'in_conversation' ? (
             <p className="text-sm text-[#7D6B5D] italic">Expert is working on their response...</p>
           ) : (
-            <p className="text-sm text-[#B0A696] italic">Waiting for a second expert to claim this question.</p>
+            <p className="text-sm text-[var(--muted)] italic">Waiting for a second expert to claim this question.</p>
           )}
         </div>
       </div>

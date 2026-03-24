@@ -4,7 +4,11 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { SPECIALTIES, SPECIALTY_LABELS } from '@/lib/marketplace/constants';
 import type { ExpertProfile, ExpertSpecialty } from '@/lib/marketplace/types';
-import { Loader2, Save, CheckCircle, AlertCircle, Plus, X, Code, Copy, CheckCircle2 } from 'lucide-react';
+import { Save, CheckCircle, AlertCircle, Plus, X, Code, Copy, CheckCircle2 } from 'lucide-react';
+import Spinner from '@/components/ui/Spinner';
+import TextInput from '@/components/ui/TextInput';
+import Select from '@/components/ui/Select';
+import SectionHeader from '@/components/ui/SectionHeader';
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
@@ -149,7 +153,7 @@ export default function ExpertProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 size={32} className="animate-spin text-[#C67B5C]" />
+        <Spinner size="lg" className="text-[#C67B5C]" />
       </div>
     );
   }
@@ -164,18 +168,17 @@ export default function ExpertProfilePage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-[#3E2723] mb-1">Expert Profile</h1>
-      <p className="text-sm text-[#7D6B5D] mb-6">Manage your expert profile and settings</p>
+      <SectionHeader size="lg" title="Expert Profile" subtitle="Manage your expert profile and settings" className="mb-6" />
 
-      <div className="bg-[#FDFBF7] rounded-2xl border border-[#D4C8B8] shadow-sm p-6 space-y-5">
+      <div className="bg-surface rounded-2xl border border-[#D4C8B8] shadow-sm p-6 space-y-5">
         {/* Display Name */}
         <div>
           <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">Display Name</label>
-          <input
+          <TextInput
             type="text"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="w-full border border-[#D4C8B8] rounded-lg px-4 py-2.5 text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white"
+            fullWidth
             maxLength={100}
           />
         </div>
@@ -198,49 +201,49 @@ export default function ExpertProfilePage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">City</label>
-            <input
+            <TextInput
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              className="w-full border border-[#D4C8B8] rounded-lg px-4 py-2.5 text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white"
+              fullWidth
               maxLength={100}
             />
           </div>
           <div>
             <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">State</label>
-            <select
+            <Select
               value={state}
               onChange={(e) => setState(e.target.value)}
-              className="w-full border border-[#D4C8B8] rounded-lg px-4 py-2.5 text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white"
+              fullWidth
             >
               <option value="">Select...</option>
               {US_STATES.map(s => (
                 <option key={s} value={s}>{s}</option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">Zip Code</label>
-            <input
+            <TextInput
               type="text"
               value={zipCode}
               onChange={(e) => setZipCode(e.target.value)}
-              className="w-full border border-[#D4C8B8] rounded-lg px-4 py-2.5 text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white"
+              fullWidth
               maxLength={10}
             />
           </div>
           <div>
             <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">Service Radius (miles)</label>
-            <input
+            <TextInput
               type="number"
               value={serviceRadiusMiles}
               onChange={(e) => setServiceRadiusMiles(parseInt(e.target.value) || 0)}
               min={1}
               max={500}
-              className="w-full border border-[#D4C8B8] rounded-lg px-4 py-2.5 text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white"
+              fullWidth
             />
           </div>
         </div>
@@ -249,26 +252,26 @@ export default function ExpertProfilePage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">Hourly Rate ($)</label>
-            <input
+            <TextInput
               type="number"
               value={hourlyRate}
               onChange={(e) => setHourlyRate(e.target.value)}
               step="0.01"
               min="0"
               placeholder="75.00"
-              className="w-full border border-[#D4C8B8] rounded-lg px-4 py-2.5 text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white placeholder-[#A89880]"
+              fullWidth
             />
           </div>
           <div>
             <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">Q&A Rate ($)</label>
-            <input
+            <TextInput
               type="number"
               value={qaRate}
               onChange={(e) => setQaRate(e.target.value)}
               step="0.01"
               min="0"
               placeholder="10.00"
-              className="w-full border border-[#D4C8B8] rounded-lg px-4 py-2.5 text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white placeholder-[#A89880]"
+              fullWidth
             />
           </div>
         </div>
@@ -300,23 +303,23 @@ export default function ExpertProfilePage() {
           <div className="space-y-3">
             {specialties.map((spec, index) => (
               <div key={index} className="flex items-center gap-2">
-                <select
+                <Select
                   value={spec.specialty}
                   onChange={(e) => updateSpecialty(index, 'specialty', e.target.value)}
-                  className="flex-1 border border-[#D4C8B8] rounded-lg px-3 py-2 text-sm text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white"
+                  className="flex-1"
                 >
                   {SPECIALTIES.map(s => (
                     <option key={s} value={s}>{SPECIALTY_LABELS[s]}</option>
                   ))}
-                </select>
-                <input
+                </Select>
+                <TextInput
                   type="number"
                   value={spec.yearsExperience ?? ''}
                   onChange={(e) => updateSpecialty(index, 'yearsExperience', e.target.value ? parseInt(e.target.value) : null)}
                   placeholder="Yrs"
                   min={0}
                   max={60}
-                  className="w-16 border border-[#D4C8B8] rounded-lg px-2 py-2 text-sm text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white text-center"
+                  className="w-16 text-center"
                 />
                 <button
                   type="button"
@@ -346,7 +349,7 @@ export default function ExpertProfilePage() {
             <button
               type="button"
               onClick={addSpecialty}
-              className="mt-2 inline-flex items-center gap-1 text-sm text-[#5D7B93] hover:text-[#4A6275] font-medium transition-colors"
+              className="mt-2 inline-flex items-center gap-1 text-sm text-[#5D7B93] hover:text-[var(--slate-blue-dark)] font-medium transition-colors"
             >
               <Plus className="w-4 h-4" />
               Add Specialty
@@ -377,7 +380,7 @@ export default function ExpertProfilePage() {
           className="inline-flex items-center gap-2 bg-[#C67B5C] text-white px-6 py-2.5 rounded-lg hover:bg-[#A65D3F] font-semibold disabled:opacity-50 transition"
         >
           {saving ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Spinner size="sm" />
           ) : (
             <Save className="w-4 h-4" />
           )}
@@ -387,7 +390,7 @@ export default function ExpertProfilePage() {
 
       {/* Embeddable Badge */}
       {profile && (
-        <div className="bg-[#FDFBF7] rounded-2xl border border-[#D4C8B8] shadow-sm p-6 mt-6">
+        <div className="bg-surface rounded-2xl border border-[#D4C8B8] shadow-sm p-6 mt-6">
           <h2 className="text-lg font-bold text-[#3E2723] mb-1 flex items-center gap-2">
             <Code size={18} className="text-[#5D7B93]" />
             Embeddable Badge
@@ -432,7 +435,7 @@ export default function ExpertProfilePage() {
             </button>
           </div>
 
-          <p className="text-xs text-[#B0A696] mt-2">
+          <p className="text-xs text-[var(--muted)] mt-2">
             Your badge updates automatically as you answer questions and earn reviews.
           </p>
         </div>
