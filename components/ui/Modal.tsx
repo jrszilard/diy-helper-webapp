@@ -38,14 +38,20 @@ export default function Modal({
 
   useEffect(() => { setMounted(true); }, []);
 
+  // Auto-focus only when the modal opens — must not depend on onClose
+  // (onClose is often an inline function that changes every render, which
+  // would retrigger this and steal focus away from inputs mid-typing)
   useEffect(() => {
     if (!isOpen) return;
-
-    // Auto-focus the first focusable element inside the modal
     requestAnimationFrame(() => {
       const el = panelRef.current?.querySelector<HTMLElement>(FOCUSABLE);
       el?.focus();
     });
+  }, [isOpen]);
+
+  // Keyboard handler: Escape + focus trap
+  useEffect(() => {
+    if (!isOpen) return;
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {

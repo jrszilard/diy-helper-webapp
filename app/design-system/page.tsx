@@ -20,6 +20,8 @@ import StarRating from '@/components/ui/StarRating';
 import Divider from '@/components/ui/Divider';
 import AppLogo from '@/components/AppLogo';
 import GlobalHeader from '@/components/GlobalHeader';
+import Dropdown from '@/components/ui/Dropdown';
+import Toggle from '@/components/ui/Toggle';
 import BotMessage, { TypingIndicator } from '@/components/guided-bot/BotMessage';
 import UserMessage from '@/components/guided-bot/UserMessage';
 import BotInput from '@/components/guided-bot/BotInput';
@@ -576,6 +578,25 @@ export default function DesignSystemPage() {
           </Row>
         </Section>
 
+        {/* ── Toggle ───────────────────────────────────────────────────────── */}
+        <Section title="Toggle">
+          <Row label="With label + description">
+            <div className="w-full max-w-sm space-y-3">
+              <Toggle label="Available for Work" description="Toggle off to pause receiving new questions" checked={true} onChange={() => {}} />
+              <Toggle label="Email notifications" checked={false} onChange={() => {}} />
+            </div>
+          </Row>
+          <Row label="Disabled">
+            <div className="w-full max-w-sm">
+              <Toggle label="Locked setting" checked={true} onChange={() => {}} disabled />
+            </div>
+          </Row>
+          <Row label="Standalone (no label)">
+            <Toggle checked={true} onChange={() => {}} />
+            <Toggle checked={false} onChange={() => {}} />
+          </Row>
+        </Section>
+
         {/* ── StarRating ───────────────────────────────────────────────────── */}
         <Section title="StarRating">
           <Row label="Display only">
@@ -613,6 +634,39 @@ export default function DesignSystemPage() {
               <TextInput id="email" label="Email address" placeholder="jane@example.com" leftIcon={Search} fullWidth />
               <TextInput id="err" label="Zip code" placeholder="00000" error="Invalid zip code" fullWidth />
             </div>
+          </Row>
+        </Section>
+
+        {/* ── Dropdown ─────────────────────────────────────────────────────── */}
+        <Section title="Dropdown">
+          <Row label="Default (right-aligned)">
+            <Dropdown
+              trigger={
+                <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-earth-brown-dark border border-earth-sand rounded-lg hover:bg-earth-tan transition-colors">
+                  Account <span className="text-earth-brown">▾</span>
+                </button>
+              }
+              items={[
+                { label: 'My Projects', icon: Home, href: '/chat' },
+                { label: 'Settings', icon: Settings, href: '/settings' },
+                { label: 'Sign Out', icon: X, danger: true, dividerBefore: true, onClick: () => {} },
+              ]}
+            />
+          </Row>
+          <Row label="Left-aligned + divider groups">
+            <Dropdown
+              align="left"
+              trigger={
+                <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-earth-brown-dark border border-earth-sand rounded-lg hover:bg-earth-tan transition-colors">
+                  Options <span className="text-earth-brown">▾</span>
+                </button>
+              }
+              items={[
+                { label: 'Edit', icon: Settings, onClick: () => {} },
+                { label: 'Duplicate', icon: Plus, onClick: () => {} },
+                { label: 'Delete', icon: Trash2, danger: true, dividerBefore: true, onClick: () => {} },
+              ]}
+            />
           </Row>
         </Section>
 

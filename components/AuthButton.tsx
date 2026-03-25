@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { User, LogOut, ChevronDown, FolderOpen, MessageSquare, Mail, Users, Award, LayoutDashboard, Settings } from 'lucide-react';
-import Link from 'next/link';
+import { LogOut, ChevronDown, FolderOpen, MessageSquare, Mail, Users, Award, Settings, User } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import TextInput from '@/components/ui/TextInput';
 import Modal from '@/components/ui/Modal';
+import Dropdown from '@/components/ui/Dropdown';
+import Avatar from '@/components/ui/Avatar';
 
 export default function AuthButton({
   user,
@@ -16,7 +17,7 @@ export default function AuthButton({
   variant = 'light',
   isExpert = false,
 }: {
-  user: { id: string; email?: string } | null;
+  user: { id: string; email?: string; name?: string } | null;
   externalShowAuth?: boolean;
   onAuthToggle?: (show: boolean) => void;
   variant?: 'light' | 'dark';
@@ -28,22 +29,7 @@ export default function AuthButton({
   const [isExpertReferral, setIsExpertReferral] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-    if (showDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showDropdown]);
 
   const showAuth = externalShowAuth !== undefined ? externalShowAuth : internalShowAuth;
   const setShowAuth = (show: boolean) => {
@@ -67,7 +53,7 @@ export default function AuthButton({
     e.preventDefault();
     setLoading(true);
 
-    const { error } = isSignUp
+    const { data, error } = isSignUp
       ? await supabase.auth.signUp({ email, password })
       : await supabase.auth.signInWithPassword({ email, password });
 
@@ -77,10 +63,27 @@ export default function AuthButton({
       setShowAuth(false);
       setEmail('');
       setPassword('');
+
       const returnTo = sessionStorage.getItem('authReturnTo');
       if (returnTo) {
         sessionStorage.removeItem('authReturnTo');
         router.push(returnTo);
+      } else if (!isSignUp && data.session?.access_token) {
+        // Check if the user is an expert and redirect to their dashboard
+        try {
+          const res = await fetch('/api/experts/me', {
+            headers: { Authorization: `Bearer ${data.session.access_token}` },
+          });
+          if (res.ok) {
+            const { expert } = await res.json();
+            if (expert) {
+              router.push('/experts/dashboard');
+              return;
+            }
+          }
+        } catch {
+          // ignore — fall through to normal page reload
+        }
       }
     }
     setLoading(false);
@@ -93,112 +96,45 @@ export default function AuthButton({
 
   if (user) {
     const isDark = variant === 'dark';
-    return (
-      <div className="relative" ref={dropdownRef}>
-        <button
-          onClick={() => setShowDropdown(!showDropdown)}
-          className={`flex items-center gap-2 transition ${
-            isDark
-              ? 'text-earth-sand hover:text-white'
-              : 'text-foreground hover:text-terracotta'
-          }`}
-          aria-label="Account menu"
-          aria-expanded={showDropdown}
-        >
-          <User className="w-5 h-5" />
-          <span className="hidden sm:inline text-sm">{user.email}</span>
-          <ChevronDown className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
-        </button>
 
-        {showDropdown && (
-          <div className="absolute right-0 mt-2 w-48 bg-surface rounded-lg shadow-xl border border-earth-sand py-1 z-50">
-            <a
-              href="/chat"
-              className="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-earth-cream transition-colors"
-            >
-              <FolderOpen className="w-4 h-4 text-earth-brown" />
-              My Projects
-            </a>
-            <Link
-              href="/marketplace/qa"
-              className="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-earth-cream transition-colors"
-              onClick={() => setShowDropdown(false)}
-            >
-              <MessageSquare className="w-4 h-4 text-earth-brown" />
-              My Questions
-            </Link>
-            <Link
-              href="/profile"
-              className="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-earth-cream transition-colors"
-              onClick={() => setShowDropdown(false)}
-            >
-              <User className="w-4 h-4 text-earth-brown" />
-              My Profile
-            </Link>
-            <Link
-              href="/settings"
-              className="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-earth-cream transition-colors"
-              onClick={() => setShowDropdown(false)}
-            >
-              <Settings className="w-4 h-4 text-earth-brown" />
-              Settings
-            </Link>
-            <Link
-              href="/messages"
-              className="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-earth-cream transition-colors"
-              onClick={() => setShowDropdown(false)}
-            >
-              <Mail className="w-4 h-4 text-earth-brown" />
-              Messages
-            </Link>
-            <Link
-              href="/experts"
-              className="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-earth-cream transition-colors"
-              onClick={() => setShowDropdown(false)}
-            >
-              <Users className="w-4 h-4 text-earth-brown" />
-              Find an Expert
-            </Link>
-            {isExpert ? (
-              <>
-                <Link
-                  href="/experts/dashboard"
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-earth-cream transition-colors"
-                  onClick={() => setShowDropdown(false)}
-                >
-                  <LayoutDashboard className="w-4 h-4 text-earth-brown" />
-                  Expert Dashboard
-                </Link>
-                <Link
-                  href="/experts/dashboard/qa"
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-earth-cream transition-colors"
-                  onClick={() => setShowDropdown(false)}
-                >
-                  <MessageSquare className="w-4 h-4 text-earth-brown" />
-                  Q&A Queue
-                </Link>
-              </>
-            ) : (
-              <Link
-                href="/experts/register"
-                className="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-earth-cream transition-colors"
-                onClick={() => setShowDropdown(false)}
-              >
-                <Award className="w-4 h-4 text-earth-brown" />
-                Become an Expert
-              </Link>
-            )}
-            <div className="border-t border-earth-tan my-1" />
-            <button
-              onClick={handleSignOut}
-              className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-rust hover:bg-[var(--status-progress-bg)] transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </button>
-          </div>
-        )}
-      </div>
+    const items = isExpert
+      ? [
+          { label: 'My Profile', icon: User, href: '/experts/dashboard/profile' },
+          { label: 'Settings', icon: Settings, href: '/settings' },
+          { label: 'Sign Out', icon: LogOut, onClick: handleSignOut, danger: true, dividerBefore: true },
+        ]
+      : [
+          { label: 'My Projects', icon: FolderOpen, href: '/chat' },
+          { label: 'My Questions', icon: MessageSquare, href: '/marketplace/qa' },
+          { label: 'My Profile', icon: User, href: '/profile' },
+          { label: 'Settings', icon: Settings, href: '/settings' },
+          { label: 'Messages', icon: Mail, href: '/messages' },
+          { label: 'Find an Expert', icon: Users, href: '/experts' },
+          { label: 'Become an Expert', icon: Award, href: '/experts/register' },
+          { label: 'Sign Out', icon: LogOut, onClick: handleSignOut, danger: true, dividerBefore: true },
+        ];
+
+    const displayName = user.name || user.email?.split('@')[0] || 'Account';
+
+    return (
+      <Dropdown
+        trigger={
+          <span
+            className={`flex items-center gap-2 cursor-pointer transition ${
+              isDark
+                ? 'text-earth-sand hover:text-white'
+                : 'text-[var(--earth-brown-dark)] hover:text-terracotta'
+            }`}
+            role="button"
+            aria-label="Account menu"
+          >
+            <Avatar name={displayName} size="sm" />
+            <span className="hidden sm:inline text-sm font-medium">{displayName}</span>
+            <ChevronDown className="w-4 h-4" />
+          </span>
+        }
+        items={items}
+      />
     );
   }
 

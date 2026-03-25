@@ -1,6 +1,7 @@
 'use client';
 
 import { DollarSign, TrendingUp, Star, MessageSquare, Clock, CreditCard } from 'lucide-react';
+import Card from '@/components/ui/Card';
 
 interface DashboardStatsProps {
   stats: {
@@ -63,10 +64,8 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
       {cards.map(({ label, value, icon: Icon, color, bgColor, subtitle }) => (
-        <div
-          key={label}
-          className="bg-white border border-earth-sand rounded-lg p-4"
-        >
+        <Card key={label} padding="md">
+
           <div className="flex items-center gap-3 mb-2">
             <div className={`w-9 h-9 rounded-lg ${bgColor} flex items-center justify-center`}>
               <Icon size={18} className={color} />
@@ -77,7 +76,7 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
           {subtitle && (
             <p className="text-xs text-[var(--muted)] mt-0.5">{subtitle}</p>
           )}
-        </div>
+        </Card>
       ))}
     </div>
   );

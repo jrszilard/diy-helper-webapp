@@ -2,10 +2,12 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { ArrowLeft } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import SectionHeader from '@/components/ui/SectionHeader';
 import MessageThread from '@/components/marketplace/MessageThread';
 
 interface ApiMessage {
@@ -126,28 +128,26 @@ export default function ExpertThreadPage() {
     <div className="max-w-4xl h-[calc(100vh-160px)] flex flex-col">
       {/* Header */}
       <div className="flex items-center gap-3 pb-4 border-b border-earth-sand">
-        <Link
+        <Button
+          variant="ghost"
+          size="sm"
+          leftIcon={ArrowLeft}
           href="/experts/dashboard/messages"
-          className="p-1.5 hover:bg-earth-tan rounded-lg transition-colors text-earth-brown"
         >
-          <ArrowLeft size={20} />
-        </Link>
-        <div>
-          <h1 className="text-lg font-bold text-foreground">
-            {otherUserName || 'Conversation'}
-          </h1>
-        </div>
+          Back
+        </Button>
+        <SectionHeader size="sm" title={otherUserName || 'Conversation'} />
       </div>
 
       {/* Messages */}
-      <div className="flex-1 bg-surface rounded-xl border border-earth-sand mt-4 overflow-hidden">
+      <Card surface rounded="xl" padding="none" className="flex-1 mt-4 overflow-hidden">
         <MessageThread
           messages={messages}
           currentUserId={currentUserId}
           onSend={handleSend}
           sending={sending}
         />
-      </div>
+      </Card>
     </div>
   );
 }

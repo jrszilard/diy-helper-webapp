@@ -1,7 +1,11 @@
 'use client';
 
 import { MessageSquare, Clock, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import Card from '@/components/ui/Card';
+import SectionHeader from '@/components/ui/SectionHeader';
+import EmptyState from '@/components/ui/EmptyState';
+import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
 
 interface QueueQuestion {
   id: string;
@@ -28,35 +32,33 @@ export default function DashboardQAQueue({ questions }: DashboardQAQueueProps) {
   };
 
   return (
-    <div className="bg-white border border-earth-sand rounded-lg">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-earth-sand">
-        <div className="flex items-center gap-2">
-          <MessageSquare size={16} className="text-slate-blue" />
-          <h3 className="text-sm font-semibold text-foreground">Recent Questions</h3>
-        </div>
-        <Link
-          href="/experts/dashboard/qa"
-          className="flex items-center gap-1 text-xs text-slate-blue hover:text-slate-blue-dark font-medium"
-        >
-          View Queue
-          <ArrowRight size={14} />
-        </Link>
+    <Card padding="none">
+      <div className="px-4 py-3 border-b border-earth-sand">
+        <SectionHeader
+          size="sm"
+          title="Recent Questions"
+          action={
+            <Button variant="ghost" size="xs" rightIcon={ArrowRight} href="/experts/dashboard/qa">
+              View Queue
+            </Button>
+          }
+        />
       </div>
 
       {questions.length === 0 ? (
-        <div className="px-4 py-8 text-center">
-          <MessageSquare size={24} className="mx-auto text-earth-sand mb-2" />
-          <p className="text-sm text-earth-brown">No open questions in your specialties</p>
-        </div>
+        <EmptyState
+          icon={MessageSquare}
+          size="sm"
+          description="No open questions in your specialties"
+          className="py-8"
+        />
       ) : (
         <div className="divide-y divide-earth-sand/50">
           {questions.slice(0, 5).map(q => (
             <div key={q.id} className="px-4 py-3 hover:bg-earth-tan/30 transition-colors">
               <p className="text-sm text-foreground line-clamp-2">{q.questionText}</p>
               <div className="flex items-center gap-3 mt-1.5">
-                <span className="text-xs px-2 py-0.5 bg-slate-blue/10 text-slate-blue rounded-full font-medium">
-                  {q.category}
-                </span>
+                <Badge variant="default" size="sm">{q.category}</Badge>
                 <span className="text-xs font-medium text-forest-green">
                   ${(q.priceCents / 100).toFixed(2)}
                 </span>
@@ -69,6 +71,6 @@ export default function DashboardQAQueue({ questions }: DashboardQAQueueProps) {
           ))}
         </div>
       )}
-    </div>
+    </Card>
   );
 }
