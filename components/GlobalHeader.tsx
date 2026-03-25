@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
+import Link from 'next/link';
 import AppLogo from './AppLogo';
 
 interface GlobalHeaderProps {
@@ -18,11 +19,12 @@ export default function GlobalHeader({ left, right, className = '' }: GlobalHead
             {left}
             <AppLogo />
           </div>
-          {right && (
-            <div className="flex items-center gap-2 sm:gap-4">
-              {right}
-            </div>
-          )}
+          <div className="flex items-center gap-2 sm:gap-4">
+            <Link href="/about" className="text-sm font-medium text-earth-brown hover:text-foreground transition-colors hidden sm:block">
+              About
+            </Link>
+            {right}
+          </div>
         </div>
       </div>
     </header>

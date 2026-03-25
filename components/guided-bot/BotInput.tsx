@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Send } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 import type { BotPhase } from './types';
 
 interface BotInputProps {
@@ -42,28 +42,30 @@ export default function BotInput({ phase, onSend, disabled = false }: BotInputPr
   }, [text, disabled, onSend]);
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2 p-3 bg-surface border-t border-[#D4C8B8]">
-      <input
-        type="text"
+    <form onSubmit={handleSubmit} className="bg-white/10 rounded-2xl p-4">
+      <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={PLACEHOLDERS[phase]}
         disabled={disabled}
-        className="flex-1 px-4 py-3 text-sm text-[#3E2723] placeholder-[#7D6B5D] bg-white border border-[#D4C8B8] rounded-xl focus:outline-none focus:border-[#C67B5C] disabled:opacity-50 disabled:cursor-not-allowed"
+        rows={3}
+        className="w-full bg-transparent text-white placeholder-white/40 text-base resize-none focus:outline-none disabled:opacity-50"
       />
-      <button
-        type="submit"
-        disabled={!text.trim() || disabled}
-        aria-label="Send message"
-        className={`p-3 rounded-xl transition-all duration-200 ${
-          text.trim() && !disabled
-            ? 'bg-[#C67B5C] text-white shadow-sm hover:bg-[#A65D3F]'
-            : 'bg-[#E8DFD0] text-[#7D6B5D] cursor-not-allowed'
-        }`}
-      >
-        <Send className="w-4 h-4" />
-      </button>
+      <div className="flex justify-end mt-2">
+        <button
+          type="submit"
+          disabled={!text.trim() || disabled}
+          aria-label="Send message"
+          className={`p-2 rounded-xl transition-all ${
+            text.trim() && !disabled
+              ? 'bg-terracotta text-white hover:bg-terracotta-dark'
+              : 'text-white/30 cursor-not-allowed'
+          }`}
+        >
+          <ArrowUp className="w-4 h-4" />
+        </button>
+      </div>
     </form>
   );
 }

@@ -165,12 +165,28 @@ export default function GuidedBot() {
     );
   }
 
+  // Initial state — show input + project cards before any conversation
+  const isInitial = bot.pipelineState === 'idle' && bot.phase === 'project' && bot.messages.length === 1;
+
+  if (isInitial) {
+    return (
+      <div className="flex flex-col gap-[var(--space-m)]">
+        <BotInput
+          phase="project"
+          onSend={bot.handleTextInput}
+          disabled={bot.isTyping || bot.isParsingFreeform}
+        />
+        <ProjectCards onSelectProject={bot.handleProjectSelect} />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col">
       {/* Message thread */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto overscroll-y-contain p-4 space-y-4 max-h-[70vh] min-h-[300px]"
+        className="space-y-4 pb-4"
       >
         {bot.messages.map((message, i) => {
           if (message.sender === 'bot') {

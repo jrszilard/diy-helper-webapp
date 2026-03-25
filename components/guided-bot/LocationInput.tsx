@@ -29,28 +29,28 @@ export default function LocationInput({ onSubmit }: LocationInputProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border border-[#D4C8B8] rounded-xl p-4 space-y-3">
+    <form onSubmit={handleSubmit} className="bg-white/10 rounded-xl p-4 space-y-3">
       <div>
-        <label className="block text-xs font-medium text-[var(--warm-brown)] mb-1">City</label>
+        <label className="block text-xs font-medium text-white/60 mb-1">City</label>
         <input
           type="text"
           value={city}
           onChange={(e) => setCity(e.target.value)}
           placeholder="e.g., Austin"
-          className="w-full px-3 py-2.5 text-sm text-[#3E2723] placeholder-[#7D6B5D] bg-surface border border-[#D4C8B8] rounded-lg focus:outline-none focus:border-[#C67B5C]"
+          className="w-full px-3 py-2.5 text-sm text-white placeholder-white/40 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-[#C67B5C]"
           autoFocus
         />
       </div>
       <div>
-        <label className="block text-xs font-medium text-[var(--warm-brown)] mb-1">State</label>
+        <label className="block text-xs font-medium text-white/60 mb-1">State</label>
         <select
           value={state}
           onChange={(e) => setState(e.target.value)}
-          className="w-full px-3 py-2.5 text-sm text-[#3E2723] bg-surface border border-[#D4C8B8] rounded-lg focus:outline-none focus:border-[#C67B5C]"
+          className="w-full px-3 py-2.5 text-sm text-white bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-[#C67B5C]"
         >
-          <option value="">Select a state</option>
+          <option value="" className="bg-[#4A3F35]">Select a state</option>
           {US_STATES.map(s => (
-            <option key={s} value={s}>{s}</option>
+            <option key={s} value={s} className="bg-[#4A3F35]">{s}</option>
           ))}
         </select>
       </div>
@@ -60,7 +60,7 @@ export default function LocationInput({ onSubmit }: LocationInputProps) {
         className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors ${
           city.trim() && state
             ? 'bg-[#C67B5C] text-white hover:bg-[#A65D3F]'
-            : 'bg-[#E8DFD0] text-[#7D6B5D] cursor-not-allowed'
+            : 'bg-white/10 text-white/30 cursor-not-allowed'
         }`}
       >
         Continue

@@ -204,9 +204,6 @@ body {
   background: rgba(253, 251, 247, 0.97);
   border-radius: 1.5rem;
   padding: 2rem;
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.15),
-    0 8px 40px rgba(0, 0, 0, 0.1);
 }
 
 /* Subtle blueprint for lighter areas */
