@@ -99,10 +99,10 @@ const ChatInput = React.memo(function ChatInput({
       {showGoogleFallback && isLoading && (
         <div className="px-4 py-2 bg-[var(--status-progress-bg)] border-t border-[#E8D5CC]">
           <div className="flex items-center justify-center gap-2">
-            <span className="text-sm text-[#B8593B]">Taking too long?</span>
+            <span className="text-sm text-rust">Taking too long?</span>
             <button
               onClick={onGoogleSearch}
-              className="inline-flex items-center gap-1 text-sm text-[#C67B5C] hover:text-[#A65D3F] underline font-medium"
+              className="inline-flex items-center gap-1 text-sm text-terracotta hover:text-terracotta-dark underline font-medium"
             >
               <Search size={14} />
               Search Google instead
@@ -142,7 +142,7 @@ const ChatInput = React.memo(function ChatInput({
 
       {/* Input */}
       <div
-        className={`bg-surface border-t border-[#D4C8B8] p-4 ${isDragOver ? 'ring-2 ring-[#C67B5C] ring-inset bg-[var(--status-progress-bg)]' : ''}`}
+        className={`bg-surface border-t border-earth-sand p-4 ${isDragOver ? 'ring-2 ring-terracotta ring-inset bg-[var(--status-progress-bg)]' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -154,14 +154,14 @@ const ChatInput = React.memo(function ChatInput({
           </div>
         )}
         {imageError && (
-          <p className="text-xs text-[#B8593B] mb-2">{imageError}</p>
+          <p className="text-xs text-rust mb-2">{imageError}</p>
         )}
 
         <div className="flex gap-2">
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isLoading}
-            className="p-2 text-[#7D6B5D] hover:text-[#C67B5C] hover:bg-[var(--status-progress-bg)] rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 text-earth-brown hover:text-terracotta hover:bg-[var(--status-progress-bg)] rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Attach image"
             title="Attach a photo for analysis"
           >

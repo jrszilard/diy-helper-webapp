@@ -117,7 +117,7 @@ export default function ExpertThreadPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Spinner size="lg" className="text-[#C67B5C]" />
+        <Spinner size="lg" className="text-terracotta" />
       </div>
     );
   }
@@ -125,22 +125,22 @@ export default function ExpertThreadPage() {
   return (
     <div className="max-w-4xl h-[calc(100vh-160px)] flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 pb-4 border-b border-[#D4C8B8]">
+      <div className="flex items-center gap-3 pb-4 border-b border-earth-sand">
         <Link
           href="/experts/dashboard/messages"
-          className="p-1.5 hover:bg-[#E8DFD0] rounded-lg transition-colors text-[#7D6B5D]"
+          className="p-1.5 hover:bg-earth-tan rounded-lg transition-colors text-earth-brown"
         >
           <ArrowLeft size={20} />
         </Link>
         <div>
-          <h1 className="text-lg font-bold text-[#3E2723]">
+          <h1 className="text-lg font-bold text-foreground">
             {otherUserName || 'Conversation'}
           </h1>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 bg-surface rounded-xl border border-[#D4C8B8] mt-4 overflow-hidden">
+      <div className="flex-1 bg-surface rounded-xl border border-earth-sand mt-4 overflow-hidden">
         <MessageThread
           messages={messages}
           currentUserId={currentUserId}

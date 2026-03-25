@@ -81,24 +81,24 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
   return (
     <Card
       padding="none"
-      className={cn('overflow-hidden', isClaimed ? 'border-[#C67B5C]' : 'border-[#4A7C59]')}
+      className={cn('overflow-hidden', isClaimed ? 'border-terracotta' : 'border-forest-green')}
     >
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-[#F5F0E6]/50 transition-colors"
+        className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-earth-cream/50 transition-colors"
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <Badge variant={isClaimed ? 'primary' : 'success'}>
             {isClaimed ? 'Claimed' : 'Answered'}
           </Badge>
           <Badge>{question.category}</Badge>
-          <p className="text-sm text-[#3E2723] truncate">{question.questionText}</p>
+          <p className="text-sm text-foreground truncate">{question.questionText}</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0 ml-2">
           {isClaimed && timeRemaining && (
             <span className={`flex items-center gap-1 text-xs font-medium ${
-              isUrgent ? 'text-[#C67B5C]' : 'text-[#7D6B5D]'
+              isUrgent ? 'text-terracotta' : 'text-earth-brown'
             }`}>
               {isUrgent && <AlertTriangle size={12} />}
               <Clock size={12} />
@@ -106,23 +106,23 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
             </span>
           )}
           {isAnswered && (
-            <CheckCircle size={14} className="text-[#4A7C59]" />
+            <CheckCircle size={14} className="text-forest-green" />
           )}
-          {expanded ? <ChevronUp size={16} className="text-[#7D6B5D]" /> : <ChevronDown size={16} className="text-[#7D6B5D]" />}
+          {expanded ? <ChevronUp size={16} className="text-earth-brown" /> : <ChevronDown size={16} className="text-earth-brown" />}
         </div>
       </button>
 
       {/* Expanded content */}
       {expanded && (
-        <div className="px-4 pb-4 border-t border-[#E8DFD0]">
+        <div className="px-4 pb-4 border-t border-earth-tan">
           {/* Question text */}
           <div className="mt-3">
-            <p className="text-sm text-[#3E2723] whitespace-pre-wrap">{question.questionText}</p>
+            <p className="text-sm text-foreground whitespace-pre-wrap">{question.questionText}</p>
           </div>
 
           {question.aiContext?.projectSummary && (
-            <div className="mt-2 bg-[#E8DFD0]/30 rounded px-3 py-2">
-              <p className="text-xs text-[#7D6B5D]">
+            <div className="mt-2 bg-earth-tan/30 rounded px-3 py-2">
+              <p className="text-xs text-earth-brown">
                 <span className="font-medium">AI Context:</span> {question.aiContext.projectSummary}
               </p>
             </div>
@@ -130,20 +130,20 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
 
           {question.photoUrls && question.photoUrls.length > 0 && (
             <div className="flex items-center gap-1 mt-2">
-              <Image size={12} className="text-[#7D6B5D]" />
-              <span className="text-xs text-[#7D6B5D]">
+              <Image size={12} className="text-earth-brown" />
+              <span className="text-xs text-earth-brown">
                 {question.photoUrls.length} photo{question.photoUrls.length !== 1 ? 's' : ''} attached
               </span>
             </div>
           )}
 
           <div className="flex items-center gap-3 mt-3">
-            <span className="flex items-center gap-1 text-xs font-medium text-[#4A7C59]">
+            <span className="flex items-center gap-1 text-xs font-medium text-forest-green">
               <DollarSign size={12} />
               Your payout: ${(question.expertPayoutCents / 100).toFixed(2)}
             </span>
             {question.diyerCity && question.diyerState && (
-              <span className="text-xs text-[#7D6B5D]">
+              <span className="text-xs text-earth-brown">
                 {question.diyerCity}, {question.diyerState}
               </span>
             )}
@@ -155,20 +155,20 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
           {/* Answer form or existing answer */}
           {isClaimed && (
             <div className="mt-4">
-              <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">
+              <label className="block text-sm font-semibold text-foreground mb-1.5">
                 Your Answer
               </label>
               <textarea
                 value={answerText}
                 onChange={(e) => { setAnswerText(e.target.value); setError(''); }}
                 rows={5}
-                className="w-full border border-[#D4C8B8] rounded-lg px-4 py-2.5 text-sm text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white resize-none"
+                className="w-full border border-earth-sand rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-terracotta bg-white resize-none"
                 placeholder="Provide a detailed, helpful answer (min 50 characters)..."
                 maxLength={2000}
               />
               <div className="flex items-center justify-between mt-1.5">
-                <p className="text-xs text-[#A89880]">{answerText.length}/2000</p>
-                {error && <p className="text-xs text-[#C67B5C] font-medium">{error}</p>}
+                <p className="text-xs text-earth-brown-light">{answerText.length}/2000</p>
+                {error && <p className="text-xs text-terracotta font-medium">{error}</p>}
               </div>
               <Button
                 variant="primary"
@@ -184,11 +184,11 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
           )}
 
           {isAnswered && question.answerText && (
-            <div className="mt-4 bg-[#4A7C59]/5 border border-[#4A7C59]/20 rounded-lg p-3">
-              <p className="text-xs font-semibold text-[#4A7C59] mb-1">Your Answer</p>
-              <p className="text-sm text-[#3E2723] whitespace-pre-wrap">{question.answerText}</p>
+            <div className="mt-4 bg-forest-green/5 border border-forest-green/20 rounded-lg p-3">
+              <p className="text-xs font-semibold text-forest-green mb-1">Your Answer</p>
+              <p className="text-sm text-foreground whitespace-pre-wrap">{question.answerText}</p>
               {question.answeredAt && (
-                <p className="text-xs text-[#7D6B5D] mt-2">Answered {formatTimeAgo(question.answeredAt)}</p>
+                <p className="text-xs text-earth-brown mt-2">Answered {formatTimeAgo(question.answeredAt)}</p>
               )}
             </div>
           )}

@@ -153,14 +153,14 @@ export default function ExpertProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Spinner size="lg" className="text-[#C67B5C]" />
+        <Spinner size="lg" className="text-terracotta" />
       </div>
     );
   }
 
   if (!profile) {
     return (
-      <div className="text-center py-20 text-[#7D6B5D]">
+      <div className="text-center py-20 text-earth-brown">
         <p>Unable to load profile.</p>
       </div>
     );
@@ -170,10 +170,10 @@ export default function ExpertProfilePage() {
     <div className="max-w-2xl">
       <SectionHeader size="lg" title="Expert Profile" subtitle="Manage your expert profile and settings" className="mb-6" />
 
-      <div className="bg-surface rounded-2xl border border-[#D4C8B8] shadow-sm p-6 space-y-5">
+      <div className="bg-surface rounded-2xl border border-earth-sand shadow-sm p-6 space-y-5">
         {/* Display Name */}
         <div>
-          <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">Display Name</label>
+          <label className="block text-sm font-semibold text-foreground mb-1.5">Display Name</label>
           <TextInput
             type="text"
             value={displayName}
@@ -185,22 +185,22 @@ export default function ExpertProfilePage() {
 
         {/* Bio */}
         <div>
-          <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">Bio</label>
+          <label className="block text-sm font-semibold text-foreground mb-1.5">Bio</label>
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             rows={3}
-            className="w-full border border-[#D4C8B8] rounded-lg px-4 py-2.5 text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#C67B5C] bg-white resize-none"
+            className="w-full border border-earth-sand rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-terracotta bg-white resize-none"
             maxLength={500}
             placeholder="Tell DIYers about your experience..."
           />
-          <p className="text-xs text-[#A89880] mt-1">{bio.length}/500</p>
+          <p className="text-xs text-earth-brown-light mt-1">{bio.length}/500</p>
         </div>
 
         {/* Location */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">City</label>
+            <label className="block text-sm font-semibold text-foreground mb-1.5">City</label>
             <TextInput
               type="text"
               value={city}
@@ -210,7 +210,7 @@ export default function ExpertProfilePage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">State</label>
+            <label className="block text-sm font-semibold text-foreground mb-1.5">State</label>
             <Select
               value={state}
               onChange={(e) => setState(e.target.value)}
@@ -226,7 +226,7 @@ export default function ExpertProfilePage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">Zip Code</label>
+            <label className="block text-sm font-semibold text-foreground mb-1.5">Zip Code</label>
             <TextInput
               type="text"
               value={zipCode}
@@ -236,7 +236,7 @@ export default function ExpertProfilePage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">Service Radius (miles)</label>
+            <label className="block text-sm font-semibold text-foreground mb-1.5">Service Radius (miles)</label>
             <TextInput
               type="number"
               value={serviceRadiusMiles}
@@ -251,7 +251,7 @@ export default function ExpertProfilePage() {
         {/* Rates */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">Hourly Rate ($)</label>
+            <label className="block text-sm font-semibold text-foreground mb-1.5">Hourly Rate ($)</label>
             <TextInput
               type="number"
               value={hourlyRate}
@@ -263,7 +263,7 @@ export default function ExpertProfilePage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">Q&A Rate ($)</label>
+            <label className="block text-sm font-semibold text-foreground mb-1.5">Q&A Rate ($)</label>
             <TextInput
               type="number"
               value={qaRate}
@@ -279,14 +279,14 @@ export default function ExpertProfilePage() {
         {/* Availability */}
         <div className="flex items-center justify-between py-2">
           <div>
-            <p className="text-sm font-semibold text-[#3E2723]">Available for Work</p>
-            <p className="text-xs text-[#7D6B5D]">Toggle off to pause receiving new questions</p>
+            <p className="text-sm font-semibold text-foreground">Available for Work</p>
+            <p className="text-xs text-earth-brown">Toggle off to pause receiving new questions</p>
           </div>
           <button
             type="button"
             onClick={() => setIsAvailable(!isAvailable)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              isAvailable ? 'bg-[#4A7C59]' : 'bg-[#D4C8B8]'
+              isAvailable ? 'bg-forest-green' : 'bg-earth-sand'
             }`}
           >
             <span
@@ -299,7 +299,7 @@ export default function ExpertProfilePage() {
 
         {/* Specialties */}
         <div>
-          <label className="block text-sm font-semibold text-[#3E2723] mb-2">Specialties</label>
+          <label className="block text-sm font-semibold text-foreground mb-2">Specialties</label>
           <div className="space-y-3">
             {specialties.map((spec, index) => (
               <div key={index} className="flex items-center gap-2">
@@ -326,8 +326,8 @@ export default function ExpertProfilePage() {
                   onClick={() => updateSpecialty(index, 'isPrimary', true)}
                   className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
                     spec.isPrimary
-                      ? 'bg-[#C67B5C] text-white'
-                      : 'bg-[#E8DFD0] text-[#7D6B5D] hover:bg-[#D4C8B8]'
+                      ? 'bg-terracotta text-white'
+                      : 'bg-earth-tan text-earth-brown hover:bg-earth-sand'
                   }`}
                   title="Set as primary"
                 >
@@ -337,7 +337,7 @@ export default function ExpertProfilePage() {
                   <button
                     type="button"
                     onClick={() => removeSpecialty(index)}
-                    className="p-1.5 text-[#A89880] hover:text-[#C67B5C] transition-colors"
+                    className="p-1.5 text-earth-brown-light hover:text-terracotta transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -349,7 +349,7 @@ export default function ExpertProfilePage() {
             <button
               type="button"
               onClick={addSpecialty}
-              className="mt-2 inline-flex items-center gap-1 text-sm text-[#5D7B93] hover:text-[var(--slate-blue-dark)] font-medium transition-colors"
+              className="mt-2 inline-flex items-center gap-1 text-sm text-slate-blue hover:text-slate-blue-dark font-medium transition-colors"
             >
               <Plus className="w-4 h-4" />
               Add Specialty
@@ -361,8 +361,8 @@ export default function ExpertProfilePage() {
         {toast && (
           <div className={`flex items-center gap-2 p-3 rounded-lg text-sm font-medium ${
             toast.type === 'success'
-              ? 'bg-[#4A7C59]/10 text-[#4A7C59]'
-              : 'bg-[#C67B5C]/10 text-[#C67B5C]'
+              ? 'bg-forest-green/10 text-forest-green'
+              : 'bg-terracotta/10 text-terracotta'
           }`}>
             {toast.type === 'success' ? (
               <CheckCircle className="w-4 h-4 flex-shrink-0" />
@@ -377,7 +377,7 @@ export default function ExpertProfilePage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="inline-flex items-center gap-2 bg-[#C67B5C] text-white px-6 py-2.5 rounded-lg hover:bg-[#A65D3F] font-semibold disabled:opacity-50 transition"
+          className="inline-flex items-center gap-2 bg-terracotta text-white px-6 py-2.5 rounded-lg hover:bg-terracotta-dark font-semibold disabled:opacity-50 transition"
         >
           {saving ? (
             <Spinner size="sm" />
@@ -390,17 +390,17 @@ export default function ExpertProfilePage() {
 
       {/* Embeddable Badge */}
       {profile && (
-        <div className="bg-surface rounded-2xl border border-[#D4C8B8] shadow-sm p-6 mt-6">
-          <h2 className="text-lg font-bold text-[#3E2723] mb-1 flex items-center gap-2">
-            <Code size={18} className="text-[#5D7B93]" />
+        <div className="bg-surface rounded-2xl border border-earth-sand shadow-sm p-6 mt-6">
+          <h2 className="text-lg font-bold text-foreground mb-1 flex items-center gap-2">
+            <Code size={18} className="text-slate-blue" />
             Embeddable Badge
           </h2>
-          <p className="text-sm text-[#7D6B5D] mb-4">
+          <p className="text-sm text-earth-brown mb-4">
             Add your verified expert badge to your website, portfolio, or social profiles.
           </p>
 
           {/* Badge preview */}
-          <div className="bg-white border border-[#D4C8B8] rounded-lg p-4 mb-4 flex items-center justify-center">
+          <div className="bg-white border border-earth-sand rounded-lg p-4 mb-4 flex items-center justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`/api/experts/${profile.id}/badge`}
@@ -412,8 +412,8 @@ export default function ExpertProfilePage() {
 
           {/* Embed code */}
           <div className="relative">
-            <label className="block text-xs font-semibold text-[#7D6B5D] mb-1">HTML Embed Code</label>
-            <div className="bg-[#3E2723] text-[#E8DFD0] rounded-lg p-3 pr-12 text-xs font-mono overflow-x-auto">
+            <label className="block text-xs font-semibold text-earth-brown mb-1">HTML Embed Code</label>
+            <div className="bg-foreground text-earth-tan rounded-lg p-3 pr-12 text-xs font-mono overflow-x-auto">
               {`<a href="${typeof window !== 'undefined' ? window.location.origin : ''}/experts/${profile.id}" target="_blank" rel="noopener"><img src="${typeof window !== 'undefined' ? window.location.origin : ''}/api/experts/${profile.id}/badge" alt="Verified Expert on DIY Helper" width="280" height="90" /></a>`}
             </div>
             <button
@@ -428,14 +428,14 @@ export default function ExpertProfilePage() {
               title="Copy embed code"
             >
               {badgeCopied ? (
-                <CheckCircle2 size={14} className="text-[#4A7C59]" />
+                <CheckCircle2 size={14} className="text-forest-green" />
               ) : (
-                <Copy size={14} className="text-[#E8DFD0]" />
+                <Copy size={14} className="text-earth-tan" />
               )}
             </button>
           </div>
 
-          <p className="text-xs text-[var(--muted)] mt-2">
+          <p className="text-xs text-muted mt-2">
             Your badge updates automatically as you answer questions and earn reviews.
           </p>
         </div>

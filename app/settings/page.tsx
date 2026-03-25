@@ -31,8 +31,8 @@ interface UsageData {
 export default function SettingsPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#F5F0E6] flex items-center justify-center">
-        <Spinner size="lg" className="text-[#C67B5C]" />
+      <div className="min-h-screen bg-earth-cream flex items-center justify-center">
+        <Spinner size="lg" className="text-terracotta" />
       </div>
     }>
       <SettingsContent />
@@ -102,22 +102,22 @@ function SettingsContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F5F0E6] flex items-center justify-center">
-        <Spinner size="lg" className="text-[#C67B5C]" />
+      <div className="min-h-screen bg-earth-cream flex items-center justify-center">
+        <Spinner size="lg" className="text-terracotta" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F0E6]">
+    <div className="min-h-screen bg-earth-cream">
       {/* Header */}
-      <header className="bg-surface border-b border-[#D4C8B8] shadow-sm">
+      <header className="bg-surface border-b border-earth-sand shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="bg-gradient-to-br from-[#C67B5C] to-[#A65D3F] p-1.5 rounded-lg">
+            <div className="bg-gradient-to-br from-terracotta to-terracotta-dark p-1.5 rounded-lg">
               <Wrench className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-[#3E2723]">DIY Helper</span>
+            <span className="text-lg font-bold text-foreground">DIY Helper</span>
           </Link>
           <div className="flex items-center gap-2">
             <NotificationBell userId={user?.id} />
@@ -130,7 +130,7 @@ function SettingsContent() {
         {/* Back link */}
         <Link
           href="/chat"
-          className="inline-flex items-center gap-1.5 text-sm text-[#7D6B5D] hover:text-[#3E2723] mb-6 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-earth-brown hover:text-foreground mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Chat
@@ -141,8 +141,8 @@ function SettingsContent() {
           {toast && (
             <div className={`flex items-center gap-2 p-4 rounded-xl text-sm font-medium ${
               toast.type === 'success'
-                ? 'bg-[#4A7C59]/10 text-[#4A7C59] border border-[#4A7C59]/20'
-                : 'bg-[#C67B5C]/10 text-[#C67B5C] border border-[#C67B5C]/20'
+                ? 'bg-forest-green/10 text-forest-green border border-forest-green/20'
+                : 'bg-terracotta/10 text-terracotta border border-terracotta/20'
             }`}>
               {toast.type === 'success' ? (
                 <CheckCircle className="w-5 h-5 flex-shrink-0" />
@@ -154,48 +154,48 @@ function SettingsContent() {
           )}
 
           {/* Subscription Card */}
-          <div className="bg-surface rounded-2xl border border-[#D4C8B8] shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-[#E8DFD0] flex items-center justify-between">
+          <div className="bg-surface rounded-2xl border border-earth-sand shadow-sm overflow-hidden">
+            <div className="px-6 py-5 border-b border-earth-tan flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Settings className="w-5 h-5 text-[#7D6B5D]" />
-                <h1 className="text-xl font-bold text-[#3E2723]">Settings</h1>
+                <Settings className="w-5 h-5 text-earth-brown" />
+                <h1 className="text-xl font-bold text-foreground">Settings</h1>
               </div>
             </div>
 
             <div className="p-6 space-y-6">
               {/* Current Plan */}
               <div>
-                <h2 className="text-sm font-semibold text-[#7D6B5D] uppercase tracking-wide mb-3">
+                <h2 className="text-sm font-semibold text-earth-brown uppercase tracking-wide mb-3">
                   Current Plan
                 </h2>
                 <div className={`rounded-xl p-5 border ${
                   isPro
-                    ? 'bg-gradient-to-br from-[#5D7B93]/5 to-[#5D7B93]/10 border-[#5D7B93]/30'
-                    : 'bg-[#F5F0E6] border-[#D4C8B8]'
+                    ? 'bg-gradient-to-br from-slate-blue/5 to-slate-blue/10 border-slate-blue/30'
+                    : 'bg-earth-cream border-earth-sand'
                 }`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       {isPro ? (
-                        <div className="w-10 h-10 bg-[#5D7B93] rounded-lg flex items-center justify-center">
+                        <div className="w-10 h-10 bg-slate-blue rounded-lg flex items-center justify-center">
                           <Crown className="w-5 h-5 text-white" />
                         </div>
                       ) : (
-                        <div className="w-10 h-10 bg-[#E8DFD0] rounded-lg flex items-center justify-center">
-                          <Zap className="w-5 h-5 text-[#7D6B5D]" />
+                        <div className="w-10 h-10 bg-earth-tan rounded-lg flex items-center justify-center">
+                          <Zap className="w-5 h-5 text-earth-brown" />
                         </div>
                       )}
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-lg font-bold text-[#3E2723]">
+                          <span className="text-lg font-bold text-foreground">
                             {isPro ? 'Pro' : 'Free'}
                           </span>
                           {isPro && (
-                            <span className="text-xs font-bold text-white bg-[#5D7B93] px-2 py-0.5 rounded-full">
+                            <span className="text-xs font-bold text-white bg-slate-blue px-2 py-0.5 rounded-full">
                               Active
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-[#7D6B5D]">
+                        <p className="text-sm text-earth-brown">
                           {isPro
                             ? 'Unlimited reports, messages, and priority expert matching'
                             : `${usage?.reports.limit ?? 5} reports & ${usage?.chatMessages.limit ?? 30} messages per month`
@@ -204,16 +204,16 @@ function SettingsContent() {
                       </div>
                     </div>
                     {isPro ? (
-                      <span className="text-lg font-bold text-[#3E2723]">
-                        $9.99<span className="text-sm font-normal text-[#7D6B5D]">/mo</span>
+                      <span className="text-lg font-bold text-foreground">
+                        $9.99<span className="text-sm font-normal text-earth-brown">/mo</span>
                       </span>
                     ) : (
-                      <span className="text-lg font-bold text-[#4A7C59]">Free</span>
+                      <span className="text-lg font-bold text-forest-green">Free</span>
                     )}
                   </div>
 
                   {isPro && subscription?.currentPeriodEnd && (
-                    <p className="text-xs text-[#7D6B5D] mt-3 pt-3 border-t border-[#5D7B93]/20">
+                    <p className="text-xs text-earth-brown mt-3 pt-3 border-t border-slate-blue/20">
                       Next billing date: {new Date(subscription.currentPeriodEnd).toLocaleDateString('en-US', {
                         year: 'numeric', month: 'long', day: 'numeric'
                       })}
@@ -224,7 +224,7 @@ function SettingsContent() {
                 {!isPro && (
                   <button
                     onClick={() => setShowUpgrade(true)}
-                    className="mt-4 inline-flex items-center gap-2 bg-[#C67B5C] text-white px-6 py-2.5 rounded-lg hover:bg-[#A65D3F] font-semibold transition"
+                    className="mt-4 inline-flex items-center gap-2 bg-terracotta text-white px-6 py-2.5 rounded-lg hover:bg-terracotta-dark font-semibold transition"
                   >
                     <Zap className="w-4 h-4" />
                     Upgrade to Pro
@@ -235,7 +235,7 @@ function SettingsContent() {
               {/* Usage */}
               {usage && (
                 <div>
-                  <h2 className="text-sm font-semibold text-[#7D6B5D] uppercase tracking-wide mb-3">
+                  <h2 className="text-sm font-semibold text-earth-brown uppercase tracking-wide mb-3">
                     This Month&apos;s Usage
                   </h2>
                   <UsageBanner usage={usage} tier={subscription?.tier || 'free'} />
@@ -244,19 +244,19 @@ function SettingsContent() {
 
               {/* Quick Links */}
               <div>
-                <h2 className="text-sm font-semibold text-[#7D6B5D] uppercase tracking-wide mb-3">
+                <h2 className="text-sm font-semibold text-earth-brown uppercase tracking-wide mb-3">
                   Account
                 </h2>
                 <div className="space-y-2">
                   <Link
                     href="/profile"
-                    className="flex items-center justify-between p-3 rounded-lg border border-[#D4C8B8] hover:bg-[#F5F0E6] transition-colors group"
+                    className="flex items-center justify-between p-3 rounded-lg border border-earth-sand hover:bg-earth-cream transition-colors group"
                   >
                     <div className="flex items-center gap-3">
-                      <CreditCard className="w-4 h-4 text-[#7D6B5D]" />
-                      <span className="text-sm font-medium text-[#3E2723]">Edit Profile</span>
+                      <CreditCard className="w-4 h-4 text-earth-brown" />
+                      <span className="text-sm font-medium text-foreground">Edit Profile</span>
                     </div>
-                    <ArrowLeft className="w-4 h-4 text-[var(--muted)] rotate-180 group-hover:text-[#7D6B5D] transition-colors" />
+                    <ArrowLeft className="w-4 h-4 text-muted rotate-180 group-hover:text-earth-brown transition-colors" />
                   </Link>
                 </div>
               </div>

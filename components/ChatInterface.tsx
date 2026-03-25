@@ -165,11 +165,11 @@ export default function ChatInterface({
   }, [chat.handleSelectConversation]);
 
   return (
-    <div className="flex flex-col h-full bg-[#F5F0E6]">
+    <div className="flex flex-col h-full bg-earth-cream">
       {/* Inventory Update Notification Toast */}
       {chat.inventoryNotification && (
         <div className={`fixed top-20 right-4 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-slide-in max-w-sm ${
-          chat.inventoryNotification.authRequired ? 'bg-[#B8593B]' : 'bg-[#4A7C59]'
+          chat.inventoryNotification.authRequired ? 'bg-rust' : 'bg-forest-green'
         }`}>
           <Package size={20} className="flex-shrink-0" />
           <div className="flex-1">
@@ -192,7 +192,7 @@ export default function ChatInterface({
           </div>
           <button
             onClick={() => chat.setInventoryNotification(null)}
-            className="ml-2 hover:bg-[var(--forest-green-dark)] p-1 rounded flex-shrink-0"
+            className="ml-2 hover:bg-forest-green-dark p-1 rounded flex-shrink-0"
             aria-label="Dismiss notification"
           >
             <X size={16} />
@@ -201,11 +201,11 @@ export default function ChatInterface({
       )}
 
       {/* Header */}
-      <div className="bg-surface border-b border-[#D4C8B8] p-4 flex items-center justify-between">
+      <div className="bg-surface border-b border-earth-sand p-4 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-[#3E2723]">DIY Helper Chat</h1>
+          <h1 className="text-xl font-bold text-foreground">DIY Helper Chat</h1>
           {projectId && (
-            <p className="text-sm text-[#7D6B5D]">
+            <p className="text-sm text-earth-brown">
               Linked to project: {projectActions.projects.find(p => p.id === projectId)?.name || 'Unknown'}
             </p>
           )}
@@ -235,7 +235,7 @@ export default function ChatInterface({
               }}
               leftIcon={Trash2}
               iconSize={18}
-              className="hover:text-[#B8593B] hover:bg-[var(--status-progress-bg)]"
+              className="hover:text-rust hover:bg-[var(--status-progress-bg)]"
               aria-label="Clear chat history"
               title="Clear chat history"
             >
@@ -317,7 +317,7 @@ export default function ChatInterface({
 
       {/* Floating Save to Project Banner */}
       {chat.messages.length > 0 && !projectId && !chat.isLoading && planner.view === 'idle' && (
-        <div className="bg-gradient-to-r from-[#C67B5C] to-[#A65D3F] px-4 py-3 shadow-lg">
+        <div className="bg-gradient-to-r from-terracotta to-terracotta-dark px-4 py-3 shadow-lg">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-white min-w-0">
               <FolderPlus size={20} className="flex-shrink-0" />
@@ -327,7 +327,7 @@ export default function ChatInterface({
             </div>
             <button
               onClick={handleSaveToProjectButton}
-              className="flex-shrink-0 bg-white text-[#C67B5C] px-4 py-1.5 rounded-lg font-semibold text-sm hover:bg-[#FDF8F3] transition-colors shadow-sm"
+              className="flex-shrink-0 bg-white text-terracotta px-4 py-1.5 rounded-lg font-semibold text-sm hover:bg-[#FDF8F3] transition-colors shadow-sm"
             >
               Save to Project
             </button>

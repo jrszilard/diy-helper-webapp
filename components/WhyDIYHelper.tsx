@@ -127,10 +127,10 @@ export default function WhyDIYHelper() {
         <div className="content-card">
           {/* Section Header */}
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
               Why DIY Helper?
             </h2>
-            <p className="text-lg text-[var(--warm-brown)] max-w-2xl mx-auto">
+            <p className="text-lg text-warm-brown max-w-2xl mx-auto">
               See how DIY Helper compares to other options for your home improvement projects
             </p>
           </div>
@@ -143,8 +143,8 @@ export default function WhyDIYHelper() {
                 onClick={() => setActiveScenario(idx)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   idx === activeScenario
-                    ? 'bg-[#C67B5C] text-white shadow-lg'
-                    : 'bg-white text-[var(--warm-brown)] hover:bg-[#F5F0E6] border border-[#E8DFD0]'
+                    ? 'bg-terracotta text-white shadow-lg'
+                    : 'bg-white text-warm-brown hover:bg-earth-cream border border-earth-tan'
                 }`}
               >
                 {s.id === 'electrical' && 'Electrical'}
@@ -155,70 +155,70 @@ export default function WhyDIYHelper() {
           </div>
 
           {/* Question Display */}
-          <div className="bg-[#4A3F35] text-white rounded-xl p-4 mb-8 text-center">
-            <p className="text-sm text-[#D4C8B8] mb-1">Your question:</p>
+          <div className="bg-earth-brown-dark text-white rounded-xl p-4 mb-8 text-center">
+            <p className="text-sm text-earth-sand mb-1">Your question:</p>
             <p className="text-lg font-medium">"{scenario.question}"</p>
           </div>
 
           {/* Comparison Grid */}
           <div className="grid md:grid-cols-3 gap-6">
             {/* ChatGPT */}
-            <div className="bg-white rounded-xl p-6 border border-[#E8DFD0]">
+            <div className="bg-white rounded-xl p-6 border border-earth-tan">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-[#F5F0E6] rounded-lg">
-                  <Bot className="w-5 h-5 text-[#7D6B5D]" />
+                <div className="p-2 bg-earth-cream rounded-lg">
+                  <Bot className="w-5 h-5 text-earth-brown" />
                 </div>
-                <h3 className="font-bold text-[#3E2723]">Generic AI</h3>
+                <h3 className="font-bold text-foreground">Generic AI</h3>
               </div>
-              <p className="text-[var(--warm-brown)] text-sm mb-4">{scenario.chatgpt.answer}</p>
+              <p className="text-warm-brown text-sm mb-4">{scenario.chatgpt.answer}</p>
               <div className="space-y-2">
                 {scenario.chatgpt.issues.map((issue, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                    <XCircle className="w-4 h-4 text-[#B8593B] flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-[var(--warm-brown)]">{issue}</span>
+                    <XCircle className="w-4 h-4 text-rust flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-warm-brown">{issue}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Google Search */}
-            <div className="bg-white rounded-xl p-6 border border-[#E8DFD0]">
+            <div className="bg-white rounded-xl p-6 border border-earth-tan">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-[#F5F0E6] rounded-lg">
-                  <Search className="w-5 h-5 text-[#7D6B5D]" />
+                <div className="p-2 bg-earth-cream rounded-lg">
+                  <Search className="w-5 h-5 text-earth-brown" />
                 </div>
-                <h3 className="font-bold text-[#3E2723]">Google Search</h3>
+                <h3 className="font-bold text-foreground">Google Search</h3>
               </div>
-              <p className="text-[var(--warm-brown)] text-sm mb-4">{scenario.google.answer}</p>
+              <p className="text-warm-brown text-sm mb-4">{scenario.google.answer}</p>
               <div className="space-y-2">
                 {scenario.google.issues.map((issue, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                    <XCircle className="w-4 h-4 text-[#B8593B] flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-[var(--warm-brown)]">{issue}</span>
+                    <XCircle className="w-4 h-4 text-rust flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-warm-brown">{issue}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* DIY Helper */}
-            <div className="bg-gradient-to-br from-[#FDF8F3] to-[var(--status-progress-bg)] rounded-xl p-6 border-2 border-[#C67B5C] relative">
+            <div className="bg-gradient-to-br from-[#FDF8F3] to-[var(--status-progress-bg)] rounded-xl p-6 border-2 border-terracotta relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="bg-[#C67B5C] text-white text-xs font-bold px-3 py-1 rounded-full">
+                <span className="bg-terracotta text-white text-xs font-bold px-3 py-1 rounded-full">
                   BEST OPTION
                 </span>
               </div>
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-[var(--status-progress-bg)] rounded-lg">
-                  <Zap className="w-5 h-5 text-[#C67B5C]" />
+                  <Zap className="w-5 h-5 text-terracotta" />
                 </div>
-                <h3 className="font-bold text-[#3E2723]">DIY Helper</h3>
+                <h3 className="font-bold text-foreground">DIY Helper</h3>
               </div>
-              <p className="text-[var(--warm-brown)] text-sm mb-4 font-medium">{scenario.diyHelper.answer}</p>
+              <p className="text-warm-brown text-sm mb-4 font-medium">{scenario.diyHelper.answer}</p>
               <div className="space-y-2">
                 {scenario.diyHelper.benefits.map((benefit, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#4A7C59] flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-[var(--warm-brown)]">{benefit}</span>
+                    <CheckCircle2 className="w-4 h-4 text-forest-green flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-warm-brown">{benefit}</span>
                   </div>
                 ))}
               </div>
@@ -229,7 +229,7 @@ export default function WhyDIYHelper() {
           <div className="text-center mt-10">
             <button
               onClick={handleTryIt}
-              className="inline-flex items-center gap-2 bg-[#C67B5C] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#A65D3F] transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 bg-terracotta text-white px-6 py-3 rounded-xl font-semibold hover:bg-terracotta-dark transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
             >
               <MessageSquare className="w-5 h-5" />
               Try This Question

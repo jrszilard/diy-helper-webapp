@@ -1,7 +1,7 @@
 'use client';
 
 function Pulse({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse bg-[#E8DFD0] rounded ${className}`} />;
+  return <div className={`animate-pulse bg-earth-tan rounded ${className}`} />;
 }
 
 export function InventorySkeleton() {
@@ -15,7 +15,7 @@ export function InventorySkeleton() {
           </div>
           <div className="space-y-2">
             {[1, 2].map(item => (
-              <div key={item} className="bg-white border border-[#D4C8B8] rounded-lg p-3 flex items-center justify-between">
+              <div key={item} className="bg-white border border-earth-sand rounded-lg p-3 flex items-center justify-between">
                 <div className="flex-1 space-y-2">
                   <Pulse className="h-4 w-32" />
                   <div className="flex gap-2">
@@ -40,7 +40,7 @@ export function ShoppingSearchSkeleton() {
   return (
     <div className="space-y-3 p-4">
       {[1, 2, 3].map(i => (
-        <div key={i} className="p-3 rounded-lg border border-[#D4C8B8] bg-white space-y-3">
+        <div key={i} className="p-3 rounded-lg border border-earth-sand bg-white space-y-3">
           <div className="flex justify-between items-start">
             <div className="space-y-2 flex-1">
               <Pulse className="h-4 w-40" />

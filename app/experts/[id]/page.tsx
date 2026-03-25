@@ -55,18 +55,18 @@ export default function ExpertDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F5F0E6] flex items-center justify-center">
-        <Spinner size="lg" className="text-[#C67B5C]" />
+      <div className="min-h-screen bg-earth-cream flex items-center justify-center">
+        <Spinner size="lg" className="text-terracotta" />
       </div>
     );
   }
 
   if (error || !expert) {
     return (
-      <div className="min-h-screen bg-[#F5F0E6] flex items-center justify-center">
+      <div className="min-h-screen bg-earth-cream flex items-center justify-center">
         <div className="text-center">
-          <p className="text-sm text-[#7D6B5D] mb-4">Expert not found</p>
-          <Link href="/experts" className="text-sm text-[#5D7B93] hover:underline">
+          <p className="text-sm text-earth-brown mb-4">Expert not found</p>
+          <Link href="/experts" className="text-sm text-slate-blue hover:underline">
             Browse Experts
           </Link>
         </div>
@@ -75,12 +75,12 @@ export default function ExpertDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F0E6]">
-      <header className="bg-surface border-b border-[#D4C8B8] shadow-sm">
+    <div className="min-h-screen bg-earth-cream">
+      <header className="bg-surface border-b border-earth-sand shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-4">
           <Link
             href="/experts"
-            className="flex items-center gap-1.5 text-sm text-[#5D7B93] hover:text-[var(--slate-blue-dark)] transition-colors"
+            className="flex items-center gap-1.5 text-sm text-slate-blue hover:text-slate-blue-dark transition-colors"
           >
             <ArrowLeft size={16} />
             Back to Experts

@@ -23,8 +23,6 @@ export default function UpgradeModal({ isOpen, onClose, feature }: UpgradeModalP
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!isOpen) return null;
-
   const handleUpgrade = async () => {
     setLoading(true);
     setError(null);
@@ -61,44 +59,44 @@ export default function UpgradeModal({ isOpen, onClose, feature }: UpgradeModalP
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-[#C67B5C]/10 rounded-full mb-3">
-            <Zap size={24} className="text-[#C67B5C]" />
-          </div>
-          <h2 className="text-xl font-bold text-[#3E2723]">Upgrade to Pro</h2>
-          {feature && (
-            <p className="text-sm text-[#7D6B5D] mt-1">
-              Unlock {feature} and more with Pro
-            </p>
-          )}
+        <div className="inline-flex items-center justify-center w-12 h-12 bg-terracotta/10 rounded-full mb-3">
+          <Zap size={24} className="text-terracotta" />
         </div>
-
-        <ul className="space-y-3 mb-6">
-          {PRO_BENEFITS.map(({ icon: Icon, text }) => (
-            <li key={text} className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#4A7C59]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Icon size={16} className="text-[#4A7C59]" />
-              </div>
-              <span className="text-sm text-[#3E2723]">{text}</span>
-            </li>
-          ))}
-        </ul>
-
-        <div className="text-center mb-4">
-          <span className="text-3xl font-bold text-[#3E2723]">$9.99</span>
-          <span className="text-sm text-[#7D6B5D]">/month</span>
-        </div>
-
-        {error && (
-          <p className="text-sm text-red-600 text-center mb-3">{error}</p>
+        <h2 className="text-xl font-bold text-foreground">Upgrade to Pro</h2>
+        {feature && (
+          <p className="text-sm text-earth-brown mt-1">
+            Unlock {feature} and more with Pro
+          </p>
         )}
+      </div>
 
-        <Button variant="primary" fullWidth onClick={handleUpgrade} disabled={loading}>
-          {loading ? 'Redirecting...' : 'Upgrade Now'}
-        </Button>
+      <ul className="space-y-3 mb-6">
+        {PRO_BENEFITS.map(({ icon: Icon, text }) => (
+          <li key={text} className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-forest-green/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Icon size={16} className="text-forest-green" />
+            </div>
+            <span className="text-sm text-foreground">{text}</span>
+          </li>
+        ))}
+      </ul>
 
-        <p className="text-xs text-center text-[#7D6B5D] mt-3">
-          Cancel anytime. Secure checkout via Stripe.
-        </p>
+      <div className="text-center mb-4">
+        <span className="text-3xl font-bold text-foreground">$9.99</span>
+        <span className="text-sm text-earth-brown">/month</span>
+      </div>
+
+      {error && (
+        <p className="text-sm text-red-600 text-center mb-3">{error}</p>
+      )}
+
+      <Button variant="primary" fullWidth onClick={handleUpgrade} disabled={loading}>
+        {loading ? 'Redirecting...' : 'Upgrade Now'}
+      </Button>
+
+      <p className="text-xs text-center text-earth-brown mt-3">
+        Cancel anytime. Secure checkout via Stripe.
+      </p>
     </Modal>
   );
 }

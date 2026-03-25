@@ -56,28 +56,28 @@ export default function ExpertHelpDropdown({
     <div className="relative" ref={ref}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-white bg-[#5D7B93] hover:bg-[var(--slate-blue-dark)] transition-colors shadow-md"
+        className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-white bg-slate-blue hover:bg-slate-blue-dark transition-colors shadow-md"
       >
         {proRequired && (
-          <span className="w-2 h-2 bg-[#C67B5C] rounded-full animate-pulse" />
+          <span className="w-2 h-2 bg-terracotta rounded-full animate-pulse" />
         )}
         Get Expert Help
         <ChevronDown size={16} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-72 bg-surface border border-[#D4C8B8] rounded-lg shadow-xl z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-72 bg-surface border border-earth-sand rounded-lg shadow-xl z-50 overflow-hidden">
           {options.map(({ label, description, icon: Icon, href, comingSoon }) => {
             if (comingSoon) {
               return (
                 <div
                   key={label}
-                  className="flex items-start gap-3 px-4 py-3 border-b border-[#D4C8B8]/50 opacity-60 cursor-default"
+                  className="flex items-start gap-3 px-4 py-3 border-b border-earth-sand/50 opacity-60 cursor-default"
                 >
-                  <Icon size={18} className="text-[#7D6B5D] mt-0.5 flex-shrink-0" />
+                  <Icon size={18} className="text-earth-brown mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-[#3E2723]">{label}</p>
-                    <p className="text-xs text-[#7D6B5D]">{description}</p>
+                    <p className="text-sm font-medium text-foreground">{label}</p>
+                    <p className="text-xs text-earth-brown">{description}</p>
                     <span className="text-xs text-[var(--muted)] italic">Coming Soon</span>
                   </div>
                 </div>
@@ -88,20 +88,20 @@ export default function ExpertHelpDropdown({
               return (
                 <div
                   key={label}
-                  className="px-4 py-3 border-b border-[#D4C8B8]/50"
+                  className="px-4 py-3 border-b border-earth-sand/50"
                 >
                   <div className="flex items-start gap-3">
-                    <Icon size={18} className="text-[#5D7B93] mt-0.5 flex-shrink-0" />
+                    <Icon size={18} className="text-slate-blue mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-medium text-[#3E2723]">{label}</p>
-                      <p className="text-xs text-[#4A7C59] font-medium mt-0.5">First question free with a new account</p>
+                      <p className="text-sm font-medium text-foreground">{label}</p>
+                      <p className="text-xs text-forest-green font-medium mt-0.5">First question free with a new account</p>
                       <a
                         href="/chat"
                         onClick={() => {
                           localStorage.setItem('expert-callout-referral', 'true');
                           setIsOpen(false);
                         }}
-                        className="inline-flex items-center gap-1 mt-1.5 text-xs font-semibold text-[#5D7B93] hover:text-[var(--slate-blue-dark)] transition-colors"
+                        className="inline-flex items-center gap-1 mt-1.5 text-xs font-semibold text-slate-blue hover:text-slate-blue-dark transition-colors"
                       >
                         Sign up to ask
                         <span aria-hidden="true">&rarr;</span>
@@ -116,13 +116,13 @@ export default function ExpertHelpDropdown({
               <a
                 key={label}
                 href={href}
-                className="flex items-start gap-3 px-4 py-3 border-b border-[#D4C8B8]/50 hover:bg-[#E8DFD0]/50 transition-colors"
+                className="flex items-start gap-3 px-4 py-3 border-b border-earth-sand/50 hover:bg-earth-tan/50 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                <Icon size={18} className="text-[#5D7B93] mt-0.5 flex-shrink-0" />
+                <Icon size={18} className="text-slate-blue mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-[#3E2723]">{label}</p>
-                  <p className="text-xs text-[#7D6B5D]">{description}</p>
+                  <p className="text-sm font-medium text-foreground">{label}</p>
+                  <p className="text-xs text-earth-brown">{description}</p>
                 </div>
               </a>
             );

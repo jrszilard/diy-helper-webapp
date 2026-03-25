@@ -26,7 +26,7 @@ export default function Avatar({ name, src, size = 'md', className }: AvatarProp
       )}
     >
       {src ? (
-        <img src={src} alt={name} className={cn('rounded-full object-cover', container)} />
+        <img src={src} alt={name} loading="lazy" className={cn('rounded-full object-cover', container)} />
       ) : (
         <span className={cn('font-bold text-[var(--slate-blue)]', text)}>{initial}</span>
       )}

@@ -111,9 +111,9 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Profile header */}
-      <div className="bg-white border border-[#D4C8B8] rounded-lg p-6">
+      <div className="bg-white border border-earth-sand rounded-lg p-6">
         <div className="flex items-start gap-4">
-          <div className="w-20 h-20 bg-[#5D7B93]/10 rounded-full flex items-center justify-center flex-shrink-0">
+          <div className="w-20 h-20 bg-slate-blue/10 rounded-full flex items-center justify-center flex-shrink-0">
             {expert.profilePhotoUrl ? (
               <img
                 src={expert.profilePhotoUrl}
@@ -121,16 +121,16 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
                 className="w-20 h-20 rounded-full object-cover"
               />
             ) : (
-              <span className="text-2xl font-bold text-[#5D7B93]">
+              <span className="text-2xl font-bold text-slate-blue">
                 {expert.displayName.charAt(0).toUpperCase()}
               </span>
             )}
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-[#3E2723]">{expert.displayName}</h1>
+              <h1 className="text-xl font-bold text-foreground">{expert.displayName}</h1>
               {expert.verificationLevel >= 2 && (
-                <Shield size={18} className="text-[#5D7B93]" />
+                <Shield size={18} className="text-slate-blue" />
               )}
               {expert.expertLevel && expert.expertLevel !== 'bronze' && (
                 <ExpertLevelBadge level={expert.expertLevel as ExpertLevel} size="md" />
@@ -144,29 +144,29 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
                     <Star
                       key={star}
                       size={14}
-                      className={star <= Math.round(expert.avgRating) ? 'fill-[#C67B5C] text-[#C67B5C]' : 'text-[#D4C8B8]'}
+                      className={star <= Math.round(expert.avgRating) ? 'fill-terracotta text-terracotta' : 'text-earth-sand'}
                     />
                   ))}
                 </div>
-                <span className="text-sm text-[#7D6B5D]">
+                <span className="text-sm text-earth-brown">
                   {expert.avgRating.toFixed(1)} ({expert.totalReviews} reviews)
                 </span>
               </div>
             </div>
 
             <div className="flex items-center gap-4 mt-2">
-              <span className="flex items-center gap-1 text-sm text-[#7D6B5D]">
+              <span className="flex items-center gap-1 text-sm text-earth-brown">
                 <MapPin size={14} />
                 {expert.city}, {expert.state}
               </span>
               {expert.hourlyRateCents && (
-                <span className="flex items-center gap-1 text-sm font-medium text-[#4A7C59]">
+                <span className="flex items-center gap-1 text-sm font-medium text-forest-green">
                   <DollarSign size={14} />
                   ${(expert.hourlyRateCents / 100).toFixed(0)}/hr
                 </span>
               )}
               {expert.responseTimeHours && (
-                <span className="flex items-center gap-1 text-sm text-[#7D6B5D]">
+                <span className="flex items-center gap-1 text-sm text-earth-brown">
                   <Clock size={14} />
                   ~{expert.responseTimeHours}h response
                 </span>
@@ -176,22 +176,22 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
         </div>
 
         {expert.bio && (
-          <div className="mt-4 pt-4 border-t border-[#D4C8B8]">
-            <p className="text-sm text-[#3E2723]">{expert.bio}</p>
+          <div className="mt-4 pt-4 border-t border-earth-sand">
+            <p className="text-sm text-foreground">{expert.bio}</p>
           </div>
         )}
 
         {expert.specialties.length > 0 && (
           <div className="mt-4">
-            <h3 className="text-xs font-semibold text-[#7D6B5D] mb-2">Specialties</h3>
+            <h3 className="text-xs font-semibold text-earth-brown mb-2">Specialties</h3>
             <div className="flex flex-wrap gap-2">
               {expert.specialties.map(s => (
                 <span
                   key={s.specialty}
                   className={`px-3 py-1 text-xs rounded-full font-medium ${
                     s.isPrimary
-                      ? 'bg-[#C67B5C]/10 text-[#C67B5C] border border-[#C67B5C]/30'
-                      : 'bg-[#5D7B93]/10 text-[#5D7B93]'
+                      ? 'bg-terracotta/10 text-terracotta border border-terracotta/30'
+                      : 'bg-slate-blue/10 text-slate-blue'
                   }`}
                 >
                   {s.specialty.replace('_', ' ')}
@@ -232,11 +232,11 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
 
         {/* Inline message composer */}
         {showMessageBox && (
-          <div className="mt-4 p-4 bg-[#F5F0E6] rounded-lg border border-[#D4C8B8]">
+          <div className="mt-4 p-4 bg-earth-cream rounded-lg border border-earth-sand">
             {messageSent ? (
               <div className="text-center py-2">
-                <p className="text-sm font-medium text-[#4A7C59]">Message sent!</p>
-                <Link href={`/messages/${expert.userId}`} className="text-xs text-[#5D7B93] hover:underline mt-1 inline-block">
+                <p className="text-sm font-medium text-forest-green">Message sent!</p>
+                <Link href={`/messages/${expert.userId}`} className="text-xs text-slate-blue hover:underline mt-1 inline-block">
                   View your messages
                 </Link>
               </div>
@@ -244,12 +244,12 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
               <>
                 {/* Project selector */}
                 <div className="mb-3">
-                  <label className="block text-xs font-medium text-[#7D6B5D] mb-1">
+                  <label className="block text-xs font-medium text-earth-brown mb-1">
                     Link a project for context (optional)
                   </label>
                   {projectsLoaded && projects.length === 0 ? (
                     <p className="text-xs text-[var(--muted)] italic">
-                      No projects yet. <Link href="/chat" className="text-[#5D7B93] hover:underline">Start a project</Link> first to share details with an expert.
+                      No projects yet. <Link href="/chat" className="text-slate-blue hover:underline">Start a project</Link> first to share details with an expert.
                     </p>
                   ) : (
                     <Select
@@ -264,7 +264,7 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
                     </Select>
                   )}
                   {selectedProjectId && (
-                    <p className="text-xs text-[#4A7C59] mt-1">
+                    <p className="text-xs text-forest-green mt-1">
                       The expert will see your project name and a link to the full details.
                     </p>
                   )}
@@ -275,14 +275,14 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
                   onChange={e => setMessageText(e.target.value)}
                   placeholder={`Describe what you need help with...`}
                   rows={4}
-                  className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
+                  className="w-full px-3 py-2 border border-earth-sand rounded-lg bg-white text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-terracotta/50 resize-none"
                   maxLength={2000}
                 />
                 {messageError && (
                   <p className="text-xs text-red-600 mt-1">{messageError}</p>
                 )}
                 <div className="flex items-center justify-between mt-2">
-                  <span className="text-xs text-[#7D6B5D]">{messageText.length}/2000</span>
+                  <span className="text-xs text-earth-brown">{messageText.length}/2000</span>
                   <Button
                     variant="primary"
                     size="sm"
@@ -300,21 +300,21 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
 
       {/* Rates */}
       {(expert.hourlyRateCents || expert.qaRateCents) && (
-        <div className="bg-white border border-[#D4C8B8] rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-[#3E2723] mb-3">Rates</h3>
+        <div className="bg-white border border-earth-sand rounded-lg p-4">
+          <h3 className="text-sm font-semibold text-foreground mb-3">Rates</h3>
           <div className="grid grid-cols-2 gap-4">
             {expert.hourlyRateCents && (
               <div>
-                <p className="text-xs text-[#7D6B5D]">Hourly Rate</p>
-                <p className="text-lg font-bold text-[#4A7C59]">
+                <p className="text-xs text-earth-brown">Hourly Rate</p>
+                <p className="text-lg font-bold text-forest-green">
                   ${(expert.hourlyRateCents / 100).toFixed(0)}/hr
                 </p>
               </div>
             )}
             {expert.qaRateCents && (
               <div>
-                <p className="text-xs text-[#7D6B5D]">Q&A Rate</p>
-                <p className="text-lg font-bold text-[#4A7C59]">
+                <p className="text-xs text-earth-brown">Q&A Rate</p>
+                <p className="text-lg font-bold text-forest-green">
                   ${(expert.qaRateCents / 100).toFixed(0)}
                 </p>
               </div>
@@ -325,20 +325,20 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
 
       {/* Performance stats */}
       {(expert.totalQuestionsAnswered ?? 0) > 0 && (
-        <div className="bg-white border border-[#D4C8B8] rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-[#3E2723] mb-3 flex items-center gap-2">
-            <TrendingUp size={16} className="text-[#5D7B93]" />
+        <div className="bg-white border border-earth-sand rounded-lg p-4">
+          <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+            <TrendingUp size={16} className="text-slate-blue" />
             Performance
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div>
-              <p className="text-xs text-[#7D6B5D]">Questions Answered</p>
-              <p className="text-lg font-bold text-[#3E2723]">{expert.totalQuestionsAnswered}</p>
+              <p className="text-xs text-earth-brown">Questions Answered</p>
+              <p className="text-lg font-bold text-foreground">{expert.totalQuestionsAnswered}</p>
             </div>
             {(expert.acceptanceRate ?? 0) > 0 && (
               <div>
-                <p className="text-xs text-[#7D6B5D]">Acceptance Rate</p>
-                <p className="text-lg font-bold text-[#4A7C59] flex items-center gap-1">
+                <p className="text-xs text-earth-brown">Acceptance Rate</p>
+                <p className="text-lg font-bold text-forest-green flex items-center gap-1">
                   <CheckCircle size={14} />
                   {expert.acceptanceRate}%
                 </p>
@@ -346,8 +346,8 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
             )}
             {expert.avgResponseMinutes && (
               <div>
-                <p className="text-xs text-[#7D6B5D]">Avg Response</p>
-                <p className="text-lg font-bold text-[#3E2723]">
+                <p className="text-xs text-earth-brown">Avg Response</p>
+                <p className="text-lg font-bold text-foreground">
                   {expert.avgResponseMinutes < 60
                     ? `${expert.avgResponseMinutes}m`
                     : `${(expert.avgResponseMinutes / 60).toFixed(1)}h`}
@@ -356,7 +356,7 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
             )}
             {expert.expertLevel && (
               <div>
-                <p className="text-xs text-[#7D6B5D]">Expert Level</p>
+                <p className="text-xs text-earth-brown">Expert Level</p>
                 <div className="mt-1">
                   <ExpertLevelBadge level={(expert.expertLevel || 'bronze') as ExpertLevel} size="md" />
                 </div>
@@ -376,12 +376,12 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
 
       {/* Reviews */}
       <div>
-        <h3 className="text-sm font-semibold text-[#3E2723] mb-3">
+        <h3 className="text-sm font-semibold text-foreground mb-3">
           Reviews ({reviews.length})
         </h3>
         {reviews.length === 0 ? (
-          <div className="bg-white border border-[#D4C8B8] rounded-lg p-6 text-center">
-            <p className="text-sm text-[#7D6B5D]">No reviews yet</p>
+          <div className="bg-white border border-earth-sand rounded-lg p-6 text-center">
+            <p className="text-sm text-earth-brown">No reviews yet</p>
           </div>
         ) : (
           <div className="space-y-3">

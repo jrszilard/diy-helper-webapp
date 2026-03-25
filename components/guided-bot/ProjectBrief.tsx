@@ -71,7 +71,7 @@ export default function ProjectBrief({ gathered, onEdit, onSubmit, isSubmitting 
           className={`w-full py-3 rounded-xl text-base font-bold transition-all duration-200 flex items-center justify-center gap-2 ${
             isSubmitting
               ? 'bg-white/20 text-white/50 cursor-not-allowed'
-              : 'bg-[#C67B5C] text-white hover:bg-[#A65D3F] hover:-translate-y-0.5'
+              : 'bg-terracotta text-white hover:bg-terracotta-dark hover:-translate-y-0.5'
           }`}
         >
           {isSubmitting ? (
@@ -109,7 +109,7 @@ function SummaryRow({
       </div>
       <button
         onClick={onEdit}
-        className="text-xs text-[#C67B5C] hover:text-[#A65D3F] font-medium flex-shrink-0 mt-1"
+        className="text-xs text-terracotta hover:text-terracotta-dark font-medium flex-shrink-0 mt-1"
       >
         Edit
       </button>

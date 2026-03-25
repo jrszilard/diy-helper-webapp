@@ -100,7 +100,7 @@ export default function GuidedBot() {
         );
       case 'agent-progress':
         return (
-          <div className="rounded-xl overflow-hidden border border-[#D4C8B8]">
+          <div className="rounded-xl overflow-hidden border border-earth-sand">
             <AgentProgress
               phases={agentRun.phases}
               overallProgress={agentRun.overallProgress}
@@ -123,7 +123,7 @@ export default function GuidedBot() {
     return (
       <div className="flex flex-col">
         {/* Compact conversation summary */}
-        <div className="bg-surface border-b border-[#D4C8B8] p-4">
+        <div className="bg-surface border-b border-earth-sand p-4">
           <p className="text-sm text-[var(--warm-brown)]">
             Your project plan for <strong>{bot.gathered.projectType || 'DIY Project'}</strong> in{' '}
             <strong>{bot.gathered.city}, {bot.gathered.state}</strong> is ready!
@@ -146,14 +146,14 @@ export default function GuidedBot() {
 
         {/* Auth CTA for unauthenticated users */}
         {!isAuthenticated && (
-          <div className="bg-[#FDF8F3] border-t border-[#D4C8B8] p-4">
+          <div className="bg-[#FDF8F3] border-t border-earth-sand p-4">
             <div className="flex items-center justify-between gap-4">
               <p className="text-sm text-[var(--warm-brown)]">
                 Sign in to save your project plan, track materials, and access it later.
               </p>
               <a
                 href="/chat"
-                className="flex items-center gap-2 px-4 py-2 bg-[#C67B5C] text-white text-sm font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors whitespace-nowrap"
+                className="flex items-center gap-2 px-4 py-2 bg-terracotta text-white text-sm font-semibold rounded-lg hover:bg-terracotta-dark transition-colors whitespace-nowrap"
               >
                 <LogIn className="w-4 h-4" />
                 Sign In

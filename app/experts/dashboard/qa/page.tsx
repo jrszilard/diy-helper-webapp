@@ -187,7 +187,7 @@ export default function ExpertQAQueuePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Spinner size="lg" className="text-[#C67B5C]" />
+        <Spinner size="lg" className="text-terracotta" />
       </div>
     );
   }
@@ -197,16 +197,16 @@ export default function ExpertQAQueuePage() {
 
   return (
     <div className="max-w-4xl">
-      <h1 className="text-xl font-bold text-[#3E2723] mb-6">Q&A Queue</h1>
+      <h1 className="text-xl font-bold text-foreground mb-6">Q&A Queue</h1>
 
       {/* Active Questions Section */}
       {activeQuestions.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
-            <ClipboardList size={18} className="text-[#C67B5C]" />
-            <h2 className="text-lg font-semibold text-[#3E2723]">
+            <ClipboardList size={18} className="text-terracotta" />
+            <h2 className="text-lg font-semibold text-foreground">
               Your Active Questions
-              <span className="ml-2 text-sm font-normal text-[#7D6B5D]">
+              <span className="ml-2 text-sm font-normal text-earth-brown">
                 ({claimedQuestions.length} to answer{answeredQuestions.length > 0 ? `, ${answeredQuestions.length} answered` : ''})
               </span>
             </h2>
@@ -227,10 +227,10 @@ export default function ExpertQAQueuePage() {
       {/* Open Queue Section */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Inbox size={18} className="text-[#5D7B93]" />
-          <h2 className="text-lg font-semibold text-[#3E2723]">
+          <Inbox size={18} className="text-slate-blue" />
+          <h2 className="text-lg font-semibold text-foreground">
             Open Questions
-            <span className="ml-2 text-sm font-normal text-[#7D6B5D]">
+            <span className="ml-2 text-sm font-normal text-earth-brown">
               ({questions.length} available)
             </span>
           </h2>
@@ -242,26 +242,26 @@ export default function ExpertQAQueuePage() {
       {bidModalQuestionId && bidModalQuestion && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b border-[#D4C8B8]">
-              <h3 className="text-lg font-bold text-[#3E2723]">Submit Proposal</h3>
-              <button onClick={() => setBidModalQuestionId(null)} className="text-[#7D6B5D] hover:text-[#3E2723]">
+            <div className="flex items-center justify-between p-4 border-b border-earth-sand">
+              <h3 className="text-lg font-bold text-foreground">Submit Proposal</h3>
+              <button onClick={() => setBidModalQuestionId(null)} className="text-earth-brown hover:text-foreground">
                 <X size={20} />
               </button>
             </div>
             <div className="p-4 space-y-4">
               {/* Question preview */}
-              <div className="bg-[#E8DFD0]/30 rounded-lg p-3">
-                <p className="text-sm text-[#3E2723] line-clamp-3">{bidModalQuestion.questionText}</p>
-                <span className="text-xs text-[#7D6B5D] mt-1 inline-block">{bidModalQuestion.category}</span>
+              <div className="bg-earth-tan/30 rounded-lg p-3">
+                <p className="text-sm text-foreground line-clamp-3">{bidModalQuestion.questionText}</p>
+                <span className="text-xs text-earth-brown mt-1 inline-block">{bidModalQuestion.category}</span>
               </div>
 
               {/* Price */}
               <div>
-                <label className="block text-sm font-medium text-[#3E2723] mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Your Price ($15 – $150)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7D6B5D]">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-earth-brown">$</span>
                   <input
                     type="number"
                     min="15"
@@ -269,12 +269,12 @@ export default function ExpertQAQueuePage() {
                     step="5"
                     value={bidPriceDollars}
                     onChange={(e) => setBidPriceDollars(e.target.value)}
-                    className="w-full pl-7 pr-3 py-2 border border-[#D4C8B8] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5D7B93]/40"
+                    className="w-full pl-7 pr-3 py-2 border border-earth-sand rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-blue/40"
                     placeholder="45"
                   />
                 </div>
                 {bidPriceDollars && (
-                  <p className="text-xs text-[#7D6B5D] mt-1">
+                  <p className="text-xs text-earth-brown mt-1">
                     DIYer pays ${bidPriceDollars} · You earn ${(parseFloat(bidPriceDollars || '0') * 0.82).toFixed(2)}
                   </p>
                 )}
@@ -282,22 +282,22 @@ export default function ExpertQAQueuePage() {
 
               {/* Pitch */}
               <div>
-                <label className="block text-sm font-medium text-[#3E2723] mb-1">
-                  Your Pitch <span className="text-[var(--muted)] font-normal">(why you&apos;re the right expert)</span>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Your Pitch <span className="text-muted font-normal">(why you&apos;re the right expert)</span>
                 </label>
                 <textarea
                   rows={3}
                   value={bidPitch}
                   onChange={(e) => setBidPitch(e.target.value)}
-                  className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5D7B93]/40 resize-none"
+                  className="w-full px-3 py-2 border border-earth-sand rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-blue/40 resize-none"
                   placeholder="I've worked on similar projects for 15 years and can help you..."
                 />
               </div>
 
               {/* Estimated time */}
               <div>
-                <label className="block text-sm font-medium text-[#3E2723] mb-1">
-                  Estimated Response Time <span className="text-[var(--muted)] font-normal">(minutes, optional)</span>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Estimated Response Time <span className="text-muted font-normal">(minutes, optional)</span>
                 </label>
                 <input
                   type="number"
@@ -305,21 +305,21 @@ export default function ExpertQAQueuePage() {
                   max="120"
                   value={bidEstMinutes}
                   onChange={(e) => setBidEstMinutes(e.target.value)}
-                  className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5D7B93]/40"
+                  className="w-full px-3 py-2 border border-earth-sand rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-blue/40"
                   placeholder="15"
                 />
               </div>
 
               {/* Relevant experience */}
               <div>
-                <label className="block text-sm font-medium text-[#3E2723] mb-1">
-                  Relevant Experience <span className="text-[var(--muted)] font-normal">(optional)</span>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Relevant Experience <span className="text-muted font-normal">(optional)</span>
                 </label>
                 <textarea
                   rows={2}
                   value={bidExperience}
                   onChange={(e) => setBidExperience(e.target.value)}
-                  className="w-full px-3 py-2 border border-[#D4C8B8] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5D7B93]/40 resize-none"
+                  className="w-full px-3 py-2 border border-earth-sand rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-blue/40 resize-none"
                   placeholder="Licensed electrician with 20 years of residential experience..."
                 />
               </div>
@@ -331,7 +331,7 @@ export default function ExpertQAQueuePage() {
               <button
                 onClick={handleSubmitBid}
                 disabled={bidSubmitting || !bidPitch.trim() || !bidPriceDollars}
-                className="w-full py-3 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[var(--slate-blue-dark)] transition-colors disabled:opacity-50"
+                className="w-full py-3 bg-slate-blue text-white text-sm font-semibold rounded-lg hover:bg-slate-blue-dark transition-colors disabled:opacity-50"
               >
                 {bidSubmitting ? (
                   <Spinner size="sm" className="mx-auto" />

@@ -65,19 +65,23 @@ export default function SaveMaterialsDialog({
   return (
     <>
       {/* Save to Project Dialog */}
-      {showSaveDialog && extractedMaterials && !showCreateProjectDialog && (
-      <Modal isOpen onClose={onCloseSaveDialog} title="Save Materials to Project">
-            <div>
-            <p className="text-[var(--warm-brown)] mb-2">
+      <Modal
+        isOpen={showSaveDialog && !!extractedMaterials && !showCreateProjectDialog}
+        onClose={onCloseSaveDialog}
+        title="Save Materials to Project"
+      >
+        {extractedMaterials && (
+          <div>
+            <p className="text-warm-brown mb-2">
               I found {extractedMaterials.materials.length} items to purchase for &quot;{extractedMaterials.project_description}&quot;.
             </p>
             {extractedMaterials.owned_items && extractedMaterials.owned_items.length > 0 && (
-              <p className="text-[#4A7C59] text-sm mb-4">
+              <p className="text-forest-green text-sm mb-4">
                 {extractedMaterials.owned_items.length} items you already own were excluded from the list.
               </p>
             )}
             {extractedMaterials.total_estimate && (
-              <p className="text-[#7D6B5D] text-sm mb-4">
+              <p className="text-earth-brown text-sm mb-4">
                 Estimated total: ${extractedMaterials.total_estimate.toFixed(2)}
               </p>
             )}
@@ -85,7 +89,7 @@ export default function SaveMaterialsDialog({
             {/* Show authenticated user's projects */}
             {!isGuestMode && projects.length > 0 && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-[var(--warm-brown)] mb-2">
+                <label className="block text-sm font-medium text-warm-brown mb-2">
                   Select existing project:
                 </label>
                 <Select
@@ -100,15 +104,14 @@ export default function SaveMaterialsDialog({
                     </option>
                   ))}
                 </Select>
-
-                <div className="text-center text-[#A89880] text-sm my-3">or</div>
+                <div className="text-center text-earth-brown-light text-sm my-3">or</div>
               </div>
             )}
 
             {/* Show guest projects */}
             {isGuestMode && guestProjects.length > 0 && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-[var(--warm-brown)] mb-2">
+                <label className="block text-sm font-medium text-warm-brown mb-2">
                   Select existing project:
                 </label>
                 <Select
@@ -123,8 +126,7 @@ export default function SaveMaterialsDialog({
                     </option>
                   ))}
                 </Select>
-
-                <div className="text-center text-[#A89880] text-sm my-3">or</div>
+                <div className="text-center text-earth-brown-light text-sm my-3">or</div>
               </div>
             )}
 
@@ -139,13 +141,13 @@ export default function SaveMaterialsDialog({
 
             {/* Guest mode notice */}
             {isGuestMode && (
-              <p className="text-xs text-[#7D6B5D] mt-4 text-center">
+              <p className="text-xs text-earth-brown mt-4 text-center">
                 Projects are saved locally. Sign in to sync across devices.
               </p>
             )}
-            </div>
+          </div>
+        )}
       </Modal>
-      )}
 
       {/* Create New Project Dialog */}
       <Modal
@@ -153,61 +155,61 @@ export default function SaveMaterialsDialog({
         onClose={onCloseCreateDialog}
         title={extractedMaterials ? 'Create New Project' : 'Save to New Project'}
       >
-            <div>
-            <p className="text-[var(--warm-brown)] mb-4">
-              {extractedMaterials
-                ? 'Enter a name for your project:'
-                : 'Save this conversation to a new project. You can add materials later.'}
-            </p>
+        <div>
+          <p className="text-warm-brown mb-4">
+            {extractedMaterials
+              ? 'Enter a name for your project:'
+              : 'Save this conversation to a new project. You can add materials later.'}
+          </p>
 
-            <TextInput
-              type="text"
-              value={newProjectName}
-              onChange={(e) => onNewProjectNameChange(e.target.value)}
-              placeholder={extractedMaterials?.project_description || 'My DIY Project'}
-              fullWidth
-              className="mb-4"
-              onKeyPress={(e) => e.key === 'Enter' && onConfirmCreateProject()}
-              autoFocus
-            />
+          <TextInput
+            type="text"
+            value={newProjectName}
+            onChange={(e) => onNewProjectNameChange(e.target.value)}
+            placeholder={extractedMaterials?.project_description || 'My DIY Project'}
+            fullWidth
+            className="mb-4"
+            onKeyPress={(e) => e.key === 'Enter' && onConfirmCreateProject()}
+            autoFocus
+          />
 
-            <div className="flex gap-2">
-              <Button variant="primary" fullWidth onClick={onConfirmCreateProject} disabled={!newProjectName.trim()}>
-                {extractedMaterials ? 'Create & Save' : 'Create Project'}
-              </Button>
-              <Button variant="ghost" fullWidth onClick={onCloseCreateDialog}>
-                Cancel
-              </Button>
-            </div>
-            </div>
+          <div className="flex gap-2">
+            <Button variant="primary" fullWidth onClick={onConfirmCreateProject} disabled={!newProjectName.trim()}>
+              {extractedMaterials ? 'Create & Save' : 'Create Project'}
+            </Button>
+            <Button variant="ghost" fullWidth onClick={onCloseCreateDialog}>
+              Cancel
+            </Button>
+          </div>
+        </div>
       </Modal>
 
       {/* Auth Prompt Dialog */}
       <Modal isOpen={showAuthPrompt} onClose={onCloseAuthPrompt} title="Sign In Required">
-            <div>
-            <p className="text-[var(--warm-brown)] mb-6">
-              You need to be signed in to save materials and create projects.
-              Create a free account to get started!
-            </p>
+        <div>
+          <p className="text-warm-brown mb-6">
+            You need to be signed in to save materials and create projects.
+            Create a free account to get started!
+          </p>
 
-            <div className="flex flex-col gap-3">
-              <Button
-                variant="tertiary"
-                fullWidth
-                onClick={() => {
-                  onCloseAuthPrompt();
-                  if (onRequestAuth) {
-                    onRequestAuth();
-                  }
-                }}
-              >
-                Create Account / Sign In
-              </Button>
-              <Button variant="ghost" fullWidth onClick={onCloseAuthPrompt}>
-                Cancel
-              </Button>
-            </div>
-            </div>
+          <div className="flex flex-col gap-3">
+            <Button
+              variant="tertiary"
+              fullWidth
+              onClick={() => {
+                onCloseAuthPrompt();
+                if (onRequestAuth) {
+                  onRequestAuth();
+                }
+              }}
+            >
+              Create Account / Sign In
+            </Button>
+            <Button variant="ghost" fullWidth onClick={onCloseAuthPrompt}>
+              Cancel
+            </Button>
+          </div>
+        </div>
       </Modal>
     </>
   );

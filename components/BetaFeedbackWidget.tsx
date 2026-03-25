@@ -60,7 +60,7 @@ export default function BetaFeedbackWidget() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-5 right-5 z-50 bg-[var(--terracotta)] hover:bg-[var(--terracotta-dark)] text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition-colors"
+          className="fixed bottom-5 right-5 z-50 bg-terracotta hover:bg-terracotta-dark text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition-colors"
           aria-label="Send feedback"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -71,9 +71,9 @@ export default function BetaFeedbackWidget() {
 
       {/* Feedback panel */}
       {open && (
-        <div className="fixed bottom-5 right-5 z-50 w-80 bg-[var(--earth-cream)] border border-[var(--earth-sand)] rounded-xl shadow-2xl overflow-hidden">
+        <div className="fixed bottom-5 right-5 z-50 w-80 bg-earth-cream border border-earth-sand rounded-xl shadow-2xl overflow-hidden">
           {/* Header */}
-          <div className="bg-[var(--terracotta)] text-white px-4 py-2.5 flex items-center justify-between">
+          <div className="bg-terracotta text-white px-4 py-2.5 flex items-center justify-between">
             <span className="font-semibold text-sm">Beta Feedback</span>
             <button
               onClick={() => setOpen(false)}
@@ -89,7 +89,7 @@ export default function BetaFeedbackWidget() {
           <div className="p-4 space-y-3">
             {status === 'sent' ? (
               <div className="text-center py-6">
-                <p className="text-[var(--forest-green)] font-semibold">Thanks for your feedback!</p>
+                <p className="text-forest-green font-semibold">Thanks for your feedback!</p>
               </div>
             ) : (
               <>
@@ -101,8 +101,8 @@ export default function BetaFeedbackWidget() {
                       onClick={() => setFeedbackType(value)}
                       className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
                         feedbackType === value
-                          ? 'bg-[var(--terracotta)] text-white'
-                          : 'bg-[var(--earth-tan)] text-[var(--earth-brown-dark)] hover:bg-[var(--earth-sand)]'
+                          ? 'bg-terracotta text-white'
+                          : 'bg-earth-tan text-earth-brown-dark hover:bg-earth-sand'
                       }`}
                     >
                       {label}
@@ -115,7 +115,7 @@ export default function BetaFeedbackWidget() {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="What's on your mind? (min 5 characters)"
-                  className="w-full h-24 px-3 py-2 text-sm bg-white border border-[var(--earth-sand)] rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[var(--terracotta)] text-[var(--earth-brown-dark)] placeholder:text-[var(--earth-brown)]"
+                  className="w-full h-24 px-3 py-2 text-sm bg-white border border-earth-sand rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-terracotta text-earth-brown-dark placeholder:text-earth-brown"
                 />
 
                 {status === 'error' && (

@@ -26,7 +26,7 @@ export default function StarRating({
   const [hovered, setHovered] = useState<number | null>(null);
   const interactive = !!onChange;
   const starSize = sizeMap[size];
-  const display = hovered ?? value;
+  const display = hovered ?? Math.round(value);
 
   return (
     <div
@@ -55,8 +55,8 @@ export default function StarRating({
               className={cn(
                 'transition-colors',
                 filled
-                  ? 'fill-[#C67B5C] text-[#C67B5C]'
-                  : 'text-[var(--earth-tan)] fill-[var(--earth-tan)]',
+                  ? 'fill-terracotta text-terracotta'
+                  : 'text-earth-tan fill-earth-tan',
               )}
             />
           </button>

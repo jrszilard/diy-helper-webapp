@@ -28,7 +28,7 @@ export default function ToolsInput({ onSubmit, onSkip }: ToolsInputProps) {
           onChange={(e) => setTools(e.target.value)}
           placeholder="e.g., drill, circular saw, leftover deck screws, tape measure"
           rows={3}
-          className="w-full px-3 py-2.5 text-sm text-white placeholder-white/40 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-[#C67B5C] resize-none"
+          className="w-full px-3 py-2.5 text-sm text-white placeholder-white/40 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-terracotta resize-none"
           autoFocus
         />
       </div>
@@ -45,7 +45,7 @@ export default function ToolsInput({ onSubmit, onSkip }: ToolsInputProps) {
           disabled={!tools.trim()}
           className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
             tools.trim()
-              ? 'bg-[#C67B5C] text-white hover:bg-[#A65D3F]'
+              ? 'bg-terracotta text-white hover:bg-terracotta-dark'
               : 'bg-white/10 text-white/30 cursor-not-allowed'
           }`}
         >

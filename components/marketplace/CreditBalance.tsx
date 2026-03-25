@@ -41,8 +41,8 @@ export default function CreditBalance({ className = '', showZero = false }: Cred
 
   return (
     <div className={`flex items-center gap-1.5 text-sm ${className}`}>
-      <Wallet size={14} className="text-[#4A7C59]" />
-      <span className="text-[#4A7C59] font-medium">
+      <Wallet size={14} className="text-forest-green" />
+      <span className="text-forest-green font-medium">
         ${(balanceCents / 100).toFixed(2)} in credits
       </span>
     </div>

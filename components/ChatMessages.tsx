@@ -87,52 +87,52 @@ export function detectInventoryUpdate(content: string): { added: string[]; exist
 
 const MarkdownComponents = (role: 'user' | 'assistant') => ({
   p: ({ children }: { children?: React.ReactNode }) => (
-    <p className={`mb-2 ${role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>{children}</p>
+    <p className={`mb-2 ${role === 'user' ? 'text-white' : 'text-foreground'}`}>{children}</p>
   ),
   ul: ({ children }: { children?: React.ReactNode }) => (
-    <ul className={`list-disc ml-4 mb-2 ${role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>{children}</ul>
+    <ul className={`list-disc ml-4 mb-2 ${role === 'user' ? 'text-white' : 'text-foreground'}`}>{children}</ul>
   ),
   ol: ({ children }: { children?: React.ReactNode }) => (
-    <ol className={`list-decimal ml-4 mb-2 ${role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>{children}</ol>
+    <ol className={`list-decimal ml-4 mb-2 ${role === 'user' ? 'text-white' : 'text-foreground'}`}>{children}</ol>
   ),
   li: ({ children }: { children?: React.ReactNode }) => (
-    <li className={role === 'user' ? 'text-white' : 'text-[#3E2723]'}>{children}</li>
+    <li className={role === 'user' ? 'text-white' : 'text-foreground'}>{children}</li>
   ),
   h1: ({ children }: { children?: React.ReactNode }) => (
-    <h1 className={`text-xl font-bold mb-2 ${role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>{children}</h1>
+    <h1 className={`text-xl font-bold mb-2 ${role === 'user' ? 'text-white' : 'text-foreground'}`}>{children}</h1>
   ),
   h2: ({ children }: { children?: React.ReactNode }) => (
-    <h2 className={`text-lg font-bold mb-2 ${role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>{children}</h2>
+    <h2 className={`text-lg font-bold mb-2 ${role === 'user' ? 'text-white' : 'text-foreground'}`}>{children}</h2>
   ),
   h3: ({ children }: { children?: React.ReactNode }) => (
-    <h3 className={`text-md font-bold mb-2 ${role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>{children}</h3>
+    <h3 className={`text-md font-bold mb-2 ${role === 'user' ? 'text-white' : 'text-foreground'}`}>{children}</h3>
   ),
   strong: ({ children }: { children?: React.ReactNode }) => (
-    <strong className={`font-bold ${role === 'user' ? 'text-white' : 'text-[#3E2723]'}`}>{children}</strong>
+    <strong className={`font-bold ${role === 'user' ? 'text-white' : 'text-foreground'}`}>{children}</strong>
   ),
   em: ({ children }: { children?: React.ReactNode }) => (
-    <em className={`italic ${role === 'user' ? 'text-white' : 'text-[var(--warm-brown)]'}`}>{children}</em>
+    <em className={`italic ${role === 'user' ? 'text-white' : 'text-warm-brown'}`}>{children}</em>
   ),
   code: ({ children }: { children?: React.ReactNode }) => (
     <code className={`px-1 py-0.5 rounded text-sm ${
-      role === 'user' ? 'bg-[#A65D3F] text-white' : 'bg-[#E8DFD0] text-[#3E2723]'
+      role === 'user' ? 'bg-terracotta-dark text-white' : 'bg-earth-tan text-foreground'
     }`}>{children}</code>
   ),
   a: ({ children, href }: { children?: React.ReactNode; href?: string }) => (
     <a
       href={sanitizeHref(href)}
-      className={`underline ${role === 'user' ? 'text-white hover:text-[#FFE0D0]' : 'text-[#5D7B93] hover:text-[var(--slate-blue-dark)]'}`}
+      className={`underline ${role === 'user' ? 'text-white hover:text-[#FFE0D0]' : 'text-slate-blue hover:text-slate-blue-dark'}`}
       target="_blank"
       rel="noopener noreferrer"
     >{children}</a>
   ),
   blockquote: ({ children }: { children?: React.ReactNode }) => (
     <blockquote className={`border-l-4 pl-4 italic ${
-      role === 'user' ? 'border-[#A65D3F] text-white' : 'border-[#C67B5C] text-[var(--warm-brown)]'
+      role === 'user' ? 'border-terracotta-dark text-white' : 'border-terracotta text-warm-brown'
     }`}>{children}</blockquote>
   ),
   del: ({ children }: { children?: React.ReactNode }) => (
-    <del className="text-[#A89880] line-through">{children}</del>
+    <del className="text-earth-brown-light line-through">{children}</del>
   ),
 });
 
@@ -148,10 +148,10 @@ const ChatMessages = React.memo(function ChatMessages({
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       {messages.length === 0 && !isStreaming && (
-        <div className="text-center text-[#7D6B5D] mt-8">
+        <div className="text-center text-earth-brown mt-8">
           <p className="text-lg mb-2">Welcome to DIY Helper!</p>
           <p className="text-sm">Ask me about any home improvement project.</p>
-          <p className="text-xs text-[#A89880] mt-2">
+          <p className="text-xs text-earth-brown-light mt-2">
             Tip: Mention tools you own (e.g., &quot;I have a drill&quot;) and I&apos;ll remember them!
           </p>
         </div>
@@ -167,7 +167,7 @@ const ChatMessages = React.memo(function ChatMessages({
           >
             <div
               className={`max-w-3xl rounded-lg ${
-                msg.role === 'user' ? 'bg-[#C67B5C] text-white p-4' : 'bg-transparent'
+                msg.role === 'user' ? 'bg-terracotta text-white p-4' : 'bg-transparent'
               }`}
             >
               {videoResults.found && (
@@ -179,7 +179,7 @@ const ChatMessages = React.memo(function ChatMessages({
                 </div>
               )}
 
-              <div className={msg.role === 'user' ? '' : 'bg-surface border border-[#D4C8B8] text-[#3E2723] rounded-lg p-4'}>
+              <div className={msg.role === 'user' ? '' : 'bg-surface border border-earth-sand text-foreground rounded-lg p-4'}>
                 <div className={`prose prose-sm max-w-none ${
                   msg.role === 'user' ? 'prose-invert' : 'prose-stone'
                 }`}>
@@ -190,7 +190,7 @@ const ChatMessages = React.memo(function ChatMessages({
                 {failedMessage && idx === messages.length - 1 && msg.role === 'assistant' && (
                   <button
                     onClick={onRetry}
-                    className="mt-2 flex items-center gap-2 px-3 py-1.5 text-sm text-[#B8593B] hover:bg-[#FADDD0] rounded-lg transition-colors"
+                    className="mt-2 flex items-center gap-2 px-3 py-1.5 text-sm text-rust hover:bg-[#FADDD0] rounded-lg transition-colors"
                   >
                     <RefreshCw size={14} />
                     Retry
@@ -211,7 +211,7 @@ const ChatMessages = React.memo(function ChatMessages({
             )}
 
             {streamingContent && (
-              <div className="bg-surface border border-[#D4C8B8] text-[#3E2723] rounded-lg p-4">
+              <div className="bg-surface border border-earth-sand text-foreground rounded-lg p-4">
                 <div className="prose prose-sm max-w-none prose-stone">
                   <ReactMarkdown>
                     {cleanMessageContent(streamingContent)}
@@ -221,11 +221,11 @@ const ChatMessages = React.memo(function ChatMessages({
             )}
 
             {!streamingContent && progressSteps.length === 0 && (
-              <div className="bg-surface border border-[#D4C8B8] rounded-lg p-4">
+              <div className="bg-surface border border-earth-sand rounded-lg p-4">
                 <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-[#C67B5C] rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-[#C67B5C] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-[#C67B5C] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-2 h-2 bg-terracotta rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-terracotta rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-terracotta rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
               </div>
             )}

@@ -182,10 +182,10 @@ export default function ProjectPlanner({ userId, onProjectCreated }: ProjectPlan
         case 'report':
           if (!agentRun.report) {
             return (
-              <div className="flex-1 flex items-center justify-center bg-[#F5F0E6]">
+              <div className="flex-1 flex items-center justify-center bg-earth-cream">
                 <div className="text-center">
-                  <div className="w-8 h-8 border-2 border-[#5D7B93] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                  <p className="text-sm text-[#7D6B5D]">Loading report...</p>
+                  <div className="w-8 h-8 border-2 border-slate-blue border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                  <p className="text-sm text-earth-brown">Loading report...</p>
                 </div>
               </div>
             );

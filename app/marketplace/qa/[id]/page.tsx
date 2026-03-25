@@ -198,18 +198,18 @@ export default function QADetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F5F0E6] flex items-center justify-center">
-        <Spinner size="lg" className="text-[#C67B5C]" />
+      <div className="min-h-screen bg-earth-cream flex items-center justify-center">
+        <Spinner size="lg" className="text-terracotta" />
       </div>
     );
   }
 
   if (!question) {
     return (
-      <div className="min-h-screen bg-[#F5F0E6] flex items-center justify-center">
+      <div className="min-h-screen bg-earth-cream flex items-center justify-center">
         <div className="text-center">
-          <p className="text-sm text-[#7D6B5D] mb-4">Question not found</p>
-          <Link href="/marketplace/qa" className="text-sm text-[#5D7B93] hover:underline">
+          <p className="text-sm text-earth-brown mb-4">Question not found</p>
+          <Link href="/marketplace/qa" className="text-sm text-slate-blue hover:underline">
             Back to Q&A
           </Link>
         </div>
@@ -347,12 +347,12 @@ export default function QADetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F0E6]">
-      <header className="bg-surface border-b border-[#D4C8B8] shadow-sm">
+    <div className="min-h-screen bg-earth-cream">
+      <header className="bg-surface border-b border-earth-sand shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link
             href="/marketplace/qa"
-            className="flex items-center gap-1.5 text-sm text-[#5D7B93] hover:text-[var(--slate-blue-dark)] transition-colors"
+            className="flex items-center gap-1.5 text-sm text-slate-blue hover:text-slate-blue-dark transition-colors"
           >
             <ArrowLeft size={16} />
             Back to Q&A
@@ -360,7 +360,7 @@ export default function QADetailPage() {
           <div className="flex items-center gap-2">
             {/* Bidding badge */}
             {isBiddingMode && (
-              <span className="flex items-center gap-1 text-xs px-2 py-1 bg-[#C67B5C]/10 text-[#C67B5C] rounded-full font-medium">
+              <span className="flex items-center gap-1 text-xs px-2 py-1 bg-terracotta/10 text-terracotta rounded-full font-medium">
                 <Gavel size={12} />
                 Bidding
               </span>
@@ -372,7 +372,7 @@ export default function QADetailPage() {
                 Direct
               </span>
             ) : (
-              <span className="flex items-center gap-1 text-xs px-2 py-1 bg-[#E8DFD0] text-[#7D6B5D] rounded-full font-medium">
+              <span className="flex items-center gap-1 text-xs px-2 py-1 bg-earth-tan text-earth-brown rounded-full font-medium">
                 <Users size={12} />
                 Pool
               </span>
@@ -446,15 +446,15 @@ export default function QADetailPage() {
         )}
 
         {/* Question text card (shown for all roles) */}
-        <div className="bg-white border border-[#D4C8B8] rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-[#7D6B5D] mb-2">Question</h3>
-          <p className="text-sm text-[#3E2723]">{question.questionText}</p>
+        <div className="bg-white border border-earth-sand rounded-lg p-4">
+          <h3 className="text-sm font-semibold text-earth-brown mb-2">Question</h3>
+          <p className="text-sm text-foreground">{question.questionText}</p>
           <div className="flex items-center gap-3 mt-3">
-            <span className="inline-block text-xs px-2 py-0.5 bg-[#5D7B93]/10 text-[#5D7B93] rounded-full font-medium">
+            <span className="inline-block text-xs px-2 py-0.5 bg-slate-blue/10 text-slate-blue rounded-full font-medium">
               {question.category}
             </span>
             {isExpert && question.status === 'claimed' && !isThreaded && (
-              <span className="flex items-center gap-1 text-xs text-[#7D6B5D]">
+              <span className="flex items-center gap-1 text-xs text-earth-brown">
                 <Clock size={12} />
                 You have 2 hours to answer
               </span>
@@ -464,13 +464,13 @@ export default function QADetailPage() {
 
         {/* Bids section (bidding mode, DIYer view — before expert is selected) */}
         {isBiddingMode && isDIYer && question.status === 'open' && (
-          <div className="bg-white border border-[#D4C8B8] rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-[#3E2723] mb-3 flex items-center gap-2">
-              <Gavel size={16} className="text-[#C67B5C]" />
+          <div className="bg-white border border-earth-sand rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+              <Gavel size={16} className="text-terracotta" />
               Expert Proposals ({bids.length})
             </h3>
             {bids.length === 0 ? (
-              <p className="text-sm text-[#7D6B5D]">
+              <p className="text-sm text-earth-brown">
                 Waiting for expert proposals. You&apos;ll be notified when experts submit their bids.
               </p>
             ) : (
@@ -546,18 +546,18 @@ export default function QADetailPage() {
 
         {/* Project graduation */}
         {canGraduate && (isDIYer || isExpert) && (
-          <div className="bg-white border border-[#D4C8B8] rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-[#3E2723] mb-2 flex items-center gap-2">
-              <ArrowUpRight size={16} className="text-[#5D7B93]" />
+          <div className="bg-white border border-earth-sand rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+              <ArrowUpRight size={16} className="text-slate-blue" />
               Need Hands-On Help?
             </h3>
-            <p className="text-xs text-[#7D6B5D] mb-3">
+            <p className="text-xs text-earth-brown mb-3">
               If this project needs professional work beyond Q&A advice, graduate it to a project.
               {question.expertId && ' Your current expert gets priority positioning.'}
             </p>
             <button
               onClick={handleGraduateToProject}
-              className="px-4 py-2 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[var(--slate-blue-dark)] transition-colors"
+              className="px-4 py-2 bg-slate-blue text-white text-sm font-semibold rounded-lg hover:bg-slate-blue-dark transition-colors"
             >
               Graduate to Project
             </button>
@@ -566,16 +566,16 @@ export default function QADetailPage() {
 
         {/* Already graduated notice */}
         {question.graduatedToRfpId && (
-          <div className="bg-[#5D7B93]/5 border border-[#5D7B93]/20 rounded-lg p-4">
+          <div className="bg-slate-blue/5 border border-slate-blue/20 rounded-lg p-4">
             <div className="flex items-center gap-2">
-              <ArrowUpRight size={16} className="text-[#5D7B93]" />
-              <p className="text-sm text-[#5D7B93] font-medium">
+              <ArrowUpRight size={16} className="text-slate-blue" />
+              <p className="text-sm text-slate-blue font-medium">
                 This Q&A has been graduated to a project.
               </p>
             </div>
             <Link
               href={`/marketplace/projects/${question.graduatedToRfpId}`}
-              className="text-xs text-[#5D7B93] hover:underline mt-1 inline-block"
+              className="text-xs text-slate-blue hover:underline mt-1 inline-block"
             >
               View Project &rarr;
             </Link>
@@ -618,7 +618,7 @@ export default function QADetailPage() {
             {!showReview ? (
               <button
                 onClick={() => setShowReview(true)}
-                className="w-full py-2 text-sm font-medium text-[#5D7B93] border border-[#D4C8B8] rounded-lg hover:bg-[#E8DFD0]/50 transition-colors"
+                className="w-full py-2 text-sm font-medium text-slate-blue border border-earth-sand rounded-lg hover:bg-earth-tan/50 transition-colors"
               >
                 Leave a Review
               </button>

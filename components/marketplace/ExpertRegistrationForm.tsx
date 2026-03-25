@@ -127,9 +127,9 @@ export default function ExpertRegistrationForm() {
   if (success) {
     return (
       <div className="max-w-lg mx-auto text-center py-12">
-        <CheckCircle2 size={48} className="mx-auto text-[#4A7C59] mb-4" />
-        <h2 className="text-xl font-bold text-[#3E2723] mb-2">Registration Complete!</h2>
-        <p className="text-sm text-[#7D6B5D]">Redirecting to your dashboard...</p>
+        <CheckCircle2 size={48} className="mx-auto text-forest-green mb-4" />
+        <h2 className="text-xl font-bold text-foreground mb-2">Registration Complete!</h2>
+        <p className="text-sm text-earth-brown">Redirecting to your dashboard...</p>
       </div>
     );
   }
@@ -141,12 +141,12 @@ export default function ExpertRegistrationForm() {
         {[1, 2, 3, 4].map(s => (
           <div key={s} className="flex items-center">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-              s <= step ? 'bg-[#C67B5C] text-white' : 'bg-[#E8DFD0] text-[#7D6B5D]'
+              s <= step ? 'bg-terracotta text-white' : 'bg-earth-tan text-earth-brown'
             }`}>
               {s < step ? <CheckCircle2 size={16} /> : s}
             </div>
             {s < 4 && (
-              <div className={`w-12 sm:w-20 h-0.5 mx-1 ${s < step ? 'bg-[#C67B5C]' : 'bg-[#E8DFD0]'}`} />
+              <div className={`w-12 sm:w-20 h-0.5 mx-1 ${s < step ? 'bg-terracotta' : 'bg-earth-tan'}`} />
             )}
           </div>
         ))}
@@ -161,7 +161,7 @@ export default function ExpertRegistrationForm() {
       {/* Step 1: Basic Info */}
       {step === 1 && (
         <div className="space-y-4">
-          <h2 className="text-lg font-bold text-[#3E2723]">Basic Information</h2>
+          <h2 className="text-lg font-bold text-foreground">Basic Information</h2>
           <TextInput
             label="Display Name *"
             type="text"
@@ -211,8 +211,8 @@ export default function ExpertRegistrationForm() {
       {/* Step 2: Specialties */}
       {step === 2 && (
         <div className="space-y-4">
-          <h2 className="text-lg font-bold text-[#3E2723]">Your Specialties</h2>
-          <p className="text-sm text-[#7D6B5D]">Select all that apply. The first selected will be your primary specialty.</p>
+          <h2 className="text-lg font-bold text-foreground">Your Specialties</h2>
+          <p className="text-sm text-earth-brown">Select all that apply. The first selected will be your primary specialty.</p>
           <div className="grid grid-cols-2 gap-2">
             {SPECIALTIES.map(({ value, label }) => {
               const selected = specialties.find(s => s.specialty === value);
@@ -222,15 +222,15 @@ export default function ExpertRegistrationForm() {
                     onClick={() => toggleSpecialty(value)}
                     className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
                       selected
-                        ? 'bg-[#C67B5C]/10 border-[#C67B5C] text-[#C67B5C]'
-                        : 'bg-white border-[#D4C8B8] text-[#3E2723] hover:bg-[#E8DFD0]'
+                        ? 'bg-terracotta/10 border-terracotta text-terracotta'
+                        : 'bg-white border-earth-sand text-foreground hover:bg-earth-tan'
                     }`}
                   >
                     {label}
                   </button>
                   {selected && (
                     <div className="mt-1 px-1">
-                      <label className="text-xs text-[#7D6B5D]">Years exp:</label>
+                      <label className="text-xs text-earth-brown">Years exp:</label>
                       <TextInput
                         type="number"
                         min={1}
@@ -252,8 +252,8 @@ export default function ExpertRegistrationForm() {
       {/* Step 3: Pricing */}
       {step === 3 && (
         <div className="space-y-4">
-          <h2 className="text-lg font-bold text-[#3E2723]">Set Your Rates</h2>
-          <p className="text-sm text-[#7D6B5D]">These can be updated later from your dashboard.</p>
+          <h2 className="text-lg font-bold text-foreground">Set Your Rates</h2>
+          <p className="text-sm text-earth-brown">These can be updated later from your dashboard.</p>
           <TextInput
             label="Hourly Rate ($)"
             type="number"
@@ -275,7 +275,7 @@ export default function ExpertRegistrationForm() {
               fullWidth
               placeholder="10.00"
             />
-            <p className="text-xs text-[#7D6B5D] mt-1">Rate for answering Q&A questions from homeowners.</p>
+            <p className="text-xs text-earth-brown mt-1">Rate for answering Q&A questions from homeowners.</p>
           </div>
         </div>
       )}
@@ -283,29 +283,29 @@ export default function ExpertRegistrationForm() {
       {/* Step 4: Review */}
       {step === 4 && (
         <div className="space-y-4">
-          <h2 className="text-lg font-bold text-[#3E2723]">Review & Submit</h2>
-          <div className="bg-white border border-[#D4C8B8] rounded-lg p-4 space-y-3">
+          <h2 className="text-lg font-bold text-foreground">Review & Submit</h2>
+          <div className="bg-white border border-earth-sand rounded-lg p-4 space-y-3">
             <div>
-              <span className="text-xs text-[#7D6B5D]">Name</span>
-              <p className="text-sm font-medium text-[#3E2723]">{displayName}</p>
+              <span className="text-xs text-earth-brown">Name</span>
+              <p className="text-sm font-medium text-foreground">{displayName}</p>
             </div>
             <div>
-              <span className="text-xs text-[#7D6B5D]">Location</span>
-              <p className="text-sm font-medium text-[#3E2723]">
+              <span className="text-xs text-earth-brown">Location</span>
+              <p className="text-sm font-medium text-foreground">
                 {city}, {state} {zipCode}
               </p>
             </div>
             {bio && (
               <div>
-                <span className="text-xs text-[#7D6B5D]">Bio</span>
-                <p className="text-sm text-[#3E2723]">{bio}</p>
+                <span className="text-xs text-earth-brown">Bio</span>
+                <p className="text-sm text-foreground">{bio}</p>
               </div>
             )}
             <div>
-              <span className="text-xs text-[#7D6B5D]">Specialties</span>
+              <span className="text-xs text-earth-brown">Specialties</span>
               <div className="flex flex-wrap gap-1 mt-1">
                 {specialties.map(s => (
-                  <span key={s.specialty} className="px-2 py-0.5 text-xs bg-[#C67B5C]/10 text-[#C67B5C] rounded-full font-medium">
+                  <span key={s.specialty} className="px-2 py-0.5 text-xs bg-terracotta/10 text-terracotta rounded-full font-medium">
                     {s.specialty.replace('_', ' ')} ({s.yearsExperience}yr)
                   </span>
                 ))}
@@ -313,14 +313,14 @@ export default function ExpertRegistrationForm() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <span className="text-xs text-[#7D6B5D]">Hourly Rate</span>
-                <p className="text-sm font-medium text-[#3E2723]">
+                <span className="text-xs text-earth-brown">Hourly Rate</span>
+                <p className="text-sm font-medium text-foreground">
                   {hourlyRate ? `$${hourlyRate}/hr` : 'Not set'}
                 </p>
               </div>
               <div>
-                <span className="text-xs text-[#7D6B5D]">Q&A Rate</span>
-                <p className="text-sm font-medium text-[#3E2723]">
+                <span className="text-xs text-earth-brown">Q&A Rate</span>
+                <p className="text-sm font-medium text-foreground">
                   {qaRate ? `$${qaRate}` : 'Not set'}
                 </p>
               </div>
@@ -334,7 +334,7 @@ export default function ExpertRegistrationForm() {
         {step > 1 ? (
           <button
             onClick={() => setStep(step - 1)}
-            className="flex items-center gap-1 px-4 py-2 text-sm text-[#7D6B5D] hover:text-[#3E2723] transition-colors"
+            className="flex items-center gap-1 px-4 py-2 text-sm text-earth-brown hover:text-foreground transition-colors"
           >
             <ChevronLeft size={16} />
             Back
@@ -348,7 +348,7 @@ export default function ExpertRegistrationForm() {
             disabled={!canProceed()}
             className={`flex items-center gap-1 px-6 py-2 rounded-lg font-semibold text-white transition-colors ${
               canProceed()
-                ? 'bg-[#C67B5C] hover:bg-[#A65D3F]'
+                ? 'bg-terracotta hover:bg-terracotta-dark'
                 : 'bg-[var(--muted)] cursor-not-allowed'
             }`}
           >
@@ -362,7 +362,7 @@ export default function ExpertRegistrationForm() {
             className={`flex items-center gap-2 px-6 py-2 rounded-lg font-semibold text-white transition-colors ${
               submitting
                 ? 'bg-[var(--muted)] cursor-not-allowed'
-                : 'bg-[#4A7C59] hover:bg-[var(--forest-green-dark)]'
+                : 'bg-forest-green hover:bg-forest-green-dark'
             }`}
           >
             {submitting && <Spinner size="sm" />}

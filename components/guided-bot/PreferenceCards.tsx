@@ -26,7 +26,7 @@ export default function PreferenceCards({ type, onSelect }: PreferenceCardsProps
         <button
           key={option.value}
           onClick={() => onSelect(option.value)}
-          className="w-full flex items-center gap-3 p-3.5 bg-white/10 border border-white/20 rounded-xl hover:bg-white/15 hover:border-[#C67B5C] transition-all text-left min-h-[48px]"
+          className="w-full flex items-center gap-3 p-3.5 bg-white/10 border border-white/20 rounded-xl hover:bg-white/15 hover:border-terracotta transition-all text-left min-h-[48px]"
         >
           <div className="flex-1 min-w-0">
             <span className="block text-sm font-semibold text-white">{option.title}</span>

@@ -433,7 +433,7 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-[#3E2723]">Export Shopping List</h3>
+          <h3 className="text-xl font-bold text-foreground">Export Shopping List</h3>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition"
@@ -442,9 +442,9 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
           </button>
         </div>
 
-        <div className="mb-4 p-3 bg-[#F5F0E6] rounded-xl">
-          <p className="font-medium text-[#3E2723]">{projectName}</p>
-          <p className="text-sm text-[#7D6B5D]">
+        <div className="mb-4 p-3 bg-earth-cream rounded-xl">
+          <p className="font-medium text-foreground">{projectName}</p>
+          <p className="text-sm text-earth-brown">
             {materials.length} items • ${total.toFixed(2)} estimated
           </p>
         </div>
@@ -453,34 +453,34 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
           <button
             onClick={printList}
             className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-xl
-                       hover:border-[#5D7B93] hover:bg-[var(--status-research-bg)] transition-all group"
+                       hover:border-slate-blue hover:bg-[var(--status-research-bg)] transition-all group"
           >
-            <Printer className="w-8 h-8 text-gray-500 group-hover:text-[#5D7B93]" />
-            <span className="font-medium text-[#3E2723]">Print</span>
+            <Printer className="w-8 h-8 text-gray-500 group-hover:text-slate-blue" />
+            <span className="font-medium text-foreground">Print</span>
             <span className="text-xs text-gray-500">Print-friendly view</span>
           </button>
 
           <button
             onClick={copyToClipboard}
             className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-xl
-                       hover:border-[#4A7C59] hover:bg-[var(--status-complete-bg)] transition-all group"
+                       hover:border-forest-green hover:bg-[var(--status-complete-bg)] transition-all group"
           >
             {copied ? (
-              <Check className="w-8 h-8 text-[#4A7C59]" />
+              <Check className="w-8 h-8 text-forest-green" />
             ) : (
-              <Copy className="w-8 h-8 text-gray-500 group-hover:text-[#4A7C59]" />
+              <Copy className="w-8 h-8 text-gray-500 group-hover:text-forest-green" />
             )}
-            <span className="font-medium text-[#3E2723]">{copied ? 'Copied!' : 'Copy'}</span>
+            <span className="font-medium text-foreground">{copied ? 'Copied!' : 'Copy'}</span>
             <span className="text-xs text-gray-500">To clipboard</span>
           </button>
 
           <button
             onClick={downloadText}
             className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-xl
-                       hover:border-[#C67B5C] hover:bg-[var(--status-progress-bg)] transition-all group"
+                       hover:border-terracotta hover:bg-[var(--status-progress-bg)] transition-all group"
           >
-            <FileText className="w-8 h-8 text-gray-500 group-hover:text-[#C67B5C]" />
-            <span className="font-medium text-[#3E2723]">Text</span>
+            <FileText className="w-8 h-8 text-gray-500 group-hover:text-terracotta" />
+            <span className="font-medium text-foreground">Text</span>
             <span className="text-xs text-gray-500">Download .txt</span>
           </button>
 
@@ -490,7 +490,7 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
                        hover:border-green-500 hover:bg-green-50 transition-all group"
           >
             <Download className="w-8 h-8 text-gray-500 group-hover:text-green-600" />
-            <span className="font-medium text-[#3E2723]">CSV</span>
+            <span className="font-medium text-foreground">CSV</span>
             <span className="text-xs text-gray-500">Excel/Sheets</span>
           </button>
 
@@ -500,17 +500,17 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
                        hover:border-[#9B7BA6] hover:bg-[#F3EDF5] transition-all group"
           >
             <FileDown className="w-8 h-8 text-gray-500 group-hover:text-[#9B7BA6]" />
-            <span className="font-medium text-[#3E2723]">PDF</span>
+            <span className="font-medium text-foreground">PDF</span>
             <span className="text-xs text-gray-500">Save as PDF</span>
           </button>
 
           <button
             onClick={generateShareLink}
             className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-xl
-                       hover:border-[#5D7B93] hover:bg-[var(--status-research-bg)] transition-all group"
+                       hover:border-slate-blue hover:bg-[var(--status-research-bg)] transition-all group"
           >
-            <Share2 className="w-8 h-8 text-gray-500 group-hover:text-[#5D7B93]" />
-            <span className="font-medium text-[#3E2723]">Share</span>
+            <Share2 className="w-8 h-8 text-gray-500 group-hover:text-slate-blue" />
+            <span className="font-medium text-foreground">Share</span>
             <span className="text-xs text-gray-500">Create link</span>
           </button>
         </div>
@@ -518,17 +518,17 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
         {/* Share link display */}
         {shareUrl && (
           <div className="mb-4 p-3 bg-[var(--status-research-bg)] rounded-xl">
-            <p className="text-xs text-[#5D7B93] font-medium mb-2">Shareable link:</p>
+            <p className="text-xs text-slate-blue font-medium mb-2">Shareable link:</p>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={shareUrl}
                 readOnly
-                className="flex-1 px-3 py-1.5 text-xs bg-white border border-[#D4C8B8] rounded-lg text-[#3E2723] truncate"
+                className="flex-1 px-3 py-1.5 text-xs bg-white border border-earth-sand rounded-lg text-foreground truncate"
               />
               <button
                 onClick={copyShareLink}
-                className="px-3 py-1.5 bg-[#5D7B93] text-white text-xs rounded-lg hover:bg-[#4A6274] transition flex items-center gap-1"
+                className="px-3 py-1.5 bg-slate-blue text-white text-xs rounded-lg hover:bg-slate-blue-dark transition flex items-center gap-1"
               >
                 {shareCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                 {shareCopied ? 'Copied' : 'Copy'}
@@ -540,7 +540,7 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
         <button
           onClick={onClose}
           className="w-full py-3 border-2 border-gray-200 rounded-xl font-medium
-                     hover:bg-gray-50 transition text-[var(--warm-brown)]"
+                     hover:bg-gray-50 transition text-warm-brown"
         >
           Close
         </button>

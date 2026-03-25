@@ -215,9 +215,9 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
 
   if (!project) {
     return (
-      <div className="p-8 text-center text-[#A89880]">
+      <div className="p-8 text-center text-earth-brown-light">
         <ShoppingCart className="w-16 h-16 mx-auto mb-4 opacity-50" />
-        <p className="text-[#7D6B5D]">Select a project to view shopping list</p>
+        <p className="text-earth-brown">Select a project to view shopping list</p>
       </div>
     );
   }
@@ -241,11 +241,11 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
       )}
 
       {priceSyncNotification && (
-        <div className="fixed top-20 right-4 bg-[#4A7C59] text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 max-w-sm">
+        <div className="fixed top-20 right-4 bg-forest-green text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 max-w-sm">
           <DollarSign className="w-5 h-5 flex-shrink-0" />
           <p className="font-medium text-sm">{priceSyncNotification}</p>
           <button onClick={() => setPriceSyncNotification(null)}
-            className="ml-2 hover:bg-[var(--forest-green-dark)] p-1 rounded flex-shrink-0" aria-label="Dismiss">
+            className="ml-2 hover:bg-forest-green-dark p-1 rounded flex-shrink-0" aria-label="Dismiss">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -256,19 +256,19 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <h2 className="text-2xl font-bold text-[#3E2723]">{project.name}</h2>
+                <h2 className="text-2xl font-bold text-foreground">{project.name}</h2>
                 {isGuestProject && (
-                  <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-[#F5F0E6] text-[#7D6B5D]">
+                  <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-earth-cream text-earth-brown">
                     <User className="w-3 h-3" /> Local Project
                   </span>
                 )}
               </div>
-              <p className="text-[#7D6B5D] text-sm">{project.description}</p>
-              {isGuestProject && <p className="text-xs text-[#A89880] mt-1">Sign in to sync this project across devices</p>}
+              <p className="text-earth-brown text-sm">{project.description}</p>
+              {isGuestProject && <p className="text-xs text-earth-brown-light mt-1">Sign in to sync this project across devices</p>}
             </div>
             {items.length > 0 && (
               <button onClick={() => setShowExportModal(true)}
-                className="flex items-center gap-2 px-3 py-2 text-[#5D7B93] hover:bg-[var(--status-research-bg)] rounded-lg transition"
+                className="flex items-center gap-2 px-3 py-2 text-slate-blue hover:bg-[var(--status-research-bg)] rounded-lg transition"
                 title="Export shopping list" aria-label="Export shopping list">
                 <Download className="w-5 h-5" /><span className="hidden lg:inline">Export</span>
               </button>
@@ -279,48 +279,48 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
 
       {items.length === 0 ? (
         <div className={`text-center ${isMobile ? 'py-16' : 'py-12'}`}>
-          <ShoppingCart className={`${isMobile ? 'w-16 h-16' : 'w-12 h-12'} mx-auto mb-3 opacity-50 text-[#D4C8B8]`} />
-          <p className={`text-[#7D6B5D] ${isMobile ? 'text-lg' : ''}`}>No items yet</p>
-          <p className={`${isMobile ? 'text-base' : 'text-sm'} mt-1 text-[#A89880]`}>Products will appear here automatically</p>
+          <ShoppingCart className={`${isMobile ? 'w-16 h-16' : 'w-12 h-12'} mx-auto mb-3 opacity-50 text-earth-sand`} />
+          <p className={`text-earth-brown ${isMobile ? 'text-lg' : ''}`}>No items yet</p>
+          <p className={`${isMobile ? 'text-base' : 'text-sm'} mt-1 text-earth-brown-light`}>Products will appear here automatically</p>
         </div>
       ) : (
         <div>
           {/* Progress bar */}
           <div className="mb-4">
             <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-[#7D6B5D]">{purchasedCount} of {items.length} items purchased</span>
-              <span className="text-[#4A7C59] font-medium">{Math.round((purchasedCount / items.length) * 100)}%</span>
+              <span className="text-earth-brown">{purchasedCount} of {items.length} items purchased</span>
+              <span className="text-forest-green font-medium">{Math.round((purchasedCount / items.length) * 100)}%</span>
             </div>
-            <div className="h-2 bg-[#E8DFD0] rounded-full overflow-hidden">
-              <div className="h-full bg-[#4A7C59] rounded-full transition-all duration-300"
+            <div className="h-2 bg-earth-tan rounded-full overflow-hidden">
+              <div className="h-full bg-forest-green rounded-full transition-all duration-300"
                 style={{ width: `${(purchasedCount / items.length) * 100}%` }} />
             </div>
           </div>
 
           <div className={`mb-4 ${isMobile ? 'space-y-3' : 'flex gap-2'}`}>
             <button onClick={() => setShowSearchPanel(!showSearchPanel)}
-              className={`flex items-center justify-center gap-2 px-4 py-3 bg-[#5D7B93] text-white rounded-xl hover:bg-[var(--slate-blue-dark)] active:bg-[#3D5160] transition ${isMobile ? 'w-full text-base' : ''}`}>
+              className={`flex items-center justify-center gap-2 px-4 py-3 bg-slate-blue text-white rounded-xl hover:bg-slate-blue-dark active:bg-[#3D5160] transition ${isMobile ? 'w-full text-base' : ''}`}>
               <Search className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />
               {showSearchPanel ? 'Hide Search' : 'Search Local Stores'}
             </button>
             {isMobile && (
               <button onClick={() => setShowExportModal(true)}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-[var(--status-research-bg)] text-[#5D7B93] rounded-xl hover:bg-[#D4E4F0] transition w-full">
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-[var(--status-research-bg)] text-slate-blue rounded-xl hover:bg-[#D4E4F0] transition w-full">
                 <Download className="w-5 h-5" /> Export List
               </button>
             )}
             {selectedItems.size > 0 && (
-              <div className={`flex items-center justify-center gap-2 px-4 py-2 bg-[var(--status-research-bg)] text-[#5D7B93] rounded-xl font-medium ${isMobile ? 'w-full' : ''}`}>
+              <div className={`flex items-center justify-center gap-2 px-4 py-2 bg-[var(--status-research-bg)] text-slate-blue rounded-xl font-medium ${isMobile ? 'w-full' : ''}`}>
                 {selectedItems.size} item(s) selected
               </div>
             )}
           </div>
 
           {showSearchPanel && (
-            <div className="mb-6 p-4 bg-[#F5F0E6] border border-[#D4C8B8] rounded-xl">
+            <div className="mb-6 p-4 bg-earth-cream border border-earth-sand rounded-xl">
               <div className="flex items-center gap-2 mb-4">
-                <MapPin className="w-5 h-5 text-[#C67B5C]" />
-                <h3 className="font-semibold text-[#3E2723]">Search Local Stores</h3>
+                <MapPin className="w-5 h-5 text-terracotta" />
+                <h3 className="font-semibold text-foreground">Search Local Stores</h3>
               </div>
               <div className={`${isMobile ? 'space-y-3' : 'flex gap-2'} mb-3`}>
                 <TextInput
@@ -333,19 +333,19 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                 />
                 <button onClick={handleSearchStores}
                   disabled={selectedItems.size === 0 || !location.trim() || storeSearch.isSearching}
-                  className={`px-6 py-3 bg-[#C67B5C] text-white rounded-xl hover:bg-[#A65D3F] active:bg-[#8B4D33] disabled:bg-[#D4C8B8] disabled:cursor-not-allowed transition ${isMobile ? 'w-full text-base font-medium' : ''}`}>
+                  className={`px-6 py-3 bg-terracotta text-white rounded-xl hover:bg-terracotta-dark active:bg-[#8B4D33] disabled:bg-earth-sand disabled:cursor-not-allowed transition ${isMobile ? 'w-full text-base font-medium' : ''}`}>
                   {storeSearch.isSearching ? 'Searching...' : 'Search'}
                 </button>
               </div>
-              <p className={`${isMobile ? 'text-base' : 'text-sm'} text-[#7D6B5D]`}>
+              <p className={`${isMobile ? 'text-base' : 'text-sm'} text-earth-brown`}>
                 Select items below with checkboxes, then search to find products at nearby stores
               </p>
               {storeSearch.searchError && (
                 <div className="mt-3 p-3 bg-[#FADDD0] border border-[#E8A990] rounded-xl flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5 text-[#B8593B] flex-shrink-0" />
-                  <p className="text-sm text-[#B8593B] flex-1">{storeSearch.searchError}</p>
+                  <AlertCircle className="w-5 h-5 text-rust flex-shrink-0" />
+                  <p className="text-sm text-rust flex-1">{storeSearch.searchError}</p>
                   <button onClick={() => { storeSearch.setSearchError(null); handleSearchStores(); }}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-[#B8593B] text-white rounded-lg hover:bg-[#9A4830] text-sm font-medium flex-shrink-0">
+                    className="flex items-center gap-1 px-3 py-1.5 bg-rust text-white rounded-lg hover:bg-[#9A4830] text-sm font-medium flex-shrink-0">
                     <RefreshCw className="w-4 h-4" /> Retry
                   </button>
                 </div>
@@ -357,15 +357,15 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
           <div className="space-y-6">
             {Object.entries(groupedItems).map(([category, categoryItems]) => (
               <div key={category}>
-                <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-[#3E2723] mb-3 uppercase tracking-wide`}>{category}</h3>
-                <div className="bg-white rounded-xl border border-[#D4C8B8] divide-y divide-[#E8DFD0]">
+                <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-foreground mb-3 uppercase tracking-wide`}>{category}</h3>
+                <div className="bg-white rounded-xl border border-earth-sand divide-y divide-earth-tan">
                   {categoryItems.map((item) => (
                     <div key={item.id}>
-                      <div className={`p-4 ${item.purchased ? 'bg-gray-50' : ''} ${isMobile ? 'active:bg-[#F5F0E6]' : ''}`}>
+                      <div className={`p-4 ${item.purchased ? 'bg-gray-50' : ''} ${isMobile ? 'active:bg-earth-cream' : ''}`}>
                         <div className="flex items-center gap-3">
                           <button onClick={() => togglePurchased(item.id)}
                             className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition flex-shrink-0 ${
-                              item.purchased ? 'bg-[#4A7C59] border-[#4A7C59] text-white' : 'border-[#D4C8B8] hover:border-[#4A7C59]'
+                              item.purchased ? 'bg-forest-green border-forest-green text-white' : 'border-earth-sand hover:border-forest-green'
                             }`} title={item.purchased ? 'Mark as not purchased' : 'Mark as purchased'}
                             aria-label={item.purchased ? 'Mark as not purchased' : 'Mark as purchased'}>
                             {item.purchased && <Check className="w-4 h-4" />}
@@ -373,8 +373,8 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                           <button onClick={(e) => { e.stopPropagation(); toggleItem(item.id); }}
                             className={`w-6 h-6 rounded-lg flex items-center justify-center transition flex-shrink-0 ${
                               selectedItems.has(item.id)
-                                ? 'bg-[#C67B5C] text-white'
-                                : 'border-2 border-[#D4C8B8] text-[#D4C8B8] hover:border-[#C67B5C] hover:text-[#C67B5C]'
+                                ? 'bg-terracotta text-white'
+                                : 'border-2 border-earth-sand text-earth-sand hover:border-terracotta hover:text-terracotta'
                             }`}
                             title={selectedItems.has(item.id) ? 'Deselect from store search' : 'Select for store search'}
                             aria-label={selectedItems.has(item.id) ? 'Deselect from store search' : 'Select for store search'}>
@@ -382,11 +382,11 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                           </button>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className={`font-semibold ${isMobile ? 'text-base' : ''} ${item.purchased ? 'line-through text-[#A89880]' : 'text-[#3E2723]'}`}>
+                              <span className={`font-semibold ${isMobile ? 'text-base' : ''} ${item.purchased ? 'line-through text-earth-brown-light' : 'text-foreground'}`}>
                                 {item.product_name}
                               </span>
                               {item.required && !item.purchased && (
-                                <span className="text-xs bg-[#FADDD0] text-[#B8593B] px-2 py-0.5 rounded font-medium">Required</span>
+                                <span className="text-xs bg-[#FADDD0] text-rust px-2 py-0.5 rounded font-medium">Required</span>
                               )}
                             </div>
                             {editingItem === item.id ? (
@@ -401,28 +401,28 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                                   autoFocus
                                   onKeyDown={(e) => { if (e.key === 'Enter') updateItemQuantity(item.id, editQuantity); else if (e.key === 'Escape') setEditingItem(null); }}
                                 />
-                                <button onClick={() => updateItemQuantity(item.id, editQuantity)} className="text-[#4A7C59] text-sm font-medium hover:underline">Save</button>
-                                <button onClick={() => setEditingItem(null)} className="text-[#7D6B5D] text-sm hover:underline">Cancel</button>
+                                <button onClick={() => updateItemQuantity(item.id, editQuantity)} className="text-forest-green text-sm font-medium hover:underline">Save</button>
+                                <button onClick={() => setEditingItem(null)} className="text-earth-brown text-sm hover:underline">Cancel</button>
                               </div>
                             ) : (
                               <button onClick={() => { setEditingItem(item.id); setEditQuantity(item.quantity); }}
-                                className={`${isMobile ? 'text-base' : 'text-sm'} text-[#7D6B5D] hover:text-[#5D7B93] mt-1 flex items-center gap-1`}>
+                                className={`${isMobile ? 'text-base' : 'text-sm'} text-earth-brown hover:text-slate-blue mt-1 flex items-center gap-1`}>
                                 Qty: {item.quantity} <Edit3 className="w-3 h-3" />
                               </button>
                             )}
                           </div>
                           {item.price && item.price > 0 && (
                             <div className="text-right flex-shrink-0">
-                              <div className={`font-bold ${isMobile ? 'text-lg' : ''} ${item.purchased ? 'text-[#A89880]' : 'text-[#4A7C59]'}`}>
+                              <div className={`font-bold ${isMobile ? 'text-lg' : ''} ${item.purchased ? 'text-earth-brown-light' : 'text-forest-green'}`}>
                                 ${item.price.toFixed(2)}
                               </div>
                               {item.quantity > 1 && (
-                                <div className={`${isMobile ? 'text-sm' : 'text-xs'} text-[#7D6B5D]`}>${(item.price * item.quantity).toFixed(2)} total</div>
+                                <div className={`${isMobile ? 'text-sm' : 'text-xs'} text-earth-brown`}>${(item.price * item.quantity).toFixed(2)} total</div>
                               )}
                             </div>
                           )}
                           <button onClick={() => deleteItem(item.id)}
-                            className="p-2 text-[#D4C8B8] hover:text-[#B8593B] transition rounded-lg hover:bg-[#FADDD0]"
+                            className="p-2 text-earth-sand hover:text-rust transition rounded-lg hover:bg-[#FADDD0]"
                             title="Remove item" aria-label="Remove item from list">
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -432,7 +432,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                       {/* Per-item search error */}
                       {storeSearch.itemErrors[item.id] && (
                         <div className="px-4 py-2 bg-[#FADDD0] border-t border-[#E8A990]">
-                          <div className="flex items-center gap-2 text-sm text-[#B8593B]">
+                          <div className="flex items-center gap-2 text-sm text-rust">
                             <AlertCircle className="w-4 h-4 flex-shrink-0" />
                             <span>{storeSearch.itemErrors[item.id]}</span>
                           </div>
@@ -455,15 +455,15 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
           {/* Totals */}
           <div className={`mt-6 space-y-3 ${isMobile ? 'pb-4' : ''}`}>
             {selectedItems.size > 0 && selectedTotal > 0 && (
-              <TotalBar icon={<ShoppingCart className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} text-[#5D7B93]`} />}
+              <TotalBar icon={<ShoppingCart className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} text-slate-blue`} />}
                 label="Selected Total:" value={selectedTotal} color="blue" isMobile={isMobile} />
             )}
             {purchasedCount > 0 && purchasedTotal > 0 && (
-              <TotalBar icon={<Check className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} text-[#7D6B5D]`} />}
+              <TotalBar icon={<Check className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} text-earth-brown`} />}
                 label="Purchased:" value={purchasedTotal} color="muted" isMobile={isMobile} strikethrough />
             )}
             {remainingTotal > 0 && (
-              <TotalBar icon={<DollarSign className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} text-[#4A7C59]`} />}
+              <TotalBar icon={<DollarSign className={`${isMobile ? 'w-6 h-6' : 'w-5 h-5'} text-forest-green`} />}
                 label={purchasedCount > 0 ? 'Remaining:' : 'Estimated Total:'} value={remainingTotal} color="green" isMobile={isMobile} />
             )}
           </div>
@@ -476,13 +476,13 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
 function TotalBar({ icon, label, value, color, isMobile, strikethrough }: {
   icon: React.ReactNode; label: string; value: number; color: 'blue' | 'muted' | 'green'; isMobile?: boolean; strikethrough?: boolean;
 }) {
-  const bgColors = { blue: 'bg-[var(--status-research-bg)] border-[#B8D0E4]', muted: 'bg-[#F5F0E6] border-[#D4C8B8]', green: 'bg-[var(--status-complete-bg)] border-[#B8D8C4]' };
-  const textColors = { blue: 'text-[#5D7B93]', muted: 'text-[#7D6B5D]', green: 'text-[#4A7C59]' };
+  const bgColors = { blue: 'bg-[var(--status-research-bg)] border-[#B8D0E4]', muted: 'bg-earth-cream border-earth-sand', green: 'bg-[var(--status-complete-bg)] border-[#B8D8C4]' };
+  const textColors = { blue: 'text-slate-blue', muted: 'text-earth-brown', green: 'text-forest-green' };
   return (
     <div className={`${bgColors[color]} border rounded-xl p-4 flex items-center justify-between`}>
       <div className="flex items-center gap-2">
         {icon}
-        <span className={`font-bold text-[#3E2723] ${isMobile ? 'text-base' : ''}`}>{label}</span>
+        <span className={`font-bold text-foreground ${isMobile ? 'text-base' : ''}`}>{label}</span>
       </div>
       <span className={`${isMobile ? 'text-2xl' : 'text-2xl'} font-bold ${textColors[color]} ${strikethrough ? 'line-through' : ''}`}>
         ${value.toFixed(2)}
@@ -496,14 +496,14 @@ function StoreSearchResults({ results, priceRange }: {
   priceRange?: { min: number | null; max: number | null; avg: number | null; sources: number } | null;
 }) {
   return (
-    <div className="px-4 pb-4 bg-[#F5F0E6]">
+    <div className="px-4 pb-4 bg-earth-cream">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <TrendingDown className="w-4 h-4 text-[#4A7C59]" />
-          <span className="text-sm font-semibold text-[#3E2723]">Found at {results.length} stores:</span>
+          <TrendingDown className="w-4 h-4 text-forest-green" />
+          <span className="text-sm font-semibold text-foreground">Found at {results.length} stores:</span>
         </div>
         {priceRange && priceRange.min && (
-          <span className="text-xs text-[#7D6B5D]">
+          <span className="text-xs text-earth-brown">
             Market range: ${priceRange.min.toFixed(2)} - ${priceRange.max!.toFixed(2)}
           </span>
         )}
@@ -512,11 +512,11 @@ function StoreSearchResults({ results, priceRange }: {
         {results.map((result, idx) => {
           const isOutOfStock = result.availability === 'out-of-stock';
           return (
-            <div key={idx} className={`p-3 rounded-lg border border-[#D4C8B8] bg-white ${isOutOfStock ? 'opacity-60' : ''}`}>
+            <div key={idx} className={`p-3 rounded-lg border border-earth-sand bg-white ${isOutOfStock ? 'opacity-60' : ''}`}>
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-[#3E2723]">{result.store}</span>
+                    <span className="font-semibold text-foreground">{result.store}</span>
                     {result.confidence && (
                       <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
                         result.confidence === 'high' ? 'bg-green-50 text-green-600' :
@@ -527,36 +527,36 @@ function StoreSearchResults({ results, priceRange }: {
                     )}
                   </div>
                   {result.productName && (
-                    <div className="text-xs text-[#5D7B93] font-medium truncate max-w-[200px]" title={result.productName}>
+                    <div className="text-xs text-slate-blue font-medium truncate max-w-[200px]" title={result.productName}>
                       {result.productName}
                     </div>
                   )}
                   {result.sku && <div className="text-xs text-[#9B8B7D]">SKU: {result.sku}</div>}
-                  <div className="text-xs text-[#7D6B5D]">{result.distance}</div>
+                  <div className="text-xs text-earth-brown">{result.distance}</div>
                 </div>
                 <div className="text-right">
                   {result.price > 0 ? (
                     <>
-                      <div className={`text-lg font-bold ${isOutOfStock ? 'text-gray-400 line-through' : 'text-[#4A7C59]'}`}>
+                      <div className={`text-lg font-bold ${isOutOfStock ? 'text-gray-400 line-through' : 'text-forest-green'}`}>
                         ${result.price.toFixed(2)}
                       </div>
                       {result.originalPrice && result.originalPrice > result.price && (
-                        <div className="text-xs text-[#A89880] line-through">${result.originalPrice.toFixed(2)}</div>
+                        <div className="text-xs text-earth-brown-light line-through">${result.originalPrice.toFixed(2)}</div>
                       )}
                     </>
                   ) : (
-                    <div className="text-sm font-semibold text-[#5D7B93]">See website</div>
+                    <div className="text-sm font-semibold text-slate-blue">See website</div>
                   )}
                   <div className="flex items-center justify-end gap-1 mt-1">
                     <span className={`text-xs px-2 py-0.5 rounded font-medium ${
-                      result.availability === 'in-stock' ? 'bg-[var(--status-complete-bg)] text-[#4A7C59]' :
-                      result.availability === 'limited' ? 'bg-[var(--status-progress-bg)] text-[#C67B5C]' :
-                      result.availability === 'out-of-stock' ? 'bg-[#FADDD0] text-[#B8593B]' : 'bg-[var(--status-research-bg)] text-[#5D7B93]'
+                      result.availability === 'in-stock' ? 'bg-[var(--status-complete-bg)] text-forest-green' :
+                      result.availability === 'limited' ? 'bg-[var(--status-progress-bg)] text-terracotta' :
+                      result.availability === 'out-of-stock' ? 'bg-[#FADDD0] text-rust' : 'bg-[var(--status-research-bg)] text-slate-blue'
                     }`}>
                       {result.availability.replace(/-/g, ' ').toUpperCase()}
                     </span>
                   </div>
-                  {result.storeStock && <div className="text-xs text-[#7D6B5D] mt-0.5">{result.storeStock}</div>}
+                  {result.storeStock && <div className="text-xs text-earth-brown mt-0.5">{result.storeStock}</div>}
                 </div>
               </div>
               {result.priceWarning && (
@@ -564,13 +564,13 @@ function StoreSearchResults({ results, priceRange }: {
                   <span className="flex-shrink-0">!</span><span>{result.priceWarning}</span>
                 </div>
               )}
-              <div className="text-xs text-[var(--warm-brown)] mb-2">
+              <div className="text-xs text-warm-brown mb-2">
                 <div>{result.address}</div>
                 <div>{result.phone}</div>
-                {result.notes && !result.priceWarning && <div className="text-[#7D6B5D] italic mt-1">{result.notes}</div>}
+                {result.notes && !result.priceWarning && <div className="text-earth-brown italic mt-1">{result.notes}</div>}
               </div>
               <a href={result.link} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-[#5D7B93] hover:text-[var(--slate-blue-dark)] font-medium">
+                className="inline-flex items-center gap-1 text-xs text-slate-blue hover:text-slate-blue-dark font-medium">
                 {isOutOfStock ? 'Check for Updates' : 'View Product'} <ExternalLink className="w-3 h-3" />
               </a>
             </div>

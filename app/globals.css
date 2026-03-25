@@ -48,6 +48,13 @@
   --status-waiting-bg: #F5EEF8;
   --status-complete-bg: #E8F3EC;
 
+  /* Warning / Amber */
+  --warning: #D97706;
+  --warning-light: #F59E0B;
+  --warning-bg: #FFFBEB;
+  --warning-border: #FDE68A;
+  --warning-dark: #92400E;
+
   /* Accent Gold (Expert/Award) */
   --gold: #D4A574;
   --gold-dark: #C6943E;

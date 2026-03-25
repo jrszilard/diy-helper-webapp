@@ -29,20 +29,20 @@ export default function AgentProgress({
   const hasError = !!error && !isCancelling;
 
   return (
-    <div className="flex-1 flex flex-col bg-[#F5F0E6] overflow-y-auto">
+    <div className="flex-1 flex flex-col bg-earth-cream overflow-y-auto">
       {/* Header */}
-      <div className="bg-surface border-b border-[#D4C8B8] p-5">
+      <div className="bg-surface border-b border-earth-sand p-5">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h2 className="text-lg font-bold text-[#3E2723]">
+            <h2 className="text-lg font-bold text-foreground">
               {isCancelling ? 'Cancelling...' : 'Planning Your Project'}
             </h2>
-            <p className="text-sm text-[var(--warm-brown)]">
+            <p className="text-sm text-warm-brown">
               {projectDescription.length > 80
                 ? projectDescription.slice(0, 80) + '...'
                 : projectDescription}
             </p>
-            <p className="text-xs text-[var(--warm-brown)] mt-0.5">{location}</p>
+            <p className="text-xs text-warm-brown mt-0.5">{location}</p>
           </div>
           {(isRunning || isCancelling) && (
             <button
@@ -56,9 +56,9 @@ export default function AgentProgress({
               title={isCancelling ? 'Cancelling...' : 'Cancel'}
             >
               {isCancelling ? (
-                <Spinner className="text-[#7D6B5D]" />
+                <Spinner className="text-earth-brown" />
               ) : (
-                <X size={20} className="text-[#7D6B5D]" />
+                <X size={20} className="text-earth-brown" />
               )}
             </button>
           )}
@@ -67,11 +67,11 @@ export default function AgentProgress({
         {/* Overall progress bar */}
         <div className="w-full bg-[#E8E0D4] rounded-full h-3 overflow-hidden">
           <div
-            className="h-full bg-[#5D7B93] rounded-full transition-all duration-500 ease-out"
+            className="h-full bg-slate-blue rounded-full transition-all duration-500 ease-out"
             style={{ width: `${overallProgress}%` }}
           />
         </div>
-        <p className="text-xs text-[var(--warm-brown)] mt-1.5 text-right">
+        <p className="text-xs text-warm-brown mt-1.5 text-right">
           {isCancelling ? 'Cancelling...' : `${overallProgress}% complete`}
         </p>
       </div>
@@ -85,21 +85,21 @@ export default function AgentProgress({
         {/* Error message */}
         {hasError && (
           <div className="bg-[var(--status-progress-bg)] border border-[#E8B4A0] rounded-lg p-4 flex items-start gap-3">
-            <AlertCircle size={20} className="text-[#B8593B] flex-shrink-0 mt-0.5" />
+            <AlertCircle size={20} className="text-rust flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="text-sm font-semibold text-[#B8593B]">Something went wrong</p>
-              <p className="text-sm text-[var(--warm-brown)] mt-1">{error}</p>
+              <p className="text-sm font-semibold text-rust">Something went wrong</p>
+              <p className="text-sm text-warm-brown mt-1">{error}</p>
             </div>
           </div>
         )}
       </div>
 
       {/* Action bar */}
-      <div className="p-5 border-t border-[#D4C8B8] bg-surface">
+      <div className="p-5 border-t border-earth-sand bg-surface">
         {hasError && onRetry ? (
           <button
             onClick={onRetry}
-            className="w-full py-2.5 rounded-lg bg-[#5D7B93] text-white hover:bg-[var(--slate-blue-dark)] transition-colors text-sm font-medium flex items-center justify-center gap-2"
+            className="w-full py-2.5 rounded-lg bg-slate-blue text-white hover:bg-slate-blue-dark transition-colors text-sm font-medium flex items-center justify-center gap-2"
           >
             <RotateCcw size={16} />
             Retry from Failed Phase
@@ -110,8 +110,8 @@ export default function AgentProgress({
             disabled={isCancelling}
             className={`w-full py-2.5 rounded-lg border text-sm font-medium transition-colors ${
               isCancelling
-                ? 'border-[#E8E0D4] text-[#7D6B5D] cursor-not-allowed'
-                : 'border-[#D4C8B8] text-[#7D6B5D] hover:bg-[#E8E0D4]'
+                ? 'border-[#E8E0D4] text-earth-brown cursor-not-allowed'
+                : 'border-earth-sand text-earth-brown hover:bg-[#E8E0D4]'
             }`}
           >
             {isCancelling ? 'Cancelling...' : 'Cancel Planning'}
@@ -152,23 +152,23 @@ function PhaseCard({ phase, index }: { phase: PhaseProgress; index: number }) {
 
   return (
     <div className={`rounded-lg border p-4 transition-all ${
-      isActive ? 'bg-white border-[#5D7B93] shadow-md' :
+      isActive ? 'bg-white border-slate-blue shadow-md' :
       isComplete ? 'bg-[#F0F7F2] border-[#B5D4BE]' :
       isError ? 'bg-[var(--status-progress-bg)] border-[#E8B4A0]' :
-      isSkipped ? 'bg-[#F5F0E6] border-[#E8E0D4] opacity-60' :
+      isSkipped ? 'bg-earth-cream border-[#E8E0D4] opacity-60' :
       'bg-surface border-[#E8E0D4]'
     }`}>
       <div className="flex items-center gap-3">
         {/* Status icon */}
         <div className="flex-shrink-0">
-          {isComplete && <CheckCircle2 size={24} className="text-[#4A7C59]" />}
-          {isActive && <Spinner size="lg" className="text-[#5D7B93]" />}
-          {isError && <AlertCircle size={24} className="text-[#B8593B]" />}
-          {isSkipped && <SkipForward size={24} className="text-[#7D6B5D]" />}
+          {isComplete && <CheckCircle2 size={24} className="text-forest-green" />}
+          {isActive && <Spinner size="lg" className="text-slate-blue" />}
+          {isError && <AlertCircle size={24} className="text-rust" />}
+          {isSkipped && <SkipForward size={24} className="text-earth-brown" />}
           {phase.status === 'pending' && (
             <div className="relative">
-              <Circle size={24} className="text-[#D4C8B8]" />
-              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#7D6B5D]">
+              <Circle size={24} className="text-earth-sand" />
+              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-earth-brown">
                 {index + 1}
               </span>
             </div>
@@ -179,42 +179,42 @@ function PhaseCard({ phase, index }: { phase: PhaseProgress; index: number }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
             <h3 className={`font-semibold text-sm ${
-              isActive ? 'text-[#3E2723]' :
-              isComplete ? 'text-[#4A7C59]' :
-              isError ? 'text-[#B8593B]' :
-              isSkipped ? 'text-[#7D6B5D]' :
-              'text-[var(--warm-brown)]'
+              isActive ? 'text-foreground' :
+              isComplete ? 'text-forest-green' :
+              isError ? 'text-rust' :
+              isSkipped ? 'text-earth-brown' :
+              'text-warm-brown'
             }`}>
               Phase {index + 1}: {phaseLabels[phase.phase]}
             </h3>
             {isComplete && phase.durationMs && (
-              <span className="text-xs text-[var(--warm-brown)]">
+              <span className="text-xs text-warm-brown">
                 {Math.round(phase.durationMs / 1000)}s
               </span>
             )}
             {isActive && elapsed !== null && (
-              <span className="text-xs text-[#5D7B93]">
+              <span className="text-xs text-slate-blue">
                 {elapsed}s
               </span>
             )}
             {isSkipped && (
-              <span className="text-xs text-[#7D6B5D]">Skipped</span>
+              <span className="text-xs text-earth-brown">Skipped</span>
             )}
           </div>
 
           {/* Description or current activity */}
           <p className={`text-xs mt-0.5 ${
-            isActive ? 'text-[#5D7B93]' :
-            isSkipped ? 'text-[#7D6B5D]' :
-            'text-[var(--warm-brown)]'
+            isActive ? 'text-slate-blue' :
+            isSkipped ? 'text-earth-brown' :
+            'text-warm-brown'
           }`}>
             {isActive ? phase.message : phaseDescriptions[phase.phase]}
           </p>
 
           {/* Detail (current tool call) */}
           {isActive && phase.detail && (
-            <p className="text-xs text-[#5D7B93] mt-1 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#5D7B93] animate-pulse" />
+            <p className="text-xs text-slate-blue mt-1 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-blue animate-pulse" />
               {phase.detail}
             </p>
           )}

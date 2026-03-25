@@ -37,7 +37,7 @@ export default function LocationInput({ onSubmit }: LocationInputProps) {
           value={city}
           onChange={(e) => setCity(e.target.value)}
           placeholder="e.g., Austin"
-          className="w-full px-3 py-2.5 text-sm text-white placeholder-white/40 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-[#C67B5C]"
+          className="w-full px-3 py-2.5 text-sm text-white placeholder-white/40 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-terracotta"
           autoFocus
         />
       </div>
@@ -46,7 +46,7 @@ export default function LocationInput({ onSubmit }: LocationInputProps) {
         <select
           value={state}
           onChange={(e) => setState(e.target.value)}
-          className="w-full px-3 py-2.5 text-sm text-white bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-[#C67B5C]"
+          className="w-full px-3 py-2.5 text-sm text-white bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-terracotta"
         >
           <option value="" className="bg-[#4A3F35]">Select a state</option>
           {US_STATES.map(s => (
@@ -59,7 +59,7 @@ export default function LocationInput({ onSubmit }: LocationInputProps) {
         disabled={!city.trim() || !state}
         className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors ${
           city.trim() && state
-            ? 'bg-[#C67B5C] text-white hover:bg-[#A65D3F]'
+            ? 'bg-terracotta text-white hover:bg-terracotta-dark'
             : 'bg-white/10 text-white/30 cursor-not-allowed'
         }`}
       >

@@ -128,45 +128,45 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
   if (!loading && !hasNotes && userRole === 'diyer') return null;
 
   return (
-    <div className="bg-white border border-[#D4C8B8] rounded-lg overflow-hidden">
+    <div className="bg-white border border-earth-sand rounded-lg overflow-hidden">
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full px-4 py-3 flex items-center justify-between bg-[#5D7B93]/5 hover:bg-[#5D7B93]/10 transition-colors"
+        className="w-full px-4 py-3 flex items-center justify-between bg-slate-blue/5 hover:bg-slate-blue/10 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <Lightbulb size={14} className="text-[#5D7B93]" />
-          <h4 className="text-sm font-semibold text-[#3E2723]">
+          <Lightbulb size={14} className="text-slate-blue" />
+          <h4 className="text-sm font-semibold text-foreground">
             Expert Insights
           </h4>
           {!hasNotes && userRole === 'expert' && (
             <span className="text-xs text-[var(--muted)]">(add notes for the DIYer)</span>
           )}
         </div>
-        {expanded ? <ChevronUp size={14} className="text-[#7D6B5D]" /> : <ChevronDown size={14} className="text-[#7D6B5D]" />}
+        {expanded ? <ChevronUp size={14} className="text-earth-brown" /> : <ChevronDown size={14} className="text-earth-brown" />}
       </button>
 
       {expanded && (
         <div className="px-4 py-3">
           {loading ? (
             <div className="flex items-center justify-center py-4">
-              <Spinner size="sm" className="text-[#C67B5C]" />
+              <Spinner size="sm" className="text-terracotta" />
             </div>
           ) : editing ? (
             /* Edit mode */
             <div className="space-y-4">
               {/* Tools needed */}
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-medium text-[#7D6B5D] mb-1">
+                <label className="flex items-center gap-1.5 text-xs font-medium text-earth-brown mb-1">
                   <Wrench size={12} />
                   Tools Needed
                 </label>
                 <div className="flex flex-wrap gap-1.5 mb-1.5">
                   {toolsNeeded.map((tool, i) => (
-                    <span key={i} className="flex items-center gap-1 text-xs bg-[#E8DFD0] text-[#3E2723] px-2 py-1 rounded-full">
+                    <span key={i} className="flex items-center gap-1 text-xs bg-earth-tan text-foreground px-2 py-1 rounded-full">
                       {tool}
                       <button onClick={() => setToolsNeeded(toolsNeeded.filter((_, j) => j !== i))}>
-                        <X size={10} className="text-[#7D6B5D]" />
+                        <X size={10} className="text-earth-brown" />
                       </button>
                     </span>
                   ))}
@@ -181,7 +181,7 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
                     inputSize="sm"
                     maxLength={200}
                   />
-                  <button onClick={addTool} className="text-xs text-[#5D7B93] hover:text-[var(--slate-blue-dark)]">
+                  <button onClick={addTool} className="text-xs text-slate-blue hover:text-slate-blue-dark">
                     <Plus size={14} />
                   </button>
                 </div>
@@ -189,7 +189,7 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
 
               {/* Estimated time */}
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-medium text-[#7D6B5D] mb-1">
+                <label className="flex items-center gap-1.5 text-xs font-medium text-earth-brown mb-1">
                   <Clock size={12} />
                   Estimated Time
                 </label>
@@ -206,16 +206,16 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
 
               {/* Common mistakes */}
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-medium text-[#7D6B5D] mb-1">
+                <label className="flex items-center gap-1.5 text-xs font-medium text-earth-brown mb-1">
                   <AlertOctagon size={12} />
                   Common Mistakes to Avoid
                 </label>
                 <div className="space-y-1 mb-1.5">
                   {commonMistakes.map((mistake, i) => (
                     <div key={i} className="flex items-start gap-1.5">
-                      <span className="text-xs text-[#3E2723] flex-1 bg-red-50 px-2 py-1 rounded">{mistake}</span>
+                      <span className="text-xs text-foreground flex-1 bg-red-50 px-2 py-1 rounded">{mistake}</span>
                       <button onClick={() => setCommonMistakes(commonMistakes.filter((_, j) => j !== i))}>
-                        <X size={10} className="text-[#7D6B5D] mt-1" />
+                        <X size={10} className="text-earth-brown mt-1" />
                       </button>
                     </div>
                   ))}
@@ -230,7 +230,7 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
                     inputSize="sm"
                     maxLength={500}
                   />
-                  <button onClick={addMistake} className="text-xs text-[#5D7B93] hover:text-[var(--slate-blue-dark)]">
+                  <button onClick={addMistake} className="text-xs text-slate-blue hover:text-slate-blue-dark">
                     <Plus size={14} />
                   </button>
                 </div>
@@ -238,7 +238,7 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
 
               {/* Local code notes */}
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-medium text-[#7D6B5D] mb-1">
+                <label className="flex items-center gap-1.5 text-xs font-medium text-earth-brown mb-1">
                   <MapPin size={12} />
                   Local Code Notes
                 </label>
@@ -247,20 +247,20 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
                   onChange={e => setLocalCodeNotes(e.target.value)}
                   placeholder="Any local building code considerations..."
                   rows={2}
-                  className="w-full px-2 py-1.5 border border-[#D4C8B8] rounded text-xs text-[#3E2723] focus:outline-none focus:ring-1 focus:ring-[#C67B5C]/50 resize-none"
+                  className="w-full px-2 py-1.5 border border-earth-sand rounded text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-terracotta/50 resize-none"
                   maxLength={2000}
                 />
               </div>
 
               {/* Additional notes */}
               <div>
-                <label className="text-xs font-medium text-[#7D6B5D] mb-1 block">Additional Notes</label>
+                <label className="text-xs font-medium text-earth-brown mb-1 block">Additional Notes</label>
                 <textarea
                   value={additional}
                   onChange={e => setAdditional(e.target.value)}
                   placeholder="Any other helpful info for the DIYer..."
                   rows={2}
-                  className="w-full px-2 py-1.5 border border-[#D4C8B8] rounded text-xs text-[#3E2723] focus:outline-none focus:ring-1 focus:ring-[#C67B5C]/50 resize-none"
+                  className="w-full px-2 py-1.5 border border-earth-sand rounded text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-terracotta/50 resize-none"
                   maxLength={2000}
                 />
               </div>
@@ -271,7 +271,7 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
                 <button
                   onClick={handleSave}
                   disabled={saving || !hasContent}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[var(--slate-blue-dark)] transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-slate-blue text-white text-sm font-semibold rounded-lg hover:bg-slate-blue-dark transition-colors disabled:opacity-50"
                 >
                   {saving ? <Spinner size="sm" /> : <Save size={14} />}
                   Save Notes
@@ -288,7 +288,7 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
                       setAdditional(notes.additional || '');
                     }
                   }}
-                  className="px-4 py-2 text-sm text-[#7D6B5D] hover:text-[#3E2723] transition-colors"
+                  className="px-4 py-2 text-sm text-earth-brown hover:text-foreground transition-colors"
                 >
                   Cancel
                 </button>
@@ -299,13 +299,13 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
             <div className="space-y-3">
               {notes!.tools_needed && notes!.tools_needed.length > 0 && (
                 <div>
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-[#7D6B5D] mb-1">
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-earth-brown mb-1">
                     <Wrench size={12} />
                     Tools Needed
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {notes!.tools_needed.map((tool, i) => (
-                      <span key={i} className="text-xs bg-[#E8DFD0] text-[#3E2723] px-2 py-1 rounded-full">{tool}</span>
+                      <span key={i} className="text-xs bg-earth-tan text-foreground px-2 py-1 rounded-full">{tool}</span>
                     ))}
                   </div>
                 </div>
@@ -313,21 +313,21 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
 
               {notes!.estimated_time && (
                 <div className="flex items-center gap-1.5">
-                  <Clock size={12} className="text-[#7D6B5D]" />
-                  <span className="text-xs font-medium text-[#7D6B5D]">Est. Time:</span>
-                  <span className="text-xs text-[#3E2723]">{notes!.estimated_time}</span>
+                  <Clock size={12} className="text-earth-brown" />
+                  <span className="text-xs font-medium text-earth-brown">Est. Time:</span>
+                  <span className="text-xs text-foreground">{notes!.estimated_time}</span>
                 </div>
               )}
 
               {notes!.common_mistakes && notes!.common_mistakes.length > 0 && (
                 <div>
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-[#7D6B5D] mb-1">
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-earth-brown mb-1">
                     <AlertOctagon size={12} />
                     Watch Out For
                   </span>
                   <ul className="space-y-1">
                     {notes!.common_mistakes.map((mistake, i) => (
-                      <li key={i} className="text-xs text-[#3E2723] bg-red-50 px-2 py-1 rounded">
+                      <li key={i} className="text-xs text-foreground bg-red-50 px-2 py-1 rounded">
                         {mistake}
                       </li>
                     ))}
@@ -337,25 +337,25 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
 
               {notes!.local_code_notes && (
                 <div>
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-[#7D6B5D] mb-1">
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-earth-brown mb-1">
                     <MapPin size={12} />
                     Local Code Notes
                   </span>
-                  <p className="text-xs text-[#3E2723] bg-blue-50 px-2 py-1.5 rounded">{notes!.local_code_notes}</p>
+                  <p className="text-xs text-foreground bg-blue-50 px-2 py-1.5 rounded">{notes!.local_code_notes}</p>
                 </div>
               )}
 
               {notes!.additional && (
                 <div>
-                  <span className="text-xs font-medium text-[#7D6B5D] mb-1 block">Additional</span>
-                  <p className="text-xs text-[#3E2723]">{notes!.additional}</p>
+                  <span className="text-xs font-medium text-earth-brown mb-1 block">Additional</span>
+                  <p className="text-xs text-foreground">{notes!.additional}</p>
                 </div>
               )}
 
               {userRole === 'expert' && (
                 <button
                   onClick={() => setEditing(true)}
-                  className="text-xs text-[#5D7B93] hover:text-[var(--slate-blue-dark)] font-medium transition-colors"
+                  className="text-xs text-slate-blue hover:text-slate-blue-dark font-medium transition-colors"
                 >
                   Edit notes
                 </button>
@@ -373,7 +373,7 @@ export default function InsightNotesPanel({ questionId, userRole }: InsightNotes
               {userRole === 'expert' ? (
                 <button
                   onClick={() => setEditing(true)}
-                  className="flex items-center gap-1.5 mx-auto text-xs font-medium text-[#5D7B93] hover:text-[var(--slate-blue-dark)] transition-colors"
+                  className="flex items-center gap-1.5 mx-auto text-xs font-medium text-slate-blue hover:text-slate-blue-dark transition-colors"
                 >
                   <Plus size={12} />
                   Add insight notes (tools, time estimate, tips)
