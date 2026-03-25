@@ -62,16 +62,8 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
   const storeSearch = useStoreSearch();
   const [priceSyncNotification, setPriceSyncNotification] = useState<string | null>(null);
   const itemsRef = useRef(items);
-  itemsRef.current = items;
+  useEffect(() => { itemsRef.current = items; }, [items]);
   const syncedPriceItemsRef = useRef<Set<string>>(new Set());
-
-  useEffect(() => {
-    if (project) {
-      loadItems();
-      storeSearch.clearResults();
-      syncedPriceItemsRef.current = new Set();
-    }
-  }, [project]);
 
   const isGuestProject = project?.isGuest === true;
 
@@ -95,6 +87,17 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
       if (data) setItems(data);
     }
   };
+
+  useEffect(() => {
+    if (project) {
+      const t = setTimeout(() => {
+        loadItems();
+        storeSearch.clearResults();
+        syncedPriceItemsRef.current = new Set();
+      }, 0);
+      return () => clearTimeout(t);
+    }
+  }, [project]);
 
   const toggleItem = (itemId: string) => {
     const newSelected = new Set(selectedItems);
@@ -181,36 +184,39 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
     const currentItems = itemsRef.current;
     if (currentItems.length === 0) return;
 
-    const updatedNames: string[] = [];
-    for (const [itemId, resultData] of entries) {
-      if (syncedPriceItemsRef.current.has(itemId)) continue;
-      const bestResult = resultData.results.find(
-        r => r.price > 0 && (r.confidence === 'high' || r.confidence === 'medium')
-      );
-      if (!bestResult) continue;
-      const item = currentItems.find(i => i.id === itemId);
-      if (!item) continue;
-      syncedPriceItemsRef.current.add(itemId);
-      const roundedBest = Math.round(bestResult.price * 100) / 100;
-      const currentPrice = item.price != null ? Math.round(item.price * 100) / 100 : null;
-      // Skip auto-sync if price differs by >5x — likely a quantity mismatch
-      // (e.g., store returns 250ft roll price but list has 25ft qty)
-      if (currentPrice != null && currentPrice > 0) {
-        const ratio = roundedBest / currentPrice;
-        if (ratio > 5 || ratio < 0.2) continue;
+    const t = setTimeout(() => {
+      const updatedNames: string[] = [];
+      for (const [itemId, resultData] of entries) {
+        if (syncedPriceItemsRef.current.has(itemId)) continue;
+        const bestResult = resultData.results.find(
+          r => r.price > 0 && (r.confidence === 'high' || r.confidence === 'medium')
+        );
+        if (!bestResult) continue;
+        const item = currentItems.find(i => i.id === itemId);
+        if (!item) continue;
+        syncedPriceItemsRef.current.add(itemId);
+        const roundedBest = Math.round(bestResult.price * 100) / 100;
+        const currentPrice = item.price != null ? Math.round(item.price * 100) / 100 : null;
+        // Skip auto-sync if price differs by >5x — likely a quantity mismatch
+        // (e.g., store returns 250ft roll price but list has 25ft qty)
+        if (currentPrice != null && currentPrice > 0) {
+          const ratio = roundedBest / currentPrice;
+          if (ratio > 5 || ratio < 0.2) continue;
+        }
+        if (currentPrice !== roundedBest) {
+          updateItemPrice(itemId, bestResult.price);
+          updatedNames.push(item.product_name);
+        }
       }
-      if (currentPrice !== roundedBest) {
-        updateItemPrice(itemId, bestResult.price);
-        updatedNames.push(item.product_name);
+      if (updatedNames.length > 0) {
+        const msg = updatedNames.length === 1
+          ? `Updated price for ${updatedNames[0]}`
+          : `Updated prices for ${updatedNames.length} items`;
+        setPriceSyncNotification(msg);
+        setTimeout(() => setPriceSyncNotification(null), 4000);
       }
-    }
-    if (updatedNames.length > 0) {
-      const msg = updatedNames.length === 1
-        ? `Updated price for ${updatedNames[0]}`
-        : `Updated prices for ${updatedNames.length} items`;
-      setPriceSyncNotification(msg);
-      setTimeout(() => setPriceSyncNotification(null), 4000);
-    }
+    }, 0);
+    return () => clearTimeout(t);
   }, [storeSearch.searchResults, updateItemPrice]);
 
   if (!project) {

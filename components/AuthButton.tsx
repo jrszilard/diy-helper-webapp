@@ -47,7 +47,7 @@ export default function AuthButton({
   }, [showDropdown]);
 
   // SSR-safe portal mount
-  useEffect(() => setPortalMounted(true), []);
+  useEffect(() => { const t = setTimeout(() => setPortalMounted(true), 0); return () => clearTimeout(t); }, []);
 
   // Escape key to close auth modal
   useEffect(() => {

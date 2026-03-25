@@ -7,6 +7,7 @@ import {
   Shield, Hammer, DollarSign, ShoppingCart, Video, Calendar,
   ClipboardCopy, CheckCircle2, Share2, Link, LogIn, X,
 } from 'lucide-react';
+import NextLink from 'next/link';
 import { supabase } from '@/lib/supabase';
 import type { ReportSection, ProjectReportRecord, ReportOutput } from '@/lib/agents/types';
 import { sanitizeHref } from '@/lib/security';
@@ -85,7 +86,7 @@ export default function ReportView({
     } else if (onApplyToProject) {
       onApplyToProject();
     }
-  }, [applyToProject, reportId, onApplyToProject, isAuthenticated]);
+  }, [applyToProject, reportId, onApplyToProject, isAuthenticated, setShowLoginPrompt, setInternalIsApplying, setInternalAppliedProjectId, setToast]);
 
   const activeSection = sections.find(s => s.id === activeTab);
 
@@ -97,7 +98,7 @@ export default function ReportView({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
-  }, [sections]);
+  }, [sections, setCopied]);
 
   const handlePrint = useCallback(() => {
     window.print();
@@ -128,7 +129,7 @@ export default function ReportView({
     } catch {
       setShareStatus('idle');
     }
-  }, [report.id, isSharedView]);
+  }, [report.id, isSharedView, setShareStatus]);
 
   return (
     <div className="flex flex-col h-full bg-earth-cream">
@@ -315,13 +316,13 @@ export default function ReportView({
               />
             )}
             {isSharedView ? (
-              <a
+              <NextLink
                 href="/"
                 className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white bg-terracotta hover:bg-terracotta-dark transition-colors shadow-md"
               >
                 <FolderPlus size={18} />
                 Create Your Own Project Plan
-              </a>
+              </NextLink>
             ) : appliedProjectId ? (
               <div className="flex items-center gap-2 text-sm text-forest-green font-medium">
                 <CheckCircle2 size={18} />

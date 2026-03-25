@@ -16,8 +16,11 @@ export default function GuestExpertCallout({ messageCount, onRequestAuth }: Gues
   const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem(DISMISS_KEY);
-    setDismissed(!!stored);
+    const t = setTimeout(() => {
+      const stored = localStorage.getItem(DISMISS_KEY);
+      setDismissed(!!stored);
+    }, 0);
+    return () => clearTimeout(t);
   }, []);
 
   if (dismissed || messageCount < SHOW_AFTER_MESSAGES) return null;

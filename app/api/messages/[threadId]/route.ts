@@ -82,11 +82,13 @@ export async function GET(
     }
 
     // First try context-based lookup
-    let { data: messages, error } = await auth.supabaseClient
+    const result = await auth.supabaseClient
       .from('marketplace_messages')
       .select('*')
       .or(`qa_question_id.eq.${threadId},consultation_id.eq.${threadId},rfp_id.eq.${threadId},bid_id.eq.${threadId}`)
       .order('created_at', { ascending: true });
+    const { error } = result;
+    let { data: messages } = result;
 
     if (error) {
       logger.error('Failed to fetch thread messages', error);

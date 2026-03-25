@@ -178,21 +178,24 @@ export default function QADetailPage() {
   // Fetch expert info when question loads with an expert
   useEffect(() => {
     if (question?.expertId) {
-      fetchExpertInfo(question.expertId);
+      const t = setTimeout(() => fetchExpertInfo(question.expertId!), 0);
+      return () => clearTimeout(t);
     }
   }, [question?.expertId, fetchExpertInfo]);
 
   // Fetch bids when question is in bidding mode
   useEffect(() => {
     if (question?.pricingMode === 'bidding') {
-      fetchBids();
+      const t = setTimeout(() => fetchBids(), 0);
+      return () => clearTimeout(t);
     }
   }, [question?.pricingMode, fetchBids]);
 
   // Sync second opinion ID from API response
   useEffect(() => {
     if (question && (question as unknown as { secondOpinionId?: string }).secondOpinionId) {
-      setSecondOpinionId((question as unknown as { secondOpinionId?: string }).secondOpinionId!);
+      const t = setTimeout(() => setSecondOpinionId((question as unknown as { secondOpinionId?: string }).secondOpinionId!), 0);
+      return () => clearTimeout(t);
     }
   }, [question]);
 

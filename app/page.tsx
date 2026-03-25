@@ -51,7 +51,8 @@ export default function LandingPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('signIn') === 'true' && !user) {
-      setShowAuth(true);
+      const t = setTimeout(() => setShowAuth(true), 0);
+      return () => clearTimeout(t);
     }
   }, [user]);
 

@@ -115,7 +115,7 @@ export async function GET(
 
     // Fetch expert profiles for all bidders
     const expertIds = [...new Set((bids || []).map(b => b.expert_id))];
-    let experts: Record<string, { displayName: string; profilePhotoUrl: string | null; avgRating: number; totalReviews: number; specialties: Array<{ specialty: string; yearsExperience: number | null; isPrimary: boolean }> }> = {};
+    const experts: Record<string, { displayName: string; profilePhotoUrl: string | null; avgRating: number; totalReviews: number; specialties: Array<{ specialty: string; yearsExperience: number | null; isPrimary: boolean }> }> = {};
 
     if (expertIds.length > 0) {
       const { data: profiles } = await adminClient

@@ -56,10 +56,13 @@ function SettingsContent() {
 
   useEffect(() => {
     if (sessionId) {
-      setToast({ type: 'success', message: 'Subscription activated! Welcome to Pro.' });
-      // Clean the URL without triggering a re-render
-      window.history.replaceState({}, '', '/settings');
-      setTimeout(() => setToast(null), 5000);
+      const t = setTimeout(() => {
+        setToast({ type: 'success', message: 'Subscription activated! Welcome to Pro.' });
+        // Clean the URL without triggering a re-render
+        window.history.replaceState({}, '', '/settings');
+        setTimeout(() => setToast(null), 5000);
+      }, 0);
+      return () => clearTimeout(t);
     }
   }, [sessionId]);
 

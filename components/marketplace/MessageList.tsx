@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { MessageSquare, Paperclip } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
 import Link from 'next/link';
@@ -24,8 +25,14 @@ interface MessageListProps {
 }
 
 export default function MessageList({ threads, basePath }: MessageListProps) {
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(Date.now()), 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   const formatTimeAgo = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime();
+    const diff = currentTime - new Date(dateStr).getTime();
     const minutes = Math.floor(diff / 60000);
     if (minutes < 1) return 'just now';
     if (minutes < 60) return `${minutes}m`;

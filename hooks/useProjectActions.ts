@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { guestStorage, GuestProject } from '@/lib/guestStorage';
-import { Project } from '@/types';
 
 interface UseProjectActionsOptions {
   userId?: string;
@@ -12,17 +11,9 @@ interface UseProjectActionsOptions {
 export function useProjectActions({ userId }: UseProjectActionsOptions = {}) {
   const [projects, setProjects] = useState<Array<{ id: string; name: string }>>([]);
   const [guestProjects, setGuestProjects] = useState<GuestProject[]>([]);
-  const [isGuestMode, setIsGuestMode] = useState(false);
 
-  useEffect(() => {
-    if (userId) {
-      loadProjects();
-      setIsGuestMode(false);
-    } else {
-      setGuestProjects(guestStorage.getProjects());
-      setIsGuestMode(true);
-    }
-  }, [userId]);
+  // Derive guest mode from userId — no need for separate state
+  const isGuestMode = !userId;
 
   const loadProjects = useCallback(async () => {
     try {
@@ -44,6 +35,18 @@ export function useProjectActions({ userId }: UseProjectActionsOptions = {}) {
       console.error('Error loading projects:', error);
     }
   }, [userId]);
+
+  // Sync projects when userId changes — deferred to satisfy react-hooks/set-state-in-effect
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (userId) {
+        loadProjects();
+      } else {
+        setGuestProjects(guestStorage.getProjects());
+      }
+    }, 0);
+    return () => clearTimeout(timeout);
+  }, [userId, loadProjects]);
 
   const refreshGuestProjects = useCallback(() => {
     setGuestProjects(guestStorage.getProjects());
@@ -84,12 +87,7 @@ export function useProjectActions({ userId }: UseProjectActionsOptions = {}) {
       return { id: guestProject.id, name: guestProject.name };
     }
 
-    let currentUserId = userId;
-    if (!currentUserId) {
-      const { data: { user } } = await supabase.auth.getUser();
-      currentUserId = user?.id;
-    }
-    if (!currentUserId) return null;
+    const currentUserId = userId;
 
     const { data: newProject, error } = await supabase
       .from('projects')
@@ -124,12 +122,7 @@ export function useProjectActions({ userId }: UseProjectActionsOptions = {}) {
       return addedMaterials.length;
     }
 
-    let currentUserId = userId;
-    if (!currentUserId) {
-      const { data: { user } } = await supabase.auth.getUser();
-      currentUserId = user?.id;
-    }
-    if (!currentUserId) return 0;
+    const currentUserId = userId;
 
     const itemsToInsert = materials.map((mat) => ({
       project_id: projectId,

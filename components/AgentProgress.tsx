@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { CheckCircle2, Circle, AlertCircle, X, RotateCcw, SkipForward } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
 import type { PhaseProgress } from '@/hooks/useAgentRun';
@@ -146,8 +147,14 @@ function PhaseCard({ phase, index }: { phase: PhaseProgress; index: number }) {
   const isError = phase.status === 'error';
   const isSkipped = phase.status === 'skipped';
 
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!isActive) return;
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [isActive]);
   const elapsed = phase.startedAt && isActive
-    ? Math.round((Date.now() - phase.startedAt) / 1000)
+    ? Math.round((now - phase.startedAt) / 1000)
     : null;
 
   return (

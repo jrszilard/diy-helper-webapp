@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Clock, DollarSign, Image, CheckCircle, Send, Loader2, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -36,11 +36,17 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(Date.now()), 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   const isClaimed = question.status === 'claimed';
   const isAnswered = question.status === 'answered';
 
   const formatTimeAgo = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime();
+    const diff = currentTime - new Date(dateStr).getTime();
     const minutes = Math.floor(diff / 60000);
     if (minutes < 1) return 'just now';
     if (minutes < 60) return `${minutes}m ago`;
@@ -52,7 +58,7 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
 
   const getTimeRemaining = () => {
     if (!question.claimExpiresAt) return null;
-    const remaining = new Date(question.claimExpiresAt).getTime() - Date.now();
+    const remaining = new Date(question.claimExpiresAt).getTime() - currentTime;
     if (remaining <= 0) return 'Expired';
     const minutes = Math.floor(remaining / 60000);
     if (minutes < 60) return `${minutes}m left`;

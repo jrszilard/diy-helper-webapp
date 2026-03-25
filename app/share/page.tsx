@@ -21,37 +21,40 @@ export default function SharePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const hash = window.location.hash.slice(1);
-      if (!hash) {
-        setError('No shared data found. The link may be invalid or expired.');
-        return;
-      }
-      const decoded = JSON.parse(decodeURIComponent(atob(hash)));
-      if (!decoded.n || !decoded.m || !Array.isArray(decoded.m)) {
-        setError('Invalid share link format.');
-        return;
-      }
-      // Validate types and sanitize values
-      if (typeof decoded.n !== 'string') {
-        setError('Invalid share link format.');
-        return;
-      }
+    const t = setTimeout(() => {
+      try {
+        const hash = window.location.hash.slice(1);
+        if (!hash) {
+          setError('No shared data found. The link may be invalid or expired.');
+          return;
+        }
+        const decoded = JSON.parse(decodeURIComponent(atob(hash)));
+        if (!decoded.n || !decoded.m || !Array.isArray(decoded.m)) {
+          setError('Invalid share link format.');
+          return;
+        }
+        // Validate types and sanitize values
+        if (typeof decoded.n !== 'string') {
+          setError('Invalid share link format.');
+          return;
+        }
 
-      const sanitized: SharedData = {
-        n: decoded.n.slice(0, 200),
-        m: decoded.m.slice(0, 200).map((item: Record<string, unknown>) => ({
-          p: typeof item.p === 'string' ? item.p.slice(0, 200) : 'Unknown item',
-          q: typeof item.q === 'number' ? Math.min(Math.max(Math.round(item.q), 1), 9999) : 1,
-          c: typeof item.c === 'string' ? item.c.slice(0, 50) : 'general',
-          $: typeof item.$ === 'number' ? Math.min(Math.max(item.$, 0), 999999) : null,
-        })),
-      };
+        const sanitized: SharedData = {
+          n: decoded.n.slice(0, 200),
+          m: decoded.m.slice(0, 200).map((item: Record<string, unknown>) => ({
+            p: typeof item.p === 'string' ? item.p.slice(0, 200) : 'Unknown item',
+            q: typeof item.q === 'number' ? Math.min(Math.max(Math.round(item.q), 1), 9999) : 1,
+            c: typeof item.c === 'string' ? item.c.slice(0, 50) : 'general',
+            $: typeof item.$ === 'number' ? Math.min(Math.max(item.$, 0), 999999) : null,
+          })),
+        };
 
-      setData(sanitized);
-    } catch {
-      setError('Could not decode the shared link. It may be corrupted.');
-    }
+        setData(sanitized);
+      } catch {
+        setError('Could not decode the shared link. It may be corrupted.');
+      }
+    }, 0);
+    return () => clearTimeout(t);
   }, []);
 
   if (error) {

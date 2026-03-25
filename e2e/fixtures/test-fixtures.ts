@@ -65,6 +65,7 @@ export const test = base.extend<{
    * Call mockAPIs() in your test before navigating.
    */
   mockAPIs: async ({ page }, use) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     await use((options?: MockAPIOptions) => mockAPIs(page, options));
   },
 
@@ -83,6 +84,7 @@ export const test = base.extend<{
     // Re-navigate so cleared state takes effect
     await page.goto('/chat');
     await page.waitForLoadState('networkidle');
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     await use(page);
   },
 });

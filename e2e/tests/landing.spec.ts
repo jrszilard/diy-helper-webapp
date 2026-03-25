@@ -5,37 +5,27 @@ test.describe('Landing Page', () => {
     await page.goto('/');
   });
 
-  test('renders hero section with headline and chat input', async ({ page }) => {
-    await expect(page.locator('h1')).toContainText('Your DIY projects');
-    await expect(page.locator('h1')).toContainText('done right');
-    // Hero chat input should be visible
-    const heroInput = page.locator('input[type="text"]').first();
-    await expect(heroInput).toBeVisible();
+  test('renders GuidedBot with greeting and project input', async ({ page }) => {
+    // GuidedBot greeting should be visible
+    await expect(page.locator('text=DIY project planner')).toBeVisible();
+    await expect(page.locator('text=What kind of project are you working on')).toBeVisible();
+    // Bot input should be visible
+    const botInput = page.locator('input[placeholder="Describe your project..."]');
+    await expect(botInput).toBeVisible();
   });
 
-  test('typing + submit navigates to /chat with sessionStorage message', async ({ page }) => {
-    const heroInput = page.locator('section input[type="text"]');
-    await heroInput.fill('How do I install a ceiling fan?');
-    await heroInput.press('Enter');
-
+  test('"Skip to full chat" link navigates to /chat', async ({ page }) => {
+    const skipLink = page.locator('a', { hasText: 'Skip to full chat' });
+    await expect(skipLink).toBeVisible();
+    await skipLink.click();
     await page.waitForURL('**/chat');
     expect(page.url()).toContain('/chat');
   });
 
-  test('"Get Started" link navigates to /chat', async ({ page }) => {
-    const getStarted = page.locator('a', { hasText: 'Get Started' });
-    await expect(getStarted).toBeVisible();
-    await getStarted.click();
-    await page.waitForURL('**/chat');
-    expect(page.url()).toContain('/chat');
-  });
-
-  test('quick start buttons navigate to /chat', async ({ page }) => {
-    const quickStart = page.locator('button', { hasText: 'Install a ceiling fan' });
-    await expect(quickStart).toBeVisible();
-    await quickStart.click();
-    await page.waitForURL('**/chat');
-    expect(page.url()).toContain('/chat');
+  test('project template cards are visible', async ({ page }) => {
+    // The GuidedBot renders ProjectCards with template buttons
+    const templateButtons = page.locator('button', { hasText: /Ceiling Fan|Deck|Bathroom/ });
+    await expect(templateButtons.first()).toBeVisible();
   });
 
   test('feature cards render', async ({ page }) => {
