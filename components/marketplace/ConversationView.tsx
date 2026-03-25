@@ -221,24 +221,24 @@ export default function ConversationView({
   };
 
   return (
-    <div className="bg-white border border-[#D4C8B8] rounded-lg overflow-hidden">
+    <div className="bg-white border border-earth-sand rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-[#D4C8B8] bg-[#F5F0E6]/50">
+      <div className="px-4 py-3 border-b border-earth-sand bg-earth-cream/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <MessageSquare size={16} className="text-[#5D7B93]" />
-            <h3 className="text-sm font-semibold text-[#3E2723]">Conversation</h3>
+            <MessageSquare size={16} className="text-slate-blue" />
+            <h3 className="text-sm font-semibold text-foreground">Conversation</h3>
             {messages.length > 0 && (
-              <span className="text-xs text-[#7D6B5D]">({messages.length} messages)</span>
+              <span className="text-xs text-earth-brown">({messages.length} messages)</span>
             )}
           </div>
           {currentTier > 1 && (
-            <span className="text-xs px-2 py-0.5 bg-[#C67B5C]/10 text-[#C67B5C] rounded-full font-medium">
+            <span className="text-xs px-2 py-0.5 bg-terracotta/10 text-terracotta rounded-full font-medium">
               Tier {currentTier}
             </span>
           )}
           {isAccepted && (
-            <span className="flex items-center gap-1 text-xs font-medium text-[#4A7C59]">
+            <span className="flex items-center gap-1 text-xs font-medium text-forest-green">
               <CheckCircle2 size={14} />
               Resolved
             </span>
@@ -259,12 +259,12 @@ export default function ConversationView({
 
       {/* Legacy answer (if no threaded messages yet) */}
       {answerText && messages.length === 0 && (
-        <div className="px-4 py-3 bg-[#5D7B93]/5 border-b border-[#D4C8B8]/50">
+        <div className="px-4 py-3 bg-slate-blue/5 border-b border-earth-sand/50">
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-1.5 py-0.5 text-[10px] font-bold text-white bg-[#5D7B93] rounded">Expert</span>
-            <span className="text-xs text-[#7D6B5D]">Original answer</span>
+            <span className="px-1.5 py-0.5 text-[10px] font-bold text-white bg-slate-blue rounded">Expert</span>
+            <span className="text-xs text-earth-brown">Original answer</span>
           </div>
-          <p className="text-sm text-[#3E2723] whitespace-pre-wrap">{answerText}</p>
+          <p className="text-sm text-foreground whitespace-pre-wrap">{answerText}</p>
         </div>
       )}
 
@@ -272,7 +272,7 @@ export default function ConversationView({
       <div className="max-h-[500px] overflow-y-auto px-4 py-3 space-y-3">
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <Spinner className="text-[#C67B5C]" />
+            <Spinner className="text-terracotta" />
           </div>
         ) : messages.length === 0 && !answerText ? (
           <p className="text-center text-sm text-[var(--muted)] py-8">
@@ -289,7 +289,7 @@ export default function ConversationView({
                 <div className={`max-w-[80%] ${isOwn ? 'order-1' : 'order-0'}`}>
                   <div className="flex items-center gap-1.5 mb-0.5">
                     <span className={`px-1.5 py-0.5 text-[10px] font-bold text-white rounded ${
-                      msg.senderRole === 'expert' ? 'bg-[#5D7B93]' : 'bg-[#C67B5C]'
+                      msg.senderRole === 'expert' ? 'bg-slate-blue' : 'bg-terracotta'
                     }`}>
                       {msg.senderRole === 'expert' ? 'Expert' : 'You'}
                     </span>
@@ -297,8 +297,8 @@ export default function ConversationView({
                   </div>
                   <div className={`px-3 py-2 rounded-lg text-sm ${
                     isOwn
-                      ? 'bg-[#C67B5C]/10 text-[#3E2723] border border-[#C67B5C]/20'
-                      : 'bg-[#5D7B93]/10 text-[#3E2723] border border-[#5D7B93]/20'
+                      ? 'bg-terracotta/10 text-foreground border border-terracotta/20'
+                      : 'bg-slate-blue/10 text-foreground border border-slate-blue/20'
                   }`}>
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                     {msg.attachments.length > 0 && (
@@ -309,7 +309,7 @@ export default function ConversationView({
                             href={url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs text-[#5D7B93] hover:underline"
+                            className="text-xs text-slate-blue hover:underline"
                           >
                             Attachment {i + 1}
                           </a>
@@ -327,15 +327,15 @@ export default function ConversationView({
 
       {/* Resolve proposal banner */}
       {isResolveProposed && userRole === 'diyer' && (
-        <div className="px-4 py-3 bg-[#4A7C59]/10 border-t border-[#4A7C59]/20">
-          <p className="text-sm font-medium text-[#4A7C59] mb-2">
+        <div className="px-4 py-3 bg-forest-green/10 border-t border-forest-green/20">
+          <p className="text-sm font-medium text-forest-green mb-2">
             The expert believes your question has been answered.
           </p>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => handleResolveAction('accept')}
               disabled={resolving}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[#4A7C59] text-white text-sm font-semibold rounded-lg hover:bg-[#3A6A49] transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-2 bg-forest-green text-white text-sm font-semibold rounded-lg hover:bg-forest-green-dark transition-colors disabled:opacity-50"
             >
               <CheckCircle2 size={14} />
               Accept Answer
@@ -343,7 +343,7 @@ export default function ConversationView({
             <button
               onClick={() => handleResolveAction('continue')}
               disabled={resolving}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[#5D7B93] text-white text-sm font-semibold rounded-lg hover:bg-[var(--slate-blue-dark)] transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-2 bg-slate-blue text-white text-sm font-semibold rounded-lg hover:bg-slate-blue-dark transition-colors disabled:opacity-50"
             >
               <ArrowRight size={14} />
               Continue Conversation
@@ -351,7 +351,7 @@ export default function ConversationView({
             <button
               onClick={() => handleResolveAction('not_helpful')}
               disabled={resolving}
-              className="px-4 py-2 text-sm font-medium text-[#7D6B5D] border border-[#D4C8B8] rounded-lg hover:bg-[#E8DFD0]/50 transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-earth-brown border border-earth-sand rounded-lg hover:bg-earth-tan/50 transition-colors disabled:opacity-50"
             >
               Not Helpful
             </button>
@@ -361,11 +361,11 @@ export default function ConversationView({
 
       {/* Expert resolve button */}
       {canSendMessage && userRole === 'expert' && !isResolveProposed && (
-        <div className="px-4 py-2 border-t border-[#D4C8B8]/50 bg-[#F5F0E6]/30">
+        <div className="px-4 py-2 border-t border-earth-sand/50 bg-earth-cream/30">
           <button
             onClick={() => handleResolveAction('propose_resolve')}
             disabled={resolving}
-            className="text-xs text-[#5D7B93] hover:text-[var(--slate-blue-dark)] font-medium disabled:opacity-50"
+            className="text-xs text-slate-blue hover:text-slate-blue-dark font-medium disabled:opacity-50"
           >
             {resolving ? 'Submitting...' : 'Propose Resolution'}
           </button>
@@ -374,7 +374,7 @@ export default function ConversationView({
 
       {/* Message input */}
       {canSendMessage && (
-        <div className="px-4 py-3 border-t border-[#D4C8B8]">
+        <div className="px-4 py-3 border-t border-earth-sand">
           {error && (
             <p className="text-xs text-red-600 mb-2">{error}</p>
           )}
@@ -385,7 +385,7 @@ export default function ConversationView({
               onKeyDown={handleKeyDown}
               placeholder={userRole === 'expert' ? 'Type your response...' : 'Ask a follow-up question...'}
               rows={2}
-              className="flex-1 px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#C67B5C]/50 resize-none"
+              className="flex-1 px-3 py-2 border border-earth-sand rounded-lg bg-white text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-terracotta/50 resize-none"
               maxLength={5000}
             />
             <button
@@ -394,7 +394,7 @@ export default function ConversationView({
               className={`flex items-center justify-center w-10 h-10 rounded-lg text-white transition-colors ${
                 sending || !newMessage.trim()
                   ? 'bg-[var(--muted)] cursor-not-allowed'
-                  : 'bg-[#C67B5C] hover:bg-[#A65D3F]'
+                  : 'bg-terracotta hover:bg-terracotta-dark'
               }`}
             >
               {sending ? <Spinner size="sm" /> : <Send size={16} />}
@@ -408,8 +408,8 @@ export default function ConversationView({
 
       {/* Closed state */}
       {(isAccepted || isDisputed) && (
-        <div className="px-4 py-3 border-t border-[#D4C8B8] bg-[#F5F0E6]/50 text-center">
-          <p className="text-xs text-[#7D6B5D]">
+        <div className="px-4 py-3 border-t border-earth-sand bg-earth-cream/50 text-center">
+          <p className="text-xs text-earth-brown">
             {isAccepted
               ? 'This conversation has been resolved. The answer is now part of your project record.'
               : 'This conversation has been marked as disputed.'}

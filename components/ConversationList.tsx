@@ -129,14 +129,14 @@ export default function ConversationList({
   return (
     <Modal isOpen={isOpen} onClose={onClose} position="right">
         {/* Header */}
-        <div className="bg-[#5D7B93] text-white p-4 flex items-center justify-between">
+        <div className="bg-slate-blue text-white p-4 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-bold">Conversation History</h2>
             <p className="text-[#C4D8E8] text-sm">{conversations.length} conversations</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-[var(--slate-blue-dark)] rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-blue-dark rounded-lg transition-colors"
             aria-label="Close conversation history"
           >
             <X size={24} />
@@ -144,7 +144,7 @@ export default function ConversationList({
         </div>
 
         {/* New Chat Button */}
-        <div className="p-4 border-b border-[#D4C8B8]">
+        <div className="p-4 border-b border-earth-sand">
           <Button
             variant="primary"
             size="lg"
@@ -164,7 +164,7 @@ export default function ConversationList({
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Spinner className="text-[#7D6B5D]" />
+              <Spinner className="text-earth-brown" />
             </div>
           ) : conversations.length === 0 ? (
             <EmptyState
@@ -181,25 +181,25 @@ export default function ConversationList({
                   onClick={() => handleSelectConversation(conversation.id)}
                   className={`group relative p-4 rounded-xl cursor-pointer transition ${
                     currentConversationId === conversation.id
-                      ? 'bg-[var(--status-research-bg)] border-2 border-[#5D7B93]'
-                      : 'bg-white border-2 border-transparent hover:bg-[#F5F0E6] border-[#D4C8B8]'
+                      ? 'bg-[var(--status-research-bg)] border-2 border-slate-blue'
+                      : 'bg-white border-2 border-transparent hover:bg-earth-cream border-earth-sand'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         {loadingConversationId === conversation.id ? (
-                          <Spinner size="sm" className="text-[#5D7B93]" />
+                          <Spinner size="sm" className="text-slate-blue" />
                         ) : (
-                          <MessageSquare size={16} className="text-[#5D7B93] flex-shrink-0" />
+                          <MessageSquare size={16} className="text-slate-blue flex-shrink-0" />
                         )}
-                        <span className="font-semibold text-sm text-[#3E2723] truncate">
+                        <span className="font-semibold text-sm text-foreground truncate">
                           {conversation.title}
                         </span>
                       </div>
                       <div className="flex items-center gap-1 ml-6">
-                        <Clock size={12} className="text-[#A89880]" />
-                        <span className="text-xs text-[#A89880]">
+                        <Clock size={12} className="text-earth-brown-light" />
+                        <span className="text-xs text-earth-brown-light">
                           {new Date(conversation.updated_at).toLocaleDateString(undefined, {
                             month: 'short',
                             day: 'numeric',
@@ -214,7 +214,7 @@ export default function ConversationList({
                       className="p-1.5 opacity-0 group-hover:opacity-100 hover:bg-[#FADDD0] rounded-lg transition"
                       aria-label="Delete conversation"
                     >
-                      <Trash2 size={16} className="text-[#B8593B]" />
+                      <Trash2 size={16} className="text-rust" />
                     </button>
                   </div>
                 </div>

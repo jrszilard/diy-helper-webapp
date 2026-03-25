@@ -170,12 +170,12 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
               <div
                 className={`max-w-[75%] rounded-lg px-3 py-2 ${
                   isCurrentUser
-                    ? 'bg-[#4A7C59] text-white'
-                    : 'bg-[#E8DFD0] text-[#3E2723]'
+                    ? 'bg-forest-green text-white'
+                    : 'bg-earth-tan text-foreground'
                 }`}
               >
                 {!isCurrentUser && msg.senderName && (
-                  <p className="text-xs font-semibold text-[#5D7B93] mb-0.5">{msg.senderName}</p>
+                  <p className="text-xs font-semibold text-slate-blue mb-0.5">{msg.senderName}</p>
                 )}
                 {msg.content && (() => {
                   const project = parseProjectContext(msg.content);
@@ -183,15 +183,15 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
                     return (
                       <>
                         <div className={`rounded-md px-2.5 py-2 mb-2 flex items-center gap-2 ${
-                          isCurrentUser ? 'bg-white/15' : 'bg-[#5D7B93]/10'
+                          isCurrentUser ? 'bg-white/15' : 'bg-slate-blue/10'
                         }`}>
-                          <FolderOpen size={14} className={isCurrentUser ? 'text-white/80' : 'text-[#5D7B93]'} />
+                          <FolderOpen size={14} className={isCurrentUser ? 'text-white/80' : 'text-slate-blue'} />
                           <div className="flex-1 min-w-0">
-                            <p className={`text-xs font-semibold truncate ${isCurrentUser ? 'text-white' : 'text-[#3E2723]'}`}>
+                            <p className={`text-xs font-semibold truncate ${isCurrentUser ? 'text-white' : 'text-foreground'}`}>
                               {project.projectName}
                             </p>
                             {project.description && (
-                              <p className={`text-xs truncate mt-0.5 ${isCurrentUser ? 'text-white/70' : 'text-[#7D6B5D]'}`}>
+                              <p className={`text-xs truncate mt-0.5 ${isCurrentUser ? 'text-white/70' : 'text-earth-brown'}`}>
                                 {project.description}
                               </p>
                             )}
@@ -199,7 +199,7 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
                           <Link
                             href={project.detailsLink}
                             className={`text-xs flex items-center gap-0.5 flex-shrink-0 ${
-                              isCurrentUser ? 'text-white/80 hover:text-white' : 'text-[#5D7B93] hover:text-[var(--slate-blue-dark)]'
+                              isCurrentUser ? 'text-white/80 hover:text-white' : 'text-slate-blue hover:text-slate-blue-dark'
                             }`}
                             onClick={e => e.stopPropagation()}
                           >
@@ -244,18 +244,18 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
 
       {/* Pending image previews */}
       {pendingImages.length > 0 && (
-        <div className="border-t border-[#D4C8B8] bg-[#F5F0E6] px-3 py-2">
+        <div className="border-t border-earth-sand bg-earth-cream px-3 py-2">
           <div className="flex gap-2 flex-wrap">
             {pendingImages.map((img, idx) => (
               <div key={idx} className="relative group">
                 <img
                   src={img.previewUrl}
                   alt={`Pending ${idx + 1}`}
-                  className="w-16 h-16 object-cover rounded-lg border border-[#D4C8B8]"
+                  className="w-16 h-16 object-cover rounded-lg border border-earth-sand"
                 />
                 <button
                   onClick={() => removePendingImage(idx)}
-                  className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#B8593B] text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-rust text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   aria-label="Remove image"
                 >
                   <X size={12} />
@@ -267,7 +267,7 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
       )}
 
       {/* Input area */}
-      <div className="border-t border-[#D4C8B8] p-3 bg-surface">
+      <div className="border-t border-earth-sand p-3 bg-surface">
         <div className="flex items-end gap-2">
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -275,7 +275,7 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
             className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
               isBusy
                 ? 'text-[var(--muted)] cursor-not-allowed'
-                : 'text-[#7D6B5D] hover:bg-[#E8DFD0] hover:text-[#5D7B93]'
+                : 'text-earth-brown hover:bg-earth-tan hover:text-slate-blue'
             }`}
             aria-label="Attach image"
           >
@@ -296,15 +296,15 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
             placeholder="Type a message..."
             rows={1}
             disabled={isBusy}
-            className="flex-1 px-3 py-2 border border-[#D4C8B8] rounded-lg bg-white text-[#3E2723] text-sm focus:outline-none focus:ring-2 focus:ring-[#5D7B93]/50 resize-none disabled:opacity-50"
+            className="flex-1 px-3 py-2 border border-earth-sand rounded-lg bg-white text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-slate-blue/50 resize-none disabled:opacity-50"
           />
           <button
             onClick={handleSend}
             disabled={!canSend}
             className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
               canSend
-                ? 'bg-[#5D7B93] text-white hover:bg-[var(--slate-blue-dark)]'
-                : 'bg-[#E8DFD0] text-[var(--muted)] cursor-not-allowed'
+                ? 'bg-slate-blue text-white hover:bg-slate-blue-dark'
+                : 'bg-earth-tan text-[var(--muted)] cursor-not-allowed'
             }`}
           >
             {isBusy ? <Spinner /> : <Send size={18} />}

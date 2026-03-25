@@ -70,8 +70,8 @@ export default function ReviewForm({ expertId, questionId, onSuccess }: ReviewFo
   };
 
   return (
-    <div className="bg-white border border-[#D4C8B8] rounded-lg p-6">
-      <h3 className="text-lg font-bold text-[#3E2723] mb-4">Leave a Review</h3>
+    <div className="bg-white border border-earth-sand rounded-lg p-6">
+      <h3 className="text-lg font-bold text-foreground mb-4">Leave a Review</h3>
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
@@ -81,7 +81,7 @@ export default function ReviewForm({ expertId, questionId, onSuccess }: ReviewFo
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-[#3E2723] mb-2">Rating *</label>
+          <label className="block text-sm font-medium text-foreground mb-2">Rating *</label>
           <div className="flex items-center gap-1">
             {[1, 2, 3, 4, 5].map(star => (
               <button
@@ -96,8 +96,8 @@ export default function ReviewForm({ expertId, questionId, onSuccess }: ReviewFo
                   size={28}
                   className={`transition-colors ${
                     star <= (hoverRating || rating)
-                      ? 'fill-[#C67B5C] text-[#C67B5C]'
-                      : 'text-[#D4C8B8]'
+                      ? 'fill-terracotta text-terracotta'
+                      : 'text-earth-sand'
                   }`}
                 />
               </button>
@@ -131,7 +131,7 @@ export default function ReviewForm({ expertId, questionId, onSuccess }: ReviewFo
             className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-white transition-colors ${
               submitting || rating === 0
                 ? 'bg-[var(--muted)] cursor-not-allowed'
-                : 'bg-[#C67B5C] hover:bg-[#A65D3F]'
+                : 'bg-terracotta hover:bg-terracotta-dark'
             }`}
           >
             {submitting && <Spinner size="sm" />}

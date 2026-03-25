@@ -121,7 +121,7 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
   if (!hasReport) return null;
 
   return (
-    <div className="bg-white border border-[#D4C8B8] rounded-lg overflow-hidden">
+    <div className="bg-white border border-earth-sand rounded-lg overflow-hidden">
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
@@ -129,27 +129,27 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
       >
         <div className="flex items-center gap-2">
           <AlertTriangle size={14} className="text-amber-600" />
-          <h4 className="text-sm font-semibold text-[#3E2723]">
+          <h4 className="text-sm font-semibold text-foreground">
             Report Corrections
             {corrections.length > 0 && (
-              <span className="ml-1.5 text-xs font-normal text-[#7D6B5D]">({corrections.length})</span>
+              <span className="ml-1.5 text-xs font-normal text-earth-brown">({corrections.length})</span>
             )}
           </h4>
         </div>
-        {expanded ? <ChevronUp size={14} className="text-[#7D6B5D]" /> : <ChevronDown size={14} className="text-[#7D6B5D]" />}
+        {expanded ? <ChevronUp size={14} className="text-earth-brown" /> : <ChevronDown size={14} className="text-earth-brown" />}
       </button>
 
       {expanded && (
         <div className="px-4 py-3 space-y-3">
           {loading ? (
             <div className="flex items-center justify-center py-4">
-              <Spinner size="sm" className="text-[#C67B5C]" />
+              <Spinner size="sm" className="text-terracotta" />
             </div>
           ) : (
             <>
               {/* Existing corrections */}
               {corrections.map((c) => (
-                <div key={c.id} className="bg-[#F5F0E6] rounded-lg p-3">
+                <div key={c.id} className="bg-earth-cream rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xs font-semibold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">
                       {SECTION_TYPES.find(s => s.value === c.section_type)?.label || c.section_type}
@@ -159,13 +159,13 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
                     </span>
                   </div>
                   {c.original_content && (
-                    <p className="text-xs text-[#7D6B5D] line-through mb-1">
+                    <p className="text-xs text-earth-brown line-through mb-1">
                       AI said: {c.original_content}
                     </p>
                   )}
-                  <p className="text-sm text-[#3E2723]">{c.corrected_content}</p>
+                  <p className="text-sm text-foreground">{c.corrected_content}</p>
                   {c.correction_reason && (
-                    <p className="text-xs text-[#7D6B5D] mt-1 italic">Reason: {c.correction_reason}</p>
+                    <p className="text-xs text-earth-brown mt-1 italic">Reason: {c.correction_reason}</p>
                   )}
                 </div>
               ))}
@@ -178,7 +178,7 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
 
               {/* Success message */}
               {success && (
-                <div className="flex items-center gap-2 text-sm text-[#4A7C59]">
+                <div className="flex items-center gap-2 text-sm text-forest-green">
                   <CheckCircle2 size={14} />
                   Correction submitted! The DIYer will see this on their report.
                 </div>
@@ -188,7 +188,7 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
               {userRole === 'expert' && !showForm && (
                 <button
                   onClick={() => setShowForm(true)}
-                  className="flex items-center gap-1.5 text-xs font-medium text-[#5D7B93] hover:text-[var(--slate-blue-dark)] transition-colors"
+                  className="flex items-center gap-1.5 text-xs font-medium text-slate-blue hover:text-slate-blue-dark transition-colors"
                 >
                   <Plus size={12} />
                   Flag a correction to the AI report
@@ -196,9 +196,9 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
               )}
 
               {showForm && (
-                <div className="space-y-3 border-t border-[#D4C8B8] pt-3">
+                <div className="space-y-3 border-t border-earth-sand pt-3">
                   <div>
-                    <label className="text-xs font-medium text-[#7D6B5D] block mb-1">Section</label>
+                    <label className="text-xs font-medium text-earth-brown block mb-1">Section</label>
                     <Select
                       value={sectionType}
                       onChange={e => setSectionType(e.target.value)}
@@ -254,7 +254,7 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
                     </button>
                     <button
                       onClick={() => setShowForm(false)}
-                      className="px-4 py-2 text-sm text-[#7D6B5D] hover:text-[#3E2723] transition-colors"
+                      className="px-4 py-2 text-sm text-earth-brown hover:text-foreground transition-colors"
                     >
                       Cancel
                     </button>

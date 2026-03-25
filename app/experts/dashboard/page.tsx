@@ -58,7 +58,7 @@ export default function ExpertDashboardPage() {
   if (!data) {
     return (
       <div className="text-center py-12">
-        <p className="text-sm text-[#7D6B5D]">Failed to load dashboard data.</p>
+        <p className="text-sm text-earth-brown">Failed to load dashboard data.</p>
       </div>
     );
   }
@@ -75,7 +75,7 @@ export default function ExpertDashboardPage() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <h1 className="text-xl font-bold text-[#3E2723]">Dashboard</h1>
+      <h1 className="text-xl font-bold text-foreground">Dashboard</h1>
 
       <StripeOnboardBanner stripeOnboardingComplete={d.stripeOnboardingComplete} />
       <DashboardStats stats={stats} />

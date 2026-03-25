@@ -26,11 +26,11 @@ export default function PreferenceCards({ type, onSelect }: PreferenceCardsProps
         <button
           key={option.value}
           onClick={() => onSelect(option.value)}
-          className="w-full flex items-center gap-3 p-3.5 bg-white border border-[#D4C8B8] rounded-xl hover:border-[#C67B5C] hover:bg-[#FDF8F3] transition-all text-left shadow-sm hover:shadow min-h-[48px]"
+          className="w-full flex items-center gap-3 p-3.5 bg-white border border-earth-sand rounded-xl hover:border-terracotta hover:bg-[#FDF8F3] transition-all text-left shadow-sm hover:shadow min-h-[48px]"
         >
           <span className="text-xl flex-shrink-0">{option.icon}</span>
           <div className="flex-1 min-w-0">
-            <span className="block text-sm font-semibold text-[#3E2723]">{option.title}</span>
+            <span className="block text-sm font-semibold text-foreground">{option.title}</span>
             <span className="block text-xs text-[var(--warm-brown)]">{option.description}</span>
           </div>
         </button>

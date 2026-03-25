@@ -48,15 +48,15 @@ export default function ExpertMessagesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Spinner size="lg" className="text-[#C67B5C]" />
+        <Spinner size="lg" className="text-terracotta" />
       </div>
     );
   }
 
   return (
     <div className="space-y-4 max-w-4xl">
-      <h1 className="text-xl font-bold text-[#3E2723]">Messages</h1>
-      <div className="bg-surface rounded-xl border border-[#D4C8B8] overflow-hidden">
+      <h1 className="text-xl font-bold text-foreground">Messages</h1>
+      <div className="bg-surface rounded-xl border border-earth-sand overflow-hidden">
         <MessageList threads={threads} basePath="/experts/dashboard/messages" />
       </div>
     </div>

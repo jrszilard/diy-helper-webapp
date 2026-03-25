@@ -74,7 +74,7 @@ export default function DIYerMessagesPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
-        <Spinner size="lg" className="text-[#C67B5C]" />
+        <Spinner size="lg" className="text-terracotta" />
       </div>
     );
   }
@@ -84,9 +84,9 @@ export default function DIYerMessagesPage() {
       <div className="min-h-screen bg-surface">
         <div className="max-w-2xl mx-auto px-4 py-12">
           <div className="text-center">
-            <LogIn size={40} className="mx-auto text-[#D4C8B8] mb-4" />
-            <h1 className="text-xl font-bold text-[#3E2723] mb-2">Sign in to view messages</h1>
-            <p className="text-sm text-[#7D6B5D] mb-6">
+            <LogIn size={40} className="mx-auto text-earth-sand mb-4" />
+            <h1 className="text-xl font-bold text-foreground mb-2">Sign in to view messages</h1>
+            <p className="text-sm text-earth-brown mb-6">
               You need to be signed in to access your messages.
             </p>
             <AuthButton
@@ -107,15 +107,15 @@ export default function DIYerMessagesPage() {
         <div className="flex items-center gap-3 mb-6">
           <Link
             href="/chat"
-            className="p-1.5 hover:bg-[#E8DFD0] rounded-lg transition-colors text-[#7D6B5D]"
+            className="p-1.5 hover:bg-earth-tan rounded-lg transition-colors text-earth-brown"
           >
             <ArrowLeft size={20} />
           </Link>
-          <h1 className="text-xl font-bold text-[#3E2723]">My Messages</h1>
+          <h1 className="text-xl font-bold text-foreground">My Messages</h1>
         </div>
 
         {/* Thread list */}
-        <div className="bg-white rounded-xl border border-[#D4C8B8] overflow-hidden">
+        <div className="bg-white rounded-xl border border-earth-sand overflow-hidden">
           <MessageList threads={threads} basePath="/messages" />
         </div>
       </div>

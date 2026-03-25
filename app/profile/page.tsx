@@ -92,22 +92,22 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F5F0E6] flex items-center justify-center">
-        <Spinner size="lg" className="text-[#C67B5C]" />
+      <div className="min-h-screen bg-earth-cream flex items-center justify-center">
+        <Spinner size="lg" className="text-terracotta" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F0E6]">
+    <div className="min-h-screen bg-earth-cream">
       {/* Header */}
-      <header className="bg-surface border-b border-[#D4C8B8] shadow-sm">
+      <header className="bg-surface border-b border-earth-sand shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="bg-gradient-to-br from-[#C67B5C] to-[#A65D3F] p-1.5 rounded-lg">
+            <div className="bg-gradient-to-br from-terracotta to-terracotta-dark p-1.5 rounded-lg">
               <Wrench className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-[#3E2723]">DIY Helper</span>
+            <span className="text-lg font-bold text-foreground">DIY Helper</span>
           </Link>
           <div className="flex items-center gap-2">
             <NotificationBell userId={user?.id} />
@@ -120,21 +120,21 @@ export default function ProfilePage() {
         {/* Back link */}
         <Link
           href="/chat"
-          className="inline-flex items-center gap-1.5 text-sm text-[#7D6B5D] hover:text-[#3E2723] mb-6 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-earth-brown hover:text-foreground mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Chat
         </Link>
 
-        <div className="bg-surface rounded-2xl border border-[#D4C8B8] shadow-sm overflow-hidden">
-          <div className="px-6 py-5 border-b border-[#E8DFD0]">
+        <div className="bg-surface rounded-2xl border border-earth-sand shadow-sm overflow-hidden">
+          <div className="px-6 py-5 border-b border-earth-tan">
             <SectionHeader size="lg" title="My Profile" subtitle="Manage your account information" />
           </div>
 
           <div className="p-6 space-y-5">
             {/* Display Name */}
             <div>
-              <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">
+              <label className="block text-sm font-semibold text-foreground mb-1.5">
                 Display Name
               </label>
               <TextInput
@@ -149,7 +149,7 @@ export default function ProfilePage() {
 
             {/* Email (read-only) */}
             <div>
-              <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">
+              <label className="block text-sm font-semibold text-foreground mb-1.5">
                 Email
               </label>
               <TextInput
@@ -157,14 +157,14 @@ export default function ProfilePage() {
                 value={profile?.email || ''}
                 readOnly
                 fullWidth
-                className="border-[#E8DFD0] text-[#7D6B5D] bg-[#F5F0E6] cursor-not-allowed"
+                className="border-earth-tan text-earth-brown bg-earth-cream cursor-not-allowed"
               />
-              <p className="text-xs text-[#A89880] mt-1">Email cannot be changed here</p>
+              <p className="text-xs text-earth-brown-light mt-1">Email cannot be changed here</p>
             </div>
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">
+              <label className="block text-sm font-semibold text-foreground mb-1.5">
                 Phone
               </label>
               <TextInput
@@ -179,7 +179,7 @@ export default function ProfilePage() {
 
             {/* Account Created (read-only) */}
             <div>
-              <label className="block text-sm font-semibold text-[#3E2723] mb-1.5">
+              <label className="block text-sm font-semibold text-foreground mb-1.5">
                 Account Created
               </label>
               <TextInput
@@ -187,7 +187,7 @@ export default function ProfilePage() {
                 value={profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
                 readOnly
                 fullWidth
-                className="border-[#E8DFD0] text-[#7D6B5D] bg-[#F5F0E6] cursor-not-allowed"
+                className="border-earth-tan text-earth-brown bg-earth-cream cursor-not-allowed"
               />
             </div>
 
@@ -195,8 +195,8 @@ export default function ProfilePage() {
             {toast && (
               <div className={`flex items-center gap-2 p-3 rounded-lg text-sm font-medium ${
                 toast.type === 'success'
-                  ? 'bg-[#4A7C59]/10 text-[#4A7C59]'
-                  : 'bg-[#C67B5C]/10 text-[#C67B5C]'
+                  ? 'bg-forest-green/10 text-forest-green'
+                  : 'bg-terracotta/10 text-terracotta'
               }`}>
                 {toast.type === 'success' ? (
                   <CheckCircle className="w-4 h-4 flex-shrink-0" />
@@ -211,7 +211,7 @@ export default function ProfilePage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="inline-flex items-center gap-2 bg-[#C67B5C] text-white px-6 py-2.5 rounded-lg hover:bg-[#A65D3F] font-semibold disabled:opacity-50 transition"
+              className="inline-flex items-center gap-2 bg-terracotta text-white px-6 py-2.5 rounded-lg hover:bg-terracotta-dark font-semibold disabled:opacity-50 transition"
             >
               {saving ? (
                 <Spinner size="sm" />

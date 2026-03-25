@@ -28,15 +28,15 @@ export default function DashboardQAQueue({ questions }: DashboardQAQueueProps) {
   };
 
   return (
-    <div className="bg-white border border-[#D4C8B8] rounded-lg">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[#D4C8B8]">
+    <div className="bg-white border border-earth-sand rounded-lg">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-earth-sand">
         <div className="flex items-center gap-2">
-          <MessageSquare size={16} className="text-[#5D7B93]" />
-          <h3 className="text-sm font-semibold text-[#3E2723]">Recent Questions</h3>
+          <MessageSquare size={16} className="text-slate-blue" />
+          <h3 className="text-sm font-semibold text-foreground">Recent Questions</h3>
         </div>
         <Link
           href="/experts/dashboard/qa"
-          className="flex items-center gap-1 text-xs text-[#5D7B93] hover:text-[var(--slate-blue-dark)] font-medium"
+          className="flex items-center gap-1 text-xs text-slate-blue hover:text-slate-blue-dark font-medium"
         >
           View Queue
           <ArrowRight size={14} />
@@ -45,19 +45,19 @@ export default function DashboardQAQueue({ questions }: DashboardQAQueueProps) {
 
       {questions.length === 0 ? (
         <div className="px-4 py-8 text-center">
-          <MessageSquare size={24} className="mx-auto text-[#D4C8B8] mb-2" />
-          <p className="text-sm text-[#7D6B5D]">No open questions in your specialties</p>
+          <MessageSquare size={24} className="mx-auto text-earth-sand mb-2" />
+          <p className="text-sm text-earth-brown">No open questions in your specialties</p>
         </div>
       ) : (
-        <div className="divide-y divide-[#D4C8B8]/50">
+        <div className="divide-y divide-earth-sand/50">
           {questions.slice(0, 5).map(q => (
-            <div key={q.id} className="px-4 py-3 hover:bg-[#E8DFD0]/30 transition-colors">
-              <p className="text-sm text-[#3E2723] line-clamp-2">{q.questionText}</p>
+            <div key={q.id} className="px-4 py-3 hover:bg-earth-tan/30 transition-colors">
+              <p className="text-sm text-foreground line-clamp-2">{q.questionText}</p>
               <div className="flex items-center gap-3 mt-1.5">
-                <span className="text-xs px-2 py-0.5 bg-[#5D7B93]/10 text-[#5D7B93] rounded-full font-medium">
+                <span className="text-xs px-2 py-0.5 bg-slate-blue/10 text-slate-blue rounded-full font-medium">
                   {q.category}
                 </span>
-                <span className="text-xs font-medium text-[#4A7C59]">
+                <span className="text-xs font-medium text-forest-green">
                   ${(q.priceCents / 100).toFixed(2)}
                 </span>
                 <span className="flex items-center gap-1 text-xs text-[var(--muted)]">

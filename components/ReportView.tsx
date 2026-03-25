@@ -28,7 +28,7 @@ interface ReportViewProps {
 const SECTION_ICONS: Record<string, React.ReactNode> = {
   overview: <FileText size={18} />,
   codes: <Shield size={18} />,
-  safety: <Shield size={18} className="text-[#B8593B]" />,
+  safety: <Shield size={18} className="text-rust" />,
   plan: <Hammer size={18} />,
   materials: <ShoppingCart size={18} />,
   tools: <Hammer size={18} />,
@@ -131,10 +131,10 @@ export default function ReportView({
   }, [report.id, isSharedView]);
 
   return (
-    <div className="flex flex-col h-full bg-[#F5F0E6]">
+    <div className="flex flex-col h-full bg-earth-cream">
       {/* Save confirmation toast */}
       {toast?.visible && (
-        <div className="fixed top-20 right-4 bg-[#4A7C59] text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 max-w-sm animate-slide-in">
+        <div className="fixed top-20 right-4 bg-forest-green text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 max-w-sm animate-slide-in">
           <CheckCircle2 size={20} className="flex-shrink-0" />
           <p className="font-medium text-sm">{toast.message}</p>
           <button onClick={() => setToast(null)} className="ml-auto hover:opacity-80">
@@ -144,11 +144,11 @@ export default function ReportView({
       )}
 
       {/* Header */}
-      <div className="bg-surface border-b border-[#D4C8B8] p-4 print:hidden">
+      <div className="bg-surface border-b border-earth-sand p-4 print:hidden">
         <div className="flex items-center justify-between mb-2">
           <button
             onClick={onBack}
-            className="flex items-center gap-1.5 text-sm text-[#5D7B93] hover:text-[var(--slate-blue-dark)] transition-colors"
+            className="flex items-center gap-1.5 text-sm text-slate-blue hover:text-slate-blue-dark transition-colors"
           >
             <ArrowLeft size={16} />
             {isSharedView ? 'Home' : 'Back'}
@@ -158,12 +158,12 @@ export default function ReportView({
               <button
                 onClick={handleShare}
                 disabled={shareStatus === 'sharing'}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#7D6B5D] hover:bg-[#E8E0D4] rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-earth-brown hover:bg-[#E8E0D4] rounded-lg transition-colors"
                 title="Share report link"
               >
                 {shareStatus === 'shared' ? (
                   <>
-                    <CheckCircle2 size={14} className="text-[#4A7C59]" />
+                    <CheckCircle2 size={14} className="text-forest-green" />
                     Link Copied!
                   </>
                 ) : shareStatus === 'sharing' ? (
@@ -181,15 +181,15 @@ export default function ReportView({
             )}
             <button
               onClick={handleCopyMarkdown}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#7D6B5D] hover:bg-[#E8E0D4] rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-earth-brown hover:bg-[#E8E0D4] rounded-lg transition-colors"
               title="Copy as markdown"
             >
-              {copied ? <CheckCircle2 size={14} className="text-[#4A7C59]" /> : <ClipboardCopy size={14} />}
+              {copied ? <CheckCircle2 size={14} className="text-forest-green" /> : <ClipboardCopy size={14} />}
               {copied ? 'Copied!' : 'Copy'}
             </button>
             <button
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#7D6B5D] hover:bg-[#E8E0D4] rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-earth-brown hover:bg-[#E8E0D4] rounded-lg transition-colors"
               title="Print / Save as PDF"
             >
               <Printer size={14} />
@@ -198,12 +198,12 @@ export default function ReportView({
           </div>
         </div>
 
-        <h1 className="text-xl font-bold text-[#3E2723]">{report.title}</h1>
+        <h1 className="text-xl font-bold text-foreground">{report.title}</h1>
         {report.summary && (
-          <p className="text-sm text-[#7D6B5D] mt-1">{report.summary}</p>
+          <p className="text-sm text-earth-brown mt-1">{report.summary}</p>
         )}
         {totalCost && (
-          <p className="text-sm font-semibold text-[#5D7B93] mt-1">
+          <p className="text-sm font-semibold text-slate-blue mt-1">
             Estimated Total: ${Number(totalCost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         )}
@@ -216,8 +216,8 @@ export default function ReportView({
               onClick={() => setActiveTab(section.id)}
               className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-lg whitespace-nowrap transition-colors ${
                 activeTab === section.id
-                  ? 'bg-white text-[#3E2723] border border-b-0 border-[#D4C8B8]'
-                  : 'text-[#7D6B5D] hover:text-[#3E2723] hover:bg-[#E8E0D4]'
+                  ? 'bg-white text-foreground border border-b-0 border-earth-sand'
+                  : 'text-earth-brown hover:text-foreground hover:bg-[#E8E0D4]'
               }`}
             >
               {SECTION_ICONS[section.type] || <FileText size={14} />}
@@ -245,7 +245,7 @@ export default function ReportView({
       <div className="flex-1 overflow-y-auto p-5 print:hidden">
         <div className="max-w-4xl mx-auto space-y-4">
           {activeSection && (
-            <div className="bg-white rounded-lg border border-[#D4C8B8] p-6">
+            <div className="bg-white rounded-lg border border-earth-sand p-6">
               <MarkdownContent content={activeSection.content} />
             </div>
           )}
@@ -271,25 +271,25 @@ export default function ReportView({
 
       {/* Login prompt overlay */}
       {showLoginPrompt && (
-        <div className="bg-[#FDF8F3] border-t border-[#D4C8B8] p-4 print:hidden">
+        <div className="bg-[#FDF8F3] border-t border-earth-sand p-4 print:hidden">
           <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
             <div className="flex-1">
-              <p className="text-sm font-semibold text-[#3E2723]">Sign in to save your plan</p>
-              <p className="text-xs text-[var(--warm-brown)] mt-0.5">
+              <p className="text-sm font-semibold text-foreground">Sign in to save your plan</p>
+              <p className="text-xs text-warm-brown mt-0.5">
                 Create a free account to save this project, track materials, and access your plans anytime.
               </p>
             </div>
             <div className="flex items-center gap-2">
               <a
                 href="/chat"
-                className="flex items-center gap-2 px-4 py-2 bg-[#C67B5C] text-white text-sm font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors whitespace-nowrap"
+                className="flex items-center gap-2 px-4 py-2 bg-terracotta text-white text-sm font-semibold rounded-lg hover:bg-terracotta-dark transition-colors whitespace-nowrap"
               >
                 <LogIn size={16} />
                 Sign In
               </a>
               <button
                 onClick={() => setShowLoginPrompt(false)}
-                className="p-1.5 text-[#7D6B5D] hover:bg-[#E8E0D4] rounded-lg transition-colors"
+                className="p-1.5 text-earth-brown hover:bg-[#E8E0D4] rounded-lg transition-colors"
               >
                 <X size={16} />
               </button>
@@ -299,9 +299,9 @@ export default function ReportView({
       )}
 
       {/* Action bar */}
-      <div className="bg-surface border-t border-[#D4C8B8] p-4 print:hidden">
+      <div className="bg-surface border-t border-earth-sand p-4 print:hidden">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
-          <p className="text-xs text-[var(--muted)]">
+          <p className="text-xs text-muted">
             Generated {createdAt ? new Date(createdAt).toLocaleDateString('en-US', {
               month: 'long', day: 'numeric', year: 'numeric',
             }) : 'just now'}
@@ -317,13 +317,13 @@ export default function ReportView({
             {isSharedView ? (
               <a
                 href="/"
-                className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white bg-[#C67B5C] hover:bg-[#A65D3F] transition-colors shadow-md"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white bg-terracotta hover:bg-terracotta-dark transition-colors shadow-md"
               >
                 <FolderPlus size={18} />
                 Create Your Own Project Plan
               </a>
             ) : appliedProjectId ? (
-              <div className="flex items-center gap-2 text-sm text-[#4A7C59] font-medium">
+              <div className="flex items-center gap-2 text-sm text-forest-green font-medium">
                 <CheckCircle2 size={18} />
                 Materials saved to project
               </div>
@@ -333,8 +333,8 @@ export default function ReportView({
                 disabled={isApplying}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white transition-colors shadow-md ${
                   isApplying
-                    ? 'bg-[var(--muted)] cursor-not-allowed'
-                    : 'bg-[#C67B5C] hover:bg-[#A65D3F]'
+                    ? 'bg-muted cursor-not-allowed'
+                    : 'bg-terracotta hover:bg-terracotta-dark'
                 }`}
               >
                 <FolderPlus size={18} />
@@ -354,17 +354,17 @@ function MarkdownContent({ content, isPrint = false }: { content: string; isPrin
       ${isPrint
         ? '[&_*]:!text-black'
         : `prose-headings:font-bold prose-p:leading-relaxed
-           [&_a]:!text-[#5D7B93] prose-a:no-underline hover:prose-a:underline`
+           [&_a]:!text-slate-blue prose-a:no-underline hover:prose-a:underline`
       }
       prose-table:border-collapse
       ${isPrint
         ? 'prose-th:bg-gray-100 prose-th:p-2 prose-th:border prose-th:border-gray-300 prose-td:p-2 prose-td:border prose-td:border-gray-300'
-        : 'prose-th:bg-[#F5F0E6] prose-th:p-2 prose-th:border prose-th:border-[#D4C8B8] prose-td:p-2 prose-td:border prose-td:border-[#D4C8B8]'
+        : 'prose-th:bg-earth-cream prose-th:p-2 prose-th:border prose-th:border-earth-sand prose-td:p-2 prose-td:border prose-td:border-earth-sand'
       }
       prose-li:my-0.5
       [&_ul]:space-y-1
       [&_ul_ul]:mt-1
-      [&_strong]:text-[#3E2723]
+      [&_strong]:text-foreground
       print:[&_*]:!text-black
     `}>
       <ReactMarkdown

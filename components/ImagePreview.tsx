@@ -14,12 +14,12 @@ export default function ImagePreview({ src, onRemove, disabled }: ImagePreviewPr
       <img
         src={src}
         alt="Attached image"
-        className="h-16 w-16 object-cover rounded-lg border border-[#D4C8B8]"
+        className="h-16 w-16 object-cover rounded-lg border border-earth-sand"
       />
       {!disabled && (
         <button
           onClick={onRemove}
-          className="absolute -top-1.5 -right-1.5 bg-[#B8593B] text-white rounded-full p-0.5 hover:bg-[#8B3A1F] transition-colors shadow-sm"
+          className="absolute -top-1.5 -right-1.5 bg-rust text-white rounded-full p-0.5 hover:bg-terracotta-dark transition-colors shadow-sm"
           aria-label="Remove image"
         >
           <X className="w-3 h-3" />

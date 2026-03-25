@@ -64,11 +64,11 @@ export default function QAQuestionCard({ question, onClaim, onBid, showClaim = f
     <Card>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-[#3E2723] line-clamp-3">{question.questionText}</p>
+          <p className="text-sm text-foreground line-clamp-3">{question.questionText}</p>
 
           {question.aiContext?.projectSummary && (
-            <div className="mt-2 bg-[#E8DFD0]/30 rounded px-2 py-1.5">
-              <p className="text-xs text-[#7D6B5D]">
+            <div className="mt-2 bg-earth-tan/30 rounded px-2 py-1.5">
+              <p className="text-xs text-earth-brown">
                 <span className="font-medium">AI Context:</span> {question.aiContext.projectSummary}
               </p>
             </div>
@@ -76,8 +76,8 @@ export default function QAQuestionCard({ question, onClaim, onBid, showClaim = f
 
           {question.photoUrls && question.photoUrls.length > 0 && (
             <div className="flex items-center gap-1 mt-2">
-              <Image size={12} className="text-[#7D6B5D]" />
-              <span className="text-xs text-[#7D6B5D]">
+              <Image size={12} className="text-earth-brown" />
+              <span className="text-xs text-earth-brown">
                 {question.photoUrls.length} photo{question.photoUrls.length !== 1 ? 's' : ''}
               </span>
             </div>
@@ -117,9 +117,9 @@ export default function QAQuestionCard({ question, onClaim, onBid, showClaim = f
               <>
                 {/* Bidding mode: show reference price + deadline */}
                 <div className="text-right">
-                  <span className="text-xs font-medium text-[#C67B5C]">Specialist</span>
+                  <span className="text-xs font-medium text-terracotta">Specialist</span>
                   {bidTimeLeft > 0 && (
-                    <p className="text-[10px] text-[#7D6B5D]">
+                    <p className="text-[10px] text-earth-brown">
                       {bidHoursLeft > 0 ? `${bidHoursLeft}h ` : ''}{bidMinsLeft}m left
                     </p>
                   )}
@@ -136,12 +136,12 @@ export default function QAQuestionCard({ question, onClaim, onBid, showClaim = f
                 {/* Fixed mode: show earnings + claim button */}
                 {!isFree && expertEarnings && (
                   <div className="text-right">
-                    <span className="text-lg font-bold text-[#4A7C59]">${expertEarnings}</span>
-                    <p className="text-[10px] text-[#7D6B5D]">You earn · Est. {estMinutes}</p>
+                    <span className="text-lg font-bold text-forest-green">${expertEarnings}</span>
+                    <p className="text-[10px] text-earth-brown">You earn · Est. {estMinutes}</p>
                   </div>
                 )}
                 {isFree && (
-                  <span className="text-xs font-medium text-[#7D6B5D]">Free question</span>
+                  <span className="text-xs font-medium text-earth-brown">Free question</span>
                 )}
                 <Button variant="primary" size="sm" onClick={onClaim}>
                   Claim
@@ -154,7 +154,7 @@ export default function QAQuestionCard({ question, onClaim, onBid, showClaim = f
         {/* Non-claim view: still show price */}
         {!showClaim && !isFree && (
           <div className="flex-shrink-0">
-            <span className="flex items-center gap-1 text-sm font-bold text-[#4A7C59]">
+            <span className="flex items-center gap-1 text-sm font-bold text-forest-green">
               <DollarSign size={14} />
               {expertEarnings || (question.priceCents / 100).toFixed(2)}
             </span>

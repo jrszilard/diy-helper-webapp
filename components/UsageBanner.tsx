@@ -26,7 +26,7 @@ export default function UsageBanner({ usage, tier }: UsageBannerProps) {
   return (
     <Card surface padding="none" className="px-4 py-3">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-[#3E2723]">Usage</span>
+        <span className="text-sm font-medium text-foreground">Usage</span>
         {tier === 'pro' && (
           <Badge variant="solid">Pro</Badge>
         )}
@@ -34,28 +34,28 @@ export default function UsageBanner({ usage, tier }: UsageBannerProps) {
       <div className="space-y-2">
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-[#7D6B5D]">Reports</span>
-            <span className={`text-xs font-medium ${isReportsWarning ? 'text-[#C67B5C]' : 'text-[#7D6B5D]'}`}>
+            <span className="text-xs text-earth-brown">Reports</span>
+            <span className={`text-xs font-medium ${isReportsWarning ? 'text-terracotta' : 'text-earth-brown'}`}>
               {usage.reports.used} of {usage.reports.limit} used
             </span>
           </div>
-          <div className="w-full bg-[#E8DFD0] rounded-full h-1.5">
+          <div className="w-full bg-earth-tan rounded-full h-1.5">
             <div
-              className={`h-1.5 rounded-full transition-all ${isReportsWarning ? 'bg-[#C67B5C]' : 'bg-[#4A7C59]'}`}
+              className={`h-1.5 rounded-full transition-all ${isReportsWarning ? 'bg-terracotta' : 'bg-forest-green'}`}
               style={{ width: `${Math.min(reportsPercent, 100)}%` }}
             />
           </div>
         </div>
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-[#7D6B5D]">Chat Messages</span>
-            <span className={`text-xs font-medium ${isMessagesWarning ? 'text-[#C67B5C]' : 'text-[#7D6B5D]'}`}>
+            <span className="text-xs text-earth-brown">Chat Messages</span>
+            <span className={`text-xs font-medium ${isMessagesWarning ? 'text-terracotta' : 'text-earth-brown'}`}>
               {usage.chatMessages.used} of {usage.chatMessages.limit} used
             </span>
           </div>
-          <div className="w-full bg-[#E8DFD0] rounded-full h-1.5">
+          <div className="w-full bg-earth-tan rounded-full h-1.5">
             <div
-              className={`h-1.5 rounded-full transition-all ${isMessagesWarning ? 'bg-[#C67B5C]' : 'bg-[#4A7C59]'}`}
+              className={`h-1.5 rounded-full transition-all ${isMessagesWarning ? 'bg-terracotta' : 'bg-forest-green'}`}
               style={{ width: `${Math.min(messagesPercent, 100)}%` }}
             />
           </div>

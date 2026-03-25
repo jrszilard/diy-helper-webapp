@@ -239,14 +239,14 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
   return (
     <Modal isOpen={isOpen} onClose={onClose} position="right">
         {/* Header */}
-        <div className="bg-[#C67B5C] text-white p-4 flex items-center justify-between safe-area-top">
+        <div className="bg-terracotta text-white p-4 flex items-center justify-between safe-area-top">
           <div>
             <h2 className="text-lg sm:text-xl font-bold">My Tool Inventory</h2>
             <p className="text-[var(--status-progress-bg)] text-sm">{inventory.length} items</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-[#A65D3F] active:bg-[#8B4D33] rounded-lg transition-colors"
+            className="p-2 hover:bg-terracotta-dark active:bg-[#8B4D33] rounded-lg transition-colors"
             aria-label="Close inventory panel"
           >
             <X size={24} />
@@ -254,7 +254,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
         </div>
 
         {/* Search and Filter */}
-        <div className="p-4 border-b border-[#D4C8B8] space-y-3">
+        <div className="p-4 border-b border-earth-sand space-y-3">
           <TextInput
             type="text"
             placeholder="Search inventory..."
@@ -271,8 +271,8 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
               onClick={() => setSelectedCategory(null)}
               className={`px-3 py-1 rounded-full text-sm ${
                 !selectedCategory
-                  ? 'bg-[#C67B5C] text-white'
-                  : 'bg-[#F5F0E6] text-[var(--warm-brown)] hover:bg-[#E8DFD0]'
+                  ? 'bg-terracotta text-white'
+                  : 'bg-earth-cream text-warm-brown hover:bg-earth-tan'
               }`}
               aria-label="Show all categories"
             >
@@ -286,8 +286,8 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                 )}
                 className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
                   selectedCategory === cat.value
-                    ? 'bg-[#C67B5C] text-white'
-                    : 'bg-[#F5F0E6] text-[var(--warm-brown)] hover:bg-[#E8DFD0]'
+                    ? 'bg-terracotta text-white'
+                    : 'bg-earth-cream text-warm-brown hover:bg-earth-tan'
                 }`}
                 aria-label={`Filter by ${cat.label}`}
               >
@@ -300,8 +300,8 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
 
         {/* Add/Edit Form */}
         {(showAddForm || editingItem) && (
-          <div className="p-4 bg-[#F5F0E6] border-b border-[#D4C8B8]">
-            <h3 className="font-semibold text-[#3E2723] mb-3">
+          <div className="p-4 bg-earth-cream border-b border-earth-sand">
+            <h3 className="font-semibold text-foreground mb-3">
               {editingItem ? 'Edit Item' : 'Add New Item'}
             </h3>
             <div className="space-y-3">
@@ -358,7 +358,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                 placeholder="Notes (optional)"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="w-full p-2 border border-[#D4C8B8] rounded-lg text-[#3E2723] bg-white focus:outline-none focus:ring-2 focus:ring-[#C67B5C] resize-none placeholder-[#A89880]"
+                className="w-full p-2 border border-earth-sand rounded-lg text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-terracotta resize-none placeholder-earth-brown-light"
                 rows={2}
               />
 
@@ -411,41 +411,41 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
 
                 return (
                   <div key={category}>
-                    <h4 className="font-semibold text-[#3E2723] mb-2 flex items-center gap-2">
-                      <Icon size={16} className="text-[#C67B5C]" />
+                    <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                      <Icon size={16} className="text-terracotta" />
                       {catInfo?.label || category}
-                      <span className="text-[#7D6B5D] font-normal">({items.length})</span>
+                      <span className="text-earth-brown font-normal">({items.length})</span>
                     </h4>
                     <div className="space-y-2">
                       {items.map(item => (
                         <div
                           key={item.id}
-                          className="bg-white border border-[#D4C8B8] rounded-lg p-3 sm:p-3 flex items-center justify-between group hover:shadow-sm transition-shadow"
+                          className="bg-white border border-earth-sand rounded-lg p-3 sm:p-3 flex items-center justify-between group hover:shadow-sm transition-shadow"
                         >
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-[#3E2723] text-sm sm:text-base">
+                            <div className="font-medium text-foreground text-sm sm:text-base">
                               {item.item_name}
                               {item.quantity > 1 && (
-                                <span className="text-[#7D6B5D] font-normal ml-1">
+                                <span className="text-earth-brown font-normal ml-1">
                                   x{item.quantity}
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs text-[#7D6B5D] flex items-center gap-2 flex-wrap mt-1">
+                            <div className="text-xs text-earth-brown flex items-center gap-2 flex-wrap mt-1">
                               <span className={`px-2 py-0.5 rounded-full ${
-                                item.condition === 'new' ? 'bg-[var(--status-complete-bg)] text-[#4A7C59]' :
-                                item.condition === 'good' ? 'bg-[var(--status-research-bg)] text-[#5D7B93]' :
-                                item.condition === 'fair' ? 'bg-[var(--status-progress-bg)] text-[#C67B5C]' :
-                                'bg-[#FADDD0] text-[#B8593B]'
+                                item.condition === 'new' ? 'bg-[var(--status-complete-bg)] text-forest-green' :
+                                item.condition === 'good' ? 'bg-[var(--status-research-bg)] text-slate-blue' :
+                                item.condition === 'fair' ? 'bg-[var(--status-progress-bg)] text-terracotta' :
+                                'bg-[#FADDD0] text-rust'
                               }`}>
                                 {item.condition}
                               </span>
                               {item.auto_added && (
-                                <span className="text-[#A89880]">auto-added</span>
+                                <span className="text-earth-brown-light">auto-added</span>
                               )}
                             </div>
                             {item.notes && (
-                              <p className="text-xs text-[#7D6B5D] mt-1 line-clamp-2">{item.notes}</p>
+                              <p className="text-xs text-earth-brown mt-1 line-clamp-2">{item.notes}</p>
                             )}
                           </div>
 
@@ -453,14 +453,14 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                           <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
                             <button
                               onClick={() => startEdit(item)}
-                              className="p-2 text-[#7D6B5D] hover:text-[#5D7B93] active:text-[var(--slate-blue-dark)] hover:bg-[var(--status-research-bg)] active:bg-[#D4E4ED] rounded-lg"
+                              className="p-2 text-earth-brown hover:text-slate-blue active:text-slate-blue-dark hover:bg-[var(--status-research-bg)] active:bg-[#D4E4ED] rounded-lg"
                               aria-label="Edit item"
                             >
                               <Edit2 size={18} />
                             </button>
                             <button
                               onClick={() => handleDeleteItem(item.id)}
-                              className="p-2 text-[#7D6B5D] hover:text-[#B8593B] active:text-[#9A4830] hover:bg-[#FADDD0] active:bg-[#F5C9B8] rounded-lg"
+                              className="p-2 text-earth-brown hover:text-rust active:text-[#9A4830] hover:bg-[#FADDD0] active:bg-[#F5C9B8] rounded-lg"
                               aria-label="Delete item"
                             >
                               <Trash2 size={18} />
@@ -478,7 +478,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
 
         {/* Add Button - only show when logged in */}
         {!showAddForm && !editingItem && userId && (
-          <div className="p-4 border-t border-[#D4C8B8] safe-area-bottom bg-surface">
+          <div className="p-4 border-t border-earth-sand safe-area-bottom bg-surface">
             <Button
               variant="primary"
               size="lg"

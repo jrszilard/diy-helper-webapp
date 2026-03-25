@@ -264,7 +264,7 @@ export default function QASubmitForm({
   const needsPayment = !isFirstQuestion;
 
   return (
-    <div className="bg-white border border-[#D4C8B8] rounded-lg p-6">
+    <div className="bg-white border border-earth-sand rounded-lg p-6">
       {/* Test mode banner */}
       {isTestMode && (
         <div className="mb-4 p-3 bg-amber-50 border border-amber-300 rounded-lg flex items-center gap-2">
@@ -275,10 +275,10 @@ export default function QASubmitForm({
         </div>
       )}
 
-      <h2 className="text-lg font-bold text-[#3E2723] mb-1">
+      <h2 className="text-lg font-bold text-foreground mb-1">
         {targetExpertName ? `Get Expert Guidance from ${targetExpertName}` : 'Get Expert Guidance on Your Project'}
       </h2>
-      <p className="text-sm text-[#7D6B5D] mb-4">
+      <p className="text-sm text-earth-brown mb-4">
         {expertContext
           ? 'Your AI report gives the expert full context before they even start — no explaining from scratch.'
           : 'Connect with a verified tradesperson who can answer the questions AI can\u2019t.'}
@@ -296,24 +296,24 @@ export default function QASubmitForm({
       )}
 
       {/* What you get — value messaging */}
-      <div className="mb-4 p-3 bg-[#5D7B93]/5 border border-[#5D7B93]/20 rounded-lg">
-        <p className="text-xs text-[#5D7B93] font-semibold mb-2">What you get that a phone call can&apos;t provide</p>
+      <div className="mb-4 p-3 bg-slate-blue/5 border border-slate-blue/20 rounded-lg">
+        <p className="text-xs text-slate-blue font-semibold mb-2">What you get that a phone call can&apos;t provide</p>
         <div className="flex flex-col gap-1.5">
           <div className="flex items-start gap-2">
-            <FileCheck size={14} className="text-[#5D7B93] flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-[#5D7B93]"><strong>Pre-contextualized answer</strong> — your expert sees your full AI report, photos, and building codes upfront</p>
+            <FileCheck size={14} className="text-slate-blue flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-slate-blue"><strong>Pre-contextualized answer</strong> — your expert sees your full AI report, photos, and building codes upfront</p>
           </div>
           <div className="flex items-start gap-2">
-            <MessageSquare size={14} className="text-[#5D7B93] flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-[#5D7B93]"><strong>Documented record</strong> — every answer stays with your project forever, not lost after a call</p>
+            <MessageSquare size={14} className="text-slate-blue flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-slate-blue"><strong>Documented record</strong> — every answer stays with your project forever, not lost after a call</p>
           </div>
           <div className="flex items-start gap-2">
-            <Shield size={14} className="text-[#5D7B93] flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-[#5D7B93]"><strong>Payment protection</strong> — only charged when an expert claims; full refund if unanswered</p>
+            <Shield size={14} className="text-slate-blue flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-slate-blue"><strong>Payment protection</strong> — only charged when an expert claims; full refund if unanswered</p>
           </div>
           <div className="flex items-start gap-2">
-            <Users size={14} className="text-[#5D7B93] flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-[#5D7B93]"><strong>Verified tradespeople</strong> — rated experts matched by specialty to your project</p>
+            <Users size={14} className="text-slate-blue flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-slate-blue"><strong>Verified tradespeople</strong> — rated experts matched by specialty to your project</p>
           </div>
         </div>
       </div>
@@ -321,14 +321,14 @@ export default function QASubmitForm({
       {targetExpertId && targetExpertName && (
         <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
           <p className="text-xs text-purple-600 font-medium">Direct Question</p>
-          <p className="text-sm text-[#3E2723]">Sending directly to {targetExpertName}</p>
+          <p className="text-sm text-foreground">Sending directly to {targetExpertName}</p>
         </div>
       )}
 
       {reportContext?.projectSummary && !expertContext && (
-        <div className="bg-[#E8DFD0]/50 rounded-lg p-3 mb-4">
-          <p className="text-xs text-[#7D6B5D] font-medium mb-1">Project Context</p>
-          <p className="text-sm text-[#3E2723]">{reportContext.projectSummary}</p>
+        <div className="bg-earth-tan/50 rounded-lg p-3 mb-4">
+          <p className="text-xs text-earth-brown font-medium mb-1">Project Context</p>
+          <p className="text-sm text-foreground">{reportContext.projectSummary}</p>
         </div>
       )}
 
@@ -341,7 +341,7 @@ export default function QASubmitForm({
       <div className="space-y-4">
         {/* Category */}
         <div>
-          <label className="block text-sm font-medium text-[#3E2723] mb-1">Category</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Category</label>
           <Select
             value={category}
             onChange={e => setCategory(e.target.value)}
@@ -382,14 +382,14 @@ export default function QASubmitForm({
 
         {/* ── Payment Section (always visible) ── */}
         {needsPayment && (
-          <div className={`border rounded-lg p-4 ${paymentMethodId ? 'border-[#4A7C59] bg-[#4A7C59]/5' : 'border-[#D4C8B8] bg-[#E8DFD0]/30'}`}>
+          <div className={`border rounded-lg p-4 ${paymentMethodId ? 'border-forest-green bg-forest-green/5' : 'border-earth-sand bg-earth-tan/30'}`}>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <CreditCard size={16} className={paymentMethodId ? 'text-[#4A7C59]' : 'text-[#7D6B5D]'} />
-                <h3 className="text-sm font-semibold text-[#3E2723]">Payment Method</h3>
+                <CreditCard size={16} className={paymentMethodId ? 'text-forest-green' : 'text-earth-brown'} />
+                <h3 className="text-sm font-semibold text-foreground">Payment Method</h3>
               </div>
               {paymentMethodId && (
-                <span className="flex items-center gap-1 text-xs text-[#4A7C59] font-medium">
+                <span className="flex items-center gap-1 text-xs text-forest-green font-medium">
                   <CheckCircle2 size={14} />
                   {isTestMode ? 'Test card saved' : 'Card saved'}
                 </span>
@@ -399,8 +399,8 @@ export default function QASubmitForm({
             {paymentMethodId ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Shield size={14} className="text-[#4A7C59]" />
-                  <p className="text-xs text-[#4A7C59]">
+                  <Shield size={14} className="text-forest-green" />
+                  <p className="text-xs text-forest-green">
                     Your card is saved. You will only be charged when an expert claims your question.
                   </p>
                 </div>
@@ -412,7 +412,7 @@ export default function QASubmitForm({
               </div>
             ) : (
               <div className="space-y-3">
-                <p className="text-xs text-[#7D6B5D]">
+                <p className="text-xs text-earth-brown">
                   Save a payment method to submit your question. You won&apos;t be charged now — only when an expert claims it.
                 </p>
                 <Button
@@ -430,9 +430,9 @@ export default function QASubmitForm({
             )}
 
             {creditBalanceCents > 0 && (
-              <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-[#D4C8B8]/50">
-                <Wallet size={14} className="text-[#4A7C59]" />
-                <span className="text-sm text-[#4A7C59] font-medium">
+              <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-earth-sand/50">
+                <Wallet size={14} className="text-forest-green" />
+                <span className="text-sm text-forest-green font-medium">
                   {formatPrice(creditBalanceCents, true)} in credits will be applied first
                 </span>
               </div>
@@ -442,20 +442,20 @@ export default function QASubmitForm({
 
         {/* ── Dynamic Price Breakdown ── */}
         {!isFirstQuestion && dynamicPricing?.tier && (
-          <div className="p-3 bg-[#F5F0E6] border border-[#D4C8B8] rounded-lg">
+          <div className="p-3 bg-earth-cream border border-earth-sand rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <TrendingUp size={14} className="text-[#C67B5C]" />
-                <span className="text-sm font-semibold text-[#3E2723]">
+                <TrendingUp size={14} className="text-terracotta" />
+                <span className="text-sm font-semibold text-foreground">
                   {dynamicPricing.tierLabel} Question — {formatPrice(dynamicPricing.priceCents)}
                 </span>
               </div>
               {pricingLoading && <Spinner size="sm" className="text-[var(--muted)]" />}
             </div>
-            <div className="flex items-center gap-4 text-xs text-[#7D6B5D]">
+            <div className="flex items-center gap-4 text-xs text-earth-brown">
               <span>You pay <strong>{formatPrice(dynamicPricing.priceCents, true)}</strong></span>
               <span className="text-[var(--muted)]">&rarr;</span>
-              <span>Expert earns <strong className="text-[#4A7C59]">{formatPrice(dynamicPricing.expertPayoutCents, true)}</strong></span>
+              <span>Expert earns <strong className="text-forest-green">{formatPrice(dynamicPricing.expertPayoutCents, true)}</strong></span>
               <span className="text-[var(--muted)]">&rarr;</span>
               <span>Protected by escrow</span>
             </div>
@@ -471,24 +471,24 @@ export default function QASubmitForm({
         )}
 
         {/* ── Price + Submit ── */}
-        <div className="flex items-center justify-between pt-2 border-t border-[#D4C8B8]/50">
+        <div className="flex items-center justify-between pt-2 border-t border-earth-sand/50">
           <div>
             {isFirstQuestion ? (
               <div>
-                <span className="text-sm font-bold text-[#4A7C59]">FREE — First question on us!</span>
-                <p className="text-xs text-[#7D6B5D] mt-0.5">No payment method needed</p>
+                <span className="text-sm font-bold text-forest-green">FREE — First question on us!</span>
+                <p className="text-xs text-earth-brown mt-0.5">No payment method needed</p>
               </div>
             ) : dynamicPricing?.tier ? (
               <div>
-                <span className="text-sm font-medium text-[#3E2723]">
+                <span className="text-sm font-medium text-foreground">
                   {dynamicPricing.tierLabel}: {formatPrice(dynamicPricing.priceCents)}
                 </span>
-                <p className="text-xs text-[#7D6B5D] mt-0.5">Charged only when an expert claims</p>
+                <p className="text-xs text-earth-brown mt-0.5">Charged only when an expert claims</p>
               </div>
             ) : (
               <div>
-                <span className="text-sm font-medium text-[#3E2723]">Price: $5 - $8</span>
-                <p className="text-xs text-[#7D6B5D] mt-0.5">Charged only when an expert claims</p>
+                <span className="text-sm font-medium text-foreground">Price: $5 - $8</span>
+                <p className="text-xs text-earth-brown mt-0.5">Charged only when an expert claims</p>
               </div>
             )}
           </div>

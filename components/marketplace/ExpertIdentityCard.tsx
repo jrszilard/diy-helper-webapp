@@ -51,11 +51,11 @@ export default function ExpertIdentityCard({
         <Avatar name={displayName} src={profilePhotoUrl} size="sm" />
         <div className="min-w-0">
           <div className="flex items-center gap-1">
-            <span className="text-sm font-semibold text-[#3E2723] truncate">{safeName}</span>
-            {verificationLevel >= 2 && <Shield size={12} className="text-[#5D7B93] flex-shrink-0" />}
+            <span className="text-sm font-semibold text-foreground truncate">{safeName}</span>
+            {verificationLevel >= 2 && <Shield size={12} className="text-slate-blue flex-shrink-0" />}
           </div>
           {primarySpecialty && (
-            <span className="text-xs text-[#7D6B5D]">
+            <span className="text-xs text-earth-brown">
               {primarySpecialty.specialty.replace('_', ' ')}
               {maxYears > 0 ? ` \u00b7 ${maxYears}+ yr exp` : ''}
             </span>
@@ -70,9 +70,9 @@ export default function ExpertIdentityCard({
       <Avatar name={displayName} src={profilePhotoUrl} />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <h4 className="text-sm font-bold text-[#3E2723] truncate">{safeName}</h4>
+          <h4 className="text-sm font-bold text-foreground truncate">{safeName}</h4>
           {verificationLevel >= 2 && (
-            <Shield size={14} className="text-[#5D7B93] flex-shrink-0" />
+            <Shield size={14} className="text-slate-blue flex-shrink-0" />
           )}
         </div>
 
@@ -84,11 +84,11 @@ export default function ExpertIdentityCard({
                 <Star
                   key={star}
                   size={12}
-                  className={star <= Math.round(avgRating) ? 'fill-[#C67B5C] text-[#C67B5C]' : 'text-[#D4C8B8]'}
+                  className={star <= Math.round(avgRating) ? 'fill-terracotta text-terracotta' : 'text-earth-sand'}
                 />
               ))}
             </div>
-            <span className="text-xs text-[#7D6B5D]">
+            <span className="text-xs text-earth-brown">
               {avgRating.toFixed(1)} ({totalReviews})
             </span>
           </div>
@@ -97,18 +97,18 @@ export default function ExpertIdentityCard({
         {/* Specialty + experience */}
         <div className="flex flex-wrap items-center gap-2 mt-1.5">
           {primarySpecialty && (
-            <Badge variant="primary" className="border border-[var(--terracotta)]/20">
+            <Badge variant="primary" className="border border-terracotta/20">
               {primarySpecialty.specialty.replace('_', ' ')}
             </Badge>
           )}
           {maxYears > 0 && (
-            <span className="flex items-center gap-1 text-xs text-[#7D6B5D]">
+            <span className="flex items-center gap-1 text-xs text-earth-brown">
               <Award size={11} />
               {maxYears}+ years experience
             </span>
           )}
           {responseTimeHours != null && (
-            <span className="flex items-center gap-1 text-xs text-[#7D6B5D]">
+            <span className="flex items-center gap-1 text-xs text-earth-brown">
               <Clock size={11} />
               ~{responseTimeHours}h response
             </span>

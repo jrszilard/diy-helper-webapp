@@ -41,12 +41,12 @@ const EVENT_ICONS: Record<string, React.ReactNode> = {
 };
 
 const EVENT_COLORS: Record<string, string> = {
-  question: 'bg-[#5D7B93] text-white',
-  answer: 'bg-[#4A7C59] text-white',
-  correction: 'bg-[#C67B5C] text-white',
-  note: 'bg-[#7D6B5D] text-white',
+  question: 'bg-slate-blue text-white',
+  answer: 'bg-forest-green text-white',
+  correction: 'bg-terracotta text-white',
+  note: 'bg-earth-brown text-white',
   graduation: 'bg-[#8B5CF6] text-white',
-  second_opinion: 'bg-[#5D7B93] text-white',
+  second_opinion: 'bg-slate-blue text-white',
 };
 
 export default function ProjectTimeline({ reportId }: ProjectTimelineProps) {
@@ -91,7 +91,7 @@ export default function ProjectTimeline({ reportId }: ProjectTimelineProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Spinner className="text-[#5D7B93]" />
+        <Spinner className="text-slate-blue" />
       </div>
     );
   }
@@ -103,14 +103,14 @@ export default function ProjectTimeline({ reportId }: ProjectTimelineProps) {
   const totalActivity = (stats?.totalQuestions || 0) + (stats?.totalCorrections || 0) + (stats?.totalSecondOpinions || 0);
 
   return (
-    <div className="bg-white rounded-lg border border-[#D4C8B8] p-5">
+    <div className="bg-white rounded-lg border border-earth-sand p-5">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-bold text-[#3E2723] flex items-center gap-2">
-          <Clock size={16} className="text-[#5D7B93]" />
+        <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+          <Clock size={16} className="text-slate-blue" />
           Expert Activity Timeline
         </h3>
         {stats && totalActivity > 0 && (
-          <span className="text-xs text-[#7D6B5D]">
+          <span className="text-xs text-earth-brown">
             {stats.totalQuestions} {stats.totalQuestions === 1 ? 'consultation' : 'consultations'}
             {stats.totalCorrections > 0 && `, ${stats.totalCorrections} ${stats.totalCorrections === 1 ? 'correction' : 'corrections'}`}
             {stats.totalSecondOpinions > 0 && `, ${stats.totalSecondOpinions} second ${stats.totalSecondOpinions === 1 ? 'opinion' : 'opinions'}`}
@@ -121,26 +121,26 @@ export default function ProjectTimeline({ reportId }: ProjectTimelineProps) {
       {/* Timeline */}
       <div className="relative">
         {/* Vertical line */}
-        <div className="absolute left-[15px] top-2 bottom-2 w-px bg-[#D4C8B8]" />
+        <div className="absolute left-[15px] top-2 bottom-2 w-px bg-earth-sand" />
 
         <div className="space-y-4">
           {events.map((event, idx) => (
             <div key={idx} className="flex items-start gap-3 relative">
               {/* Icon dot */}
-              <div className={`w-[30px] h-[30px] rounded-full flex items-center justify-center flex-shrink-0 z-10 ${EVENT_COLORS[event.type] || 'bg-[#7D6B5D] text-white'}`}>
+              <div className={`w-[30px] h-[30px] rounded-full flex items-center justify-center flex-shrink-0 z-10 ${EVENT_COLORS[event.type] || 'bg-earth-brown text-white'}`}>
                 {EVENT_ICONS[event.type] || <MessageCircle size={14} />}
               </div>
 
               {/* Content */}
               <div className="flex-1 min-w-0 pt-0.5">
                 <div className="flex items-baseline gap-2 flex-wrap">
-                  <span className="text-sm font-medium text-[#3E2723]">{event.title}</span>
+                  <span className="text-sm font-medium text-foreground">{event.title}</span>
                   {event.expertName && (
-                    <span className="text-xs text-[#5D7B93]">by {event.expertName}</span>
+                    <span className="text-xs text-slate-blue">by {event.expertName}</span>
                   )}
                 </div>
                 {event.detail && (
-                  <p className="text-xs text-[#7D6B5D] mt-0.5 line-clamp-2">{event.detail}</p>
+                  <p className="text-xs text-earth-brown mt-0.5 line-clamp-2">{event.detail}</p>
                 )}
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-[10px] text-[var(--muted)]">
@@ -152,7 +152,7 @@ export default function ProjectTimeline({ reportId }: ProjectTimelineProps) {
                   {event.questionId && (
                     <Link
                       href={`/marketplace/qa/${event.questionId}`}
-                      className="text-[10px] text-[#5D7B93] hover:underline"
+                      className="text-[10px] text-slate-blue hover:underline"
                     >
                       View details
                     </Link>

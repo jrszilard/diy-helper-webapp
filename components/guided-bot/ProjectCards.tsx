@@ -22,11 +22,11 @@ export default function ProjectCards({ onSelectProject }: ProjectCardsProps) {
         <button
           key={template.id}
           onClick={() => onSelectProject(template.category, template.starterPrompt, template.id)}
-          className="group flex flex-col items-start gap-2 p-3 bg-white border border-[#D4C8B8] rounded-xl hover:border-[#C67B5C] hover:bg-[#FDF8F3] transition-all text-left shadow-sm hover:shadow min-h-[48px]"
+          className="group flex flex-col items-start gap-2 p-3 bg-white border border-earth-sand rounded-xl hover:border-terracotta hover:bg-[#FDF8F3] transition-all text-left shadow-sm hover:shadow min-h-[48px]"
         >
           <div className="flex items-center gap-2 w-full">
             <span className="text-xl flex-shrink-0">{template.icon}</span>
-            <span className="text-sm font-medium text-[#3E2723] leading-tight">{template.name}</span>
+            <span className="text-sm font-medium text-foreground leading-tight">{template.name}</span>
           </div>
           <div className="flex items-center gap-2 w-full">
             <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${DIFFICULTY_COLORS[template.difficulty]}`}>

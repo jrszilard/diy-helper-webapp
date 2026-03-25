@@ -15,12 +15,12 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
   return (
     <Link
       href={`/experts/${expert.id}`}
-      className="block bg-white border border-[var(--earth-sand)] rounded-lg p-4 hover:shadow-md hover:border-[var(--terracotta)]/30 transition-all"
+      className="block bg-white border border-earth-sand rounded-lg p-4 hover:shadow-md hover:border-terracotta/30 transition-all"
     >
       <div className="flex items-start gap-3">
         <Avatar name={expert.displayName} src={expert.profilePhotoUrl} />
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-bold text-[#3E2723] truncate">{expert.displayName}</h3>
+          <h3 className="text-sm font-bold text-foreground truncate">{expert.displayName}</h3>
 
           <div className="flex items-center gap-1 mt-1">
             <div className="flex items-center gap-0.5">
@@ -28,22 +28,22 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 <Star
                   key={star}
                   size={12}
-                  className={star <= Math.round(expert.avgRating) ? 'fill-[#C67B5C] text-[#C67B5C]' : 'text-[#D4C8B8]'}
+                  className={star <= Math.round(expert.avgRating) ? 'fill-terracotta text-terracotta' : 'text-earth-sand'}
                 />
               ))}
             </div>
-            <span className="text-xs text-[#7D6B5D]">
+            <span className="text-xs text-earth-brown">
               ({expert.totalReviews})
             </span>
           </div>
 
           <div className="flex items-center gap-1 mt-1">
-            <MapPin size={12} className="text-[#7D6B5D]" />
-            <span className="text-xs text-[#7D6B5D]">{expert.city}, {expert.state}</span>
+            <MapPin size={12} className="text-earth-brown" />
+            <span className="text-xs text-earth-brown">{expert.city}, {expert.state}</span>
           </div>
 
           {expert.hourlyRateCents && (
-            <span className="text-xs font-medium text-[#4A7C59] mt-1">
+            <span className="text-xs font-medium text-forest-green mt-1">
               {formatPrice(expert.hourlyRateCents)}/hr
             </span>
           )}

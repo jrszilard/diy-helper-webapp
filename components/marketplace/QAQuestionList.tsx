@@ -10,10 +10,10 @@ interface QAQuestionListProps {
 }
 
 const STATUS_STYLES: Record<string, { label: string; bg: string; text: string; icon: React.ReactNode }> = {
-  open: { label: 'Open', bg: 'bg-[#5D7B93]/10', text: 'text-[#5D7B93]', icon: <Clock size={12} /> },
+  open: { label: 'Open', bg: 'bg-slate-blue/10', text: 'text-slate-blue', icon: <Clock size={12} /> },
   claimed: { label: 'Claimed', bg: 'bg-amber-100', text: 'text-amber-700', icon: <UserCheck size={12} /> },
-  answered: { label: 'Answered', bg: 'bg-[#4A7C59]/10', text: 'text-[#4A7C59]', icon: <MessageSquare size={12} /> },
-  accepted: { label: 'Accepted', bg: 'bg-[#4A7C59]/10', text: 'text-[#4A7C59]', icon: <CheckCircle2 size={12} /> },
+  answered: { label: 'Answered', bg: 'bg-forest-green/10', text: 'text-forest-green', icon: <MessageSquare size={12} /> },
+  accepted: { label: 'Accepted', bg: 'bg-forest-green/10', text: 'text-forest-green', icon: <CheckCircle2 size={12} /> },
   expired: { label: 'Expired', bg: 'bg-red-100', text: 'text-red-700', icon: <XCircle size={12} /> },
 };
 
@@ -40,13 +40,13 @@ export default function QAQuestionList({ questions }: QAQuestionListProps) {
           <Link
             key={q.id}
             href={`/marketplace/qa/${q.id}`}
-            className="block bg-white border border-[#D4C8B8] rounded-lg p-4 hover:bg-[#E8DFD0]/30 transition-colors"
+            className="block bg-white border border-earth-sand rounded-lg p-4 hover:bg-earth-tan/30 transition-colors"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-[#3E2723] line-clamp-2">{q.questionText}</p>
+                <p className="text-sm text-foreground line-clamp-2">{q.questionText}</p>
                 <div className="flex items-center gap-3 mt-2">
-                  <span className="text-xs px-2 py-0.5 bg-[#5D7B93]/10 text-[#5D7B93] rounded-full font-medium">
+                  <span className="text-xs px-2 py-0.5 bg-slate-blue/10 text-slate-blue rounded-full font-medium">
                     {q.category}
                   </span>
                   {isDirect && (

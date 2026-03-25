@@ -122,12 +122,12 @@ export default function ChatPage() {
     <div className="flex h-screen blueprint-bg-subtle">
       {/* Migration Toast */}
       {migrationToast && (
-        <div className="fixed top-20 right-4 bg-[#4A7C59] text-white px-4 py-3 rounded-lg shadow-lg z-[60] flex items-center gap-3 animate-slide-in max-w-sm">
+        <div className="fixed top-20 right-4 bg-forest-green text-white px-4 py-3 rounded-lg shadow-lg z-[60] flex items-center gap-3 animate-slide-in max-w-sm">
           <Package size={20} className="flex-shrink-0" />
           <p className="font-medium text-sm">{migrationToast}</p>
           <button
             onClick={() => setMigrationToast(null)}
-            className="ml-2 hover:bg-[var(--forest-green-dark)] p-1 rounded flex-shrink-0"
+            className="ml-2 hover:bg-forest-green-dark p-1 rounded flex-shrink-0"
             aria-label="Dismiss migration notification"
           >
             <X size={16} />
@@ -147,13 +147,13 @@ export default function ChatPage() {
       {/* Mobile Projects Overlay - shown for both guests and authenticated users */}
       {showMobileProjects && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-[#3E2723] bg-opacity-50" onClick={closeMobilePanels} />
+          <div className="absolute inset-0 bg-foreground bg-opacity-50" onClick={closeMobilePanels} />
           <div className="absolute left-0 top-0 bottom-0 w-[85vw] max-w-80 bg-surface shadow-xl animate-slide-in-left">
-            <div className="flex items-center justify-between p-4 border-b border-[#D4C8B8] bg-[#5D7B93] text-white">
+            <div className="flex items-center justify-between p-4 border-b border-earth-sand bg-slate-blue text-white">
               <h2 className="font-bold text-lg">{user ? 'My Projects' : 'Local Projects'}</h2>
               <button
                 onClick={() => setShowMobileProjects(false)}
-                className="p-2 hover:bg-[var(--slate-blue-dark)] rounded-lg transition-colors"
+                className="p-2 hover:bg-slate-blue-dark rounded-lg transition-colors"
                 aria-label="Close projects panel"
               >
                 <X size={20} />
@@ -172,16 +172,16 @@ export default function ChatPage() {
       {/* Mobile Shopping List Overlay */}
       {showMobileShopping && selectedProject && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-[#3E2723] bg-opacity-50" onClick={closeMobilePanels} />
+          <div className="absolute inset-0 bg-foreground bg-opacity-50" onClick={closeMobilePanels} />
           <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-surface shadow-xl animate-slide-in-right overflow-y-auto">
-            <div className="sticky top-0 flex items-center justify-between p-4 border-b border-[#D4C8B8] bg-[#4A7C59] text-white z-10">
+            <div className="sticky top-0 flex items-center justify-between p-4 border-b border-earth-sand bg-forest-green text-white z-10">
               <div className="flex items-center gap-2">
                 <ShoppingCart size={20} />
                 <h2 className="font-bold text-lg">Shopping List</h2>
               </div>
               <button
                 onClick={() => setShowMobileShopping(false)}
-                className="p-2 hover:bg-[var(--forest-green-dark)] rounded-lg transition-colors"
+                className="p-2 hover:bg-forest-green-dark rounded-lg transition-colors"
                 aria-label="Close shopping list"
               >
                 <X size={20} />
@@ -193,7 +193,7 @@ export default function ChatPage() {
       )}
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-surface border-b border-[#D4C8B8] shadow-sm">
+        <header className="bg-surface border-b border-earth-sand shadow-sm">
           <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-14 sm:h-16">
               {/* Left side: Menu button (mobile) + Logo */}
@@ -201,7 +201,7 @@ export default function ChatPage() {
                 {/* Mobile Projects Menu Button - shown for both guests and authenticated users */}
                 <button
                   onClick={() => setShowMobileProjects(true)}
-                  className="md:hidden p-2 text-[#7D6B5D] hover:text-[#5D7B93] hover:bg-[#E8DFD0] rounded-lg transition"
+                  className="md:hidden p-2 text-earth-brown hover:text-slate-blue hover:bg-earth-tan rounded-lg transition"
                   title={user ? "My Projects" : "Local Projects"}
                   aria-label={user ? "My Projects" : "Local Projects"}
                 >
@@ -209,10 +209,10 @@ export default function ChatPage() {
                 </button>
 
                 <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
-                  <div className="bg-gradient-to-br from-[#C67B5C] to-[#A65D3F] p-1.5 rounded-lg">
+                  <div className="bg-gradient-to-br from-terracotta to-terracotta-dark p-1.5 rounded-lg">
                     <Wrench className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
-                  <span className="text-lg sm:text-xl font-bold text-[#3E2723] hidden xs:inline">DIY Helper</span>
+                  <span className="text-lg sm:text-xl font-bold text-foreground hidden xs:inline">DIY Helper</span>
                 </Link>
               </div>
 
@@ -222,26 +222,26 @@ export default function ChatPage() {
                 {selectedProject && (
                   <button
                     onClick={() => setShowMobileShopping(true)}
-                    className="md:hidden relative p-2 text-[#7D6B5D] hover:text-[#4A7C59] hover:bg-[#E8DFD0] rounded-lg transition"
+                    className="md:hidden relative p-2 text-earth-brown hover:text-forest-green hover:bg-earth-tan rounded-lg transition"
                     title="Shopping List"
                     aria-label="Shopping List"
                   >
                     <ShoppingCart size={22} />
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#4A7C59] text-white text-xs rounded-full flex items-center justify-center font-medium">
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-forest-green text-white text-xs rounded-full flex items-center justify-center font-medium">
                       !
                     </span>
                   </button>
                 )}
 
-                <Link href="/" className="flex items-center gap-2 text-[#3E2723] hover:text-[#C67B5C] transition p-2 sm:p-0">
+                <Link href="/" className="flex items-center gap-2 text-foreground hover:text-terracotta transition p-2 sm:p-0">
                   <Home className="w-5 h-5" />
                   <span className="hidden sm:inline font-medium">Home</span>
                 </Link>
-                <Link href="/marketplace/qa" className="hidden sm:flex items-center gap-2 text-[#3E2723] hover:text-[#C67B5C] transition">
+                <Link href="/marketplace/qa" className="hidden sm:flex items-center gap-2 text-foreground hover:text-terracotta transition">
                   <MessageSquare className="w-5 h-5" />
                   <span className="hidden md:inline font-medium">Ask an Expert</span>
                 </Link>
-                <Link href="/experts" className="hidden sm:flex items-center gap-2 text-[#3E2723] hover:text-[#C67B5C] transition">
+                <Link href="/experts" className="hidden sm:flex items-center gap-2 text-foreground hover:text-terracotta transition">
                   <Users className="w-5 h-5" />
                   <span className="hidden md:inline font-medium">Find an Expert</span>
                 </Link>
@@ -269,14 +269,14 @@ export default function ChatPage() {
 
         {/* Mobile context bar - shows selected project */}
         {selectedProject && (
-          <div className="md:hidden bg-[#E8DFD0] border-b border-[#D4C8B8] px-4 py-2 flex items-center justify-between">
+          <div className="md:hidden bg-earth-tan border-b border-earth-sand px-4 py-2 flex items-center justify-between">
             <div className="flex items-center gap-2 min-w-0">
-              <FolderOpen className="w-4 h-4 text-[#5D7B93] flex-shrink-0" />
-              <span className="text-sm font-medium text-[#3E2723] truncate">{selectedProject.name}</span>
+              <FolderOpen className="w-4 h-4 text-slate-blue flex-shrink-0" />
+              <span className="text-sm font-medium text-foreground truncate">{selectedProject.name}</span>
             </div>
             <button
               onClick={() => setShowMobileShopping(true)}
-              className="flex items-center gap-1 text-xs text-[#5D7B93] font-medium flex-shrink-0"
+              className="flex items-center gap-1 text-xs text-slate-blue font-medium flex-shrink-0"
             >
               <ShoppingCart size={14} />
               View List
@@ -296,7 +296,7 @@ export default function ChatPage() {
 
           {/* Desktop Shopping List Sidebar - hidden on mobile */}
           {selectedProject && (
-            <div className="hidden md:block w-80 lg:w-96 bg-surface border-l border-[#D4C8B8] overflow-y-auto flex-shrink-0">
+            <div className="hidden md:block w-80 lg:w-96 bg-surface border-l border-earth-sand overflow-y-auto flex-shrink-0">
               <ShoppingListView project={selectedProject} />
             </div>
           )}

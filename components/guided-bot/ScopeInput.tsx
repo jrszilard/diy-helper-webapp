@@ -67,7 +67,7 @@ export default function ScopeInput({ projectType, onSubmit }: ScopeInputProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border border-[#D4C8B8] rounded-xl p-4 space-y-3">
+    <form onSubmit={handleSubmit} className="bg-white border border-earth-sand rounded-xl p-4 space-y-3">
       <div>
         <label className="block text-xs font-medium text-[var(--warm-brown)] mb-1">{fields.dimensionLabel}</label>
         <input
@@ -75,7 +75,7 @@ export default function ScopeInput({ projectType, onSubmit }: ScopeInputProps) {
           value={dimensions}
           onChange={(e) => setDimensions(e.target.value)}
           placeholder={fields.dimensionPlaceholder}
-          className="w-full px-3 py-2.5 text-sm text-[#3E2723] placeholder-[#7D6B5D] bg-surface border border-[#D4C8B8] rounded-lg focus:outline-none focus:border-[#C67B5C]"
+          className="w-full px-3 py-2.5 text-sm text-foreground placeholder-earth-brown bg-surface border border-earth-sand rounded-lg focus:outline-none focus:border-terracotta"
           autoFocus
         />
       </div>
@@ -86,7 +86,7 @@ export default function ScopeInput({ projectType, onSubmit }: ScopeInputProps) {
           value={details}
           onChange={(e) => setDetails(e.target.value)}
           placeholder={fields.detailPlaceholder}
-          className="w-full px-3 py-2.5 text-sm text-[#3E2723] placeholder-[#7D6B5D] bg-surface border border-[#D4C8B8] rounded-lg focus:outline-none focus:border-[#C67B5C]"
+          className="w-full px-3 py-2.5 text-sm text-foreground placeholder-earth-brown bg-surface border border-earth-sand rounded-lg focus:outline-none focus:border-terracotta"
         />
       </div>
       <button
@@ -94,8 +94,8 @@ export default function ScopeInput({ projectType, onSubmit }: ScopeInputProps) {
         disabled={!dimensions.trim()}
         className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors ${
           dimensions.trim()
-            ? 'bg-[#C67B5C] text-white hover:bg-[#A65D3F]'
-            : 'bg-[#E8DFD0] text-[#7D6B5D] cursor-not-allowed'
+            ? 'bg-terracotta text-white hover:bg-terracotta-dark'
+            : 'bg-earth-tan text-earth-brown cursor-not-allowed'
         }`}
       >
         Continue

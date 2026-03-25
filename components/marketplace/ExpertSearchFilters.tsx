@@ -33,14 +33,14 @@ const SPECIALTY_OPTIONS = [
 
 export default function ExpertSearchFilters({ filters, onChange }: ExpertSearchFiltersProps) {
   return (
-    <div className="bg-white border border-[#D4C8B8] rounded-lg p-4">
+    <div className="bg-white border border-earth-sand rounded-lg p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Search size={16} className="text-[#7D6B5D]" />
-        <h3 className="text-sm font-semibold text-[#3E2723]">Filter Experts</h3>
+        <Search size={16} className="text-earth-brown" />
+        <h3 className="text-sm font-semibold text-foreground">Filter Experts</h3>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label className="block text-xs text-[#7D6B5D] mb-1">Specialty</label>
+          <label className="block text-xs text-earth-brown mb-1">Specialty</label>
           <Select
             value={filters.specialty}
             onChange={e => onChange({ ...filters, specialty: e.target.value })}
@@ -52,7 +52,7 @@ export default function ExpertSearchFilters({ filters, onChange }: ExpertSearchF
           </Select>
         </div>
         <div>
-          <label className="block text-xs text-[#7D6B5D] mb-1">State</label>
+          <label className="block text-xs text-earth-brown mb-1">State</label>
           <TextInput
             type="text"
             value={filters.state}
@@ -63,7 +63,7 @@ export default function ExpertSearchFilters({ filters, onChange }: ExpertSearchF
           />
         </div>
         <div>
-          <label className="block text-xs text-[#7D6B5D] mb-1">Min Rating</label>
+          <label className="block text-xs text-earth-brown mb-1">Min Rating</label>
           <Select
             value={filters.minRating}
             onChange={e => onChange({ ...filters, minRating: parseInt(e.target.value) })}

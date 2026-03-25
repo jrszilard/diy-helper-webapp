@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Send, Loader2, AlertTriangle } from 'lucide-react';
+import { Send, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Button from '@/components/ui/Button';
 import Textarea from '@/components/ui/Textarea';
+import Spinner from '@/components/ui/Spinner';
 
 interface QAAnswerFormProps {
   questionId: string;
@@ -69,8 +70,8 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
   };
 
   return (
-    <div className="bg-white border border-[#D4C8B8] rounded-lg p-6">
-      <h3 className="text-lg font-bold text-[#3E2723] mb-4">Your Answer</h3>
+    <div className="bg-white border border-earth-sand rounded-lg p-6">
+      <h3 className="text-lg font-bold text-foreground mb-4">Your Answer</h3>
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
@@ -89,7 +90,7 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
             placeholder="Provide a detailed answer..."
           />
           <p className={`text-xs mt-1 ${
-            charCount < 50 ? 'text-[#C67B5C]' : charCount > 2000 ? 'text-red-600' : 'text-[var(--muted)]'
+            charCount < 50 ? 'text-terracotta' : charCount > 2000 ? 'text-red-600' : 'text-muted'
           }`}>
             {charCount}/2000 characters (minimum 50)
           </p>
@@ -105,17 +106,17 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
           placeholder="One URL per line"
         />
 
-        <div className="border border-[#D4C8B8] rounded-lg p-3">
+        <div className="border border-earth-sand rounded-lg p-3">
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={recommendsPro}
               onChange={e => setRecommendsPro(e.target.checked)}
-              className="w-4 h-4 accent-[#C67B5C]"
+              className="w-4 h-4 accent-terracotta"
             />
             <div className="flex items-center gap-2">
-              <AlertTriangle size={16} className="text-amber-600" />
-              <span className="text-sm font-medium text-[#3E2723]">Recommend hiring a professional</span>
+              <AlertTriangle size={16} className="text-[var(--warning)]" />
+              <span className="text-sm font-medium text-foreground">Recommend hiring a professional</span>
             </div>
           </label>
           {recommendsPro && (
@@ -135,13 +136,12 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
           <Button
             variant="secondary"
             size="lg"
-            leftIcon={submitting ? Loader2 : Send}
+            leftIcon={submitting ? undefined : Send}
             iconSize={16}
             onClick={handleSubmit}
             disabled={submitting || !isValid}
-            className={submitting ? '[&>svg:first-child]:animate-spin' : ''}
           >
-            {submitting ? 'Submitting...' : 'Submit Answer'}
+            {submitting ? <><Spinner size="sm" color="default" className="text-white" /> Submitting...</> : 'Submit Answer'}
           </Button>
         </div>
       </div>

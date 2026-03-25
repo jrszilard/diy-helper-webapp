@@ -85,8 +85,8 @@ function QAPageContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F5F0E6] flex items-center justify-center">
-        <Spinner size="lg" className="text-[#C67B5C]" />
+      <div className="min-h-screen bg-earth-cream flex items-center justify-center">
+        <Spinner size="lg" className="text-terracotta" />
       </div>
     );
   }
@@ -98,12 +98,12 @@ function QAPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F0E6]">
-      <header className="bg-surface border-b border-[#D4C8B8] shadow-sm">
+    <div className="min-h-screen bg-earth-cream">
+      <header className="bg-surface border-b border-earth-sand shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-4">
           <Link
             href="/chat"
-            className="flex items-center gap-1.5 text-sm text-[#5D7B93] hover:text-[var(--slate-blue-dark)] transition-colors"
+            className="flex items-center gap-1.5 text-sm text-slate-blue hover:text-slate-blue-dark transition-colors"
           >
             <ArrowLeft size={16} />
             Back to Chat
@@ -135,8 +135,8 @@ function QAPageContent() {
 export default function QAPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#F5F0E6] flex items-center justify-center">
-        <Spinner size="lg" className="text-[#C67B5C]" />
+      <div className="min-h-screen bg-earth-cream flex items-center justify-center">
+        <Spinner size="lg" className="text-terracotta" />
       </div>
     }>
       <QAPageContent />

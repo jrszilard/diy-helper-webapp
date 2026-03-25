@@ -36,10 +36,10 @@ export default function SharedReportPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F0E6]">
+      <div className="min-h-screen flex items-center justify-center bg-earth-cream">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-[#5D7B93] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-sm text-[#7D6B5D]">Loading shared report...</p>
+          <div className="w-8 h-8 border-2 border-slate-blue border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm text-earth-brown">Loading shared report...</p>
         </div>
       </div>
     );
@@ -47,15 +47,15 @@ export default function SharedReportPage() {
 
   if (error || !report) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F0E6]">
+      <div className="min-h-screen flex items-center justify-center bg-earth-cream">
         <div className="text-center max-w-md px-6">
-          <h1 className="text-xl font-bold text-[#3E2723] mb-2">Report Not Found</h1>
-          <p className="text-sm text-[#7D6B5D] mb-6">
+          <h1 className="text-xl font-bold text-foreground mb-2">Report Not Found</h1>
+          <p className="text-sm text-earth-brown mb-6">
             {error || 'This shared report link may have expired or been disabled.'}
           </p>
           <a
             href="/"
-            className="inline-block px-5 py-2.5 bg-[#C67B5C] text-white font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors"
+            className="inline-block px-5 py-2.5 bg-terracotta text-white font-semibold rounded-lg hover:bg-terracotta-dark transition-colors"
           >
             Create Your Own Project Plan
           </a>
@@ -65,7 +65,7 @@ export default function SharedReportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F0E6]">
+    <div className="min-h-screen bg-earth-cream">
       <ReportView
         report={report}
         onApplyToProject={() => {}}

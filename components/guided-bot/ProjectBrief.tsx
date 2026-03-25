@@ -24,7 +24,7 @@ const BUDGET_LABELS: Record<string, string> = {
 
 export default function ProjectBrief({ gathered, onEdit, onSubmit, isSubmitting }: ProjectBriefProps) {
   return (
-    <div className="bg-white border border-[#D4C8B8] rounded-xl overflow-hidden">
+    <div className="bg-white border border-earth-sand rounded-xl overflow-hidden">
       {/* Summary fields */}
       <div className="divide-y divide-[#E8E0D4]">
         <SummaryRow
@@ -73,7 +73,7 @@ export default function ProjectBrief({ gathered, onEdit, onSubmit, isSubmitting 
           className={`w-full py-3 rounded-xl text-base font-bold transition-all duration-200 flex items-center justify-center gap-2 ${
             isSubmitting
               ? 'bg-[#8B7D6B] text-white cursor-not-allowed'
-              : 'bg-[#C67B5C] text-white hover:bg-[#A65D3F] shadow-md hover:shadow-lg hover:-translate-y-0.5'
+              : 'bg-terracotta text-white hover:bg-terracotta-dark shadow-md hover:shadow-lg hover:-translate-y-0.5'
           }`}
         >
           {isSubmitting ? (
@@ -105,13 +105,13 @@ function SummaryRow({
     <div className="flex items-start justify-between gap-3 px-4 py-3">
       <div className="flex-1 min-w-0">
         <span className="block text-[10px] font-semibold text-[var(--warm-brown)] uppercase tracking-wider">{label}</span>
-        <span className={`block text-sm text-[#3E2723] mt-0.5 ${truncate ? 'line-clamp-2' : ''}`}>
+        <span className={`block text-sm text-foreground mt-0.5 ${truncate ? 'line-clamp-2' : ''}`}>
           {value}
         </span>
       </div>
       <button
         onClick={onEdit}
-        className="text-xs text-[#C67B5C] hover:text-[#A65D3F] font-medium flex-shrink-0 mt-1"
+        className="text-xs text-terracotta hover:text-terracotta-dark font-medium flex-shrink-0 mt-1"
       >
         Edit
       </button>

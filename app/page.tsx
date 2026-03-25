@@ -60,31 +60,31 @@ export default function LandingPage() {
       icon: BookOpen,
       title: "Building Codes",
       description: "Instant access to NEC, IRC, and local codes. No more searching through confusing documents.",
-      color: "from-[#C67B5C] to-[#A65D3F]"
+      color: "from-terracotta to-terracotta-dark"
     },
     {
       icon: Video,
       title: "Video Tutorials",
       description: "Curated tutorial videos for your specific project. Learn from the pros before you start.",
-      color: "from-[#B87333] to-[#8B5A2B]"
+      color: "from-copper to-[#8B5A2B]"
     },
     {
       icon: ShoppingCart,
       title: "Smart Shopping Lists",
       description: "Auto-generated materials lists with local store pricing. Never over-buy again.",
-      color: "from-[#4A7C59] to-[var(--forest-green-dark)]"
+      color: "from-forest-green to-forest-green-dark"
     },
     {
       icon: Package,
       title: "Tool Inventory",
       description: "Track what you own. We'll exclude items you already have from shopping lists.",
-      color: "from-[#5D7B93] to-[var(--slate-blue-dark)]"
+      color: "from-slate-blue to-slate-blue-dark"
     },
     {
       icon: MapPin,
       title: "Local Store Finder",
       description: "Find materials at Home Depot, Lowe's, and Ace Hardware near you with real-time pricing.",
-      color: "from-[#7D6B5D] to-[var(--warm-brown)]"
+      color: "from-earth-brown to-warm-brown"
     },
     {
       icon: Zap,
@@ -97,12 +97,12 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen blueprint-bg">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 backdrop-blur-xl bg-[var(--earth-brown-dark)]/95 border-b border-[var(--blueprint-grid-major)]">
+      <nav className="sticky top-0 z-50 backdrop-blur-xl bg-earth-brown-dark/95 border-b border-[var(--blueprint-grid-major)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <AppLogo variant="dark" />
             <div className="flex items-center gap-3">
-              <Button variant="ghost" href="/experts/register" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10">
+              <Button variant="ghost" href="/experts/register" className="text-earth-sand hover:text-white hover:bg-white/10">
                 Become an Expert
               </Button>
               <AuthButton user={user} variant="dark" isExpert={isExpert} externalShowAuth={showAuth} onAuthToggle={setShowAuth} />
@@ -129,9 +129,9 @@ export default function LandingPage() {
             <GuidedBot />
           </div>
           {/* Skip link */}
-          <p className="text-center mt-4 text-sm text-[var(--warm-brown)]">
+          <p className="text-center mt-4 text-sm text-warm-brown">
             Already know what you need?{' '}
-            <Link href="/chat" className="text-[#C67B5C] hover:underline">
+            <Link href="/chat" className="text-terracotta hover:underline">
               Skip to full chat →
             </Link>
           </p>
@@ -141,25 +141,25 @@ export default function LandingPage() {
       {/* Social Proof Bar */}
       <section className="py-4 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
-          <div className="bg-surface rounded-2xl py-6 px-8 shadow-lg border border-[#E8DFD0]">
-            <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-12 text-[#7D6B5D]">
+          <div className="bg-surface rounded-2xl py-6 px-8 shadow-lg border border-earth-tan">
+            <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-12 text-earth-brown">
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-[#3E2723]">Free</span>
+                <span className="text-2xl font-bold text-foreground">Free</span>
                 <span className="text-sm">to use</span>
               </div>
-              <div className="h-8 w-px bg-[#D4C8B8] hidden sm:block" />
+              <div className="h-8 w-px bg-earth-sand hidden sm:block" />
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-[#3E2723]">Instant</span>
+                <span className="text-2xl font-bold text-foreground">Instant</span>
                 <span className="text-sm">answers</span>
               </div>
-              <div className="h-8 w-px bg-[#D4C8B8] hidden sm:block" />
+              <div className="h-8 w-px bg-earth-sand hidden sm:block" />
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-[#3E2723]">No signup</span>
+                <span className="text-2xl font-bold text-foreground">No signup</span>
                 <span className="text-sm">required</span>
               </div>
-              <div className="h-8 w-px bg-[#D4C8B8] hidden sm:block" />
+              <div className="h-8 w-px bg-earth-sand hidden sm:block" />
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-[#3E2723]">Verified</span>
+                <span className="text-2xl font-bold text-foreground">Verified</span>
                 <span className="text-sm">experts</span>
               </div>
             </div>
@@ -172,29 +172,29 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <div className="content-card">
             <div className="text-center mb-12">
-              <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
                 One platform, two ways to win
               </h2>
-              <p className="text-lg text-[var(--warm-brown)] max-w-2xl mx-auto">
+              <p className="text-lg text-warm-brown max-w-2xl mx-auto">
                 Whether you&apos;re tackling a project or sharing your trade knowledge
               </p>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-6">
               {/* For Homeowners */}
-              <div className="bg-white rounded-2xl p-6 border border-[#E8DFD0] hover:border-[#C67B5C] transition-all duration-300 hover:shadow-lg">
-                <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-[#5D7B93] to-[var(--slate-blue-dark)] mb-4 shadow-lg">
+              <div className="bg-white rounded-2xl p-6 border border-earth-tan hover:border-terracotta transition-all duration-300 hover:shadow-lg">
+                <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-slate-blue to-slate-blue-dark mb-4 shadow-lg">
                   <Home className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-[#3E2723] mb-4">Get your project done right</h3>
+                <h3 className="text-xl font-bold text-foreground mb-4">Get your project done right</h3>
                 <ul className="space-y-3 mb-6">
                   {[
                     'AI-powered project plans with local building codes',
                     'Smart shopping lists with real store prices',
                     'Expert help when you get stuck',
                   ].map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm text-[var(--warm-brown)]">
-                      <CheckCircle className="w-4 h-4 text-[#4A7C59] mt-0.5 flex-shrink-0" />
+                    <li key={idx} className="flex items-start gap-2 text-sm text-warm-brown">
+                      <CheckCircle className="w-4 h-4 text-forest-green mt-0.5 flex-shrink-0" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -205,26 +205,26 @@ export default function LandingPage() {
               </div>
 
               {/* For Trade Professionals */}
-              <div className="bg-white rounded-2xl p-6 border border-[#E8DFD0] hover:border-[var(--gold)] transition-all duration-300 hover:shadow-lg">
-                <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] mb-4 shadow-lg">
+              <div className="bg-white rounded-2xl p-6 border border-earth-tan hover:border-gold transition-all duration-300 hover:shadow-lg">
+                <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-gold to-gold-dark mb-4 shadow-lg">
                   <Award className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-[#3E2723] mb-4">Turn your expertise into income</h3>
+                <h3 className="text-xl font-bold text-foreground mb-4">Turn your expertise into income</h3>
                 <ul className="space-y-3 mb-6">
                   {[
                     'Answer DIY questions and get paid per response',
                     'Set your own rates and schedule',
                     'Build your reputation with verified reviews',
                   ].map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm text-[var(--warm-brown)]">
-                      <CheckCircle className="w-4 h-4 text-[#4A7C59] mt-0.5 flex-shrink-0" />
+                    <li key={idx} className="flex items-start gap-2 text-sm text-warm-brown">
+                      <CheckCircle className="w-4 h-4 text-forest-green mt-0.5 flex-shrink-0" />
                       <span>{item}</span>
                     </li>
                   ))}
                 </ul>
                 <Link
                   href="/experts/register"
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--gold)] to-[var(--gold-dark)] text-white px-5 py-2.5 rounded-xl hover:from-[var(--gold-dark)] hover:to-[#B8860B] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-gold to-gold-dark text-white px-5 py-2.5 rounded-xl hover:from-gold-dark hover:to-[#B8860B] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
                 >
                   <span>Start Earning</span>
                   <ArrowRight className="w-4 h-4" />
@@ -244,13 +244,13 @@ export default function LandingPage() {
           <div className="content-card">
             <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 mb-4">
-                <Ruler className="w-5 h-5 text-[#5D7B93]" />
-                <span className="text-sm font-medium text-[#5D7B93] uppercase tracking-wider">Features</span>
+                <Ruler className="w-5 h-5 text-slate-blue" />
+                <span className="text-sm font-medium text-slate-blue uppercase tracking-wider">Features</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
                 Everything you need to DIY with confidence
               </h2>
-              <p className="text-lg text-[var(--warm-brown)] max-w-2xl mx-auto">
+              <p className="text-lg text-warm-brown max-w-2xl mx-auto">
                 From planning to purchasing, we&apos;ve got you covered
               </p>
             </div>
@@ -259,15 +259,15 @@ export default function LandingPage() {
               {features.map((feature, idx) => (
                 <div
                   key={idx}
-                  className="group relative bg-white rounded-2xl p-6 border border-[#E8DFD0] hover:border-[#C67B5C] transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                  className="group relative bg-white rounded-2xl p-6 border border-earth-tan hover:border-terracotta transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
                 >
                   <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${feature.color} mb-4 shadow-lg`}>
                     <feature.icon className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-lg font-bold text-[#3E2723] mb-2">
+                  <h3 className="text-lg font-bold text-foreground mb-2">
                     {feature.title}
                   </h3>
-                  <p className="text-[var(--warm-brown)] text-sm leading-relaxed">
+                  <p className="text-warm-brown text-sm leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -278,7 +278,7 @@ export default function LandingPage() {
       </section>
 
       {/* Demo Conversation Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#4A3F35] text-white relative overflow-hidden">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-earth-brown-dark text-white relative overflow-hidden">
         {/* Blueprint pattern overlay */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
@@ -295,44 +295,44 @@ export default function LandingPage() {
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
               See how it works
             </h2>
-            <p className="text-[#D4C8B8] text-lg">
+            <p className="text-earth-sand text-lg">
               A real conversation with DIY Helper
             </p>
           </div>
 
           {/* Chat Demo */}
-          <div className="bg-[#3E3530]/50 rounded-2xl p-6 sm:p-8 border border-[var(--warm-brown)]">
+          <div className="bg-[#3E3530]/50 rounded-2xl p-6 sm:p-8 border border-warm-brown">
             <div className="space-y-6">
               {/* User message */}
               <div className="flex justify-end">
-                <div className="bg-[#C67B5C] text-white rounded-2xl rounded-br-md px-5 py-3 max-w-[85%]">
+                <div className="bg-terracotta text-white rounded-2xl rounded-br-md px-5 py-3 max-w-[85%]">
                   <p>What size wire do I need for a 20-amp kitchen circuit that&apos;s 35 feet from the panel?</p>
                 </div>
               </div>
 
               {/* Assistant message */}
               <div className="flex justify-start">
-                <div className="bg-[var(--warm-brown)] rounded-2xl rounded-bl-md px-5 py-4 max-w-[90%]">
-                  <p className="mb-4">For a 20-amp circuit at 35 feet, you&apos;ll need <span className="text-[#C67B5C] font-semibold">12-gauge wire</span> per NEC 210.19.</p>
+                <div className="bg-warm-brown rounded-2xl rounded-bl-md px-5 py-4 max-w-[90%]">
+                  <p className="mb-4">For a 20-amp circuit at 35 feet, you&apos;ll need <span className="text-terracotta font-semibold">12-gauge wire</span> per NEC 210.19.</p>
 
                   {/* Product card */}
-                  <div className="bg-[#4A3F35]/50 rounded-xl p-4 border border-[#6B5D4F]">
+                  <div className="bg-earth-brown-dark/50 rounded-xl p-4 border border-[#6B5D4F]">
                     <div className="flex items-start gap-4">
                       <div className="w-16 h-16 bg-[#6B5D4F] rounded-lg flex items-center justify-center text-2xl flex-shrink-0">
                         🔌
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-white">Southwire 250ft 12/2 NM-B Romex</p>
-                        <p className="text-sm text-[#A89880] mt-1">Copper with Ground • In Stock</p>
+                        <p className="text-sm text-earth-brown-light mt-1">Copper with Ground • In Stock</p>
                         <div className="flex items-center gap-3 mt-2">
-                          <span className="text-[#C67B5C] font-bold text-lg">$87.43</span>
-                          <span className="text-xs text-[#A89880] bg-[var(--warm-brown)] px-2 py-1 rounded">Home Depot</span>
+                          <span className="text-terracotta font-bold text-lg">$87.43</span>
+                          <span className="text-xs text-earth-brown-light bg-warm-brown px-2 py-1 rounded">Home Depot</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <p className="mt-4 text-[#D4C8B8] text-sm">
+                  <p className="mt-4 text-earth-sand text-sm">
                     Would you like me to add this to your shopping list, or see some installation videos first?
                   </p>
                 </div>
@@ -340,9 +340,9 @@ export default function LandingPage() {
             </div>
 
             {/* Demo input (non-functional, just for show) */}
-            <div className="mt-6 pt-6 border-t border-[var(--warm-brown)]">
+            <div className="mt-6 pt-6 border-t border-warm-brown">
               <div
-                className="bg-[var(--warm-brown)]/50 rounded-xl px-5 py-4 text-[#A89880] cursor-pointer hover:bg-[var(--warm-brown)] transition-colors"
+                className="bg-warm-brown/50 rounded-xl px-5 py-4 text-earth-brown-light cursor-pointer hover:bg-warm-brown transition-colors"
                 onClick={() => router.push('/chat')}
               >
                 Try asking your own question...
@@ -358,13 +358,13 @@ export default function LandingPage() {
           <div className="content-card">
             <div className="text-center mb-10">
               <div className="inline-flex items-center gap-2 mb-4">
-                <Award className="w-5 h-5 text-[var(--gold-dark)]" />
-                <span className="text-sm font-medium text-[var(--gold-dark)] uppercase tracking-wider">Expert Spotlight</span>
+                <Award className="w-5 h-5 text-gold-dark" />
+                <span className="text-sm font-medium text-gold-dark uppercase tracking-wider">Expert Spotlight</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
                 Experts on DIY Helper
               </h2>
-              <p className="text-lg text-[var(--warm-brown)]">
+              <p className="text-lg text-warm-brown">
                 Real professionals. Real earnings.
               </p>
             </div>
@@ -392,28 +392,28 @@ export default function LandingPage() {
                   reviews: '32',
                 },
               ].map((expert, idx) => (
-                <div key={idx} className="bg-white rounded-2xl p-6 border border-[#E8DFD0]">
+                <div key={idx} className="bg-white rounded-2xl p-6 border border-earth-tan">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center text-white font-bold text-lg">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center text-white font-bold text-lg">
                       {expert.name[0]}
                     </div>
                     <div>
-                      <p className="font-bold text-[#3E2723]">{expert.name}</p>
-                      <p className="text-sm text-[#7D6B5D]">{expert.trade} · {expert.location}</p>
+                      <p className="font-bold text-foreground">{expert.name}</p>
+                      <p className="text-sm text-earth-brown">{expert.trade} · {expert.location}</p>
                     </div>
                   </div>
-                  <p className="text-sm text-[var(--warm-brown)] italic mb-4 leading-relaxed">
+                  <p className="text-sm text-warm-brown italic mb-4 leading-relaxed">
                     &ldquo;{expert.quote}&rdquo;
                   </p>
-                  <div className="flex items-center gap-4 pt-4 border-t border-[#E8DFD0]">
+                  <div className="flex items-center gap-4 pt-4 border-t border-earth-tan">
                     <div>
-                      <span className="text-xl font-bold text-[#3E2723]">{expert.earnings}</span>
-                      <span className="text-sm text-[#7D6B5D]">{expert.period}</span>
+                      <span className="text-xl font-bold text-foreground">{expert.earnings}</span>
+                      <span className="text-sm text-earth-brown">{expert.period}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 text-[var(--gold-dark)] fill-[var(--gold-dark)]" />
-                      <span className="font-bold text-[#3E2723]">{expert.rating}</span>
-                      <span className="text-sm text-[#7D6B5D]">({expert.reviews} reviews)</span>
+                      <Star className="w-4 h-4 text-gold-dark fill-gold-dark" />
+                      <span className="font-bold text-foreground">{expert.rating}</span>
+                      <span className="text-sm text-earth-brown">({expert.reviews} reviews)</span>
                     </div>
                   </div>
                 </div>
@@ -423,12 +423,12 @@ export default function LandingPage() {
             <div className="text-center">
               <Link
                 href="/experts/register"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--gold)] to-[var(--gold-dark)] text-white px-6 py-3 rounded-xl hover:from-[var(--gold-dark)] hover:to-[#B8860B] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-gold to-gold-dark text-white px-6 py-3 rounded-xl hover:from-gold-dark hover:to-[#B8860B] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
               >
                 <span>Become an Expert</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <p className="mt-3 text-sm text-[#7D6B5D]">
+              <p className="mt-3 text-sm text-earth-brown">
                 Free to join — start earning within days
               </p>
             </div>
@@ -441,10 +441,10 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="content-card">
             <div className="text-center mb-12">
-              <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
                 Popular Project Templates
               </h2>
-              <p className="text-lg text-[var(--warm-brown)] max-w-2xl mx-auto">
+              <p className="text-lg text-warm-brown max-w-2xl mx-auto">
                 Get started quickly with step-by-step guidance for common DIY projects
               </p>
             </div>
@@ -456,7 +456,7 @@ export default function LandingPage() {
       {/* Final CTA — Dual */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
-          <div className="relative bg-gradient-to-br from-[#C67B5C] via-[#B8593B] to-[#A65D3F] rounded-3xl p-8 sm:p-12 text-center text-white overflow-hidden">
+          <div className="relative bg-gradient-to-br from-terracotta via-rust to-terracotta-dark rounded-3xl p-8 sm:p-12 text-center text-white overflow-hidden">
             {/* Blueprint grid overlay */}
             <div className="absolute inset-0 opacity-10" style={{
               backgroundImage: `
@@ -480,7 +480,7 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   href="/chat"
-                  className="inline-flex items-center gap-3 bg-white text-[#3E2723] px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#F5F0E6] transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-3 bg-white text-foreground px-8 py-4 rounded-xl font-bold text-lg hover:bg-earth-cream transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
                 >
                   <span>Start My Project</span>
                   <ArrowRight className="w-5 h-5" />
@@ -501,10 +501,10 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-surface rounded-2xl py-6 px-8 shadow-lg border border-[#E8DFD0]">
+          <div className="bg-surface rounded-2xl py-6 px-8 shadow-lg border border-earth-tan">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <AppLogo />
-              <p className="text-sm text-[var(--warm-brown)]">
+              <p className="text-sm text-warm-brown">
                 Built for DIYers and the pros who help them. Powered by Claude AI.
               </p>
             </div>

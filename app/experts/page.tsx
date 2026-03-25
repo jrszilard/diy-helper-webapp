@@ -55,18 +55,18 @@ export default function ExpertsBrowsePage() {
   }, [fetchExperts]);
 
   return (
-    <div className="min-h-screen bg-[#F5F0E6]">
-      <header className="bg-surface border-b border-[#D4C8B8] shadow-sm">
+    <div className="min-h-screen bg-earth-cream">
+      <header className="bg-surface border-b border-earth-sand shadow-sm">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="bg-gradient-to-br from-[#C67B5C] to-[#A65D3F] p-1.5 rounded-lg">
+            <div className="bg-gradient-to-br from-terracotta to-terracotta-dark p-1.5 rounded-lg">
               <Wrench className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-[#3E2723]">DIY Helper</span>
+            <span className="text-lg font-bold text-foreground">DIY Helper</span>
           </Link>
           <Link
             href="/experts/register"
-            className="text-sm font-medium text-[#5D7B93] hover:text-[var(--slate-blue-dark)] transition-colors"
+            className="text-sm font-medium text-slate-blue hover:text-slate-blue-dark transition-colors"
           >
             Become an Expert
           </Link>
@@ -75,8 +75,8 @@ export default function ExpertsBrowsePage() {
 
       <main className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-6">
-          <Users size={24} className="text-[#5D7B93]" />
-          <h1 className="text-2xl font-bold text-[#3E2723]">Find an Expert</h1>
+          <Users size={24} className="text-slate-blue" />
+          <h1 className="text-2xl font-bold text-foreground">Find an Expert</h1>
         </div>
 
         <div className="mb-6">
@@ -85,19 +85,19 @@ export default function ExpertsBrowsePage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Spinner size="lg" className="text-[#C67B5C]" />
+            <Spinner size="lg" className="text-terracotta" />
           </div>
         ) : error ? (
           <div className="text-center py-12">
-            <p className="text-sm text-[#B8593B] mb-3">Something went wrong loading experts.</p>
-            <button onClick={fetchExperts} className="text-sm font-medium text-[#5D7B93] hover:underline">
+            <p className="text-sm text-rust mb-3">Something went wrong loading experts.</p>
+            <button onClick={fetchExperts} className="text-sm font-medium text-slate-blue hover:underline">
               Try again
             </button>
           </div>
         ) : experts.length === 0 ? (
           <div className="text-center py-12">
-            <Users size={40} className="mx-auto text-[#D4C8B8] mb-3" />
-            <p className="text-sm text-[#7D6B5D]">No experts found matching your criteria</p>
+            <Users size={40} className="mx-auto text-earth-sand mb-3" />
+            <p className="text-sm text-earth-brown">No experts found matching your criteria</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

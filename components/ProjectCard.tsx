@@ -50,8 +50,8 @@ export default function ProjectCard({
         onClick={onSelect}
         className={`relative p-4 rounded-xl cursor-pointer transition active:scale-[0.98] ${
           isSelected
-            ? 'bg-[var(--status-progress-bg)] border-2 border-[#C67B5C]'
-            : 'bg-surface border-2 border-transparent active:bg-[#F5F0E6]'
+            ? 'bg-[var(--status-progress-bg)] border-2 border-terracotta'
+            : 'bg-surface border-2 border-transparent active:bg-earth-cream'
         }`}
       >
         <div className="flex items-start justify-between gap-3">
@@ -69,18 +69,18 @@ export default function ProjectCard({
             ) : (
               <>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[#5D7B93]">{categoryIcon}</span>
-                  <span className="font-semibold text-base truncate text-[#3E2723]">{project.name}</span>
+                  <span className="text-slate-blue">{categoryIcon}</span>
+                  <span className="font-semibold text-base truncate text-foreground">{project.name}</span>
                 </div>
                 {project.description && (
-                  <p className="text-sm text-[#7D6B5D] line-clamp-2 ml-6">{project.description}</p>
+                  <p className="text-sm text-earth-brown line-clamp-2 ml-6">{project.description}</p>
                 )}
               </>
             )}
             <div className="flex items-center gap-2 mt-2 ml-6 flex-wrap">
               {project.isGuest && <GuestBadge />}
               <StatusBadge status={project.status} />
-              <span className="text-xs text-[#A89880]">
+              <span className="text-xs text-earth-brown-light">
                 {new Date(project.created_at).toLocaleDateString()}
               </span>
             </div>
@@ -93,7 +93,7 @@ export default function ProjectCard({
                 title="Edit project"
                 aria-label="Edit project"
               >
-                <Edit2 className="w-5 h-5 text-[#5D7B93]" />
+                <Edit2 className="w-5 h-5 text-slate-blue" />
               </button>
             )}
             <button
@@ -102,7 +102,7 @@ export default function ProjectCard({
               title="Delete project"
               aria-label="Delete project"
             >
-              <Trash2 className="w-5 h-5 text-[#B8593B]" />
+              <Trash2 className="w-5 h-5 text-rust" />
             </button>
           </div>
         </div>
@@ -116,8 +116,8 @@ export default function ProjectCard({
       onClick={onSelect}
       className={`group relative p-3 rounded-lg cursor-pointer transition ${
         isSelected
-          ? 'bg-[var(--status-progress-bg)] border-2 border-[#C67B5C]'
-          : 'bg-[#F5F0E6] hover:bg-[#E8DFD0] border-2 border-transparent'
+          ? 'bg-[var(--status-progress-bg)] border-2 border-terracotta'
+          : 'bg-earth-cream hover:bg-earth-tan border-2 border-transparent'
       }`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -133,17 +133,17 @@ export default function ProjectCard({
             />
           ) : (
             <>
-              <span className="font-semibold text-sm text-[#3E2723] block truncate">
+              <span className="font-semibold text-sm text-foreground block truncate">
                 {project.name}
               </span>
               {project.description && (
-                <p className="text-xs text-[#7D6B5D] line-clamp-1 mt-0.5">{project.description}</p>
+                <p className="text-xs text-earth-brown line-clamp-1 mt-0.5">{project.description}</p>
               )}
             </>
           )}
           <div className="flex items-center gap-1 mt-1 flex-wrap">
             {project.isGuest && (
-              <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-[#F5F0E6] text-[#7D6B5D]">
+              <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-earth-cream text-earth-brown">
                 <User className="w-2.5 h-2.5" />
                 Local
               </span>
@@ -159,7 +159,7 @@ export default function ProjectCard({
               title="Edit project"
               aria-label="Edit project"
             >
-              <Edit2 className="w-4 h-4 text-[#5D7B93]" />
+              <Edit2 className="w-4 h-4 text-slate-blue" />
             </button>
           )}
           <button
@@ -168,7 +168,7 @@ export default function ProjectCard({
             title="Delete project"
             aria-label="Delete project"
           >
-            <Trash2 className="w-4 h-4 text-[#B8593B]" />
+            <Trash2 className="w-4 h-4 text-rust" />
           </button>
         </div>
       </div>
@@ -178,7 +178,7 @@ export default function ProjectCard({
 
 function GuestBadge() {
   return (
-    <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[#F5F0E6] text-[#7D6B5D]">
+    <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-earth-cream text-earth-brown">
       <User className="w-3 h-3" />
       Local
     </span>

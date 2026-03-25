@@ -85,7 +85,7 @@ export default function TierUpgradeModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#C67B5C] to-[#A65D3F] px-6 py-4 text-white">
+        <div className="bg-gradient-to-r from-terracotta to-terracotta-dark px-6 py-4 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ArrowUpCircle size={20} />
@@ -103,8 +103,8 @@ export default function TierUpgradeModal({
         {/* Body */}
         <div className="px-6 py-5 space-y-4">
           {/* Context */}
-          <div className="bg-[#F5F0E6] rounded-lg p-3">
-            <p className="text-sm text-[#3E2723]">
+          <div className="bg-earth-cream rounded-lg p-3">
+            <p className="text-sm text-foreground">
               Your conversation has grown deeper with <span className="font-semibold">{diyerMessageCount} follow-up messages</span>.
               Upgrade to keep the dialogue going.
             </p>
@@ -112,30 +112,30 @@ export default function TierUpgradeModal({
 
           {/* What you get */}
           <div>
-            <p className="text-xs font-semibold text-[#7D6B5D] uppercase tracking-wide mb-2">
+            <p className="text-xs font-semibold text-earth-brown uppercase tracking-wide mb-2">
               What you get with {upgradeDescription}
             </p>
             <ul className="space-y-2">
               {benefits.map((benefit, i) => (
                 <li key={i} className="flex items-start gap-2">
-                  <CheckCircle size={14} className="text-[#4A7C59] mt-0.5 flex-shrink-0" />
-                  <span className="text-sm text-[#3E2723]">{benefit}</span>
+                  <CheckCircle size={14} className="text-forest-green mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-foreground">{benefit}</span>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Value comparison */}
-          <div className="flex items-center justify-between bg-[#4A7C59]/5 rounded-lg px-3 py-2">
-            <span className="text-xs text-[#7D6B5D]">A follow-up service call would cost</span>
-            <span className="text-sm font-medium text-[#7D6B5D] line-through">$75-150</span>
+          <div className="flex items-center justify-between bg-forest-green/5 rounded-lg px-3 py-2">
+            <span className="text-xs text-earth-brown">A follow-up service call would cost</span>
+            <span className="text-sm font-medium text-earth-brown line-through">$75-150</span>
           </div>
 
           {/* Price */}
           <div className="text-center">
             <div className="inline-flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-[#3E2723]">${(upgradeCostCents / 100).toFixed(0)}</span>
-              <span className="text-sm text-[#7D6B5D]">one-time</span>
+              <span className="text-3xl font-bold text-foreground">${(upgradeCostCents / 100).toFixed(0)}</span>
+              <span className="text-sm text-earth-brown">one-time</span>
             </div>
             <p className="text-xs text-[var(--muted)] mt-1">
               Tier {currentTier} &rarr; Tier {nextTier} &middot; Same payment method
@@ -152,7 +152,7 @@ export default function TierUpgradeModal({
           <button
             onClick={handleUpgrade}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#C67B5C] text-white font-semibold rounded-lg hover:bg-[#A65D3F] transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-terracotta text-white font-semibold rounded-lg hover:bg-terracotta-dark transition-colors disabled:opacity-50"
           >
             {loading ? (
               <Spinner size="sm" />
@@ -164,7 +164,7 @@ export default function TierUpgradeModal({
           <button
             onClick={onDecline}
             disabled={loading}
-            className="w-full px-4 py-2 text-sm text-[#7D6B5D] hover:text-[#3E2723] transition-colors disabled:opacity-50"
+            className="w-full px-4 py-2 text-sm text-earth-brown hover:text-foreground transition-colors disabled:opacity-50"
           >
             No thanks, I&apos;m satisfied with the current answers
           </button>

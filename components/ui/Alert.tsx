@@ -26,11 +26,11 @@ const variantConfig: Record<AlertVariant, {
     bodyClass:  'text-[var(--earth-brown)]',
   },
   warning: {
-    container: 'bg-amber-50 border border-amber-200',
+    container: 'bg-[var(--warning-bg)] border border-[var(--warning-border)]',
     icon: AlertTriangle,
-    iconClass: 'text-amber-600',
-    titleClass: 'text-amber-800',
-    bodyClass:  'text-amber-700',
+    iconClass: 'text-[var(--warning)]',
+    titleClass: 'text-[var(--warning-dark)]',
+    bodyClass:  'text-[var(--warning)]',
   },
   error: {
     container: 'bg-[var(--rust)]/8 border border-[var(--rust)]/20',

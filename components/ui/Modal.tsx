@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -21,6 +21,8 @@ interface ModalProps {
   className?: string;
 }
 
+const FOCUSABLE = 'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export default function Modal({
   isOpen,
   onClose,
@@ -30,9 +32,39 @@ export default function Modal({
   size = 'md',
   className,
 }: ModalProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!isOpen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+
+    // Auto-focus the first focusable element inside the modal
+    requestAnimationFrame(() => {
+      const el = panelRef.current?.querySelector<HTMLElement>(FOCUSABLE);
+      el?.focus();
+    });
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+
+      // Focus trap: keep Tab cycling within the modal
+      if (e.key === 'Tab' && panelRef.current) {
+        const nodes = panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE);
+        if (nodes.length === 0) return;
+        const first = nodes[0];
+        const last = nodes[nodes.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [isOpen, onClose]);
@@ -44,6 +76,10 @@ export default function Modal({
       <div className="fixed inset-0 bg-[var(--foreground)]/50 z-50 flex justify-end">
         <div className="absolute inset-0" onClick={onClose} />
         <div
+          ref={panelRef}
+          role="dialog"
+          aria-modal={true}
+          aria-label={title}
           className={cn(
             'relative w-full max-w-md bg-surface h-full overflow-hidden flex flex-col shadow-xl animate-slide-in-right',
             className,
@@ -71,13 +107,15 @@ export default function Modal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-[var(--foreground)]/50" onClick={onClose} />
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal={true}
+        aria-label={title}
         className={cn(
           'relative bg-surface rounded-xl shadow-2xl w-full border border-[var(--earth-sand)]',
           sizeClasses[size],
           className,
         )}
-        role="dialog"
-        aria-modal="true"
       >
         {title && (
           <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-[var(--earth-sand)]">

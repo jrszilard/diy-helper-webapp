@@ -48,7 +48,7 @@ export default function MessageList({ threads, basePath }: MessageListProps) {
   }
 
   return (
-    <div className="divide-y divide-[#D4C8B8]">
+    <div className="divide-y divide-earth-sand">
       {threads.map(thread => {
         const hasAttachments = thread.lastMessage.attachments && thread.lastMessage.attachments.length > 0;
         const preview = thread.lastMessage.content
@@ -61,25 +61,25 @@ export default function MessageList({ threads, basePath }: MessageListProps) {
           <Link
             key={thread.id}
             href={`${basePath}/${thread.id}`}
-            className="flex items-center gap-3 px-4 py-3 hover:bg-[#E8DFD0]/50 transition-colors"
+            className="flex items-center gap-3 px-4 py-3 hover:bg-earth-tan/50 transition-colors"
           >
-            <div className="w-10 h-10 bg-[#5D7B93]/10 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-sm font-bold text-[#5D7B93]">
+            <div className="w-10 h-10 bg-slate-blue/10 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-sm font-bold text-slate-blue">
                 {thread.otherUserName.charAt(0).toUpperCase()}
               </span>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-[#3E2723]">{thread.otherUserName}</span>
+                <span className="text-sm font-semibold text-foreground">{thread.otherUserName}</span>
                 <span className="text-xs text-[var(--muted)]">{formatTimeAgo(thread.lastMessage.createdAt)}</span>
               </div>
-              <p className="text-xs text-[#7D6B5D] truncate mt-0.5 flex items-center gap-1">
+              <p className="text-xs text-earth-brown truncate mt-0.5 flex items-center gap-1">
                 {hasAttachments && <Paperclip size={10} className="flex-shrink-0" />}
                 {preview}
               </p>
             </div>
             {thread.unreadCount > 0 && (
-              <span className="w-5 h-5 bg-[#C67B5C] text-white text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="w-5 h-5 bg-terracotta text-white text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0">
                 {thread.unreadCount}
               </span>
             )}

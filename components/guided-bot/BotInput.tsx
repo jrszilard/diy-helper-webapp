@@ -42,7 +42,7 @@ export default function BotInput({ phase, onSend, disabled = false }: BotInputPr
   }, [text, disabled, onSend]);
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2 p-3 bg-surface border-t border-[#D4C8B8]">
+    <form onSubmit={handleSubmit} className="flex items-center gap-2 p-3 bg-surface border-t border-earth-sand">
       <input
         type="text"
         value={text}
@@ -50,7 +50,7 @@ export default function BotInput({ phase, onSend, disabled = false }: BotInputPr
         onKeyDown={handleKeyDown}
         placeholder={PLACEHOLDERS[phase]}
         disabled={disabled}
-        className="flex-1 px-4 py-3 text-sm text-[#3E2723] placeholder-[#7D6B5D] bg-white border border-[#D4C8B8] rounded-xl focus:outline-none focus:border-[#C67B5C] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex-1 px-4 py-3 text-sm text-foreground placeholder-earth-brown bg-white border border-earth-sand rounded-xl focus:outline-none focus:border-terracotta disabled:opacity-50 disabled:cursor-not-allowed"
       />
       <button
         type="submit"
@@ -58,8 +58,8 @@ export default function BotInput({ phase, onSend, disabled = false }: BotInputPr
         aria-label="Send message"
         className={`p-3 rounded-xl transition-all duration-200 ${
           text.trim() && !disabled
-            ? 'bg-[#C67B5C] text-white shadow-sm hover:bg-[#A65D3F]'
-            : 'bg-[#E8DFD0] text-[#7D6B5D] cursor-not-allowed'
+            ? 'bg-terracotta text-white shadow-sm hover:bg-terracotta-dark'
+            : 'bg-earth-tan text-earth-brown cursor-not-allowed'
         }`}
       >
         <Send className="w-4 h-4" />

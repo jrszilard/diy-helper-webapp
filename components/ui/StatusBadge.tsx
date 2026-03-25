@@ -11,7 +11,7 @@ const statusConfig: Record<ProjectStatus, {
 }> = {
   research:      { bg: 'bg-[var(--status-research-bg)]', text: 'text-[var(--slate-blue)]',    label: 'Research',       icon: <FlaskConical className="w-3 h-3" /> },
   in_progress:   { bg: 'bg-[var(--status-progress-bg)]', text: 'text-[var(--terracotta)]',    label: 'In Progress',    icon: <Clock className="w-3 h-3" /> },
-  waiting_parts: { bg: 'bg-[#F3EDF5]', text: 'text-[var(--status-waiting)]',label: 'Waiting Parts',  icon: <Package className="w-3 h-3" /> },
+  waiting_parts: { bg: 'bg-[var(--status-waiting-bg)]', text: 'text-[var(--status-waiting)]', label: 'Waiting Parts',  icon: <Package className="w-3 h-3" /> },
   completed:     { bg: 'bg-[var(--status-complete-bg)]', text: 'text-[var(--forest-green)]',  label: 'Completed',      icon: <CheckCircle2 className="w-3 h-3" /> },
 };
 

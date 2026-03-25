@@ -80,9 +80,9 @@ export default function Button({
   );
 
   if ('href' in props && props.href) {
-    const { href, target, rel, ...rest } = props as AsLink;
+    const { href, target, rel } = props as AsLink;
     return (
-      <Link href={href} target={target} rel={rel} className={classes} {...(rest as object)}>
+      <Link href={href} target={target} rel={rel} className={classes}>
         {content}
       </Link>
     );

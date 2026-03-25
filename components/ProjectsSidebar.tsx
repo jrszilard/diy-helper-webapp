@@ -201,14 +201,14 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
 
       <button
         onClick={() => setShowFilters(!showFilters)}
-        className={`flex items-center gap-${isMobile ? '2' : '1'} text-${isMobile ? 'sm' : 'xs'} font-medium ${hasActiveFilters ? 'text-[#5D7B93]' : 'text-[#7D6B5D]'}`}
+        className={`flex items-center gap-${isMobile ? '2' : '1'} text-${isMobile ? 'sm' : 'xs'} font-medium ${hasActiveFilters ? 'text-slate-blue' : 'text-earth-brown'}`}
         aria-label="Toggle filters"
         aria-expanded={showFilters}
       >
         <Filter className={`w-${isMobile ? '4' : '3'} h-${isMobile ? '4' : '3'}`} />
         Filters
         {hasActiveFilters && (
-          <span className={`bg-[#5D7B93] text-white text-xs px-1${isMobile ? '.5 py-0.5' : ''} rounded-full ${isMobile ? '' : 'ml-1'}`}>
+          <span className={`bg-slate-blue text-white text-xs px-1${isMobile ? '.5 py-0.5' : ''} rounded-full ${isMobile ? '' : 'ml-1'}`}>
             {isMobile ? '2' : '!'}
           </span>
         )}
@@ -277,7 +277,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
   if (isMobile) {
     return (
       <div className="flex-1 overflow-y-auto">
-        <div className="p-4 space-y-3 bg-surface border-b border-[#D4C8B8] sticky top-0 z-10">
+        <div className="p-4 space-y-3 bg-surface border-b border-earth-sand sticky top-0 z-10">
           {searchAndFilters}
         </div>
         <div className="p-4 space-y-3">
@@ -289,13 +289,13 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
 
   // Desktop view
   return (
-    <div className="w-64 bg-surface border-r border-[#D4C8B8] flex flex-col h-full">
-      <div className="p-4 border-b border-[#D4C8B8]">
-        <h2 className="font-bold text-lg text-[#3E2723]">My Projects</h2>
-        <p className="text-xs text-[#7D6B5D] mt-1">Saved conversations</p>
+    <div className="w-64 bg-surface border-r border-earth-sand flex flex-col h-full">
+      <div className="p-4 border-b border-earth-sand">
+        <h2 className="font-bold text-lg text-foreground">My Projects</h2>
+        <p className="text-xs text-earth-brown mt-1">Saved conversations</p>
       </div>
 
-      <div className="p-3 border-b border-[#D4C8B8]">
+      <div className="p-3 border-b border-earth-sand">
         {searchAndFilters}
       </div>
 
@@ -303,10 +303,10 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
         {Object.keys(groupedProjects).length === 0 ? emptyState : (
           Object.entries(groupedProjects).map(([category, categoryProjects]) => (
             <div key={category}>
-              <div className="flex items-center gap-2 text-xs font-semibold text-[#7D6B5D] uppercase tracking-wide mb-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-earth-brown uppercase tracking-wide mb-2">
                 {getCategoryIcon(category)}
                 <span>{category}</span>
-                <span className="text-[#A89880]">({categoryProjects.length})</span>
+                <span className="text-earth-brown-light">({categoryProjects.length})</span>
               </div>
               <div className="space-y-2">
                 {categoryProjects.map(renderProjectCard)}
