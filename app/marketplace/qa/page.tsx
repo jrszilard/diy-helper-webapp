@@ -18,24 +18,6 @@ function QAPageContent() {
   const reportId = searchParams.get('reportId') || undefined;
   const targetExpertId = searchParams.get('targetExpertId') || undefined;
   const targetExpertName = searchParams.get('targetExpertName') || undefined;
-  // Read prefill from sessionStorage (set by landing page redirect)
-  const [initialQuestion, setInitialQuestion] = useState<string | undefined>();
-  const [initialCategory, setInitialCategory] = useState<string | undefined>();
-
-  useEffect(() => {
-    try {
-      const draft = sessionStorage.getItem('diy-expert-question-draft');
-      if (draft) {
-        const parsed = JSON.parse(draft);
-        if (parsed.question) setInitialQuestion(parsed.question);
-        if (parsed.trade) setInitialCategory(parsed.trade);
-        sessionStorage.removeItem('diy-expert-question-draft');
-      }
-    } catch {
-      // ignore parse errors
-    }
-  }, []);
-
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [reportContext, setReportContext] = useState<{ projectSummary?: string; projectType?: string } | undefined>();
@@ -136,8 +118,6 @@ function QAPageContent() {
           expertContext={expertContext}
           targetExpertId={targetExpertId}
           targetExpertName={targetExpertName}
-          initialQuestion={initialQuestion}
-          initialCategory={initialCategory}
           onSuccess={handleSuccess}
         />
 

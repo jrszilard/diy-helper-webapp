@@ -5,7 +5,7 @@
 
 -- ── New table: qa_bids ─────────────────────────────────────────────────────
 
-create table if not exists qa_bids (
+create table qa_bids (
   id uuid primary key default gen_random_uuid(),
   question_id uuid not null references qa_questions(id) on delete cascade,
   expert_id uuid not null references expert_profiles(id),
@@ -21,34 +21,24 @@ create table if not exists qa_bids (
 );
 
 -- Unique constraint: one bid per expert per question
-create unique index if not exists idx_qa_bids_question_expert on qa_bids(question_id, expert_id);
+create unique index idx_qa_bids_question_expert on qa_bids(question_id, expert_id);
 
 -- Index for listing bids by question
-create index if not exists idx_qa_bids_question on qa_bids(question_id, created_at);
+create index idx_qa_bids_question on qa_bids(question_id, created_at);
 
 -- Index for expert's bid history
-create index if not exists idx_qa_bids_expert on qa_bids(expert_id, status);
+create index idx_qa_bids_expert on qa_bids(expert_id, status);
 
 -- ── Bidding columns on qa_questions ────────────────────────────────────────
 
-alter table qa_questions add column if not exists pricing_mode text not null default 'fixed';
-DO $$ BEGIN
-  ALTER TABLE qa_questions ADD CONSTRAINT qa_questions_pricing_mode_check
-    CHECK (pricing_mode in ('fixed', 'bidding'));
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
-
-alter table qa_questions add column if not exists bid_deadline timestamptz;
-alter table qa_questions add column if not exists bid_count int not null default 0;
-alter table qa_questions add column if not exists accepted_bid_id uuid;
-DO $$ BEGIN
-  ALTER TABLE qa_questions ADD CONSTRAINT qa_questions_accepted_bid_id_fkey
-    FOREIGN KEY (accepted_bid_id) REFERENCES qa_bids(id);
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
+alter table qa_questions add column pricing_mode text not null default 'fixed'
+  check (pricing_mode in ('fixed', 'bidding'));
+alter table qa_questions add column bid_deadline timestamptz;
+alter table qa_questions add column bid_count int not null default 0;
+alter table qa_questions add column accepted_bid_id uuid references qa_bids(id);
 
 -- Index for finding bidding questions
-create index if not exists idx_qa_questions_bidding on qa_questions(pricing_mode, status, bid_deadline)
+create index idx_qa_questions_bidding on qa_questions(pricing_mode, status, bid_deadline)
   where pricing_mode = 'bidding';
 
 -- ── RLS for qa_bids ────────────────────────────────────────────────────────
@@ -56,7 +46,6 @@ create index if not exists idx_qa_questions_bidding on qa_questions(pricing_mode
 alter table qa_bids enable row level security;
 
 -- DIYer who owns the question can view all bids
-drop policy if exists "Question owner views bids" on qa_bids;
 create policy "Question owner views bids"
   on qa_bids for select using (
     question_id in (
@@ -65,21 +54,18 @@ create policy "Question owner views bids"
   );
 
 -- Experts can view their own bids
-drop policy if exists "Experts view own bids" on qa_bids;
 create policy "Experts view own bids"
   on qa_bids for select using (
     expert_id in (select id from expert_profiles where user_id = auth.uid())
   );
 
 -- Experts can create bids
-drop policy if exists "Experts create bids" on qa_bids;
 create policy "Experts create bids"
   on qa_bids for insert with check (
     expert_id in (select id from expert_profiles where user_id = auth.uid())
   );
 
 -- Experts can update (withdraw) their own bids
-drop policy if exists "Experts update own bids" on qa_bids;
 create policy "Experts update own bids"
   on qa_bids for update using (
     expert_id in (select id from expert_profiles where user_id = auth.uid())
@@ -97,14 +83,12 @@ begin
 end;
 $$ language plpgsql;
 
-drop trigger if exists trg_increment_qa_bid_count on qa_bids;
 create trigger trg_increment_qa_bid_count
   after insert on qa_bids
   for each row execute function increment_qa_bid_count();
 
 -- ── Updated_at trigger for qa_bids ─────────────────────────────────────────
 
-drop trigger if exists set_updated_at_qa_bids on qa_bids;
 create trigger set_updated_at_qa_bids
   before update on qa_bids
   for each row execute function update_updated_at();

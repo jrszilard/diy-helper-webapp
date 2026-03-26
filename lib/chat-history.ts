@@ -14,8 +14,7 @@ export async function createConversation(
   client: SupabaseClient,
   userId: string,
   title?: string,
-  projectId?: string,
-  intentType?: string
+  projectId?: string
 ) {
   const { data, error } = await client
     .from('conversations')
@@ -23,7 +22,6 @@ export async function createConversation(
       user_id: userId,
       title: title || 'New Conversation',
       project_id: projectId || null,
-      intent_type: intentType || null,
     })
     .select('id, title, created_at, updated_at, project_id')
     .single();

@@ -31,9 +31,9 @@ create table if not exists qa_activity_log (
   created_at timestamptz default now()
 );
 
-create index if not exists idx_activity_log_user on qa_activity_log(user_id, created_at);
-create index if not exists idx_activity_log_type on qa_activity_log(event_type, severity, created_at);
-create index if not exists idx_activity_log_unreviewed on qa_activity_log(reviewed_at) where reviewed_at is null;
+create index idx_activity_log_user on qa_activity_log(user_id, created_at);
+create index idx_activity_log_type on qa_activity_log(event_type, severity, created_at);
+create index idx_activity_log_unreviewed on qa_activity_log(reviewed_at) where reviewed_at is null;
 
 alter table qa_activity_log enable row level security;
 
@@ -43,18 +43,13 @@ alter table qa_activity_log enable row level security;
 -- ── Expert Subscription Tiers ───────────────────────────────────────────────
 
 alter table expert_profiles
-  add column if not exists subscription_tier text not null default 'free',
+  add column if not exists subscription_tier text not null default 'free'
+    check (subscription_tier in ('free', 'pro', 'premium')),
   add column if not exists subscription_stripe_id text,
   add column if not exists subscription_expires_at timestamptz,
   add column if not exists subscription_started_at timestamptz;
 
-DO $$ BEGIN
-  ALTER TABLE expert_profiles ADD CONSTRAINT expert_profiles_subscription_tier_check
-    CHECK (subscription_tier in ('free', 'pro', 'premium'));
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
-
-create index if not exists idx_expert_profiles_subscription on expert_profiles(subscription_tier) where is_active = true;
+create index idx_expert_profiles_subscription on expert_profiles(subscription_tier) where is_active = true;
 
 -- ── Consultation Availability Slots ─────────────────────────────────────────
 
@@ -71,30 +66,23 @@ create table if not exists expert_consultation_slots (
   is_active boolean default true,
 
   created_at timestamptz default now(),
-  updated_at timestamptz default now()
+  updated_at timestamptz default now(),
+
+  unique(expert_id, day_of_week, start_time)
 );
 
-DO $$ BEGIN
-  ALTER TABLE expert_consultation_slots ADD CONSTRAINT expert_consultation_slots_expert_id_day_of_week_start_time_key
-    UNIQUE (expert_id, day_of_week, start_time);
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
-
-create index if not exists idx_consultation_slots_expert on expert_consultation_slots(expert_id, is_active);
+create index idx_consultation_slots_expert on expert_consultation_slots(expert_id, is_active);
 
 alter table expert_consultation_slots enable row level security;
 
-drop policy if exists "Experts manage own slots" on expert_consultation_slots;
 create policy "Experts manage own slots"
   on expert_consultation_slots for all using (
     expert_id in (select id from expert_profiles where user_id = auth.uid())
   );
 
-drop policy if exists "Public reads active slots" on expert_consultation_slots;
 create policy "Public reads active slots"
   on expert_consultation_slots for select using (is_active = true);
 
-drop trigger if exists set_updated_at_consultation_slots on expert_consultation_slots;
 create trigger set_updated_at_consultation_slots
   before update on expert_consultation_slots
   for each row execute function update_updated_at();

@@ -12,23 +12,20 @@ create table if not exists beta_feedback (
   created_at timestamptz default now()
 );
 
-create index if not exists idx_beta_feedback_user_id on beta_feedback(user_id);
-create index if not exists idx_beta_feedback_created_at on beta_feedback(created_at desc);
+create index idx_beta_feedback_user_id on beta_feedback(user_id);
+create index idx_beta_feedback_created_at on beta_feedback(created_at desc);
 
 -- RLS
 alter table beta_feedback enable row level security;
 
-drop policy if exists "Users can insert own feedback" on beta_feedback;
 create policy "Users can insert own feedback"
   on beta_feedback for insert
   with check (auth.uid() = user_id);
 
-drop policy if exists "Users can read own feedback" on beta_feedback;
 create policy "Users can read own feedback"
   on beta_feedback for select
   using (auth.uid() = user_id);
 
-drop policy if exists "Service role full access on beta_feedback" on beta_feedback;
 create policy "Service role full access on beta_feedback"
   on beta_feedback for all
   using (auth.role() = 'service_role');

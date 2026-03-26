@@ -18,4 +18,3 @@ export { default as StatusBadge, statusConfig } from './StatusBadge';
 export type { ProjectStatus } from './StatusBadge';
 export { default as TextInput } from './TextInput';
 export { default as Textarea } from './Textarea';
-export { default as FileUpload } from './FileUpload';

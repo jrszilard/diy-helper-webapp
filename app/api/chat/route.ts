@@ -7,11 +7,7 @@ import { ChatRequestSchema, parseRequestBody } from '@/lib/validation';
 import config from '@/lib/config';
 import { pruneConversation } from '@/lib/conversation-pruner';
 import { createConversation, addMessage, generateTitle } from '@/lib/chat-history';
-import { systemPrompt, getSystemPrompt } from '@/lib/system-prompt';
-import { classifyIntent } from '@/lib/intelligence/intent-router';
-import { calibratePrompt } from '@/lib/intelligence/prompt-calibrator';
-import type { IntentType } from '@/lib/intelligence/types';
-import { getAdminClient } from '@/lib/supabase-admin';
+import { systemPrompt } from '@/lib/system-prompt';
 import { tools, progressMessages } from '@/lib/tools/definitions';
 import { executeTool } from '@/lib/tools/executor';
 import { StreamEvent } from '@/lib/tools/types';
@@ -128,65 +124,8 @@ export async function POST(req: NextRequest) {
     }
     userContent.push({ type: 'text', text: message });
 
-    // ── Intent Classification ─────────────────────────────────────
-    let intentType: IntentType | undefined;
-    if (!existingConversationId && prunedHistory.length === 0) {
-      const classification = await classifyIntent(message, {
-        hasActiveProjects: false,
-      });
-      if (classification.confidence >= config.intelligence.confidenceThreshold) {
-        intentType = classification.intent;
-      }
-      logger.info('Intent classified', {
-        requestId,
-        intent: classification.intent,
-        confidence: classification.confidence,
-        reasoning: classification.reasoning,
-      });
-    } else if (existingConversationId && auth.userId) {
-      try {
-        const { data: convData } = await auth.supabaseClient
-          .from('conversations')
-          .select('intent_type')
-          .eq('id', existingConversationId)
-          .single();
-        if (convData?.intent_type) {
-          intentType = convData.intent_type as IntentType;
-        }
-      } catch {
-        // Failed to load — fall through to default prompt
-      }
-    }
-
-    const activeSystemPrompt = intentType ? getSystemPrompt(intentType) : systemPrompt;
-
-    // ── Skill Calibration ─────────────────────────────────────────
-    let calibratedPrompt = activeSystemPrompt;
-    if (auth.userId) {
-      try {
-        const adminClient = getAdminClient();
-        const { data: profileData } = await adminClient
-          .from('user_skill_profiles')
-          .select('domain_familiarity, communication_level, known_topics')
-          .eq('user_id', auth.userId)
-          .single();
-
-        if (profileData) {
-          calibratedPrompt = calibratePrompt(activeSystemPrompt, {
-            userId: auth.userId,
-            domainFamiliarity: profileData.domain_familiarity,
-            communicationLevel: profileData.communication_level,
-            knownTopics: profileData.known_topics || [],
-            lastCalibrated: new Date(),
-          });
-        }
-      } catch {
-        // No profile yet or DB error — use uncalibrated prompt
-      }
-    }
-
     if (!streaming) {
-      return handleNonStreamingRequest(auth, message, prunedHistory, image ? userContent : undefined, intentType, calibratedPrompt);
+      return handleNonStreamingRequest(auth, message, prunedHistory, image ? userContent : undefined);
     }
 
     const stream = new ReadableStream({
@@ -217,7 +156,7 @@ export async function POST(req: NextRequest) {
             () => anthropic.messages.create({
               model: config.anthropic.model,
               max_tokens: config.anthropic.maxTokens,
-              system: calibratedPrompt,
+              system: systemPrompt,
               tools: tools as Anthropic.Tool[],
               messages
             }),
@@ -300,7 +239,7 @@ export async function POST(req: NextRequest) {
               () => anthropic.messages.create({
                 model: config.anthropic.model,
                 max_tokens: config.anthropic.maxTokens,
-                system: calibratedPrompt,
+                system: systemPrompt,
                 tools: tools as Anthropic.Tool[],
                 messages
               }),
@@ -342,8 +281,7 @@ export async function POST(req: NextRequest) {
                   auth.supabaseClient,
                   auth.userId,
                   generateTitle(message),
-                  parsed.data.project_id,
-                  intentType
+                  parsed.data.project_id
                 );
                 responseConversationId = conv.id;
               }
@@ -413,11 +351,8 @@ async function handleNonStreamingRequest(
   auth: Awaited<ReturnType<typeof getAuthFromRequest>>,
   message: string,
   history: Array<{ role: string; content: string | Array<Record<string, unknown>> }>,
-  multiModalContent?: Anthropic.ContentBlockParam[],
-  intentType?: IntentType,
-  calibratedSystemPrompt?: string
+  multiModalContent?: Anthropic.ContentBlockParam[]
 ) {
-  const effectivePrompt = calibratedSystemPrompt || systemPrompt;
   const messages: Anthropic.MessageParam[] = [
     ...(history as Anthropic.MessageParam[]),
     { role: 'user' as const, content: multiModalContent || message }
@@ -427,7 +362,7 @@ async function handleNonStreamingRequest(
     () => anthropic.messages.create({
       model: config.anthropic.model,
       max_tokens: config.anthropic.maxTokens,
-      system: effectivePrompt,
+      system: systemPrompt,
       tools: tools as Anthropic.Tool[],
       messages
     }),
@@ -473,7 +408,7 @@ async function handleNonStreamingRequest(
       () => anthropic.messages.create({
         model: config.anthropic.model,
         max_tokens: config.anthropic.maxTokens,
-        system: effectivePrompt,
+        system: systemPrompt,
         tools: tools as Anthropic.Tool[],
         messages
       }),

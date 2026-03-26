@@ -3,7 +3,7 @@
 
 -- ── qa_messages table ──────────────────────────────────────────────────────
 
-CREATE TABLE IF NOT EXISTS qa_messages (
+CREATE TABLE qa_messages (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   question_id uuid NOT NULL REFERENCES qa_questions(id) ON DELETE CASCADE,
   sender_user_id uuid NOT NULL REFERENCES auth.users(id),
@@ -13,15 +13,14 @@ CREATE TABLE IF NOT EXISTS qa_messages (
   created_at timestamptz DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_qa_messages_question ON qa_messages(question_id, created_at);
-CREATE INDEX IF NOT EXISTS idx_qa_messages_sender ON qa_messages(sender_user_id);
+CREATE INDEX idx_qa_messages_question ON qa_messages(question_id, created_at);
+CREATE INDEX idx_qa_messages_sender ON qa_messages(sender_user_id);
 
 -- ── RLS: only participants can see/create messages ────────────────────────
 
 ALTER TABLE qa_messages ENABLE ROW LEVEL SECURITY;
 
 -- Select: sender or any participant of the question
-DROP POLICY IF EXISTS "Participants can view messages" ON qa_messages;
 CREATE POLICY "Participants can view messages"
   ON qa_messages FOR SELECT USING (
     sender_user_id = auth.uid()
@@ -37,7 +36,6 @@ CREATE POLICY "Participants can view messages"
   );
 
 -- Insert: only participants
-DROP POLICY IF EXISTS "Participants can send messages" ON qa_messages;
 CREATE POLICY "Participants can send messages"
   ON qa_messages FOR INSERT WITH CHECK (
     sender_user_id = auth.uid()
@@ -58,10 +56,7 @@ CREATE POLICY "Participants can send messages"
 
 -- ── Enable Supabase Realtime for qa_messages ──────────────────────────────
 
-DO $$ BEGIN
-  ALTER PUBLICATION supabase_realtime ADD TABLE qa_messages;
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
+ALTER PUBLICATION supabase_realtime ADD TABLE qa_messages;
 
 -- ── New columns on qa_questions for threaded mode ─────────────────────────
 
@@ -84,7 +79,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-DROP TRIGGER IF EXISTS trg_increment_qa_message_count ON qa_messages;
 CREATE TRIGGER trg_increment_qa_message_count
   AFTER INSERT ON qa_messages
   FOR EACH ROW EXECUTE FUNCTION increment_qa_message_count();

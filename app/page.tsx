@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import WhyDIYHelper from '@/components/WhyDIYHelper';
 import ProjectTemplates from '@/components/ProjectTemplates';
-import LandingHero from '@/components/LandingHero';
+import GuidedBot from '@/components/guided-bot/GuidedBot';
 import AuthButton from '@/components/AuthButton';
 import ExpertQuickBar from '@/components/ExpertQuickBar';
 import { useExpertStatus } from '@/hooks/useExpertStatus';
@@ -127,7 +127,7 @@ export default function LandingPage() {
 
         <div className="relative max-w-4xl mx-auto">
           <div className="content-card">
-            <LandingHero />
+            <GuidedBot />
           </div>
           {/* Skip link */}
           <p className="text-center mt-4 text-sm text-warm-brown">
