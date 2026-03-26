@@ -15,7 +15,7 @@ describe('createConversation', () => {
   it('passes intent_type to database insert when provided', async () => {
     const client = createMockClient();
     const { createConversation } = await import('@/lib/chat-history');
-    await createConversation(client as any, 'user-1', 'Test', undefined, 'quick_question');
+    await createConversation(client as unknown as Parameters<typeof createConversation>[0], 'user-1', 'Test', undefined, 'quick_question');
     const insertArg = client.__mocks.mockInsert.mock.calls[0][0];
     expect(insertArg.intent_type).toBe('quick_question');
     expect(insertArg.user_id).toBe('user-1');
@@ -24,7 +24,7 @@ describe('createConversation', () => {
   it('passes null intent_type when not provided (backward compat)', async () => {
     const client = createMockClient();
     const { createConversation } = await import('@/lib/chat-history');
-    await createConversation(client as any, 'user-1', 'Test');
+    await createConversation(client as unknown as Parameters<typeof createConversation>[0], 'user-1', 'Test');
     const insertArg = client.__mocks.mockInsert.mock.calls[0][0];
     expect(insertArg.intent_type).toBeNull();
   });

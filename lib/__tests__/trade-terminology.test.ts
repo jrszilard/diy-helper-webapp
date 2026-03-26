@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { analyzeTerminology, TERMINOLOGY } from '@/lib/intelligence/trade-terminology';
+import type { DomainCategory } from '@/lib/intelligence/types';
 
 describe('TERMINOLOGY', () => {
   it('has entries for all domain categories', () => {
-    const domains = ['electrical', 'plumbing', 'carpentry', 'hvac', 'general', 'landscaping', 'painting', 'roofing'];
+    const domains: DomainCategory[] = ['electrical', 'plumbing', 'carpentry', 'hvac', 'general', 'landscaping', 'painting', 'roofing'];
     for (const domain of domains) {
       expect(TERMINOLOGY[domain]).toBeDefined();
       expect(TERMINOLOGY[domain].advanced.length).toBeGreaterThan(0);
