@@ -125,6 +125,19 @@ Replace the `GuidedBot`-only hero section (lines 120-140 of `app/page.tsx`) with
 - Keep the "Already know what you need? Skip to full chat →" link below
 - No other changes to the page
 
+### SessionStorage Consumer Modifications
+
+**`app/chat/page.tsx` (or `ChatInterface.tsx`):**
+- On mount, check sessionStorage for `diy-helper-conversation-id` and `diy-helper-chat-messages`
+- If found, hydrate the chat with the stored conversation state (messages + conversation ID)
+- Clear sessionStorage keys after hydration to prevent stale data on revisit
+
+**`app/marketplace/qa/page.tsx` → `QASubmitForm.tsx`:**
+- On mount, check sessionStorage for `diy-expert-question-draft` key
+- If found, pre-fill the question textarea, trade category select, and photo URLs from the stored draft
+- Clear sessionStorage key after hydration
+- Note: `marketplace-build` already had this read logic in `app/marketplace/qa/page.tsx` — port it, using design system components for the pre-filled form state
+
 ## Section 3: Chat Feedback — "I already knew this" Button
 
 ### Changes
@@ -137,7 +150,8 @@ Add an inline feedback button below each assistant message in `components/ChatMe
   - Default state: "I already knew this" with `CheckCircle` icon (16px)
   - Styling: `text-xs text-earth-brown-light hover:text-terracotta transition-colors`
   - Acknowledged state: "Got it, noted for next time" in `text-xs text-forest-green`
-- On click: POST to `/api/skill-profile/feedback` with domain inferred from conversation context
+- On click: POST to `/api/skill-profile/feedback` with domain. Domain is determined by running `analyzeTerminology()` from `lib/intelligence/trade-terminology.ts` on the conversation's message history — the domain with the highest advanced term count is used. If no domain has terms above zero, default to `'general'`. The analysis runs once on component mount and is memoized, not re-run per click.
+- `ChatMessages.tsx` receives a new optional prop `conversationDomain?: string` computed by the parent (`ChatInterface.tsx`) using `analyzeTerminology()` on the message array.
 - State tracked per-message via local `Set<number>` of acknowledged message indices
 - Only rendered for authenticated users (check via Supabase session)
 - No new component — styled `<button>` consistent with existing message layout
@@ -156,7 +170,7 @@ Add an "Expert Tools" button to `QAAnswerForm.tsx` that opens a right-side panel
 
 - `Button` (variant `tertiary`, `leftIcon={Wrench}`) labeled "Expert Tools"
 - Placed above the answer textarea in the form
-- Opens panel via `Modal` component with `position="right"` and `size="lg"`
+- Opens panel via `Modal` component with `position="right"`. Note: Modal currently hardcodes `max-w-md` in right-panel mode — pass `className="max-w-lg"` to override for the wider expert tools panel.
 
 ### Panel Component: `components/marketplace/ExpertCoPilot.tsx`
 
@@ -225,7 +239,7 @@ interface FileUploadProps {
 - Flex row with `gap-2`, rendered below the drop zone when files exist
 - Each thumbnail: 80x80, `rounded-lg`, `border border-earth-sand`, `overflow-hidden`
 - Image preview via `URL.createObjectURL()`
-- Remove button: `IconButton` (variant `danger`, `X` icon, size small) positioned absolute top-right
+- Remove button: `IconButton` (variant `danger`, `X` icon, `iconSize={14}`) positioned absolute top-right
 - Cleanup: `URL.revokeObjectURL()` on unmount and on file removal
 
 **Validation:**
