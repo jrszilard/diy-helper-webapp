@@ -1,5 +1,6 @@
 -- Q&A Payment Flow v2: charge on expert claim instead of at submission
 -- New columns on qa_questions, new tables: user_credits, credit_transactions
+-- Made idempotent so it can be safely re-run if partially applied.
 
 -- ── New columns on qa_questions ─────────────────────────────────────────────
 
@@ -14,9 +15,12 @@ ALTER TABLE qa_questions
   ADD COLUMN IF NOT EXISTS not_helpful_at timestamptz,
   ADD COLUMN IF NOT EXISTS credit_applied_cents int DEFAULT 0;
 
-ALTER TABLE qa_questions
-  ADD CONSTRAINT qa_questions_question_mode_check
-  CHECK (question_mode IN ('pool', 'direct'));
+DO $$ BEGIN
+  ALTER TABLE qa_questions
+    ADD CONSTRAINT qa_questions_question_mode_check
+    CHECK (question_mode IN ('pool', 'direct'));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_qa_questions_mode ON qa_questions(question_mode);
 CREATE INDEX IF NOT EXISTS idx_qa_questions_target_expert ON qa_questions(target_expert_id) WHERE target_expert_id IS NOT NULL;
@@ -32,15 +36,17 @@ CREATE TABLE IF NOT EXISTS user_credits (
 
 ALTER TABLE user_credits ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own credits" ON user_credits;
 CREATE POLICY "Users can view own credits"
   ON user_credits FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own credits" ON user_credits;
 CREATE POLICY "Users can update own credits"
   ON user_credits FOR UPDATE
   USING (auth.uid() = user_id);
 
--- Service role can do everything (for API routes using admin client)
+DROP POLICY IF EXISTS "Service role full access on user_credits" ON user_credits;
 CREATE POLICY "Service role full access on user_credits"
   ON user_credits FOR ALL
   USING (auth.role() = 'service_role');
@@ -58,10 +64,12 @@ CREATE TABLE IF NOT EXISTS credit_transactions (
 
 ALTER TABLE credit_transactions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own credit transactions" ON credit_transactions;
 CREATE POLICY "Users can view own credit transactions"
   ON credit_transactions FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Service role full access on credit_transactions" ON credit_transactions;
 CREATE POLICY "Service role full access on credit_transactions"
   ON credit_transactions FOR ALL
   USING (auth.role() = 'service_role');
@@ -71,6 +79,7 @@ CREATE INDEX IF NOT EXISTS idx_credit_transactions_question ON credit_transactio
 
 -- ── RLS for direct questions: target experts can see questions addressed to them ──
 
+DROP POLICY IF EXISTS "Target experts can view direct questions" ON qa_questions;
 CREATE POLICY "Target experts can view direct questions"
   ON qa_questions FOR SELECT
   USING (
