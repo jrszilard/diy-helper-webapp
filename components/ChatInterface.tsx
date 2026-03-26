@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Package, X, Trash2, FolderPlus, MessageSquare, Sparkles } from 'lucide-react';
 import ChatMessages from './ChatMessages';
 import ChatInput from './ChatInput';
@@ -34,6 +34,25 @@ export default function ChatInterface({
 
   const chat = useChat({ projectId, conversationId: undefined });
   const projectActions = useProjectActions({ userId });
+
+  // Hydrate chat state from sessionStorage (set by landing page redirect)
+  useEffect(() => {
+    try {
+      const storedConvId = sessionStorage.getItem('diy-helper-conversation-id');
+      const storedMessages = sessionStorage.getItem('diy-helper-chat-messages');
+      if (storedConvId && storedMessages) {
+        const parsed = JSON.parse(storedMessages);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          chat.handleSelectConversation(storedConvId, parsed);
+        }
+      }
+      sessionStorage.removeItem('diy-helper-conversation-id');
+      sessionStorage.removeItem('diy-helper-chat-messages');
+    } catch {
+      // ignore parse errors
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const planner = ProjectPlanner({
     userId,
