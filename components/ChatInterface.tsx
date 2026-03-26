@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Package, X, Trash2, FolderPlus, MessageSquare, Sparkles } from 'lucide-react';
 import ChatMessages from './ChatMessages';
 import ChatInput from './ChatInput';
@@ -11,6 +11,7 @@ import ProjectPlanner from './ProjectPlanner';
 import Button from '@/components/ui/Button';
 import { useChat } from '@/hooks/useChat';
 import { useProjectActions } from '@/hooks/useProjectActions';
+import { analyzeTerminology } from '@/lib/intelligence/trade-terminology';
 import type { Message } from '@/hooks/useChat';
 
 export default function ChatInterface({
@@ -53,6 +54,17 @@ export default function ChatInterface({
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Detect the dominant trade domain from conversation content
+  const conversationDomain = useMemo(() => {
+    if (chat.messages.length === 0) return 'general';
+    const allContent = chat.messages.map(m => m.content).join(' ');
+    const analyses = analyzeTerminology(allContent);
+    const best = analyses.reduce((top, cur) =>
+      cur.advancedTermCount > top.advancedTermCount ? cur : top
+    );
+    return best.advancedTermCount > 0 ? best.domain : 'general';
+  }, [chat.messages]);
 
   const planner = ProjectPlanner({
     userId,
@@ -309,6 +321,8 @@ export default function ChatInterface({
             failedMessage={chat.failedMessage}
             onRetry={chat.handleRetry}
             messagesEndRef={chat.messagesEndRef}
+            conversationDomain={conversationDomain}
+            user={userId ? { id: userId } : null}
           />
 
           {/* Guest expert upsell */}
