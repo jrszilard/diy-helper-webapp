@@ -13,6 +13,9 @@ do $$
 begin
   if exists (select 1 from pg_tables where tablename = 'qa_bids') then
     execute $policy$
+      drop policy if exists "Service role full access on qa_bids" on qa_bids
+    $policy$;
+    execute $policy$
       create policy "Service role full access on qa_bids"
         on qa_bids for all
         using (auth.role() = 'service_role')
