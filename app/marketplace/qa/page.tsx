@@ -21,7 +21,6 @@ function QAPageContent() {
   // Read prefill from sessionStorage (set by landing page redirect)
   const [initialQuestion, setInitialQuestion] = useState<string | undefined>();
   const [initialCategory, setInitialCategory] = useState<string | undefined>();
-  const [initialPhotoUrls, setInitialPhotoUrls] = useState<string[] | undefined>();
 
   useEffect(() => {
     try {
@@ -30,7 +29,6 @@ function QAPageContent() {
         const parsed = JSON.parse(draft);
         if (parsed.question) setInitialQuestion(parsed.question);
         if (parsed.trade) setInitialCategory(parsed.trade);
-        if (parsed.photoUrls && Array.isArray(parsed.photoUrls)) setInitialPhotoUrls(parsed.photoUrls);
         sessionStorage.removeItem('diy-expert-question-draft');
       }
     } catch {
@@ -140,7 +138,6 @@ function QAPageContent() {
           targetExpertName={targetExpertName}
           initialQuestion={initialQuestion}
           initialCategory={initialCategory}
-          initialPhotoUrls={initialPhotoUrls}
           onSuccess={handleSuccess}
         />
 
