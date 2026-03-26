@@ -82,27 +82,6 @@ export default function LandingExpertForm() {
         Get a verified expert&apos;s take on your project
       </p>
 
-      {/* Question */}
-      <div>
-        <Textarea
-          id="expert-question"
-          label="Your Question"
-          value={question}
-          onChange={(e) => {
-            setQuestion(e.target.value);
-            if (errors.question) setErrors((prev) => ({ ...prev, question: undefined }));
-          }}
-          rows={4}
-          placeholder="Describe your question or project in detail..."
-          error={errors.question}
-          fullWidth
-          resize="vertical"
-        />
-        <p className="text-xs text-earth-brown-light mt-1">
-          {question.length}/20 characters minimum
-        </p>
-      </div>
-
       {/* Trade category */}
       <div>
         <label
@@ -127,6 +106,27 @@ export default function LandingExpertForm() {
             </option>
           ))}
         </Select>
+      </div>
+
+      {/* Question */}
+      <div>
+        <Textarea
+          id="expert-question"
+          label="Your Question"
+          value={question}
+          onChange={(e) => {
+            setQuestion(e.target.value);
+            if (errors.question) setErrors((prev) => ({ ...prev, question: undefined }));
+          }}
+          rows={4}
+          placeholder="Describe your question or project in detail..."
+          error={errors.question}
+          fullWidth
+          resize="vertical"
+        />
+        <p className="text-xs text-earth-brown-light mt-1">
+          {question.length}/20 characters minimum
+        </p>
       </div>
 
       {/* Photos */}
