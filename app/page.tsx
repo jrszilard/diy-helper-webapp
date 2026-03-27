@@ -61,14 +61,6 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="pt-[var(--space-3xl)] pb-[var(--space-2xl)]">
         <div className="u-container">
-          <div className="mb-[var(--space-m)]">
-            <h1 className="text-step-4 font-bold text-white mb-3">
-              What are you building?
-            </h1>
-            <p className="text-[var(--earth-sand)] text-step-1">
-              Describe your project and we&apos;ll put together a plan — building codes, materials list, and how-tos included.
-            </p>
-          </div>
           <LandingHero />
         </div>
       </section>
