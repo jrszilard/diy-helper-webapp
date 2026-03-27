@@ -31,23 +31,22 @@ import Button from '@/components/ui/Button';
 
 export default function LandingPage() {
   const router = useRouter();
-  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const [user, setUser] = useState<{ id: string; email?: string; name?: string } | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const { isExpert, expert, openQueueCount } = useExpertStatus();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ? { id: session.user.id, email: session.user.email ?? undefined } : null);
+      setUser(session?.user ? { id: session.user.id, email: session.user.email ?? undefined, name: session.user.user_metadata?.display_name ?? undefined } : null);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ? { id: session.user.id, email: session.user.email ?? undefined } : null);
+      setUser(session?.user ? { id: session.user.id, email: session.user.email ?? undefined, name: session.user.user_metadata?.display_name ?? undefined } : null);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Auto-open auth modal when redirected from protected route
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('signIn') === 'true' && !user) {
@@ -96,14 +95,17 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen blueprint-bg">
+    <div className="min-h-screen bg-earth-brown-dark">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 backdrop-blur-xl bg-earth-brown-dark/95 border-b border-[var(--blueprint-grid-major)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="sticky top-0 z-50 backdrop-blur-xl bg-[var(--earth-brown-dark)]/95 border-b border-[var(--blueprint-grid-major)]">
+        <div className="u-container">
           <div className="flex justify-between items-center h-16">
             <AppLogo variant="dark" />
             <div className="flex items-center gap-3">
-              <Button variant="ghost" href="/experts/register" className="text-earth-sand hover:text-white hover:bg-white/10">
+              <Button variant="ghost" href="/about" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10 hidden sm:inline-flex">
+                About
+              </Button>
+              <Button variant="ghost" href="/experts/register" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10">
                 Become an Expert
               </Button>
               <AuthButton user={user} variant="dark" isExpert={isExpert} externalShowAuth={showAuth} onAuthToggle={setShowAuth} />
@@ -324,7 +326,7 @@ export default function LandingPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-white">Southwire 250ft 12/2 NM-B Romex</p>
-                        <p className="text-sm text-earth-brown-light mt-1">Copper with Ground • In Stock</p>
+                        <p className="text-sm text-earth-brown-light mt-1">Copper with Ground - In Stock</p>
                         <div className="flex items-center gap-3 mt-2">
                           <span className="text-terracotta font-bold text-lg">$87.43</span>
                           <span className="text-xs text-earth-brown-light bg-warm-brown px-2 py-1 rounded">Home Depot</span>
@@ -500,14 +502,18 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="bg-surface rounded-2xl py-6 px-8 shadow-lg border border-earth-tan">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <AppLogo />
-              <p className="text-sm text-warm-brown">
-                Built for DIYers and the pros who help them. Powered by Claude AI.
-              </p>
+      <footer className="py-[var(--space-l)]">
+        <div className="u-container">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <AppLogo variant="dark" />
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" href="/about" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10 text-sm">
+                About
+              </Button>
+              <Button variant="ghost" href="/experts/register" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10 text-sm">
+                Become an Expert
+              </Button>
+              <span className="text-white/30 text-sm pl-2">Powered by Claude AI</span>
             </div>
           </div>
         </div>

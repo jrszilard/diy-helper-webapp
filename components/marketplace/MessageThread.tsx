@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Image, X, FolderOpen, ExternalLink } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
 import EmptyState from '@/components/ui/EmptyState';
+import IconButton from '@/components/ui/IconButton';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 
@@ -253,13 +254,14 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
                   alt={`Pending ${idx + 1}`}
                   className="w-16 h-16 object-cover rounded-lg border border-earth-sand"
                 />
-                <button
+                <IconButton
+                  icon={X}
+                  iconSize={12}
+                  label="Remove image"
+                  variant="danger"
                   onClick={() => removePendingImage(idx)}
-                  className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-rust text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  aria-label="Remove image"
-                >
-                  <X size={12} />
-                </button>
+                  className="absolute -top-1.5 -right-1.5 !w-5 !h-5 !p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                />
               </div>
             ))}
           </div>
@@ -269,18 +271,14 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
       {/* Input area */}
       <div className="border-t border-earth-sand p-3 bg-surface">
         <div className="flex items-end gap-2">
-          <button
+          <IconButton
+            icon={Image}
+            iconSize={18}
+            label="Attach image"
             onClick={() => fileInputRef.current?.click()}
             disabled={isBusy}
-            className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
-              isBusy
-                ? 'text-[var(--muted)] cursor-not-allowed'
-                : 'text-earth-brown hover:bg-earth-tan hover:text-slate-blue'
-            }`}
-            aria-label="Attach image"
-          >
-            <Image size={18} />
-          </button>
+            className="flex-shrink-0"
+          />
           <input
             ref={fileInputRef}
             type="file"
@@ -298,17 +296,21 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
             disabled={isBusy}
             className="flex-1 px-3 py-2 border border-earth-sand rounded-lg bg-white text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-slate-blue/50 resize-none disabled:opacity-50"
           />
-          <button
-            onClick={handleSend}
-            disabled={!canSend}
-            className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
-              canSend
-                ? 'bg-slate-blue text-white hover:bg-slate-blue-dark'
-                : 'bg-earth-tan text-[var(--muted)] cursor-not-allowed'
-            }`}
-          >
-            {isBusy ? <Spinner /> : <Send size={18} />}
-          </button>
+          {isBusy ? (
+            <div className="p-2 flex-shrink-0">
+              <Spinner size="sm" />
+            </div>
+          ) : (
+            <IconButton
+              icon={Send}
+              iconSize={18}
+              label="Send message"
+              variant={canSend ? 'primary' : 'default'}
+              onClick={handleSend}
+              disabled={!canSend}
+              className="flex-shrink-0"
+            />
+          )}
         </div>
       </div>
 
@@ -318,13 +320,13 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
           className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
           onClick={() => setLightboxUrl(null)}
         >
-          <button
+          <IconButton
+            icon={X}
+            iconSize={28}
+            label="Close image"
             onClick={() => setLightboxUrl(null)}
-            className="absolute top-4 right-4 text-white hover:text-white/80 transition-colors"
-            aria-label="Close image"
-          >
-            <X size={28} />
-          </button>
+            className="absolute top-4 right-4 text-white hover:text-white/80"
+          />
           <img
             src={lightboxUrl}
             alt="Full size"

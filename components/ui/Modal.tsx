@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -32,16 +33,25 @@ export default function Modal({
   size = 'md',
   className,
 }: ModalProps) {
+  const [mounted, setMounted] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => { setMounted(true); }, []);
+
+  // Auto-focus only when the modal opens — must not depend on onClose
+  // (onClose is often an inline function that changes every render, which
+  // would retrigger this and steal focus away from inputs mid-typing)
   useEffect(() => {
     if (!isOpen) return;
-
-    // Auto-focus the first focusable element inside the modal
     requestAnimationFrame(() => {
       const el = panelRef.current?.querySelector<HTMLElement>(FOCUSABLE);
       el?.focus();
     });
+  }, [isOpen]);
+
+  // Keyboard handler: Escape + focus trap
+  useEffect(() => {
+    if (!isOpen) return;
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -69,10 +79,10 @@ export default function Modal({
     return () => window.removeEventListener('keydown', onKey);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   if (position === 'right') {
-    return (
+    return createPortal(
       <div className="fixed inset-0 bg-[var(--foreground)]/50 z-50 flex justify-end">
         <div className="absolute inset-0" onClick={onClose} />
         <div
@@ -99,11 +109,12 @@ export default function Modal({
           )}
           {children}
         </div>
-      </div>
+      </div>,
+      document.body,
     );
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-[var(--foreground)]/50" onClick={onClose} />
       <div
@@ -140,6 +151,7 @@ export default function Modal({
         )}
         <div className="p-6">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

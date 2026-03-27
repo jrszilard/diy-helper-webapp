@@ -4,9 +4,13 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ArrowLeft, LogIn } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
-import Link from 'next/link';
-import MessageList from '@/components/marketplace/MessageList';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import SectionHeader from '@/components/ui/SectionHeader';
+import EmptyState from '@/components/ui/EmptyState';
+import GlobalHeader from '@/components/GlobalHeader';
 import AuthButton from '@/components/AuthButton';
+import MessageList from '@/components/marketplace/MessageList';
 
 interface Thread {
   id: string;
@@ -25,14 +29,14 @@ interface Thread {
 export default function DIYerMessagesPage() {
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const [user, setUser] = useState<{ id: string; email?: string; name?: string } | null>(null);
   const [showAuth, setShowAuth] = useState(false);
 
   useEffect(() => {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        setUser({ id: user.id, email: user.email });
+        setUser({ id: user.id, email: user.email, name: user.user_metadata?.display_name });
       }
       setLoading(false);
     }
@@ -40,11 +44,7 @@ export default function DIYerMessagesPage() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const u = session?.user;
-      if (u) {
-        setUser({ id: u.id, email: u.email });
-      } else {
-        setUser(null);
-      }
+      setUser(u ? { id: u.id, email: u.email, name: u.user_metadata?.display_name } : null);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -82,19 +82,14 @@ export default function DIYerMessagesPage() {
   if (!user) {
     return (
       <div className="min-h-screen bg-surface">
-        <div className="max-w-2xl mx-auto px-4 py-12">
-          <div className="text-center">
-            <LogIn size={40} className="mx-auto text-earth-sand mb-4" />
-            <h1 className="text-xl font-bold text-foreground mb-2">Sign in to view messages</h1>
-            <p className="text-sm text-earth-brown mb-6">
-              You need to be signed in to access your messages.
-            </p>
-            <AuthButton
-              user={null}
-              externalShowAuth={showAuth}
-              onAuthToggle={setShowAuth}
-            />
-          </div>
+        <GlobalHeader right={<AuthButton user={null} externalShowAuth={showAuth} onAuthToggle={setShowAuth} />} />
+        <div className="max-w-2xl mx-auto px-4 py-16">
+          <EmptyState
+            icon={LogIn}
+            title="Sign in to view messages"
+            description="You need to be signed in to access your messages."
+            action={<AuthButton user={null} externalShowAuth={showAuth} onAuthToggle={setShowAuth} />}
+          />
         </div>
       </div>
     );
@@ -102,22 +97,16 @@ export default function DIYerMessagesPage() {
 
   return (
     <div className="min-h-screen bg-surface">
+      <GlobalHeader right={<AuthButton user={user} />} />
       <div className="max-w-2xl mx-auto px-4 py-6">
-        {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <Link
-            href="/chat"
-            className="p-1.5 hover:bg-earth-tan rounded-lg transition-colors text-earth-brown"
-          >
-            <ArrowLeft size={20} />
-          </Link>
-          <h1 className="text-xl font-bold text-foreground">My Messages</h1>
+          <Button variant="ghost" href="/chat" leftIcon={ArrowLeft} size="sm" />
+          <SectionHeader size="md" title="My Messages" />
         </div>
 
-        {/* Thread list */}
-        <div className="bg-white rounded-xl border border-earth-sand overflow-hidden">
+        <Card rounded="xl" padding="none">
           <MessageList threads={threads} basePath="/messages" />
-        </div>
+        </Card>
       </div>
     </div>
   );

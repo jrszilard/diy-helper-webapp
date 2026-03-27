@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Bell } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
+import Button from '@/components/ui/Button';
 import { useNotifications } from '@/hooks/useNotifications';
 
 interface NotificationBellProps {
@@ -13,6 +15,7 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(userId);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const [currentTime, setCurrentTime] = useState(() => Date.now());
 
@@ -35,8 +38,9 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
 
   const handleNotificationClick = (id: string, link: string | null) => {
     markAsRead(id);
+    setIsOpen(false);
     if (link) {
-      window.location.assign(link);
+      router.push(link);
     }
   };
 
@@ -67,16 +71,13 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-surface border border-earth-sand rounded-lg shadow-xl z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-earth-sand rounded-lg shadow-xl z-50 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-earth-sand">
-            <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
+            <h3 className="text-sm font-semibold text-[#3E2723]">Notifications</h3>
             {unreadCount > 0 && (
-              <button
-                onClick={() => markAllAsRead()}
-                className="text-xs text-slate-blue hover:text-slate-blue-dark font-medium"
-              >
+              <Button variant="ghost" size="xs" onClick={() => markAllAsRead()}>
                 Mark all as read
-              </button>
+              </Button>
             )}
           </div>
 
@@ -97,7 +98,7 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
                       <span className="w-2 h-2 bg-terracotta rounded-full mt-1.5 flex-shrink-0" />
                     )}
                     <div className={`flex-1 ${notification.isRead ? 'ml-4' : ''}`}>
-                      <p className="text-sm font-medium text-foreground line-clamp-1">
+                      <p className="text-sm font-medium text-[#3E2723] line-clamp-1">
                         {notification.title}
                       </p>
                       {notification.body && (

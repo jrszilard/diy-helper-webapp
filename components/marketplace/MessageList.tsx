@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { MessageSquare, Paperclip } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
+import Avatar from '@/components/ui/Avatar';
+import Badge from '@/components/ui/Badge';
 import Link from 'next/link';
 
 interface Thread {
@@ -70,11 +72,7 @@ export default function MessageList({ threads, basePath }: MessageListProps) {
             href={`${basePath}/${thread.id}`}
             className="flex items-center gap-3 px-4 py-3 hover:bg-earth-tan/50 transition-colors"
           >
-            <div className="w-10 h-10 bg-slate-blue/10 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-sm font-bold text-slate-blue">
-                {thread.otherUserName.charAt(0).toUpperCase()}
-              </span>
-            </div>
+            <Avatar name={thread.otherUserName} size="sm" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-foreground">{thread.otherUserName}</span>
@@ -86,9 +84,7 @@ export default function MessageList({ threads, basePath }: MessageListProps) {
               </p>
             </div>
             {thread.unreadCount > 0 && (
-              <span className="w-5 h-5 bg-terracotta text-white text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0">
-                {thread.unreadCount}
-              </span>
+              <Badge variant="primary" size="sm">{thread.unreadCount}</Badge>
             )}
           </Link>
         );

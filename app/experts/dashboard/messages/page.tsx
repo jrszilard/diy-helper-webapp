@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Spinner from '@/components/ui/Spinner';
+import SectionHeader from '@/components/ui/SectionHeader';
+import Card from '@/components/ui/Card';
 import MessageList from '@/components/marketplace/MessageList';
 
 interface Thread {
@@ -55,10 +57,10 @@ export default function ExpertMessagesPage() {
 
   return (
     <div className="space-y-4 max-w-4xl">
-      <h1 className="text-xl font-bold text-foreground">Messages</h1>
-      <div className="bg-surface rounded-xl border border-earth-sand overflow-hidden">
+      <SectionHeader size="lg" title="Messages" />
+      <Card surface rounded="xl" padding="none" className="overflow-hidden">
         <MessageList threads={threads} basePath="/experts/dashboard/messages" />
-      </div>
+      </Card>
     </div>
   );
 }

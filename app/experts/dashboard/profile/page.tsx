@@ -4,11 +4,18 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { SPECIALTIES, SPECIALTY_LABELS } from '@/lib/marketplace/constants';
 import type { ExpertProfile, ExpertSpecialty } from '@/lib/marketplace/types';
-import { Save, CheckCircle, AlertCircle, Plus, X, Code, Copy, CheckCircle2 } from 'lucide-react';
+import { Save, Plus, X, Copy, CheckCircle2 } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
 import TextInput from '@/components/ui/TextInput';
+import Textarea from '@/components/ui/Textarea';
 import Select from '@/components/ui/Select';
 import SectionHeader from '@/components/ui/SectionHeader';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import IconButton from '@/components/ui/IconButton';
+import Alert from '@/components/ui/Alert';
+import EmptyState from '@/components/ui/EmptyState';
+import Toggle from '@/components/ui/Toggle';
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
@@ -160,9 +167,10 @@ export default function ExpertProfilePage() {
 
   if (!profile) {
     return (
-      <div className="text-center py-20 text-earth-brown">
-        <p>Unable to load profile.</p>
-      </div>
+      <EmptyState
+        description="Unable to load profile."
+        className="py-20"
+      />
     );
   }
 
@@ -170,136 +178,118 @@ export default function ExpertProfilePage() {
     <div className="max-w-2xl">
       <SectionHeader size="lg" title="Expert Profile" subtitle="Manage your expert profile and settings" className="mb-6" />
 
-      <div className="bg-surface rounded-2xl border border-earth-sand shadow-sm p-6 space-y-5">
+      <div className="space-y-5">
         {/* Display Name */}
-        <div>
-          <label className="block text-sm font-semibold text-foreground mb-1.5">Display Name</label>
-          <TextInput
-            type="text"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            fullWidth
-            maxLength={100}
-          />
-        </div>
+        <TextInput
+          id="profile-display-name"
+          label="Display Name"
+          type="text"
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          fullWidth
+          maxLength={100}
+        />
 
         {/* Bio */}
         <div>
-          <label className="block text-sm font-semibold text-foreground mb-1.5">Bio</label>
-          <textarea
+          <Textarea
+            label="Bio"
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             rows={3}
-            className="w-full border border-earth-sand rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-terracotta bg-white resize-none"
             maxLength={500}
             placeholder="Tell DIYers about your experience..."
+            resize="none"
+            fullWidth
           />
           <p className="text-xs text-earth-brown-light mt-1">{bio.length}/500</p>
         </div>
 
         {/* Location */}
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-1.5">City</label>
-            <TextInput
-              type="text"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              fullWidth
-              maxLength={100}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-1.5">State</label>
-            <Select
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-              fullWidth
-            >
-              <option value="">Select...</option>
-              {US_STATES.map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </Select>
-          </div>
+          <TextInput
+            id="profile-city"
+            label="City"
+            type="text"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            fullWidth
+            maxLength={100}
+          />
+          <Select
+            id="profile-state"
+            label="State"
+            value={state}
+            onChange={(e) => setState(e.target.value)}
+            fullWidth
+          >
+            <option value="">Select...</option>
+            {US_STATES.map(s => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </Select>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-1.5">Zip Code</label>
-            <TextInput
-              type="text"
-              value={zipCode}
-              onChange={(e) => setZipCode(e.target.value)}
-              fullWidth
-              maxLength={10}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-1.5">Service Radius (miles)</label>
-            <TextInput
-              type="number"
-              value={serviceRadiusMiles}
-              onChange={(e) => setServiceRadiusMiles(parseInt(e.target.value) || 0)}
-              min={1}
-              max={500}
-              fullWidth
-            />
-          </div>
+          <TextInput
+            id="profile-zip"
+            label="Zip Code"
+            type="text"
+            value={zipCode}
+            onChange={(e) => setZipCode(e.target.value)}
+            fullWidth
+            maxLength={10}
+          />
+          <TextInput
+            id="profile-radius"
+            label="Service Radius (miles)"
+            type="number"
+            value={serviceRadiusMiles}
+            onChange={(e) => setServiceRadiusMiles(parseInt(e.target.value) || 0)}
+            min={1}
+            max={500}
+            fullWidth
+          />
         </div>
 
         {/* Rates */}
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-1.5">Hourly Rate ($)</label>
-            <TextInput
-              type="number"
-              value={hourlyRate}
-              onChange={(e) => setHourlyRate(e.target.value)}
-              step="0.01"
-              min="0"
-              placeholder="75.00"
-              fullWidth
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-1.5">Q&A Rate ($)</label>
-            <TextInput
-              type="number"
-              value={qaRate}
-              onChange={(e) => setQaRate(e.target.value)}
-              step="0.01"
-              min="0"
-              placeholder="10.00"
-              fullWidth
-            />
-          </div>
+          <TextInput
+            id="profile-hourly-rate"
+            label="Hourly Rate ($)"
+            type="number"
+            value={hourlyRate}
+            onChange={(e) => setHourlyRate(e.target.value)}
+            step="0.01"
+            min="0"
+            placeholder="75.00"
+            fullWidth
+          />
+          <TextInput
+            id="profile-qa-rate"
+            label="Q&A Rate ($)"
+            type="number"
+            value={qaRate}
+            onChange={(e) => setQaRate(e.target.value)}
+            step="0.01"
+            min="0"
+            placeholder="10.00"
+            fullWidth
+          />
         </div>
 
         {/* Availability */}
-        <div className="flex items-center justify-between py-2">
-          <div>
-            <p className="text-sm font-semibold text-foreground">Available for Work</p>
-            <p className="text-xs text-earth-brown">Toggle off to pause receiving new questions</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setIsAvailable(!isAvailable)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              isAvailable ? 'bg-forest-green' : 'bg-earth-sand'
-            }`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                isAvailable ? 'translate-x-6' : 'translate-x-1'
-              }`}
-            />
-          </button>
-        </div>
+        <Toggle
+          id="profile-available"
+          label="Available for Work"
+          description="Toggle off to pause receiving new questions"
+          checked={isAvailable}
+          onChange={setIsAvailable}
+        />
 
         {/* Specialties */}
         <div>
-          <label className="block text-sm font-semibold text-foreground mb-2">Specialties</label>
+          <p className="text-sm font-semibold text-[var(--earth-brown-dark)] mb-2">Specialties</p>
           <div className="space-y-3">
             {specialties.map((spec, index) => (
               <div key={index} className="flex items-center gap-2">
@@ -321,86 +311,70 @@ export default function ExpertProfilePage() {
                   max={60}
                   className="w-16 text-center"
                 />
-                <button
+                <Button
                   type="button"
+                  variant={spec.isPrimary ? 'primary' : 'ghost'}
+                  size="xs"
                   onClick={() => updateSpecialty(index, 'isPrimary', true)}
-                  className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                    spec.isPrimary
-                      ? 'bg-terracotta text-white'
-                      : 'bg-earth-tan text-earth-brown hover:bg-earth-sand'
-                  }`}
-                  title="Set as primary"
                 >
                   Primary
-                </button>
+                </Button>
                 {specialties.length > 1 && (
-                  <button
-                    type="button"
+                  <IconButton
+                    icon={X}
+                    iconSize={16}
+                    label="Remove specialty"
                     onClick={() => removeSpecialty(index)}
-                    className="p-1.5 text-earth-brown-light hover:text-terracotta transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                    className="!p-1.5"
+                  />
                 )}
               </div>
             ))}
           </div>
           {specialties.length < 5 && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
+              leftIcon={Plus}
               onClick={addSpecialty}
-              className="mt-2 inline-flex items-center gap-1 text-sm text-slate-blue hover:text-slate-blue-dark font-medium transition-colors"
+              className="mt-2 !text-slate-blue hover:!text-slate-blue-dark"
             >
-              <Plus className="w-4 h-4" />
               Add Specialty
-            </button>
+            </Button>
           )}
         </div>
 
         {/* Toast */}
         {toast && (
-          <div className={`flex items-center gap-2 p-3 rounded-lg text-sm font-medium ${
-            toast.type === 'success'
-              ? 'bg-forest-green/10 text-forest-green'
-              : 'bg-terracotta/10 text-terracotta'
-          }`}>
-            {toast.type === 'success' ? (
-              <CheckCircle className="w-4 h-4 flex-shrink-0" />
-            ) : (
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            )}
+          <Alert variant={toast.type === 'success' ? 'success' : 'error'}>
             {toast.message}
-          </div>
+          </Alert>
         )}
 
         {/* Save */}
-        <button
+        <Button
+          variant="primary"
+          size="md"
+          leftIcon={saving ? undefined : Save}
           onClick={handleSave}
           disabled={saving}
-          className="inline-flex items-center gap-2 bg-terracotta text-white px-6 py-2.5 rounded-lg hover:bg-terracotta-dark font-semibold disabled:opacity-50 transition"
         >
-          {saving ? (
-            <Spinner size="sm" />
-          ) : (
-            <Save className="w-4 h-4" />
-          )}
-          {saving ? 'Saving...' : 'Save Changes'}
-        </button>
+          {saving ? <><Spinner size="sm" /> Saving...</> : 'Save Changes'}
+        </Button>
       </div>
 
       {/* Embeddable Badge */}
       {profile && (
-        <div className="bg-surface rounded-2xl border border-earth-sand shadow-sm p-6 mt-6">
-          <h2 className="text-lg font-bold text-foreground mb-1 flex items-center gap-2">
-            <Code size={18} className="text-slate-blue" />
-            Embeddable Badge
-          </h2>
-          <p className="text-sm text-earth-brown mb-4">
-            Add your verified expert badge to your website, portfolio, or social profiles.
-          </p>
+        <Card surface rounded="2xl" shadow="sm" padding="lg" className="mt-6 space-y-4">
+          <SectionHeader
+            size="sm"
+            title="Embeddable Badge"
+            subtitle="Add your verified expert badge to your website, portfolio, or social profiles."
+          />
 
           {/* Badge preview */}
-          <div className="bg-white border border-earth-sand rounded-lg p-4 mb-4 flex items-center justify-center">
+          <div className="bg-white border border-earth-sand rounded-lg p-4 flex items-center justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`/api/experts/${profile.id}/badge`}
@@ -412,11 +386,14 @@ export default function ExpertProfilePage() {
 
           {/* Embed code */}
           <div className="relative">
-            <label className="block text-xs font-semibold text-earth-brown mb-1">HTML Embed Code</label>
-            <div className="bg-foreground text-earth-tan rounded-lg p-3 pr-12 text-xs font-mono overflow-x-auto">
+            <p className="text-xs font-semibold text-earth-brown mb-1">HTML Embed Code</p>
+            <div className="bg-[#3E2723] text-earth-tan rounded-lg p-3 pr-12 text-xs font-mono overflow-x-auto">
               {`<a href="${typeof window !== 'undefined' ? window.location.origin : ''}/experts/${profile.id}" target="_blank" rel="noopener"><img src="${typeof window !== 'undefined' ? window.location.origin : ''}/api/experts/${profile.id}/badge" alt="Verified Expert on DIY Helper" width="280" height="90" /></a>`}
             </div>
-            <button
+            <IconButton
+              icon={badgeCopied ? CheckCircle2 : Copy}
+              iconSize={14}
+              label="Copy embed code"
               onClick={() => {
                 const origin = window.location.origin;
                 const code = `<a href="${origin}/experts/${profile.id}" target="_blank" rel="noopener"><img src="${origin}/api/experts/${profile.id}/badge" alt="Verified Expert on DIY Helper" width="280" height="90" /></a>`;
@@ -424,21 +401,14 @@ export default function ExpertProfilePage() {
                 setBadgeCopied(true);
                 setTimeout(() => setBadgeCopied(false), 2000);
               }}
-              className="absolute top-7 right-2 p-1.5 rounded hover:bg-white/10 transition-colors"
-              title="Copy embed code"
-            >
-              {badgeCopied ? (
-                <CheckCircle2 size={14} className="text-forest-green" />
-              ) : (
-                <Copy size={14} className="text-earth-tan" />
-              )}
-            </button>
+              className="absolute top-7 right-2 !p-1.5 hover:bg-earth-tan"
+            />
           </div>
 
-          <p className="text-xs text-muted mt-2">
+          <p className="text-xs text-muted">
             Your badge updates automatically as you answer questions and earn reviews.
           </p>
-        </div>
+        </Card>
       )}
     </div>
   );

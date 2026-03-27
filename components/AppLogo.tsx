@@ -4,11 +4,12 @@ import { Wrench } from 'lucide-react';
 interface AppLogoProps {
   showLabel?: boolean;
   variant?: 'light' | 'dark';
+  href?: string;
 }
 
-export default function AppLogo({ showLabel = true, variant = 'light' }: AppLogoProps) {
+export default function AppLogo({ showLabel = true, variant = 'light', href = '/' }: AppLogoProps) {
   return (
-    <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
+    <Link href={href} className="flex items-center gap-2 hover:opacity-80 transition">
       <div className="bg-gradient-to-br from-terracotta to-terracotta-dark p-1.5 rounded-lg">
         <Wrench className="w-5 h-5 text-white" />
       </div>
