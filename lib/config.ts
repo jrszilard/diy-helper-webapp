@@ -189,6 +189,19 @@ export const expertSubscriptions = {
   },
 } as const;
 
+// ── Intelligence ─────────────────────────────────────────────────────────────
+export const intelligence = {
+  /** Model for intent classification (fast, cheap) */
+  classificationModel: envString('INTENT_CLASSIFICATION_MODEL', 'claude-haiku-4-5-20251001'),
+  classificationMaxTokens: envInt('INTENT_CLASSIFICATION_MAX_TOKENS', 100),
+  /** Confidence threshold — below this, ask user to clarify */
+  confidenceThreshold: envFloat('INTENT_CONFIDENCE_THRESHOLD', 0.7),
+  /** Max ms to wait for classification before falling back.
+   *  Spec target is <300ms, but 500ms gives headroom for cold starts.
+   *  Haiku typically responds in 100-200ms; this timeout is a safety net. */
+  classificationTimeoutMs: envInt('INTENT_CLASSIFICATION_TIMEOUT_MS', 500),
+} as const;
+
 // Re-export everything as a single default for convenience
-const config = { beta, anthropic, rateLimits, cors, storeSearch, streaming, pruning, freemium, stripe, marketplace, expertSubscriptions } as const;
+const config = { beta, anthropic, rateLimits, cors, storeSearch, streaming, pruning, freemium, stripe, marketplace, expertSubscriptions, intelligence } as const;
 export default config;

@@ -3,11 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Send, Loader2, CreditCard, Wallet, Shield, CheckCircle2, Zap, MessageSquare, FileCheck, Users, TrendingUp } from 'lucide-react';
 import { formatPrice } from '@/lib/formatPrice';
-import Spinner from '@/components/ui/Spinner';
 import { supabase } from '@/lib/supabase';
-import Button from '@/components/ui/Button';
-import Select from '@/components/ui/Select';
-import Textarea from '@/components/ui/Textarea';
+import { Spinner, Button, Select, Textarea, FileUpload } from '@/components/ui';
 import type { ExpertContext } from '@/lib/marketplace/types';
 import ProjectContextCard from '@/components/marketplace/ProjectContextCard';
 
@@ -18,6 +15,8 @@ interface QASubmitFormProps {
   onSuccess: (questionId: string) => void;
   targetExpertId?: string;
   targetExpertName?: string;
+  initialQuestion?: string;
+  initialCategory?: string;
 }
 
 const CATEGORIES = [
@@ -42,10 +41,12 @@ export default function QASubmitForm({
   onSuccess,
   targetExpertId,
   targetExpertName,
+  initialQuestion,
+  initialCategory,
 }: QASubmitFormProps) {
-  const [category, setCategory] = useState('general');
-  const [questionText, setQuestionText] = useState('');
-  const [photoUrls, setPhotoUrls] = useState('');
+  const [category, setCategory] = useState(initialCategory || 'general');
+  const [questionText, setQuestionText] = useState(initialQuestion || '');
+  const [photos, setPhotos] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFirstQuestion, setIsFirstQuestion] = useState(false);
@@ -126,11 +127,10 @@ export default function QASubmitForm({
     if (questionText.trim().length < 20) return;
     if (priceFetchTimer.current) clearTimeout(priceFetchTimer.current);
     priceFetchTimer.current = setTimeout(() => {
-      const photoCount = photoUrls.split('\n').filter(u => u.trim()).length;
-      fetchPrice(category, questionText.trim(), photoCount);
+      fetchPrice(category, questionText.trim(), photos.length);
     }, 800);
     return () => { if (priceFetchTimer.current) clearTimeout(priceFetchTimer.current); };
-  }, [category, questionText, photoUrls, fetchPrice]);
+  }, [category, questionText, photos.length, fetchPrice]);
 
   const handleSetupPayment = async () => {
     setSavingCard(true);
@@ -225,10 +225,20 @@ export default function QASubmitForm({
         return;
       }
 
-      const photos = photoUrls
-        .split('\n')
-        .map(u => u.trim())
-        .filter(Boolean);
+      let uploadedUrls: string[] = [];
+      if (photos.length > 0) {
+        const formData = new FormData();
+        photos.forEach((file) => formData.append('files', file));
+        const uploadRes = await fetch('/api/messages/upload', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json();
+          uploadedUrls = uploadData.urls || [];
+        }
+      }
 
       const res = await fetch('/api/qa', {
         method: 'POST',
@@ -240,7 +250,7 @@ export default function QASubmitForm({
           reportId,
           category,
           questionText: questionText.trim(),
-          photoUrls: photos,
+          photoUrls: uploadedUrls,
           paymentMethodId: paymentMethodId || undefined,
           targetExpertId: targetExpertId || undefined,
         }),
@@ -289,7 +299,7 @@ export default function QASubmitForm({
         <div className="mb-4">
           <ProjectContextCard
             context={expertContext}
-            photoCount={photoUrls.split('\n').filter(u => u.trim()).length || undefined}
+            photoCount={photos.length || undefined}
             compact
           />
         </div>
@@ -369,15 +379,13 @@ export default function QASubmitForm({
           <p className="text-xs text-[var(--muted)] mt-1">{questionText.length} characters (minimum 20)</p>
         </div>
 
-        {/* Photo URLs */}
-        <Textarea
-          label="Photo URLs (optional)"
-          value={photoUrls}
-          onChange={e => setPhotoUrls(e.target.value)}
-          rows={2}
-          fullWidth
-          resize="none"
-          placeholder="One URL per line"
+        {/* Photos */}
+        <FileUpload
+          files={photos}
+          onChange={setPhotos}
+          maxFiles={3}
+          maxSizeMB={5}
+          label="Photos"
         />
 
         {/* ── Payment Section (always visible) ── */}

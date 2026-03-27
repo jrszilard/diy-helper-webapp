@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Send, AlertTriangle } from 'lucide-react';
+import { Send, AlertTriangle, Wrench } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import Button from '@/components/ui/Button';
-import Textarea from '@/components/ui/Textarea';
-import Spinner from '@/components/ui/Spinner';
+import { Button, Textarea, Spinner, Modal } from '@/components/ui';
+import ExpertCoPilot from './ExpertCoPilot';
 
 interface QAAnswerFormProps {
   questionId: string;
@@ -19,6 +18,7 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
   const [proReason, setProReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isToolsOpen, setIsToolsOpen] = useState(false);
 
   const charCount = answerText.length;
   const isValid = charCount >= 50 && charCount <= 2000;
@@ -81,6 +81,16 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
 
       <div className="space-y-4">
         <div>
+          <div className="flex justify-end mb-2">
+            <Button
+              variant="tertiary"
+              size="sm"
+              leftIcon={Wrench}
+              onClick={() => setIsToolsOpen(true)}
+            >
+              Expert Tools
+            </Button>
+          </div>
           <Textarea
             value={answerText}
             onChange={e => setAnswerText(e.target.value)}
@@ -145,6 +155,22 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
           </Button>
         </div>
       </div>
+
+      <Modal
+        isOpen={isToolsOpen}
+        onClose={() => setIsToolsOpen(false)}
+        title="Expert Tools"
+        position="right"
+        className="max-w-lg"
+      >
+        <ExpertCoPilot
+          questionId={questionId}
+          onInsertDraft={(draft) => {
+            setAnswerText(draft);
+            setIsToolsOpen(false);
+          }}
+        />
+      </Modal>
     </div>
   );
 }
