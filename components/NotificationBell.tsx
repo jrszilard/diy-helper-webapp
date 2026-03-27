@@ -17,8 +17,6 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const [currentTime, setCurrentTime] = useState(() => Date.now());
-
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -27,11 +25,6 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(Date.now()), 60000);
-    return () => clearInterval(interval);
   }, []);
 
   if (!userId) return null;
@@ -45,7 +38,7 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
   };
 
   const formatTimeAgo = (dateStr: string) => {
-    const diff = currentTime - new Date(dateStr).getTime();
+    const diff = Date.now() - new Date(dateStr).getTime();
     const minutes = Math.floor(diff / 60000);
     if (minutes < 1) return 'just now';
     if (minutes < 60) return `${minutes}m ago`;

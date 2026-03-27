@@ -20,7 +20,7 @@ export class ChatPage {
     this.myToolsButton = page.locator('button', { hasText: 'My Tools' });
     this.welcomeMessage = page.locator('text=Welcome to DIY Helper!');
     this.saveMaterialsDialog = page.locator(
-      '[role="dialog"][aria-label="Save Materials to Project"]'
+      '[role="dialog"][aria-label="Save materials to project"]'
     );
     this.messagesArea = page.locator('.overflow-y-auto');
   }

@@ -1,0 +1,57 @@
+<h2>Photo Upload Component Style</h2>
+<p class="subtitle">marketplace-build replaced the photo URL textarea with actual file upload + preview in QASubmitForm and LandingExpertForm. Main's design system has <code>TextInput</code>, <code>Button</code>, and <code>Card</code> components. How should the photo upload look?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Drop Zone + Thumbnail Grid</h3>
+      <p>A dashed border drop zone with "click or drag" prompt. Uploaded photos show as a grid of thumbnails below with remove buttons. Matches the earthy card style.</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="padding: 16px; background: #FDFBF7;">
+          <label style="font-size: 14px; font-weight: 600; color: #2C1810; display: block; margin-bottom: 8px;">Photos <span style="font-weight: 400; color: #8B7355;">(optional, max 3)</span></label>
+          <!-- Drop zone -->
+          <div style="border: 2px dashed #D4C5B0; border-radius: 12px; padding: 24px; text-align: center; background: white; cursor: pointer; margin-bottom: 12px;">
+            <div style="font-size: 28px; margin-bottom: 4px;">📷</div>
+            <p style="font-size: 14px; font-weight: 500; color: #2C1810;">Click to upload or drag photos here</p>
+            <p style="font-size: 12px; color: #8B7355;">JPG, PNG up to 5MB each</p>
+          </div>
+          <!-- Thumbnail grid -->
+          <div style="display: flex; gap: 8px;">
+            <div style="position: relative; width: 80px; height: 80px; border-radius: 8px; background: #E8DDD0; border: 1px solid #D4C5B0; overflow: hidden;">
+              <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 24px;">🖼️</div>
+              <div style="position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; background: #B84A28; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer;">×</div>
+            </div>
+            <div style="position: relative; width: 80px; height: 80px; border-radius: 8px; background: #E8DDD0; border: 1px solid #D4C5B0; overflow: hidden;">
+              <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 24px;">🖼️</div>
+              <div style="position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; background: #B84A28; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer;">×</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Compact Button + Inline Previews</h3>
+      <p>A simple "Add Photos" button (secondary variant) that opens a file picker. Uploaded photos appear as small inline chips with filename and remove icon. More compact, less visual weight.</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="padding: 16px; background: #FDFBF7;">
+          <label style="font-size: 14px; font-weight: 600; color: #2C1810; display: block; margin-bottom: 8px;">Photos <span style="font-weight: 400; color: #8B7355;">(optional)</span></label>
+          <button style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; border: 1px solid #4A7C59; color: #4A7C59; font-size: 14px; font-weight: 600; background: white; cursor: pointer; margin-bottom: 10px;">📎 Add Photos <span style="font-size: 12px; color: #8B7355;">(2/3)</span></button>
+          <!-- File chips -->
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; background: #F0EBE3; border-radius: 6px; font-size: 13px; color: #2C1810;">
+              <span>📷</span> kitchen-outlet.jpg <span style="color: #B84A28; cursor: pointer; font-weight: bold;">×</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; background: #F0EBE3; border-radius: 6px; font-size: 13px; color: #2C1810;">
+              <span>📷</span> panel-closeup.jpg <span style="color: #B84A28; cursor: pointer; font-weight: bold;">×</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

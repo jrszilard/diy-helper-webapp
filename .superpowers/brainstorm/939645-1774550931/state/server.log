@@ -1,0 +1,5 @@
+{"type":"server-started","port":60537,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:60537","screen_dir":"/home/justin/lakeshore-studio/ai-projects/diy-helper-webapp/.superpowers/brainstorm/939645-1774550931/content","state_dir":"/home/justin/lakeshore-studio/ai-projects/diy-helper-webapp/.superpowers/brainstorm/939645-1774550931/state"}
+{"type":"screen-added","file":"/home/justin/lakeshore-studio/ai-projects/diy-helper-webapp/.superpowers/brainstorm/939645-1774550931/content/landing-hero-integration.html"}
+{"type":"screen-added","file":"/home/justin/lakeshore-studio/ai-projects/diy-helper-webapp/.superpowers/brainstorm/939645-1774550931/content/photo-upload-style.html"}
+{"type":"screen-added","file":"/home/justin/lakeshore-studio/ai-projects/diy-helper-webapp/.superpowers/brainstorm/939645-1774550931/content/waiting.html"}
+{"type":"server-stopped","reason":"idle timeout"}

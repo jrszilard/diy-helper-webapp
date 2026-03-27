@@ -159,9 +159,9 @@ export default function DesignSystemPage() {
         {/* ── Typography ──────────────────────────────────────────────────── */}
         <Section title="Typography Scale">
           <div className="space-y-2">
-            <div className="flex items-baseline gap-4"><span className="text-2xl font-bold text-[var(--earth-brown-dark)]">text-2xl bold</span><span className="text-xs text-muted">page headings (size=&quot;lg&quot;)</span></div>
-            <div className="flex items-baseline gap-4"><span className="text-lg font-semibold text-[var(--earth-brown-dark)]">text-lg semibold</span><span className="text-xs text-muted">section headings (size=&quot;md&quot;)</span></div>
-            <div className="flex items-baseline gap-4"><span className="text-base font-semibold text-[var(--earth-brown-dark)]">text-base semibold</span><span className="text-xs text-muted">sub-headings (size=&quot;sm&quot;)</span></div>
+            <div className="flex items-baseline gap-4"><span className="text-2xl font-bold text-[var(--earth-brown-dark)]">text-2xl bold</span><span className="text-xs text-muted">page headings (size="lg")</span></div>
+            <div className="flex items-baseline gap-4"><span className="text-lg font-semibold text-[var(--earth-brown-dark)]">text-lg semibold</span><span className="text-xs text-muted">section headings (size="md")</span></div>
+            <div className="flex items-baseline gap-4"><span className="text-base font-semibold text-[var(--earth-brown-dark)]">text-base semibold</span><span className="text-xs text-muted">sub-headings (size="sm")</span></div>
             <div className="flex items-baseline gap-4"><span className="text-sm text-[var(--earth-brown)]">text-sm</span><span className="text-xs text-muted">body text</span></div>
             <div className="flex items-baseline gap-4"><span className="text-xs text-[var(--earth-brown-light)]">text-xs</span><span className="text-xs text-muted">captions, labels</span></div>
             <div className="flex items-baseline gap-4"><span className="text-2xs text-[var(--muted)]">text-2xs</span><span className="text-xs text-muted">micro labels (10px)</span></div>

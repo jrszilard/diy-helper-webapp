@@ -157,7 +157,7 @@ export default function WhyDIYHelper() {
           {/* Question Display */}
           <div className="bg-earth-brown-dark text-white rounded-xl p-4 mb-8 text-center">
             <p className="text-sm text-earth-sand mb-1">Your question:</p>
-            <p className="text-lg font-medium">&quot;{scenario.question}&quot;</p>
+            <p className="text-lg font-medium">"{scenario.question}"</p>
           </div>
 
           {/* Comparison Grid */}

@@ -27,12 +27,9 @@ export function useNotifications(userId: string | undefined) {
   }, [userId]);
 
   useEffect(() => {
-    const timeout = setTimeout(fetchNotifications, 0);
+    fetchNotifications();
     const interval = setInterval(fetchNotifications, 30000);
-    return () => {
-      clearTimeout(timeout);
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [fetchNotifications]);
 
   const markAsRead = async (id: string) => {

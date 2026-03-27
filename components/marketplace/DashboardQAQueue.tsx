@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { MessageSquare, Clock, ArrowRight } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import SectionHeader from '@/components/ui/SectionHeader';
@@ -21,14 +20,8 @@ interface DashboardQAQueueProps {
 }
 
 export default function DashboardQAQueue({ questions }: DashboardQAQueueProps) {
-  const [currentTime, setCurrentTime] = useState(() => Date.now());
-  useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(Date.now()), 60000);
-    return () => clearInterval(interval);
-  }, []);
-
   const formatTimeAgo = (dateStr: string) => {
-    const diff = currentTime - new Date(dateStr).getTime();
+    const diff = Date.now() - new Date(dateStr).getTime();
     const minutes = Math.floor(diff / 60000);
     if (minutes < 1) return 'just now';
     if (minutes < 60) return `${minutes}m ago`;
