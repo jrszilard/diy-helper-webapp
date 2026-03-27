@@ -5,13 +5,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { redirectToSignIn } from '@/lib/auth-redirect';
-import AuthButton from '@/components/AuthButton';
-import NotificationBell from '@/components/NotificationBell';
-import { useExpertStatus } from '@/hooks/useExpertStatus';
-import { Wrench, ArrowLeft, Save, CheckCircle, AlertCircle } from 'lucide-react';
+import DIYerHeader from '@/components/DIYerHeader';
+import { ArrowLeft, Save } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
+import Button from '@/components/ui/Button';
 import TextInput from '@/components/ui/TextInput';
-import SectionHeader from '@/components/ui/SectionHeader';
+import Alert from '@/components/ui/Alert';
 
 interface UserProfile {
   email: string | null;
@@ -27,8 +26,6 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-  const { isExpert } = useExpertStatus();
-
   // Form fields
   const [displayName, setDisplayName] = useState('');
   const [phone, setPhone] = useState('');
@@ -92,135 +89,90 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-earth-cream flex items-center justify-center">
+      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
         <Spinner size="lg" className="text-terracotta" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-earth-cream">
-      {/* Header */}
-      <header className="bg-surface border-b border-earth-sand shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="bg-gradient-to-br from-terracotta to-terracotta-dark p-1.5 rounded-lg">
-              <Wrench className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-lg font-bold text-foreground">DIY Helper</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <NotificationBell userId={user?.id} />
-            <AuthButton user={user} isExpert={isExpert} />
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-earth-brown-dark">
+      <DIYerHeader />
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Back link */}
         <Link
           href="/chat"
-          className="inline-flex items-center gap-1.5 text-sm text-earth-brown hover:text-foreground mb-6 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-[var(--earth-sand)] hover:text-white mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Chat
         </Link>
 
-        <div className="bg-surface rounded-2xl border border-earth-sand shadow-sm overflow-hidden">
-          <div className="px-6 py-5 border-b border-earth-tan">
-            <SectionHeader size="lg" title="My Profile" subtitle="Manage your account information" />
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-white">My Profile</h2>
+          <p className="text-sm text-[var(--earth-sand)] mt-0.5">Manage your account information</p>
+        </div>
+
+        <div className="space-y-5">
+          <TextInput
+            id="profile-display-name"
+            label="Display Name"
+            labelClassName="text-white"
+            type="text"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            placeholder="Your name"
+            fullWidth
+            maxLength={100}
+          />
+
+          <div>
+            <TextInput
+              id="profile-email"
+              label="Email"
+              labelClassName="text-white"
+              type="email"
+              value={profile?.email || ''}
+              readOnly
+              fullWidth
+              className="cursor-not-allowed opacity-60"
+            />
+            <p className="text-xs text-[var(--earth-sand)]/70 mt-1">Email cannot be changed here</p>
           </div>
 
-          <div className="p-6 space-y-5">
-            {/* Display Name */}
-            <div>
-              <label className="block text-sm font-semibold text-foreground mb-1.5">
-                Display Name
-              </label>
-              <TextInput
-                type="text"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Your name"
-                fullWidth
-                maxLength={100}
-              />
-            </div>
+          <TextInput
+            id="profile-phone"
+            label="Phone"
+            labelClassName="text-white"
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="(555) 123-4567"
+            fullWidth
+            maxLength={20}
+          />
 
-            {/* Email (read-only) */}
-            <div>
-              <label className="block text-sm font-semibold text-foreground mb-1.5">
-                Email
-              </label>
-              <TextInput
-                type="email"
-                value={profile?.email || ''}
-                readOnly
-                fullWidth
-                className="border-earth-tan text-earth-brown bg-earth-cream cursor-not-allowed"
-              />
-              <p className="text-xs text-earth-brown-light mt-1">Email cannot be changed here</p>
-            </div>
+          <TextInput
+            id="profile-created"
+            label="Account Created"
+            labelClassName="text-white"
+            type="text"
+            value={profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+            readOnly
+            fullWidth
+            className="cursor-not-allowed opacity-60"
+          />
 
-            {/* Phone */}
-            <div>
-              <label className="block text-sm font-semibold text-foreground mb-1.5">
-                Phone
-              </label>
-              <TextInput
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="(555) 123-4567"
-                fullWidth
-                maxLength={20}
-              />
-            </div>
+          {toast && (
+            <Alert variant={toast.type === 'success' ? 'success' : 'error'}>
+              {toast.message}
+            </Alert>
+          )}
 
-            {/* Account Created (read-only) */}
-            <div>
-              <label className="block text-sm font-semibold text-foreground mb-1.5">
-                Account Created
-              </label>
-              <TextInput
-                type="text"
-                value={profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
-                readOnly
-                fullWidth
-                className="border-earth-tan text-earth-brown bg-earth-cream cursor-not-allowed"
-              />
-            </div>
-
-            {/* Toast */}
-            {toast && (
-              <div className={`flex items-center gap-2 p-3 rounded-lg text-sm font-medium ${
-                toast.type === 'success'
-                  ? 'bg-forest-green/10 text-forest-green'
-                  : 'bg-terracotta/10 text-terracotta'
-              }`}>
-                {toast.type === 'success' ? (
-                  <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                ) : (
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                )}
-                {toast.message}
-              </div>
-            )}
-
-            {/* Save button */}
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="inline-flex items-center gap-2 bg-terracotta text-white px-6 py-2.5 rounded-lg hover:bg-terracotta-dark font-semibold disabled:opacity-50 transition"
-            >
-              {saving ? (
-                <Spinner size="sm" />
-              ) : (
-                <Save className="w-4 h-4" />
-              )}
-              {saving ? 'Saving...' : 'Save Changes'}
-            </button>
-          </div>
+          <Button variant="primary" onClick={handleSave} disabled={saving} leftIcon={saving ? undefined : Save} iconSize={16}>
+            {saving ? <><Spinner size="sm" /> Saving...</> : 'Save Changes'}
+          </Button>
         </div>
       </div>
     </div>

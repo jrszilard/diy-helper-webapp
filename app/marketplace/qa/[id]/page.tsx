@@ -6,7 +6,11 @@ import { supabase } from '@/lib/supabase';
 import { ArrowLeft, Target, Users, RotateCcw, XCircle, CreditCard, Shield, Zap, DollarSign, Clock, Gavel, ArrowUpRight } from 'lucide-react';
 import { formatPrice } from '@/lib/formatPrice';
 import Spinner from '@/components/ui/Spinner';
-import Link from 'next/link';
+import DIYerHeader from '@/components/DIYerHeader';
+import Button from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
+import Alert from '@/components/ui/Alert';
+import Card from '@/components/ui/Card';
 import QAAnswerView from '@/components/marketplace/QAAnswerView';
 import QAAnswerForm from '@/components/marketplace/QAAnswerForm';
 import ConversationView from '@/components/marketplace/ConversationView';
@@ -198,7 +202,7 @@ export default function QADetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-earth-cream flex items-center justify-center">
+      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
         <Spinner size="lg" className="text-terracotta" />
       </div>
     );
@@ -206,12 +210,12 @@ export default function QADetailPage() {
 
   if (!question) {
     return (
-      <div className="min-h-screen bg-earth-cream flex items-center justify-center">
+      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
         <div className="text-center">
-          <p className="text-sm text-earth-brown mb-4">Question not found</p>
-          <Link href="/marketplace/qa" className="text-sm text-slate-blue hover:underline">
-            Back to Q&A
-          </Link>
+          <p className="text-sm text-[var(--earth-sand)] mb-4">Question not found</p>
+          <Button variant="ghost" href="/marketplace/qa" leftIcon={ArrowLeft} size="sm" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10">
+            Back to Q&amp;A
+          </Button>
         </div>
       </div>
     );
@@ -339,120 +343,68 @@ export default function QADetailPage() {
     : q.status === 'expired'
     ? { label: 'Not charged', color: 'gray', detail: 'Question expired — you were not charged' }
     : { label: 'Pending', color: 'gray', detail: 'Payment pending' };
-  const statusColors: Record<string, string> = {
-    green: 'bg-green-50 border-green-200 text-green-800',
-    amber: 'bg-amber-50 border-amber-200 text-amber-800',
-    blue: 'bg-blue-50 border-blue-200 text-blue-800',
-    gray: 'bg-gray-50 border-gray-200 text-gray-600',
-  };
 
   return (
-    <div className="min-h-screen bg-earth-cream">
-      <header className="bg-surface border-b border-earth-sand shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link
-            href="/marketplace/qa"
-            className="flex items-center gap-1.5 text-sm text-slate-blue hover:text-slate-blue-dark transition-colors"
-          >
-            <ArrowLeft size={16} />
-            Back to Q&A
-          </Link>
+    <div className="min-h-screen bg-earth-brown-dark">
+      <DIYerHeader />
+
+      <main className="max-w-4xl mx-auto px-4 py-8 space-y-4">
+        <div className="flex items-center justify-between mb-2">
+          <Button variant="ghost" href="/marketplace/qa" leftIcon={ArrowLeft} size="sm" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10">
+            Back to Q&amp;A
+          </Button>
           <div className="flex items-center gap-2">
-            {/* Bidding badge */}
-            {isBiddingMode && (
-              <span className="flex items-center gap-1 text-xs px-2 py-1 bg-terracotta/10 text-terracotta rounded-full font-medium">
-                <Gavel size={12} />
-                Bidding
-              </span>
-            )}
-            {/* Mode badge */}
-            {question.questionMode === 'direct' ? (
-              <span className="flex items-center gap-1 text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full font-medium">
-                <Target size={12} />
-                Direct
-              </span>
-            ) : (
-              <span className="flex items-center gap-1 text-xs px-2 py-1 bg-earth-tan text-earth-brown rounded-full font-medium">
-                <Users size={12} />
-                Pool
-              </span>
-            )}
-            {/* Status badges */}
-            {question.status === 'expired' && (
-              <span className="flex items-center gap-1 text-xs px-2 py-1 bg-red-100 text-red-700 rounded-full font-medium">
-                <XCircle size={12} />
-                Expired
-              </span>
-            )}
-            {question.refundId && (
-              <span className="flex items-center gap-1 text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">
-                <RotateCcw size={12} />
-                Refunded
-              </span>
-            )}
+            {isBiddingMode && <Badge variant="primary" icon={Gavel}>Bidding</Badge>}
+            {question.questionMode === 'direct'
+              ? <Badge variant="purple" icon={Target}>Direct</Badge>
+              : <Badge variant="neutral" icon={Users}>Pool</Badge>}
+            {question.status === 'expired' && <Badge variant="warning" icon={XCircle}>Expired</Badge>}
+            {question.refundId && <Badge variant="success" icon={RotateCcw}>Refunded</Badge>}
           </div>
         </div>
-      </header>
-
-      <main className="max-w-3xl mx-auto px-4 py-8 space-y-4">
         {/* Test mode banner */}
         {isTestPayment && (
-          <div className="p-3 bg-amber-50 border border-amber-300 rounded-lg flex items-center gap-2">
-            <Zap size={16} className="text-amber-600 flex-shrink-0" />
-            <p className="text-sm text-amber-800 font-medium">
-              Test Mode — This question uses fake payments. No real money was charged.
-            </p>
-          </div>
+          <Alert variant="warning" icon={Zap}>
+            Test Mode — This question uses fake payments. No real money was charged.
+          </Alert>
         )}
 
         {/* Payment status card (DIYer only) */}
         {isDIYer && (
-          <div className={`border rounded-lg p-4 ${statusColors[paymentStatus.color]}`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {paymentStatus.color === 'blue' ? (
-                  <Shield size={16} />
-                ) : paymentStatus.color === 'green' ? (
-                  <RotateCcw size={16} />
-                ) : (
-                  <DollarSign size={16} />
+          <Alert variant={
+            paymentStatus.color === 'green' ? 'success' :
+            paymentStatus.color === 'amber' ? 'warning' :
+            'info'
+          }>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <span className="font-semibold">{paymentStatus.label}</span>
+                <p className="text-xs mt-0.5 opacity-80">{paymentStatus.detail}</p>
+                {(question.currentTier || 1) > 1 && (
+                  <p className="text-xs mt-0.5 opacity-80">Tier {question.currentTier} · Total: {formatPrice(question.priceCents, true)}</p>
                 )}
-                <span className="text-sm font-semibold">{paymentStatus.label}</span>
               </div>
               {!isFree && question.priceCents > 0 && (
-                <span className="text-sm font-bold">{formatPrice(question.priceCents, true)}</span>
+                <span className="font-bold text-sm">{formatPrice(question.priceCents, true)}</span>
               )}
             </div>
-            <p className="text-xs mt-1 opacity-80">{paymentStatus.detail}</p>
-            {(question.currentTier || 1) > 1 && (
-              <p className="text-xs mt-1 opacity-80">
-                Tier {question.currentTier} &middot; Total: {formatPrice(question.priceCents, true)}
-              </p>
-            )}
-            {isTestPayment && question.paymentIntentId && (
-              <p className="text-xs mt-1 font-mono opacity-60">ID: {question.paymentIntentId}</p>
-            )}
-          </div>
+          </Alert>
         )}
 
         {/* Credit notice after not-helpful */}
         {showCreditNotice && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <p className="text-sm text-green-700 font-medium">
-              Platform credit has been added to your account.
-            </p>
+          <Alert variant="success">
+            <p className="font-medium">Platform credit has been added to your account.</p>
             <CreditBalance className="mt-2" showZero />
-          </div>
+          </Alert>
         )}
 
         {/* Question text card (shown for all roles) */}
-        <div className="bg-white border border-earth-sand rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-earth-brown mb-2">Question</h3>
+        <Card padding="sm">
+          <h3 className="text-sm font-semibold text-[var(--earth-brown-dark)] mb-2">Question</h3>
           <p className="text-sm text-foreground">{question.questionText}</p>
           <div className="flex items-center gap-3 mt-3">
-            <span className="inline-block text-xs px-2 py-0.5 bg-slate-blue/10 text-slate-blue rounded-full font-medium">
-              {question.category}
-            </span>
+            <Badge variant="default">{question.category}</Badge>
             {isExpert && question.status === 'claimed' && !isThreaded && (
               <span className="flex items-center gap-1 text-xs text-earth-brown">
                 <Clock size={12} />
@@ -460,11 +412,11 @@ export default function QADetailPage() {
               </span>
             )}
           </div>
-        </div>
+        </Card>
 
         {/* Bids section (bidding mode, DIYer view — before expert is selected) */}
         {isBiddingMode && isDIYer && question.status === 'open' && (
-          <div className="bg-white border border-earth-sand rounded-lg p-4">
+          <Card padding="sm">
             <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
               <Gavel size={16} className="text-terracotta" />
               Expert Proposals ({bids.length})
@@ -487,7 +439,7 @@ export default function QADetailPage() {
                 ))}
               </div>
             )}
-          </div>
+          </Card>
         )}
 
         {/* Threaded conversation view */}
@@ -546,7 +498,7 @@ export default function QADetailPage() {
 
         {/* Project graduation */}
         {canGraduate && (isDIYer || isExpert) && (
-          <div className="bg-white border border-earth-sand rounded-lg p-4">
+          <Card padding="sm">
             <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
               <ArrowUpRight size={16} className="text-slate-blue" />
               Need Hands-On Help?
@@ -555,31 +507,26 @@ export default function QADetailPage() {
               If this project needs professional work beyond Q&A advice, graduate it to a project.
               {question.expertId && ' Your current expert gets priority positioning.'}
             </p>
-            <button
-              onClick={handleGraduateToProject}
-              className="px-4 py-2 bg-slate-blue text-white text-sm font-semibold rounded-lg hover:bg-slate-blue-dark transition-colors"
-            >
-              Graduate to Project
-            </button>
-          </div>
+            <Button variant="tertiary" onClick={handleGraduateToProject}>Graduate to Project</Button>
+          </Card>
         )}
 
         {/* Already graduated notice */}
         {question.graduatedToRfpId && (
-          <div className="bg-slate-blue/5 border border-slate-blue/20 rounded-lg p-4">
+          <Alert variant="info">
             <div className="flex items-center gap-2">
               <ArrowUpRight size={16} className="text-slate-blue" />
               <p className="text-sm text-slate-blue font-medium">
                 This Q&A has been graduated to a project.
               </p>
             </div>
-            <Link
+            <a
               href={`/marketplace/projects/${question.graduatedToRfpId}`}
-              className="text-xs text-slate-blue hover:underline mt-1 inline-block"
+              className="text-xs underline mt-1 inline-block"
             >
-              View Project &rarr;
-            </Link>
-          </div>
+              View Project →
+            </a>
+          </Alert>
         )}
 
         {/* Legacy single-answer view (non-threaded DIYer) */}
@@ -616,12 +563,7 @@ export default function QADetailPage() {
         {isThreaded && isDIYer && question.status === 'accepted' && !question.markedNotHelpful && (
           <>
             {!showReview ? (
-              <button
-                onClick={() => setShowReview(true)}
-                className="w-full py-2 text-sm font-medium text-slate-blue border border-earth-sand rounded-lg hover:bg-earth-tan/50 transition-colors"
-              >
-                Leave a Review
-              </button>
+              <Button variant="outline" fullWidth onClick={() => setShowReview(true)}>Leave a Review</Button>
             ) : question.expertId && (
               <ReviewForm
                 expertId={question.expertId}

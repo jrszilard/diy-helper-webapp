@@ -3,8 +3,10 @@
 import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { guestStorage } from '@/lib/guestStorage';
+import { cn } from '@/lib/utils';
 import TextInput from '@/components/ui/TextInput';
 import Select from '@/components/ui/Select';
+import Button from '@/components/ui/Button';
 import {
   FolderOpen,
   Search,
@@ -16,7 +18,6 @@ import {
   PaintBucket,
   Fence,
   LayoutGrid,
-
 } from 'lucide-react';
 import { Project } from '@/types';
 import ProjectCard from './ProjectCard';
@@ -186,6 +187,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
   const hasActiveFilters = statusFilter !== 'all' || categoryFilter !== 'all';
 
   // Shared search + filter UI
+  const darkInput = !isMobile ? 'bg-white/10 text-white border-white/20 placeholder-white/40' : '';
   const searchAndFilters = (
     <>
       <TextInput
@@ -197,23 +199,30 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
         inputSize={isMobile ? 'md' : 'sm'}
         fullWidth
         aria-label="Search projects"
+        className={darkInput}
       />
 
-      <button
+      <Button
+        variant="ghost"
+        size={isMobile ? 'sm' : 'xs'}
         onClick={() => setShowFilters(!showFilters)}
-        className={`flex items-center gap-${isMobile ? '2' : '1'} text-${isMobile ? 'sm' : 'xs'} font-medium ${hasActiveFilters ? 'text-slate-blue' : 'text-earth-brown'}`}
         aria-label="Toggle filters"
         aria-expanded={showFilters}
+        className={cn(
+          isMobile
+            ? hasActiveFilters ? 'text-terracotta' : 'text-earth-brown'
+            : hasActiveFilters ? 'text-terracotta hover:text-terracotta hover:bg-white/10' : 'text-[var(--earth-sand)]/70 hover:text-white hover:bg-white/10',
+        )}
       >
         <Filter className={`w-${isMobile ? '4' : '3'} h-${isMobile ? '4' : '3'}`} />
         Filters
         {hasActiveFilters && (
-          <span className={`bg-slate-blue text-white text-xs px-1${isMobile ? '.5 py-0.5' : ''} rounded-full ${isMobile ? '' : 'ml-1'}`}>
-            {isMobile ? '2' : '!'}
+          <span className="bg-terracotta text-white text-xs px-1.5 py-0.5 rounded-full">
+            {(statusFilter !== 'all' ? 1 : 0) + (categoryFilter !== 'all' ? 1 : 0)}
           </span>
         )}
         <ChevronDown className={`w-${isMobile ? '4' : '3'} h-${isMobile ? '4' : '3'} transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-      </button>
+      </Button>
 
       {showFilters && (
         <div className={isMobile ? 'grid grid-cols-2 gap-2' : 'space-y-2'}>
@@ -222,6 +231,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
             onChange={(e) => setStatusFilter(e.target.value)}
             inputSize={isMobile ? 'md' : 'sm'}
             fullWidth={!isMobile}
+            className={darkInput}
           >
             {statusOptions.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -232,6 +242,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
             onChange={(e) => setCategoryFilter(e.target.value)}
             inputSize={isMobile ? 'md' : 'sm'}
             fullWidth={!isMobile}
+            className={darkInput}
           >
             {categoryOptions.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -277,7 +288,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
   if (isMobile) {
     return (
       <div className="flex-1 overflow-y-auto">
-        <div className="p-4 space-y-3 bg-surface border-b border-earth-sand sticky top-0 z-10">
+        <div className="p-4 space-y-3 bg-[#1A1612] border-b border-[var(--blueprint-grid-major)] sticky top-0 z-10">
           {searchAndFilters}
         </div>
         <div className="p-4 space-y-3">
@@ -289,13 +300,13 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
 
   // Desktop view
   return (
-    <div className="w-64 bg-surface border-r border-earth-sand flex flex-col h-full">
-      <div className="p-4 border-b border-earth-sand">
-        <h2 className="font-bold text-lg text-foreground">My Projects</h2>
-        <p className="text-xs text-earth-brown mt-1">Saved conversations</p>
+    <div className="w-64 bg-[#1A1612] border-r border-[var(--blueprint-grid-major)] flex flex-col h-full">
+      <div className="p-4 border-b border-[var(--blueprint-grid-major)]">
+        <h2 className="font-bold text-lg text-white">My Projects</h2>
+        <p className="text-xs text-[var(--earth-sand)]/60 mt-1">Saved conversations</p>
       </div>
 
-      <div className="p-3 border-b border-earth-sand">
+      <div className="p-3 border-b border-[var(--blueprint-grid-major)]">
         {searchAndFilters}
       </div>
 
@@ -303,10 +314,10 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
         {Object.keys(groupedProjects).length === 0 ? emptyState : (
           Object.entries(groupedProjects).map(([category, categoryProjects]) => (
             <div key={category}>
-              <div className="flex items-center gap-2 text-xs font-semibold text-earth-brown uppercase tracking-wide mb-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--earth-sand)]/60 uppercase tracking-wide mb-2">
                 {getCategoryIcon(category)}
                 <span>{category}</span>
-                <span className="text-earth-brown-light">({categoryProjects.length})</span>
+                <span className="text-white/30">({categoryProjects.length})</span>
               </div>
               <div className="space-y-2">
                 {categoryProjects.map(renderProjectCard)}

@@ -4,20 +4,15 @@ import { useEffect, useState } from 'react';
 import ChatInterface from '@/components/ChatInterface';
 import ProjectsSidebar from '@/components/ProjectsSidebar';
 import ShoppingListView from '@/components/ShoppingListView';
-import Link from 'next/link';
-import { Home, Wrench, Menu, FolderOpen, ShoppingCart, X, Users, MessageSquare } from 'lucide-react';
+import { Menu, FolderOpen, ShoppingCart, X, Package } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { guestStorage } from '@/lib/guestStorage';
-import AuthButton from '@/components/AuthButton';
-import NotificationBell from '@/components/NotificationBell';
 import InventoryPanel from '@/components/InventoryPanel';
 import { useExpertStatus } from '@/hooks/useExpertStatus';
-import { Package } from 'lucide-react';
 import { Project } from '@/types';
 import type { User } from '@supabase/supabase-js';
-import GlobalHeader from '@/components/GlobalHeader';
-import IconButton from '@/components/ui/IconButton';
+import DIYerHeader from '@/components/DIYerHeader';
 import Button from '@/components/ui/Button';
 
 export default function ChatPage() {
@@ -119,7 +114,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex h-screen blueprint-bg-subtle">
+    <div className="flex flex-col h-screen bg-[var(--earth-brown-dark)]">
       {/* Migration Toast */}
       {migrationToast && (
         <div className="fixed top-20 right-4 bg-forest-green text-white px-4 py-3 rounded-lg shadow-lg z-[60] flex items-center gap-3 animate-slide-in max-w-sm">
@@ -135,25 +130,16 @@ export default function ChatPage() {
         </div>
       )}
 
-      {/* Desktop Projects Sidebar - hidden on mobile, shown for both guests and authenticated users */}
-      <div className="hidden md:block">
-        <ProjectsSidebar
-          user={user}
-          onSelectProject={handleSelectProject}
-          refreshTrigger={projectRefreshTrigger}
-        />
-      </div>
-
-      {/* Mobile Projects Overlay - shown for both guests and authenticated users */}
+      {/* Mobile Projects Overlay */}
       {showMobileProjects && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-foreground bg-opacity-50" onClick={closeMobilePanels} />
-          <div className="absolute left-0 top-0 bottom-0 w-[85vw] max-w-80 bg-surface shadow-xl animate-slide-in-left">
-            <div className="flex items-center justify-between p-4 border-b border-earth-sand bg-slate-blue text-white">
-              <h2 className="font-bold text-lg">{user ? 'My Projects' : 'Local Projects'}</h2>
+          <div className="absolute inset-0 bg-black/60" onClick={closeMobilePanels} />
+          <div className="absolute left-0 top-0 bottom-0 w-[85vw] max-w-80 bg-[#1E1A17] shadow-xl animate-slide-in-left flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-[var(--blueprint-grid-major)]">
+              <h2 className="font-bold text-lg text-white">{user ? 'My Projects' : 'Local Projects'}</h2>
               <button
                 onClick={() => setShowMobileProjects(false)}
-                className="p-2 hover:bg-slate-blue-dark rounded-lg transition-colors"
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors text-[var(--earth-sand)]"
                 aria-label="Close projects panel"
               >
                 <X size={20} />
@@ -172,7 +158,7 @@ export default function ChatPage() {
       {/* Mobile Shopping List Overlay */}
       {showMobileShopping && selectedProject && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-foreground bg-opacity-50" onClick={closeMobilePanels} />
+          <div className="absolute inset-0 bg-black/60" onClick={closeMobilePanels} />
           <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-surface shadow-xl animate-slide-in-right overflow-y-auto">
             <div className="sticky top-0 flex items-center justify-between p-4 border-b border-earth-sand bg-forest-green text-white z-10">
               <div className="flex items-center gap-2">
@@ -192,114 +178,92 @@ export default function ChatPage() {
         </div>
       )}
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-surface border-b border-earth-sand shadow-sm">
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-14 sm:h-16">
-              {/* Left side: Menu button (mobile) + Logo */}
-              <div className="flex items-center gap-2">
-                {/* Mobile Projects Menu Button - shown for both guests and authenticated users */}
-                <button
-                  onClick={() => setShowMobileProjects(true)}
-                  className="md:hidden p-2 text-earth-brown hover:text-slate-blue hover:bg-earth-tan rounded-lg transition"
-                  title={user ? "My Projects" : "Local Projects"}
-                  aria-label={user ? "My Projects" : "Local Projects"}
-                >
-                  <Menu size={22} />
-                </button>
-
-                <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
-                  <div className="bg-gradient-to-br from-terracotta to-terracotta-dark p-1.5 rounded-lg">
-                    <Wrench className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                  </div>
-                  <span className="text-lg sm:text-xl font-bold text-foreground hidden xs:inline">DIY Helper</span>
-                </Link>
-              </div>
-
-              {/* Right side: Actions */}
-              <div className="flex items-center gap-2 sm:gap-4">
-                {/* Mobile Shopping Cart Button */}
-                {selectedProject && (
-                  <button
-                    onClick={() => setShowMobileShopping(true)}
-                    className="md:hidden relative p-2 text-earth-brown hover:text-forest-green hover:bg-earth-tan rounded-lg transition"
-                    title="Shopping List"
-                    aria-label="Shopping List"
-                  >
-                    <ShoppingCart size={22} />
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-forest-green text-white text-xs rounded-full flex items-center justify-center font-medium">
-                      !
-                    </span>
-                  </button>
-                )}
-
-                <Link href="/" className="flex items-center gap-2 text-foreground hover:text-terracotta transition p-2 sm:p-0">
-                  <Home className="w-5 h-5" />
-                  <span className="hidden sm:inline font-medium">Home</span>
-                </Link>
-                <Link href="/marketplace/qa" className="hidden sm:flex items-center gap-2 text-foreground hover:text-terracotta transition">
-                  <MessageSquare className="w-5 h-5" />
-                  <span className="hidden md:inline font-medium">Ask an Expert</span>
-                </Link>
-                <Link href="/experts" className="hidden sm:flex items-center gap-2 text-foreground hover:text-terracotta transition">
-                  <Users className="w-5 h-5" />
-                  <span className="hidden md:inline font-medium">Find an Expert</span>
-                </Link>
-                <AuthButton
-                  user={user}
-                  externalShowAuth={showAuthModal}
-                  onAuthToggle={setShowAuthModal}
-                  isExpert={isExpert}
-                />
-                <NotificationBell userId={user?.id} />
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  leftIcon={Package}
-                  iconSize={18}
-                  onClick={() => setShowInventory(true)}
-                  title="View your tool inventory"
-                >
-                  <span className="hidden sm:inline">My Tools</span>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Mobile context bar - shows selected project */}
-        {selectedProject && (
-          <div className="md:hidden bg-earth-tan border-b border-earth-sand px-4 py-2 flex items-center justify-between">
-            <div className="flex items-center gap-2 min-w-0">
-              <FolderOpen className="w-4 h-4 text-slate-blue flex-shrink-0" />
-              <span className="text-sm font-medium text-foreground truncate">{selectedProject.name}</span>
-            </div>
-            <button
-              onClick={() => setShowMobileShopping(true)}
-              className="flex items-center gap-1 text-xs text-slate-blue font-medium flex-shrink-0"
+      {/* Full-width global nav */}
+      <DIYerHeader
+        isExpert={isExpert}
+        left={
+          <button
+            onClick={() => setShowMobileProjects(true)}
+            className="md:hidden p-2 text-[var(--earth-sand)] hover:text-white hover:bg-white/10 rounded-lg transition"
+            title={user ? "My Projects" : "Local Projects"}
+            aria-label={user ? "My Projects" : "Local Projects"}
+          >
+            <Menu size={22} />
+          </button>
+        }
+        extraRight={
+          <>
+            {selectedProject && (
+              <button
+                onClick={() => setShowMobileShopping(true)}
+                className="md:hidden relative p-2 text-[var(--earth-sand)] hover:text-white hover:bg-white/10 rounded-lg transition"
+                title="Shopping List"
+                aria-label="Shopping List"
+              >
+                <ShoppingCart size={22} />
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-forest-green text-white text-xs rounded-full flex items-center justify-center font-medium">!</span>
+              </button>
+            )}
+            <Button
+              variant="secondary"
+              size="sm"
+              leftIcon={Package}
+              iconSize={18}
+              onClick={() => setShowInventory(true)}
+              title="View your tool inventory"
             >
-              <ShoppingCart size={14} />
-              View List
-            </button>
-          </div>
-        )}
+              <span className="hidden sm:inline">My Tools</span>
+            </Button>
+          </>
+        }
+      />
 
-        <div className="flex-1 overflow-hidden flex">
-          <div className="flex-1 overflow-hidden">
-            <ChatInterface
-              userId={user?.id ?? ''}
-              projectId={selectedProject?.id}
-              onProjectLinked={handleProjectLinked}
-              onRequestAuth={() => setShowAuthModal(true)}
-            />
-          </div>
+      {/* Content row: sidebar + main */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Desktop Projects Sidebar */}
+        <div className="hidden md:block">
+          <ProjectsSidebar
+            user={user}
+            onSelectProject={handleSelectProject}
+            refreshTrigger={projectRefreshTrigger}
+          />
+        </div>
 
-          {/* Desktop Shopping List Sidebar - hidden on mobile */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          {/* Mobile context bar */}
           {selectedProject && (
-            <div className="hidden md:block w-80 lg:w-96 bg-surface border-l border-earth-sand overflow-y-auto flex-shrink-0">
-              <ShoppingListView project={selectedProject} />
+            <div className="md:hidden border-b border-[var(--blueprint-grid-major)] px-4 py-2 flex items-center justify-between">
+              <div className="flex items-center gap-2 min-w-0">
+                <FolderOpen className="w-4 h-4 text-[var(--earth-sand)] flex-shrink-0" />
+                <span className="text-sm font-medium text-white truncate">{selectedProject.name}</span>
+              </div>
+              <button
+                onClick={() => setShowMobileShopping(true)}
+                className="flex items-center gap-1 text-xs text-[var(--earth-sand)] font-medium flex-shrink-0"
+              >
+                <ShoppingCart size={14} />
+                View List
+              </button>
             </div>
           )}
+
+          <div className="flex-1 overflow-hidden flex">
+            <div className="flex-1 overflow-hidden">
+              <ChatInterface
+                userId={user?.id ?? ''}
+                projectId={selectedProject?.id}
+                onProjectLinked={handleProjectLinked}
+                onRequestAuth={() => setShowAuthModal(true)}
+              />
+            </div>
+
+            {/* Desktop Shopping List Sidebar */}
+            {selectedProject && (
+              <div className="hidden md:block w-80 lg:w-96 bg-surface border-l border-earth-sand overflow-y-auto flex-shrink-0">
+                <ShoppingListView project={selectedProject} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

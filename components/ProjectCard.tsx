@@ -1,15 +1,15 @@
 'use client';
 
 import React from 'react';
-import {
-  Trash2,
-  Edit2,
-  User,
-} from 'lucide-react';
+import { Trash2, Edit2, User } from 'lucide-react';
 import { Project } from '@/types';
+import { cn } from '@/lib/utils';
 import Button from '@/components/ui/Button';
 import TextInput from '@/components/ui/TextInput';
 import StatusBadge from '@/components/ui/StatusBadge';
+import Badge from '@/components/ui/Badge';
+import Card from '@/components/ui/Card';
+import IconButton from '@/components/ui/IconButton';
 
 interface ProjectCardProps {
   project: Project;
@@ -46,13 +46,16 @@ export default function ProjectCard({
 }: ProjectCardProps) {
   if (isMobile) {
     return (
-      <div
+      <Card
+        padding="md"
+        rounded="xl"
         onClick={onSelect}
-        className={`relative p-4 rounded-xl cursor-pointer transition active:scale-[0.98] ${
+        className={cn(
+          'cursor-pointer transition active:scale-[0.98]',
           isSelected
-            ? 'bg-[var(--status-progress-bg)] border-2 border-terracotta'
-            : 'bg-surface border-2 border-transparent active:bg-earth-cream'
-        }`}
+            ? 'bg-terracotta/15 border-terracotta'
+            : 'bg-white/5 border-transparent active:bg-white/10',
+        )}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
@@ -69,56 +72,59 @@ export default function ProjectCard({
             ) : (
               <>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-slate-blue">{categoryIcon}</span>
-                  <span className="font-semibold text-base truncate text-foreground">{project.name}</span>
+                  <span className="text-[var(--earth-sand)]">{categoryIcon}</span>
+                  <span className="font-semibold text-base truncate text-white">{project.name}</span>
                 </div>
                 {project.description && (
-                  <p className="text-sm text-earth-brown line-clamp-2 ml-6">{project.description}</p>
+                  <p className="text-sm text-[var(--earth-sand)]/70 line-clamp-2 ml-6">{project.description}</p>
                 )}
               </>
             )}
             <div className="flex items-center gap-2 mt-2 ml-6 flex-wrap">
-              {project.isGuest && <GuestBadge />}
+              {project.isGuest && (
+                <Badge icon={User} size="sm" className="bg-white/10 text-[var(--earth-sand)]">Local</Badge>
+              )}
               <StatusBadge status={project.status} />
-              <span className="text-xs text-earth-brown-light">
+              <span className="text-xs text-[var(--earth-sand)]/50">
                 {new Date(project.created_at).toLocaleDateString()}
               </span>
             </div>
           </div>
           <div className="flex gap-1">
             {!isEditing && (
-              <button
+              <IconButton
+                icon={Edit2}
+                iconSize={20}
+                label="Edit project"
                 onClick={onStartEditing}
-                className="p-2 hover:bg-[var(--status-research-bg)] active:bg-[#D4E4ED] rounded-lg transition"
-                title="Edit project"
-                aria-label="Edit project"
-              >
-                <Edit2 className="w-5 h-5 text-slate-blue" />
-              </button>
+                className="hover:bg-white/10 text-[var(--earth-sand)]"
+              />
             )}
-            <button
+            <IconButton
+              icon={Trash2}
+              iconSize={20}
+              label="Delete project"
               onClick={onDelete}
-              className="p-2 hover:bg-[var(--status-progress-bg)] active:bg-[#FADDD0] rounded-lg transition"
-              title="Delete project"
-              aria-label="Delete project"
-            >
-              <Trash2 className="w-5 h-5 text-rust" />
-            </button>
+              className="hover:bg-white/10 text-rust"
+            />
           </div>
         </div>
-      </div>
+      </Card>
     );
   }
 
   // Desktop view
   return (
-    <div
+    <Card
+      padding="sm"
+      rounded="lg"
       onClick={onSelect}
-      className={`group relative p-3 rounded-lg cursor-pointer transition ${
+      className={cn(
+        'group cursor-pointer transition',
         isSelected
-          ? 'bg-[var(--status-progress-bg)] border-2 border-terracotta'
-          : 'bg-earth-cream hover:bg-earth-tan border-2 border-transparent'
-      }`}
+          ? 'bg-terracotta/15 border-terracotta'
+          : 'bg-white/5 border-transparent hover:bg-white/10',
+      )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
@@ -133,58 +139,43 @@ export default function ProjectCard({
             />
           ) : (
             <>
-              <span className="font-semibold text-sm text-foreground block truncate">
+              <span className="font-semibold text-sm text-white block truncate">
                 {project.name}
               </span>
               {project.description && (
-                <p className="text-xs text-earth-brown line-clamp-1 mt-0.5">{project.description}</p>
+                <p className="text-xs text-[var(--earth-sand)]/70 line-clamp-1 mt-0.5">{project.description}</p>
               )}
             </>
           )}
           <div className="flex items-center gap-1 mt-1 flex-wrap">
             {project.isGuest && (
-              <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-earth-cream text-earth-brown">
-                <User className="w-2.5 h-2.5" />
-                Local
-              </span>
+              <Badge icon={User} size="sm" className="bg-white/10 text-[var(--earth-sand)]">Local</Badge>
             )}
             <StatusBadge status={project.status} size="sm" />
           </div>
         </div>
         <div className="opacity-0 group-hover:opacity-100 flex gap-0.5 transition">
           {!isEditing && (
-            <button
+            <IconButton
+              icon={Edit2}
+              iconSize={16}
+              label="Edit project"
               onClick={onStartEditing}
-              className="p-1 hover:bg-[var(--status-research-bg)] rounded transition"
-              title="Edit project"
-              aria-label="Edit project"
-            >
-              <Edit2 className="w-4 h-4 text-slate-blue" />
-            </button>
+              className="hover:bg-white/10 text-[var(--earth-sand)]"
+            />
           )}
-          <button
+          <IconButton
+            icon={Trash2}
+            iconSize={16}
+            label="Delete project"
             onClick={onDelete}
-            className="p-1 hover:bg-[var(--status-progress-bg)] rounded transition"
-            title="Delete project"
-            aria-label="Delete project"
-          >
-            <Trash2 className="w-4 h-4 text-rust" />
-          </button>
+            className="hover:bg-white/10 text-rust"
+          />
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
-
-function GuestBadge() {
-  return (
-    <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-earth-cream text-earth-brown">
-      <User className="w-3 h-3" />
-      Local
-    </span>
-  );
-}
-
 
 function EditForm({
   editName,
@@ -212,6 +203,7 @@ function EditForm({
         inputSize={isMobile ? 'md' : 'sm'}
         fullWidth
         autoFocus
+        className="bg-white/10 text-white border-white/20"
         onKeyDown={(e) => {
           if (e.key === 'Enter') onSave(e);
           if (e.key === 'Escape') onCancel(e);
@@ -224,7 +216,7 @@ function EditForm({
         placeholder="Description (optional)"
         inputSize={isMobile ? 'md' : 'sm'}
         fullWidth
-        className="text-xs"
+        className="text-xs bg-white/10 text-white border-white/20"
         onKeyDown={(e) => {
           if (e.key === 'Enter') onSave(e);
           if (e.key === 'Escape') onCancel(e);
@@ -234,7 +226,7 @@ function EditForm({
         <Button variant="secondary" size={isMobile ? 'sm' : 'xs'} onClick={onSave}>
           Save
         </Button>
-        <Button variant="ghost" size={isMobile ? 'sm' : 'xs'} onClick={onCancel}>
+        <Button variant="ghost" size={isMobile ? 'sm' : 'xs'} onClick={onCancel} className="text-[var(--earth-sand)] hover:bg-white/10 hover:text-white">
           Cancel
         </Button>
       </div>

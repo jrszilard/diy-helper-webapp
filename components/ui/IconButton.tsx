@@ -1,4 +1,5 @@
 import { ButtonHTMLAttributes, ElementType } from 'react';
+import { cn } from '@/lib/utils';
 
 interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon: ElementType;
@@ -12,7 +13,7 @@ export default function IconButton({
   iconSize = 20,
   label,
   variant = 'default',
-  className = '',
+  className,
   ...props
 }: IconButtonProps) {
   const variantClass =
@@ -25,7 +26,7 @@ export default function IconButton({
   return (
     <button
       aria-label={label}
-      className={`p-2 rounded-lg transition-colors ${variantClass} ${className}`}
+      className={cn('p-2 rounded-lg transition-colors', variantClass, className)}
       {...props}
     >
       <Icon size={iconSize} />

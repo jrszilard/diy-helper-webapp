@@ -24,6 +24,10 @@ import { InventorySkeleton } from './SkeletonLoader';
 import Button from '@/components/ui/Button';
 import TextInput from '@/components/ui/TextInput';
 import Select from '@/components/ui/Select';
+import Textarea from '@/components/ui/Textarea';
+import Badge, { type BadgeVariant } from '@/components/ui/Badge';
+import IconButton from '@/components/ui/IconButton';
+import Card from '@/components/ui/Card';
 
 interface InventoryItem {
   id: string;
@@ -61,6 +65,15 @@ const CONDITIONS = [
   { value: 'fair', label: 'Fair' },
   { value: 'needs_repair', label: 'Needs Repair' },
 ];
+
+function conditionVariant(condition: string): BadgeVariant {
+  switch (condition) {
+    case 'new': return 'success';
+    case 'good': return 'default';
+    case 'fair': return 'primary';
+    default: return 'warning';
+  }
+}
 
 export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPanelProps) {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
@@ -244,13 +257,13 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
             <h2 className="text-lg sm:text-xl font-bold">My Tool Inventory</h2>
             <p className="text-[var(--status-progress-bg)] text-sm">{inventory.length} items</p>
           </div>
-          <button
+          <IconButton
+            icon={X}
+            iconSize={24}
+            label="Close inventory panel"
             onClick={onClose}
-            className="p-2 hover:bg-terracotta-dark active:bg-[#8B4D33] rounded-lg transition-colors"
-            aria-label="Close inventory panel"
-          >
-            <X size={24} />
-          </button>
+            className="text-white hover:bg-[var(--terracotta-dark)] active:bg-[#8B4D33]"
+          />
         </div>
 
         {/* Search and Filter */}
@@ -267,33 +280,30 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
           />
 
           <div className="flex gap-2 flex-wrap">
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className={`px-3 py-1 rounded-full text-sm ${
-                !selectedCategory
-                  ? 'bg-terracotta text-white'
-                  : 'bg-earth-cream text-warm-brown hover:bg-earth-tan'
-              }`}
+            <Button
+              size="sm"
+              variant={!selectedCategory ? 'primary' : 'ghost'}
+              className="rounded-full"
               aria-label="Show all categories"
+              onClick={() => setSelectedCategory(null)}
             >
               All
-            </button>
+            </Button>
             {CATEGORIES.slice(0, 5).map(cat => (
-              <button
+              <Button
                 key={cat.value}
+                size="sm"
+                variant={selectedCategory === cat.value ? 'primary' : 'ghost'}
+                leftIcon={cat.icon}
+                iconSize={14}
+                className="rounded-full"
+                aria-label={`Filter by ${cat.label}`}
                 onClick={() => setSelectedCategory(
                   selectedCategory === cat.value ? null : cat.value
                 )}
-                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                  selectedCategory === cat.value
-                    ? 'bg-terracotta text-white'
-                    : 'bg-earth-cream text-warm-brown hover:bg-earth-tan'
-                }`}
-                aria-label={`Filter by ${cat.label}`}
               >
-                <cat.icon size={14} />
                 {cat.label}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -352,13 +362,13 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                 ))}
               </Select>
 
-              <label htmlFor="inventory-notes" className="sr-only">Notes</label>
-              <textarea
+              <Textarea
                 id="inventory-notes"
                 placeholder="Notes (optional)"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="w-full p-2 border border-earth-sand rounded-lg text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-terracotta resize-none placeholder-earth-brown-light"
+                resize="none"
+                fullWidth
                 rows={2}
               />
 
@@ -418,9 +428,10 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                     </h4>
                     <div className="space-y-2">
                       {items.map(item => (
-                        <div
+                        <Card
                           key={item.id}
-                          className="bg-white border border-earth-sand rounded-lg p-3 sm:p-3 flex items-center justify-between group hover:shadow-sm transition-shadow"
+                          padding="sm"
+                          className="flex items-center justify-between group hover:shadow-sm transition-shadow"
                         >
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-foreground text-sm sm:text-base">
@@ -431,17 +442,12 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs text-earth-brown flex items-center gap-2 flex-wrap mt-1">
-                              <span className={`px-2 py-0.5 rounded-full ${
-                                item.condition === 'new' ? 'bg-[var(--status-complete-bg)] text-forest-green' :
-                                item.condition === 'good' ? 'bg-[var(--status-research-bg)] text-slate-blue' :
-                                item.condition === 'fair' ? 'bg-[var(--status-progress-bg)] text-terracotta' :
-                                'bg-[#FADDD0] text-rust'
-                              }`}>
+                            <div className="flex items-center gap-2 flex-wrap mt-1">
+                              <Badge variant={conditionVariant(item.condition)}>
                                 {item.condition}
-                              </span>
+                              </Badge>
                               {item.auto_added && (
-                                <span className="text-earth-brown-light">auto-added</span>
+                                <Badge variant="neutral">auto-added</Badge>
                               )}
                             </div>
                             {item.notes && (
@@ -451,22 +457,22 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
 
                           {/* Always visible on mobile, hover on desktop */}
                           <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
-                            <button
+                            <IconButton
+                              icon={Edit2}
+                              iconSize={18}
+                              label="Edit item"
                               onClick={() => startEdit(item)}
-                              className="p-2 text-earth-brown hover:text-slate-blue active:text-slate-blue-dark hover:bg-[var(--status-research-bg)] active:bg-[#D4E4ED] rounded-lg"
-                              aria-label="Edit item"
-                            >
-                              <Edit2 size={18} />
-                            </button>
-                            <button
+                              className="hover:text-[var(--slate-blue)] hover:bg-[var(--status-research-bg)]"
+                            />
+                            <IconButton
+                              icon={Trash2}
+                              iconSize={18}
+                              label="Delete item"
                               onClick={() => handleDeleteItem(item.id)}
-                              className="p-2 text-earth-brown hover:text-rust active:text-[#9A4830] hover:bg-[#FADDD0] active:bg-[#F5C9B8] rounded-lg"
-                              aria-label="Delete item"
-                            >
-                              <Trash2 size={18} />
-                            </button>
+                              className="hover:text-[var(--rust)] hover:bg-[#FADDD0]"
+                            />
                           </div>
-                        </div>
+                        </Card>
                       ))}
                     </div>
                   </div>

@@ -346,13 +346,13 @@ body {
   animation: fade-in 0.2s ease-out forwards;
 }
 
-/* Safe area insets for notched devices */
+/* Safe area insets for notched devices — adds safe-area on top of existing padding */
 .safe-area-top {
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 1rem);
 }
 
 .safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
 }
 
 /* Custom xs breakpoint for very small screens */

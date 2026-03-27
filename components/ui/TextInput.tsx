@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 
 interface TextInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  labelClassName?: string;
   leftIcon?: ElementType;
   rightIcon?: ElementType;
   iconSize?: number;
@@ -19,6 +20,7 @@ const sizeClasses = {
 
 const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({
   label,
+  labelClassName,
   leftIcon: LeftIcon,
   rightIcon: RightIcon,
   iconSize = 16,
@@ -37,7 +39,7 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({
       {label && (
         <label
           htmlFor={id}
-          className="text-sm font-medium text-[var(--earth-brown-dark)]"
+          className={cn('text-sm font-medium text-[var(--earth-brown-dark)]', labelClassName)}
         >
           {label}
         </label>

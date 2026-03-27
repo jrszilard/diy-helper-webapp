@@ -2,10 +2,12 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { ArrowLeft } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import DIYerHeader from '@/components/DIYerHeader';
 import MessageThread from '@/components/marketplace/MessageThread';
 
 interface ApiMessage {
@@ -116,39 +118,42 @@ export default function DIYerThreadPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center">
-        <Spinner size="lg" className="text-terracotta" />
+      <div className="flex flex-col h-screen bg-earth-brown-dark">
+        <DIYerHeader />
+        <div className="flex-1 flex items-center justify-center">
+          <Spinner size="lg" className="text-terracotta" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-surface">
-      <div className="max-w-2xl mx-auto px-4 py-6 h-screen flex flex-col">
+    <div className="flex flex-col h-screen bg-earth-brown-dark">
+      <DIYerHeader />
+      <div className="flex-1 overflow-hidden max-w-4xl mx-auto w-full px-4 py-6 flex flex-col">
         {/* Header */}
-        <div className="flex items-center gap-3 pb-4 border-b border-earth-sand">
-          <Link
+        <div className="flex items-center gap-3 pb-4 border-b border-[var(--blueprint-grid-major)]">
+          <Button
+            variant="ghost"
             href="/messages"
-            className="p-1.5 hover:bg-earth-tan rounded-lg transition-colors text-earth-brown"
-          >
-            <ArrowLeft size={20} />
-          </Link>
-          <div>
-            <h1 className="text-lg font-bold text-foreground">
-              {otherUserName || 'Conversation'}
-            </h1>
-          </div>
+            leftIcon={ArrowLeft}
+            size="sm"
+            className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10"
+          />
+          <h2 className="text-lg font-bold text-white">
+            {otherUserName || 'Conversation'}
+          </h2>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 bg-white rounded-xl border border-earth-sand mt-4 overflow-hidden min-h-0">
+        <Card surface rounded="xl" padding="none" className="flex-1 mt-4 overflow-hidden">
           <MessageThread
             messages={messages}
             currentUserId={currentUserId}
             onSend={handleSend}
             sending={sending}
           />
-        </div>
+        </Card>
       </div>
     </div>
   );

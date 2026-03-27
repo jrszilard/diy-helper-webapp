@@ -6,9 +6,8 @@ import { ArrowLeft, LogIn } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
-import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/ui/EmptyState';
-import GlobalHeader from '@/components/GlobalHeader';
+import DIYerHeader from '@/components/DIYerHeader';
 import AuthButton from '@/components/AuthButton';
 import MessageList from '@/components/marketplace/MessageList';
 
@@ -73,7 +72,7 @@ export default function DIYerMessagesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center">
+      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
         <Spinner size="lg" className="text-terracotta" />
       </div>
     );
@@ -81,9 +80,9 @@ export default function DIYerMessagesPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-surface">
-        <GlobalHeader right={<AuthButton user={null} externalShowAuth={showAuth} onAuthToggle={setShowAuth} />} />
-        <div className="max-w-2xl mx-auto px-4 py-16">
+      <div className="min-h-screen bg-earth-brown-dark">
+        <DIYerHeader />
+        <div className="max-w-4xl mx-auto px-4 py-16">
           <EmptyState
             icon={LogIn}
             title="Sign in to view messages"
@@ -96,15 +95,15 @@ export default function DIYerMessagesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface">
-      <GlobalHeader right={<AuthButton user={user} />} />
-      <div className="max-w-2xl mx-auto px-4 py-6">
+    <div className="min-h-screen bg-earth-brown-dark">
+      <DIYerHeader />
+      <div className="max-w-4xl mx-auto px-4 py-6">
         <div className="flex items-center gap-3 mb-6">
-          <Button variant="ghost" href="/chat" leftIcon={ArrowLeft} size="sm" />
-          <SectionHeader size="md" title="My Messages" />
+          <Button variant="ghost" href="/chat" leftIcon={ArrowLeft} size="sm" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10" />
+          <h2 className="text-2xl font-bold text-white">My Messages</h2>
         </div>
 
-        <Card rounded="xl" padding="none">
+        <Card surface rounded="xl" padding="none">
           <MessageList threads={threads} basePath="/messages" />
         </Card>
       </div>

@@ -6,10 +6,10 @@ import { supabase } from '@/lib/supabase';
 import { redirectToSignIn } from '@/lib/auth-redirect';
 import { ArrowLeft } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
-import Link from 'next/link';
+import DIYerHeader from '@/components/DIYerHeader';
+import Button from '@/components/ui/Button';
 import QASubmitForm from '@/components/marketplace/QASubmitForm';
 import QAQuestionList from '@/components/marketplace/QAQuestionList';
-import SectionHeader from '@/components/ui/SectionHeader';
 import type { QAQuestion, ExpertContext } from '@/lib/marketplace/types';
 
 function QAPageContent() {
@@ -103,7 +103,7 @@ function QAPageContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-earth-cream flex items-center justify-center">
+      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
         <Spinner size="lg" className="text-terracotta" />
       </div>
     );
@@ -116,20 +116,13 @@ function QAPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-earth-cream">
-      <header className="bg-surface border-b border-earth-sand shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 py-4">
-          <Link
-            href="/chat"
-            className="flex items-center gap-1.5 text-sm text-slate-blue hover:text-slate-blue-dark transition-colors"
-          >
-            <ArrowLeft size={16} />
-            Back to Chat
-          </Link>
-        </div>
-      </header>
+    <div className="min-h-screen bg-earth-brown-dark">
+      <DIYerHeader />
 
-      <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+      <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+        <Button variant="ghost" href="/chat" leftIcon={ArrowLeft} size="sm" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10">
+          Back to Chat
+        </Button>
         <QASubmitForm
           reportId={reportId}
           reportContext={reportContext}
@@ -143,7 +136,7 @@ function QAPageContent() {
 
         {myQuestions.length > 0 && (
           <div>
-            <SectionHeader title="Your Questions" className="mb-4" />
+            <h2 className="text-xl font-bold text-white mb-4">Your Questions</h2>
             <QAQuestionList questions={myQuestions} />
           </div>
         )}
@@ -155,7 +148,7 @@ function QAPageContent() {
 export default function QAPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-earth-cream flex items-center justify-center">
+      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
         <Spinner size="lg" className="text-terracotta" />
       </div>
     }>
