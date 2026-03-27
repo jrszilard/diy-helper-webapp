@@ -22,7 +22,7 @@ export interface GuidedBotState {
 }
 
 export function useGuidedBot() {
-  const [state, setState] = useState<GuidedBotState>(() => ({
+  const [state, setState] = useState<GuidedBotState>({
     phase: 'project',
     messages: [
       {
@@ -37,7 +37,7 @@ export function useGuidedBot() {
     isTyping: false,
     pipelineState: 'idle',
     isParsingFreeform: false,
-  }));
+  });
 
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSubmitting = useRef(false);

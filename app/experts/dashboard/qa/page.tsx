@@ -2,8 +2,14 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Inbox, ClipboardList, X } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
+import SectionHeader from '@/components/ui/SectionHeader';
+import Modal from '@/components/ui/Modal';
+import TextInput from '@/components/ui/TextInput';
+import Textarea from '@/components/ui/Textarea';
+import Button from '@/components/ui/Button';
+import Alert from '@/components/ui/Alert';
+import Badge from '@/components/ui/Badge';
 import QAQueue from '@/components/marketplace/QAQueue';
 import ActiveQuestionCard from '@/components/marketplace/ActiveQuestionCard';
 import type { QAQuestion } from '@/lib/marketplace/types';
@@ -197,20 +203,16 @@ export default function ExpertQAQueuePage() {
 
   return (
     <div className="max-w-4xl">
-      <h1 className="text-xl font-bold text-foreground mb-6">Q&A Queue</h1>
+      <SectionHeader size="lg" title="Q&A Queue" className="mb-6" />
 
       {/* Active Questions Section */}
       {activeQuestions.length > 0 && (
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-3">
-            <ClipboardList size={18} className="text-terracotta" />
-            <h2 className="text-lg font-semibold text-foreground">
-              Your Active Questions
-              <span className="ml-2 text-sm font-normal text-earth-brown">
-                ({claimedQuestions.length} to answer{answeredQuestions.length > 0 ? `, ${answeredQuestions.length} answered` : ''})
-              </span>
-            </h2>
-          </div>
+          <SectionHeader
+            title="Your Active Questions"
+            subtitle={`${claimedQuestions.length} to answer${answeredQuestions.length > 0 ? `, ${answeredQuestions.length} answered` : ''}`}
+            className="mb-3"
+          />
 
           <div className="space-y-2">
             {activeQuestions.map(q => (
@@ -226,123 +228,101 @@ export default function ExpertQAQueuePage() {
 
       {/* Open Queue Section */}
       <div>
-        <div className="flex items-center gap-2 mb-3">
-          <Inbox size={18} className="text-slate-blue" />
-          <h2 className="text-lg font-semibold text-foreground">
-            Open Questions
-            <span className="ml-2 text-sm font-normal text-earth-brown">
-              ({questions.length} available)
-            </span>
-          </h2>
-        </div>
+        <SectionHeader
+          title="Open Questions"
+          subtitle={`${questions.length} available`}
+          className="mb-3"
+        />
         <QAQueue questions={questions} onClaim={handleClaim} onBid={handleOpenBidModal} />
       </div>
 
       {/* Bid Submission Modal */}
-      {bidModalQuestionId && bidModalQuestion && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b border-earth-sand">
-              <h3 className="text-lg font-bold text-foreground">Submit Proposal</h3>
-              <button onClick={() => setBidModalQuestionId(null)} className="text-earth-brown hover:text-foreground">
-                <X size={20} />
-              </button>
+      <Modal
+        isOpen={!!bidModalQuestionId && !!bidModalQuestion}
+        onClose={() => setBidModalQuestionId(null)}
+        title="Submit Proposal"
+        size="lg"
+      >
+        {bidModalQuestion && (
+          <div className="space-y-4">
+            {/* Question preview */}
+            <div className="bg-earth-tan/30 rounded-lg p-3">
+              <p className="text-sm text-foreground line-clamp-3">{bidModalQuestion.questionText}</p>
+              <Badge variant="neutral" size="sm" className="mt-1">{bidModalQuestion.category}</Badge>
             </div>
-            <div className="p-4 space-y-4">
-              {/* Question preview */}
-              <div className="bg-earth-tan/30 rounded-lg p-3">
-                <p className="text-sm text-foreground line-clamp-3">{bidModalQuestion.questionText}</p>
-                <span className="text-xs text-earth-brown mt-1 inline-block">{bidModalQuestion.category}</span>
-              </div>
 
-              {/* Price */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Your Price ($15 – $150)
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-earth-brown">$</span>
-                  <input
-                    type="number"
-                    min="15"
-                    max="150"
-                    step="5"
-                    value={bidPriceDollars}
-                    onChange={(e) => setBidPriceDollars(e.target.value)}
-                    className="w-full pl-7 pr-3 py-2 border border-earth-sand rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-blue/40"
-                    placeholder="45"
-                  />
-                </div>
-                {bidPriceDollars && (
-                  <p className="text-xs text-earth-brown mt-1">
-                    DIYer pays ${bidPriceDollars} · You earn ${(parseFloat(bidPriceDollars || '0') * 0.82).toFixed(2)}
-                  </p>
-                )}
-              </div>
+            {/* Price */}
+            <TextInput
+              label="Your Price ($15 – $150)"
+              type="number"
+              min={15}
+              max={150}
+              step={5}
+              value={bidPriceDollars}
+              onChange={(e) => setBidPriceDollars(e.target.value)}
+              placeholder="45"
+              fullWidth
+            />
+            {bidPriceDollars && (
+              <p className="text-xs text-earth-brown -mt-2">
+                DIYer pays ${bidPriceDollars} · You earn ${(parseFloat(bidPriceDollars || '0') * 0.82).toFixed(2)}
+              </p>
+            )}
 
-              {/* Pitch */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Your Pitch <span className="text-muted font-normal">(why you&apos;re the right expert)</span>
-                </label>
-                <textarea
-                  rows={3}
-                  value={bidPitch}
-                  onChange={(e) => setBidPitch(e.target.value)}
-                  className="w-full px-3 py-2 border border-earth-sand rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-blue/40 resize-none"
-                  placeholder="I've worked on similar projects for 15 years and can help you..."
-                />
-              </div>
+            {/* Pitch */}
+            <Textarea
+              label="Your Pitch (why you're the right expert)"
+              rows={3}
+              value={bidPitch}
+              onChange={(e) => setBidPitch(e.target.value)}
+              placeholder="I've worked on similar projects for 15 years and can help you..."
+              resize="none"
+              fullWidth
+            />
 
-              {/* Estimated time */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Estimated Response Time <span className="text-muted font-normal">(minutes, optional)</span>
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="120"
-                  value={bidEstMinutes}
-                  onChange={(e) => setBidEstMinutes(e.target.value)}
-                  className="w-full px-3 py-2 border border-earth-sand rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-blue/40"
-                  placeholder="15"
-                />
-              </div>
+            {/* Estimated time */}
+            <TextInput
+              label="Estimated Response Time (minutes, optional)"
+              type="number"
+              min={1}
+              max={120}
+              value={bidEstMinutes}
+              onChange={(e) => setBidEstMinutes(e.target.value)}
+              placeholder="15"
+              fullWidth
+            />
 
-              {/* Relevant experience */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Relevant Experience <span className="text-muted font-normal">(optional)</span>
-                </label>
-                <textarea
-                  rows={2}
-                  value={bidExperience}
-                  onChange={(e) => setBidExperience(e.target.value)}
-                  className="w-full px-3 py-2 border border-earth-sand rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-blue/40 resize-none"
-                  placeholder="Licensed electrician with 20 years of residential experience..."
-                />
-              </div>
+            {/* Relevant experience */}
+            <Textarea
+              label="Relevant Experience (optional)"
+              rows={2}
+              value={bidExperience}
+              onChange={(e) => setBidExperience(e.target.value)}
+              placeholder="Licensed electrician with 20 years of residential experience..."
+              resize="none"
+              fullWidth
+            />
 
-              {bidError && (
-                <p className="text-sm text-red-600">{bidError}</p>
+            {bidError && (
+              <Alert variant="error">{bidError}</Alert>
+            )}
+
+            <Button
+              variant="tertiary"
+              fullWidth
+              size="lg"
+              onClick={handleSubmitBid}
+              disabled={bidSubmitting || !bidPitch.trim() || !bidPriceDollars}
+            >
+              {bidSubmitting ? (
+                <Spinner size="sm" />
+              ) : (
+                'Submit Proposal'
               )}
-
-              <button
-                onClick={handleSubmitBid}
-                disabled={bidSubmitting || !bidPitch.trim() || !bidPriceDollars}
-                className="w-full py-3 bg-slate-blue text-white text-sm font-semibold rounded-lg hover:bg-slate-blue-dark transition-colors disabled:opacity-50"
-              >
-                {bidSubmitting ? (
-                  <Spinner size="sm" className="mx-auto" />
-                ) : (
-                  'Submit Proposal'
-                )}
-              </button>
-            </div>
+            </Button>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   );
 }

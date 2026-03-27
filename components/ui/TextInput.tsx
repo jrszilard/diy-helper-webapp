@@ -52,9 +52,8 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({
       <input
         ref={ref}
         id={id}
-        style={{ color: 'var(--foreground)' }}
         className={cn(
-          'border rounded-lg bg-white transition-colors',
+          'border rounded-lg bg-white text-[#3E2723] transition-colors',
           'placeholder-[var(--earth-brown-light)]',
           'focus:outline-none focus:ring-2 focus:ring-[var(--terracotta)] focus:border-[var(--terracotta)]',
           'disabled:opacity-50 disabled:cursor-not-allowed',

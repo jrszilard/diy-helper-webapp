@@ -11,17 +11,14 @@ export default function ExpertBar({ user }: { user: { id: string } | null }) {
   const [dismissed, setDismissed] = useState(true); // start hidden to avoid flash
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      const stored = localStorage.getItem(DISMISS_KEY);
-      if (stored) {
-        const dismissedAt = parseInt(stored, 10);
-        const daysSince = (Date.now() - dismissedAt) / (1000 * 60 * 60 * 24);
-        setDismissed(daysSince < DISMISS_DAYS);
-      } else {
-        setDismissed(false);
-      }
-    }, 0);
-    return () => clearTimeout(t);
+    const stored = localStorage.getItem(DISMISS_KEY);
+    if (stored) {
+      const dismissedAt = parseInt(stored, 10);
+      const daysSince = (Date.now() - dismissedAt) / (1000 * 60 * 60 * 24);
+      setDismissed(daysSince < DISMISS_DAYS);
+    } else {
+      setDismissed(false);
+    }
   }, []);
 
   if (user || dismissed) return null;

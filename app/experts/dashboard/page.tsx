@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Spinner from '@/components/ui/Spinner';
+import SectionHeader from '@/components/ui/SectionHeader';
+import Alert from '@/components/ui/Alert';
 import StripeOnboardBanner from '@/components/marketplace/StripeOnboardBanner';
 import DashboardStats from '@/components/marketplace/DashboardStats';
 import DashboardQAQueue from '@/components/marketplace/DashboardQAQueue';
@@ -57,8 +59,8 @@ export default function ExpertDashboardPage() {
 
   if (!data) {
     return (
-      <div className="text-center py-12">
-        <p className="text-sm text-earth-brown">Failed to load dashboard data.</p>
+      <div className="py-12">
+        <Alert variant="error">Failed to load dashboard data.</Alert>
       </div>
     );
   }
@@ -75,7 +77,7 @@ export default function ExpertDashboardPage() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <h1 className="text-xl font-bold text-foreground">Dashboard</h1>
+      <SectionHeader size="lg" title="Dashboard" />
 
       <StripeOnboardBanner stripeOnboardingComplete={d.stripeOnboardingComplete} />
       <DashboardStats stats={stats} />

@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Clock, DollarSign, Image, CheckCircle, Send, Loader2, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Card from '@/components/ui/Card';
+import Textarea from '@/components/ui/Textarea';
+import Alert from '@/components/ui/Alert';
 import { cn } from '@/lib/utils';
 
 interface ActiveQuestion {
@@ -36,17 +38,11 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const [currentTime, setCurrentTime] = useState(() => Date.now());
-  useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(Date.now()), 60000);
-    return () => clearInterval(interval);
-  }, []);
-
   const isClaimed = question.status === 'claimed';
   const isAnswered = question.status === 'answered';
 
   const formatTimeAgo = (dateStr: string) => {
-    const diff = currentTime - new Date(dateStr).getTime();
+    const diff = Date.now() - new Date(dateStr).getTime();
     const minutes = Math.floor(diff / 60000);
     if (minutes < 1) return 'just now';
     if (minutes < 60) return `${minutes}m ago`;
@@ -58,7 +54,7 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
 
   const getTimeRemaining = () => {
     if (!question.claimExpiresAt) return null;
-    const remaining = new Date(question.claimExpiresAt).getTime() - currentTime;
+    const remaining = new Date(question.claimExpiresAt).getTime() - Date.now();
     if (remaining <= 0) return 'Expired';
     const minutes = Math.floor(remaining / 60000);
     if (minutes < 60) return `${minutes}m left`;
@@ -161,21 +157,20 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
           {/* Answer form or existing answer */}
           {isClaimed && (
             <div className="mt-4">
-              <label className="block text-sm font-semibold text-foreground mb-1.5">
-                Your Answer
-              </label>
-              <textarea
+              <Textarea
+                label="Your Answer"
                 value={answerText}
                 onChange={(e) => { setAnswerText(e.target.value); setError(''); }}
                 rows={5}
-                className="w-full border border-earth-sand rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-terracotta bg-white resize-none"
                 placeholder="Provide a detailed, helpful answer (min 50 characters)..."
                 maxLength={2000}
+                resize="none"
+                fullWidth
               />
-              <div className="flex items-center justify-between mt-1.5">
+              <div className="flex items-center justify-between mt-1">
                 <p className="text-xs text-earth-brown-light">{answerText.length}/2000</p>
-                {error && <p className="text-xs text-terracotta font-medium">{error}</p>}
               </div>
+              {error && <Alert variant="error" className="mt-2">{error}</Alert>}
               <Button
                 variant="primary"
                 leftIcon={submitting ? Loader2 : Send}

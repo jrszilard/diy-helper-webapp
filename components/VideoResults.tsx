@@ -23,7 +23,7 @@ export default function VideoResults({ videos, projectQuery }: VideoResultsProps
     return (
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 my-4">
         <p className="text-yellow-800">
-          No videos found for &quot;{projectQuery}&quot;. Try searching with different keywords.
+          No videos found for "{projectQuery}". Try searching with different keywords.
         </p>
       </div>
     );

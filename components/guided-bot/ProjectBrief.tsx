@@ -24,9 +24,8 @@ const BUDGET_LABELS: Record<string, string> = {
 
 export default function ProjectBrief({ gathered, onEdit, onSubmit, isSubmitting }: ProjectBriefProps) {
   return (
-    <div className="bg-white border border-earth-sand rounded-xl overflow-hidden">
-      {/* Summary fields */}
-      <div className="divide-y divide-[#E8E0D4]">
+    <div className="bg-white/10 border border-white/20 rounded-xl overflow-hidden">
+      <div className="divide-y divide-white/10">
         <SummaryRow
           label="Project"
           value={gathered.projectDescription || gathered.projectType || '—'}
@@ -65,15 +64,14 @@ export default function ProjectBrief({ gathered, onEdit, onSubmit, isSubmitting 
         />
       </div>
 
-      {/* Build button */}
       <div className="p-4">
         <button
           onClick={onSubmit}
           disabled={isSubmitting}
           className={`w-full py-3 rounded-xl text-base font-bold transition-all duration-200 flex items-center justify-center gap-2 ${
             isSubmitting
-              ? 'bg-[#8B7D6B] text-white cursor-not-allowed'
-              : 'bg-terracotta text-white hover:bg-terracotta-dark shadow-md hover:shadow-lg hover:-translate-y-0.5'
+              ? 'bg-white/20 text-white/50 cursor-not-allowed'
+              : 'bg-terracotta text-white hover:bg-terracotta-dark hover:-translate-y-0.5'
           }`}
         >
           {isSubmitting ? (
@@ -104,8 +102,8 @@ function SummaryRow({
   return (
     <div className="flex items-start justify-between gap-3 px-4 py-3">
       <div className="flex-1 min-w-0">
-        <span className="block text-[10px] font-semibold text-[var(--warm-brown)] uppercase tracking-wider">{label}</span>
-        <span className={`block text-sm text-foreground mt-0.5 ${truncate ? 'line-clamp-2' : ''}`}>
+        <span className="block text-[10px] font-semibold text-white/50 uppercase tracking-wider">{label}</span>
+        <span className={`block text-sm text-white mt-0.5 ${truncate ? 'line-clamp-2' : ''}`}>
           {value}
         </span>
       </div>

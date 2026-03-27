@@ -89,6 +89,11 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
 
+  useEffect(() => {
+    if (user) loadProjects();
+    else loadGuestProjects();
+  }, [user, refreshTrigger]);
+
   const loadGuestProjects = () => {
     const guestProjects = guestStorage.getProjects();
     setProjects(guestProjects.map(p => ({
@@ -112,14 +117,6 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
       })));
     }
   };
-
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (user) loadProjects();
-      else loadGuestProjects();
-    }, 0);
-    return () => clearTimeout(t);
-  }, [user, refreshTrigger]);
 
   const deleteProject = async (id: string, e: React.MouseEvent, isGuest: boolean = false) => {
     e.stopPropagation();

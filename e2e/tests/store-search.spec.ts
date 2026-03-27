@@ -76,9 +76,9 @@ test.describe('Store Search', () => {
     await page.locator('input[placeholder*="Enter location"]').fill('Portsmouth, NH');
     await expect(searchSubmit).toBeDisabled();
 
-    // Select an item (button with search icon, not a checkbox)
-    const itemButton = page.locator('button[aria-label="Select for store search"]').first();
-    await itemButton.click();
+    // Select an item
+    const itemCheckbox = page.locator('input[aria-label="Select item for store search"]').first();
+    await itemCheckbox.check();
 
     // Now search button should be enabled
     await expect(searchSubmit).toBeEnabled();
@@ -90,9 +90,9 @@ test.describe('Store Search', () => {
     // Open search panel
     await page.locator('button', { hasText: 'Search Local Stores' }).click();
 
-    // Select item for search (button with search icon, not a checkbox)
-    const itemButton = page.locator('button[aria-label="Select for store search"]').first();
-    await itemButton.click();
+    // Select item for search
+    const itemCheckbox = page.locator('input[aria-label="Select item for store search"]').first();
+    await itemCheckbox.check();
 
     // Enter location
     await page.locator('input[placeholder*="Enter location"]').fill('Portsmouth, NH');

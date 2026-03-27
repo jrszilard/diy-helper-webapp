@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { ChevronDown } from 'lucide-react';
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
+  label?: string;
   leftIcon?: React.ElementType;
   iconSize?: number;
   error?: string;
@@ -17,18 +18,26 @@ const sizeClasses = {
 };
 
 const Select = forwardRef<HTMLSelectElement, SelectProps>(({
+  label,
   leftIcon: LeftIcon,
   iconSize = 16,
   error,
   fullWidth,
   inputSize = 'md',
   className,
+  id,
   children,
   ...props
 }, ref) => {
   const paddingLeft = LeftIcon ? 'pl-9' : 'pl-3';
 
   return (
+    <div className={cn('flex flex-col gap-1', fullWidth && 'w-full')}>
+      {label && (
+        <label htmlFor={id} className="text-sm font-medium text-[var(--earth-brown-dark)]">
+          {label}
+        </label>
+      )}
     <div className={cn('relative', fullWidth && 'w-full')}>
       {LeftIcon && (
         <LeftIcon
@@ -38,8 +47,9 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(({
       )}
       <select
         ref={ref}
-        style={{ color: 'var(--foreground)' }}
+        id={id}
         className={cn(
+          'text-[#3E2723]',
           'appearance-none border rounded-lg bg-white transition-colors',
           'focus:outline-none focus:ring-2 focus:ring-[var(--terracotta)] focus:border-[var(--terracotta)]',
           'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -63,6 +73,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(({
       {error && (
         <p className="mt-1 text-xs text-[var(--rust)]">{error}</p>
       )}
+    </div>
     </div>
   );
 });

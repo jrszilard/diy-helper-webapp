@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Button from '@/components/ui/Button';
-import Select from '@/components/ui/Select';
-import Textarea from '@/components/ui/Textarea';
+import { ArrowRight } from 'lucide-react';
 import FileUpload from '@/components/ui/FileUpload';
 
 const TRADE_OPTIONS = [
@@ -50,7 +48,6 @@ export default function LandingExpertForm() {
     setSubmitting(true);
 
     try {
-      // Convert files to base64
       const photoUrls = await Promise.all(
         photos.map(
           (file) =>
@@ -78,55 +75,65 @@ export default function LandingExpertForm() {
 
   return (
     <div className="space-y-5">
-      <p className="text-lg font-semibold text-foreground">
-        Get a verified expert&apos;s take on your project
-      </p>
-
       {/* Trade category */}
       <div>
         <label
           htmlFor="trade-category"
-          className="block text-sm font-medium text-foreground mb-1"
+          className="block text-sm font-medium text-white/70 mb-2"
         >
           Trade Category
         </label>
-        <Select
+        <select
           id="trade-category"
           value={trade}
           onChange={(e) => {
             setTrade(e.target.value);
             if (errors.trade) setErrors((prev) => ({ ...prev, trade: undefined }));
           }}
-          error={errors.trade}
-          fullWidth
+          className="w-full bg-white/10 text-white border-0 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-terracotta/50 appearance-none"
         >
           {TRADE_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value} disabled={opt.value === ''}>
+            <option key={opt.value} value={opt.value} disabled={opt.value === ''} className="bg-earth-brown-dark text-white">
               {opt.label}
             </option>
           ))}
-        </Select>
+        </select>
+        {errors.trade && (
+          <p className="text-red-300 text-xs mt-1">{errors.trade}</p>
+        )}
       </div>
 
       {/* Question */}
       <div>
-        <Textarea
-          id="expert-question"
-          label="Your Question"
-          value={question}
-          onChange={(e) => {
-            setQuestion(e.target.value);
-            if (errors.question) setErrors((prev) => ({ ...prev, question: undefined }));
-          }}
-          rows={4}
-          placeholder="Describe your question or project in detail..."
-          error={errors.question}
-          fullWidth
-          resize="vertical"
-        />
-        <p className="text-xs text-earth-brown-light mt-1">
-          {question.length}/20 characters minimum
-        </p>
+        <label
+          htmlFor="expert-question"
+          className="block text-sm font-medium text-white/70 mb-2"
+        >
+          Your Question
+        </label>
+        <div className="bg-white/10 rounded-2xl p-4">
+          <textarea
+            id="expert-question"
+            value={question}
+            onChange={(e) => {
+              setQuestion(e.target.value);
+              if (errors.question) setErrors((prev) => ({ ...prev, question: undefined }));
+            }}
+            rows={4}
+            placeholder="Describe your question or project in detail..."
+            className="w-full bg-transparent text-white placeholder-white/40 text-base resize-none focus:outline-none"
+          />
+        </div>
+        <div className="flex justify-between mt-1">
+          {errors.question ? (
+            <p className="text-red-300 text-xs">{errors.question}</p>
+          ) : (
+            <span />
+          )}
+          <p className="text-xs text-white/40">
+            {question.length}/20 min
+          </p>
+        </div>
       </div>
 
       {/* Photos */}
@@ -136,18 +143,18 @@ export default function LandingExpertForm() {
         maxFiles={3}
         maxSizeMB={5}
         label="Photos"
+        variant="dark"
       />
 
       {/* Submit */}
-      <Button
-        variant="primary"
-        size="lg"
-        fullWidth
+      <button
         onClick={handleSubmit}
         disabled={submitting}
+        className="w-full flex items-center justify-center gap-2 bg-terracotta text-white px-6 py-3 rounded-xl font-semibold hover:bg-terracotta-dark transition-all disabled:opacity-50"
       >
         {submitting ? 'Submitting...' : 'Ask an Expert'}
-      </Button>
+        {!submitting && <ArrowRight className="w-4 h-4" />}
+      </button>
     </div>
   );
 }
