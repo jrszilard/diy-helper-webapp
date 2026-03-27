@@ -13,6 +13,7 @@ interface FileUploadProps {
   accept?: string;
   label?: string;
   error?: string;
+  variant?: 'light' | 'dark';
 }
 
 export default function FileUpload({
@@ -23,7 +24,9 @@ export default function FileUpload({
   accept = 'image/*',
   label,
   error,
+  variant = 'light',
 }: FileUploadProps) {
+  const isDark = variant === 'dark';
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -94,9 +97,9 @@ export default function FileUpload({
   return (
     <div>
       {label && (
-        <label className="block text-sm font-semibold text-foreground mb-2">
+        <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-white/70' : 'text-foreground'}`}>
           {label}{' '}
-          <span className="font-normal text-earth-brown-light">
+          <span className={`font-normal ${isDark ? 'text-white/40' : 'text-earth-brown-light'}`}>
             (optional, max {maxFiles})
           </span>
         </label>
@@ -117,15 +120,15 @@ export default function FileUpload({
         onDrop={handleDrop}
         className={`
           border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors
-          ${dragOver ? 'border-terracotta bg-terracotta/5' : 'border-earth-sand bg-white'}
+          ${dragOver ? 'border-terracotta bg-terracotta/5' : isDark ? 'border-white/20 bg-white/5' : 'border-earth-sand bg-white'}
           ${atLimit ? 'opacity-50 cursor-not-allowed' : 'hover:border-terracotta/50'}
         `}
       >
-        <Camera className="w-7 h-7 text-earth-brown-light mx-auto mb-1" />
-        <p className="text-sm font-medium text-foreground">
+        <Camera className={`w-7 h-7 mx-auto mb-1 ${isDark ? 'text-white/40' : 'text-earth-brown-light'}`} />
+        <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-foreground'}`}>
           {atLimit ? `${maxFiles} files uploaded` : 'Click to upload or drag photos here'}
         </p>
-        <p className="text-xs text-earth-brown-light mt-1">
+        <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-earth-brown-light'}`}>
           JPG, PNG up to {maxSizeMB}MB each
         </p>
       </div>

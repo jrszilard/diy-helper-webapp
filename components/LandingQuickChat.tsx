@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Send, ArrowRight } from 'lucide-react';
+import { ArrowUp, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/lib/supabase';
-import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
 
 const POPULAR_QUESTIONS = [
@@ -31,7 +30,6 @@ export default function LandingQuickChat() {
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom on new messages or streaming content
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -146,10 +144,6 @@ export default function LandingQuickChat() {
 
   return (
     <div className="space-y-4">
-      <p className="text-lg font-semibold text-foreground">
-        Ask anything about your home project
-      </p>
-
       {/* Messages */}
       <div ref={scrollRef} className="max-h-80 overflow-y-auto space-y-3">
         {messages.map((msg, idx) => (
@@ -158,11 +152,11 @@ export default function LandingQuickChat() {
               className={`max-w-[85%] ${
                 msg.role === 'user'
                   ? 'bg-terracotta text-white rounded-2xl rounded-br-md px-4 py-2.5'
-                  : 'bg-[var(--surface)] text-foreground border border-earth-sand rounded-2xl rounded-bl-md px-4 py-3'
+                  : 'bg-white/10 text-white rounded-2xl rounded-bl-md px-4 py-3'
               }`}
             >
               {msg.role === 'assistant' ? (
-                <div className="prose prose-sm max-w-none prose-stone">
+                <div className="prose prose-sm prose-invert max-w-none">
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
               ) : (
@@ -175,8 +169,8 @@ export default function LandingQuickChat() {
         {/* Streaming content */}
         {isStreaming && streamingContent && (
           <div className="flex justify-start">
-            <div className="max-w-[85%] bg-[var(--surface)] text-foreground border border-earth-sand rounded-2xl rounded-bl-md px-4 py-3">
-              <div className="prose prose-sm max-w-none prose-stone">
+            <div className="max-w-[85%] bg-white/10 text-white rounded-2xl rounded-bl-md px-4 py-3">
+              <div className="prose prose-sm prose-invert max-w-none">
                 <ReactMarkdown>{streamingContent}</ReactMarkdown>
               </div>
             </div>
@@ -186,8 +180,8 @@ export default function LandingQuickChat() {
         {/* Loading spinner */}
         {isStreaming && !streamingContent && (
           <div className="flex justify-start">
-            <div className="bg-[var(--surface)] border border-earth-sand rounded-2xl rounded-bl-md px-4 py-3">
-              <Spinner size="sm" color="primary" />
+            <div className="bg-white/10 rounded-2xl rounded-bl-md px-4 py-3">
+              <Spinner size="sm" />
             </div>
           </div>
         )}
@@ -195,7 +189,7 @@ export default function LandingQuickChat() {
 
       {/* Error */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">
+        <div className="bg-red-900/30 border border-red-500/30 text-red-200 rounded-lg p-3 text-sm">
           {error}
           <button onClick={() => setError(null)} className="ml-2 underline">
             Dismiss
@@ -205,47 +199,60 @@ export default function LandingQuickChat() {
 
       {/* Continue in full chat */}
       {hasConversation && !isStreaming && (
-        <Button variant="tertiary" size="sm" rightIcon={ArrowRight} onClick={handleContinue}>
-          Continue in full chat
-        </Button>
+        <button
+          onClick={handleContinue}
+          className="flex items-center gap-2 text-sm font-semibold text-terracotta hover:text-terracotta-dark transition-colors"
+        >
+          Continue in full chat <ArrowRight className="w-4 h-4" />
+        </button>
       )}
 
-      {/* Input area */}
-      <div className="flex gap-2">
-        <input
+      {/* Input area — matches GuidedBot BotInput dark style */}
+      <div className="bg-white/10 rounded-2xl p-4">
+        <textarea
           value={input}
           onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
-          placeholder={hasConversation ? 'Ask a follow-up...' : 'What size wire for a 20-amp circuit?'}
-          className="flex-1 px-4 py-3 border border-earth-sand rounded-xl bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-terracotta/50 focus:border-terracotta"
+          onKeyDown={e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
+          placeholder={hasConversation ? 'Ask a follow-up...' : 'Ask a quick DIY question...'}
+          className="w-full bg-transparent text-white placeholder-white/40 text-base resize-none focus:outline-none disabled:opacity-50"
           disabled={isStreaming}
+          rows={2}
         />
-        <Button
-          variant="primary"
-          size="lg"
-          onClick={() => handleSend()}
-          disabled={isStreaming || !input.trim()}
-          leftIcon={isStreaming ? undefined : Send}
-        >
-          {isStreaming ? <Spinner size="sm" color="default" className="text-white" /> : null}
-        </Button>
+        <div className="flex justify-end mt-2">
+          <button
+            onClick={() => handleSend()}
+            disabled={isStreaming || !input.trim()}
+            aria-label="Send message"
+            className={`p-2 rounded-xl transition-all ${
+              input.trim() && !isStreaming
+                ? 'bg-terracotta text-white hover:bg-terracotta-dark'
+                : 'text-white/30 cursor-not-allowed'
+            }`}
+          >
+            <ArrowUp className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      {/* Popular question chips */}
+      {/* Popular question chips — match ProjectCards dark style */}
       {!hasConversation && (
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {POPULAR_QUESTIONS.map((q, idx) => (
-            <Button
+            <button
               key={idx}
-              variant="ghost"
-              size="xs"
               onClick={() => {
                 setInput(q);
                 handleSend(q);
               }}
+              className="rounded-2xl bg-white/10 hover:bg-white/15 text-left transition-all p-4 text-white font-semibold text-sm leading-tight"
             >
               {q}
-            </Button>
+            </button>
           ))}
         </div>
       )}
