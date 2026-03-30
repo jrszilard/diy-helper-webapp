@@ -20,7 +20,7 @@ export default function GlobalHeader({ left, nav, right, className = '', logoHre
 
   return (
     <header className={`${isDark ? 'sticky top-0 z-50 backdrop-blur-xl bg-[var(--earth-brown-dark)]/95 border-b border-[var(--blueprint-grid-major)]' : 'bg-nav-surface border-b border-earth-sand shadow-sm'} ${className}`}>
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div className="u-container">
         <div className="flex items-center justify-between h-14 sm:h-16">
           <div className="flex items-center gap-4">
             {left}

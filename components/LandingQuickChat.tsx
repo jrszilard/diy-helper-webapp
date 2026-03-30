@@ -1,11 +1,14 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { ArrowUp, ArrowRight } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { ArrowUp, FolderPlus, ShoppingCart } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/lib/supabase';
 import Spinner from '@/components/ui/Spinner';
+import Button from '@/components/ui/Button';
+import SaveToProjectModal from '@/components/SaveToProjectModal';
+import { extractMaterialsData } from '@/components/ChatMessages';
+import type { ExtractedMaterials } from '@/types';
 
 const POPULAR_QUESTIONS = [
   'Do I need a permit to finish my basement?',
@@ -19,22 +22,140 @@ interface Message {
   content: string;
 }
 
-export default function LandingQuickChat() {
-  const router = useRouter();
+const MATERIALS_KEYWORDS = ["you'll need", "you will need", "materials list", "shopping list", "supplies needed", "materials needed", "items needed", "tools needed"];
+
+export default function LandingQuickChat({ initialConversationId }: { initialConversationId?: string } = {}) {
+  const [userId, setUserId] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(initialConversationId ?? null);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showMaterialsModal, setShowMaterialsModal] = useState(false);
+  const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
+  const [extractedMaterials, setExtractedMaterials] = useState<ExtractedMaterials | null>(null);
+  const [isExtractingMaterials, setIsExtractingMaterials] = useState(false);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user?.id ?? null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUserId(session?.user?.id ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!initialConversationId) return;
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const headers: Record<string, string> = {};
+      if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+      try {
+        const res = await fetch(`/api/conversations/${initialConversationId}/messages`, { headers });
+        if (!res.ok) return;
+        const data = await res.json();
+        const msgs: Array<{ role: string; content: string }> = data.messages ?? data;
+        if (msgs.length > 0) setMessages(msgs as Message[]);
+      } catch {}
+    });
+  }, [initialConversationId]);
+
+  const defaultProjectName = messages.find(m => m.role === 'user')?.content.slice(0, 60) ?? '';
+
+  // Check if the last assistant message likely has materials
+  const hasMaterialsInChat = useMemo(() => {
+    const lastAssistant = [...messages].reverse().find(m => m.role === 'assistant');
+    if (!lastAssistant) return false;
+    const lower = lastAssistant.content.toLowerCase();
+    return MATERIALS_KEYWORDS.some(kw => lower.includes(kw));
+  }, [messages]);
+
+  const storeSessionHandoff = (projectId: string) => {
+    if (conversationId) sessionStorage.setItem('diy-helper-conversation-id', conversationId);
+    if (messages.length > 0) sessionStorage.setItem('diy-helper-chat-messages', JSON.stringify(messages));
+    sessionStorage.setItem('diy-helper-project-id', projectId);
+  };
+
+  const handleSaved = (projectId: string) => {
+    setSavedProjectId(projectId);
+    storeSessionHandoff(projectId);
+  };
+
+  const handleMaterialsSaved = async (projectId: string) => {
+    setSavedProjectId(projectId);
+    storeSessionHandoff(projectId);
+
+    if (extractedMaterials && userId) {
+      const items = extractedMaterials.materials.map(mat => ({
+        project_id: projectId,
+        user_id: userId,
+        product_name: mat.name,
+        quantity: parseInt(mat.quantity) || 1,
+        category: mat.category || 'General',
+        price: mat.estimated_price ? parseFloat(mat.estimated_price.replace(/[^0-9.]/g, '')) || null : null,
+        required: mat.required !== false,
+      }));
+      await supabase.from('shopping_list_items').insert(items);
     }
-  }, [messages, streamingContent]);
+  };
+
+  const handleSaveMaterials = useCallback(async () => {
+    if (isExtractingMaterials) return;
+
+    // Use already-extracted materials if available
+    if (extractedMaterials) {
+      setShowMaterialsModal(true);
+      return;
+    }
+
+    // Check for embedded JSON in the last assistant message
+    const lastAssistant = [...messages].reverse().find(m => m.role === 'assistant');
+    if (lastAssistant) {
+      const inline = extractMaterialsData(lastAssistant.content);
+      if (inline && inline.materials.length > 0) {
+        setExtractedMaterials(inline);
+        setShowMaterialsModal(true);
+        return;
+      }
+    }
+
+    // Fall back to the extract API
+    setIsExtractingMaterials(true);
+    try {
+      const session = (await supabase.auth.getSession()).data.session;
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+
+      const res = await fetch('/api/extract-materials', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          conversationContext: messages.map(m => ({ role: m.role, content: m.content })),
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.materials?.length > 0) {
+          setExtractedMaterials(data);
+          setShowMaterialsModal(true);
+        } else {
+          setError('No materials list found in this conversation.');
+        }
+      } else {
+        setError('Could not extract materials. Please try again.');
+      }
+    } catch {
+      setError('Could not extract materials. Please try again.');
+    } finally {
+      setIsExtractingMaterials(false);
+    }
+  }, [isExtractingMaterials, extractedMaterials, messages]);
 
   const handleSend = useCallback(async (text?: string) => {
     const message = (text || input).trim();
@@ -42,6 +163,7 @@ export default function LandingQuickChat() {
 
     setInput('');
     setError(null);
+    setExtractedMaterials(null);
     setMessages(prev => [...prev, { role: 'user', content: message }]);
     setIsStreaming(true);
     setStreamingContent('');
@@ -120,6 +242,11 @@ export default function LandingQuickChat() {
 
       if (accumulated) {
         setMessages(prev => [...prev, { role: 'assistant', content: accumulated }]);
+        // Auto-detect embedded materials JSON
+        const inline = extractMaterialsData(accumulated);
+        if (inline && inline.materials.length > 0) {
+          setExtractedMaterials(inline);
+        }
       }
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') return;
@@ -130,29 +257,21 @@ export default function LandingQuickChat() {
     }
   }, [input, isStreaming, messages]);
 
-  const handleContinue = () => {
-    if (conversationId) {
-      sessionStorage.setItem('diy-helper-conversation-id', conversationId);
-    }
-    if (messages.length > 0) {
-      sessionStorage.setItem('diy-helper-chat-messages', JSON.stringify(messages));
-    }
-    router.push('/chat');
-  };
-
   const hasConversation = messages.length > 0;
+  const showMaterialsButton = userId && hasMaterialsInChat && !savedProjectId;
+  const showSaveButton = userId && !showMaterialsButton && !savedProjectId;
 
   return (
     <div className="space-y-4">
       {/* Messages */}
-      <div ref={scrollRef} className="max-h-80 overflow-y-auto space-y-3">
+      <div className="space-y-3">
         {messages.map((msg, idx) => (
           <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div
               className={`max-w-[85%] ${
                 msg.role === 'user'
                   ? 'bg-terracotta text-white rounded-2xl rounded-br-md px-4 py-2.5'
-                  : 'bg-white/10 text-white rounded-2xl rounded-bl-md px-4 py-3'
+                  : 'bg-white/10 text-earth-cream rounded-2xl rounded-bl-md px-4 py-3'
               }`}
             >
               {msg.role === 'assistant' ? (
@@ -169,7 +288,7 @@ export default function LandingQuickChat() {
         {/* Streaming content */}
         {isStreaming && streamingContent && (
           <div className="flex justify-start">
-            <div className="max-w-[85%] bg-white/10 text-white rounded-2xl rounded-bl-md px-4 py-3">
+            <div className="max-w-[85%] bg-white/10 text-earth-cream rounded-2xl rounded-bl-md px-4 py-3">
               <div className="prose prose-sm prose-invert max-w-none">
                 <ReactMarkdown>{streamingContent}</ReactMarkdown>
               </div>
@@ -197,17 +316,56 @@ export default function LandingQuickChat() {
         </div>
       )}
 
-      {/* Continue in full chat */}
+      {/* Actions */}
       {hasConversation && !isStreaming && (
-        <button
-          onClick={handleContinue}
-          className="flex items-center gap-2 text-sm font-semibold text-terracotta hover:text-terracotta-dark transition-colors"
-        >
-          Continue in full chat <ArrowRight className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-3 flex-wrap">
+          {showMaterialsButton && (
+            <Button
+              variant="primary"
+              size="sm"
+              leftIcon={isExtractingMaterials ? undefined : ShoppingCart}
+              iconSize={16}
+              onClick={handleSaveMaterials}
+              disabled={isExtractingMaterials}
+            >
+              {isExtractingMaterials ? (
+                <span className="flex items-center gap-2"><Spinner size="sm" /> Extracting...</span>
+              ) : (
+                'Save Materials'
+              )}
+            </Button>
+          )}
+          {showSaveButton && (
+            <Button variant="primary" size="sm" leftIcon={FolderPlus} iconSize={16} onClick={() => setShowSaveModal(true)}>
+              Save to Project
+            </Button>
+          )}
+        </div>
       )}
 
-      {/* Input area — matches GuidedBot BotInput dark style */}
+      {/* Save to Project modal (no materials) */}
+      {userId && (
+        <SaveToProjectModal
+          isOpen={showSaveModal}
+          onClose={() => setShowSaveModal(false)}
+          userId={userId}
+          defaultName={defaultProjectName}
+          onSaved={handleSaved}
+        />
+      )}
+
+      {/* Save Materials modal */}
+      {userId && (
+        <SaveToProjectModal
+          isOpen={showMaterialsModal}
+          onClose={() => setShowMaterialsModal(false)}
+          userId={userId}
+          defaultName={extractedMaterials?.project_description || defaultProjectName}
+          onSaved={handleMaterialsSaved}
+        />
+      )}
+
+      {/* Input area */}
       <div className="bg-white/10 rounded-2xl p-4">
         <textarea
           value={input}
@@ -219,7 +377,7 @@ export default function LandingQuickChat() {
             }
           }}
           placeholder={hasConversation ? 'Ask a follow-up...' : 'Ask a quick DIY question...'}
-          className="w-full bg-transparent text-white placeholder-white/40 text-base resize-none focus:outline-none disabled:opacity-50"
+          className="w-full bg-transparent text-earth-cream placeholder-earth-cream/40 text-base resize-none focus:outline-none disabled:opacity-50"
           disabled={isStreaming}
           rows={2}
         />
@@ -239,7 +397,7 @@ export default function LandingQuickChat() {
         </div>
       </div>
 
-      {/* Popular question chips — match ProjectCards dark style */}
+      {/* Popular question chips */}
       {!hasConversation && (
         <div className="grid grid-cols-2 gap-2">
           {POPULAR_QUESTIONS.map((q, idx) => (
@@ -249,7 +407,7 @@ export default function LandingQuickChat() {
                 setInput(q);
                 handleSend(q);
               }}
-              className="rounded-2xl bg-white/10 hover:bg-white/15 text-left transition-all p-4 text-white font-semibold text-sm leading-tight"
+              className="rounded-2xl bg-white/10 hover:bg-white/15 text-left transition-all p-4 text-earth-cream font-semibold text-sm leading-tight"
             >
               {q}
             </button>

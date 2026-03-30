@@ -390,7 +390,8 @@ body {
   --tw-prose-code: #3E2723;
   --tw-prose-th-borders: #D4C8B8;
   --tw-prose-td-borders: #D4C8B8;
-  color: #3E2723;
+  /* Do not hardcode color here — prose-invert overrides the variables above
+     to light values, and hardcoding color: would prevent that from working */
 }
 
 /* Line clamp utility */

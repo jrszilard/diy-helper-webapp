@@ -4,33 +4,33 @@ import { useEffect, useState } from 'react';
 import ChatInterface from '@/components/ChatInterface';
 import ProjectsSidebar from '@/components/ProjectsSidebar';
 import ShoppingListView from '@/components/ShoppingListView';
-import { Menu, FolderOpen, ShoppingCart, X, Package } from 'lucide-react';
+import { FolderOpen, ShoppingCart, X, Package } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { guestStorage } from '@/lib/guestStorage';
-import InventoryPanel from '@/components/InventoryPanel';
-import { useExpertStatus } from '@/hooks/useExpertStatus';
 import { Project } from '@/types';
 import type { User } from '@supabase/supabase-js';
-import DIYerHeader from '@/components/DIYerHeader';
+import AppHeader from '@/components/AppHeader';
 import Button from '@/components/ui/Button';
 
 export default function ChatPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const { isExpert } = useExpertStatus();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [projectRefreshTrigger, setProjectRefreshTrigger] = useState(0);
 
-  const [showInventory, setShowInventory] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [migrationToast, setMigrationToast] = useState<string | null>(null);
-
-  // Mobile panel states
-  const [showMobileProjects, setShowMobileProjects] = useState(false);
   const [showMobileShopping, setShowMobileShopping] = useState(false);
 
   useEffect(() => {
+    const storedProjectId = sessionStorage.getItem('diy-helper-project-id');
+    if (storedProjectId) {
+      sessionStorage.removeItem('diy-helper-project-id');
+      supabase.from('projects').select('*').eq('id', storedProjectId).single()
+        .then(({ data }) => { if (data) setSelectedProject(data); });
+    }
+
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
     });
@@ -101,15 +101,11 @@ export default function ChatPage() {
       });
   };
 
-  // Handle project selection from sidebar
   const handleSelectProject = (project: Project | null) => {
     setSelectedProject(project);
-    setShowMobileProjects(false); // Close mobile panel after selection
   };
 
-  // Close all mobile panels when clicking overlay
   const closeMobilePanels = () => {
-    setShowMobileProjects(false);
     setShowMobileShopping(false);
   };
 
@@ -127,31 +123,6 @@ export default function ChatPage() {
           >
             <X size={16} />
           </button>
-        </div>
-      )}
-
-      {/* Mobile Projects Overlay */}
-      {showMobileProjects && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-black/60" onClick={closeMobilePanels} />
-          <div className="absolute left-0 top-0 bottom-0 w-[85vw] max-w-80 bg-[#1E1A17] shadow-xl animate-slide-in-left flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-[var(--blueprint-grid-major)]">
-              <h2 className="font-bold text-lg text-white">{user ? 'My Projects' : 'Local Projects'}</h2>
-              <button
-                onClick={() => setShowMobileProjects(false)}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors text-[var(--earth-sand)]"
-                aria-label="Close projects panel"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <ProjectsSidebar
-              user={user}
-              onSelectProject={handleSelectProject}
-              isMobile={true}
-              refreshTrigger={projectRefreshTrigger}
-            />
-          </div>
         </div>
       )}
 
@@ -178,44 +149,20 @@ export default function ChatPage() {
         </div>
       )}
 
-      {/* Full-width global nav */}
-      <DIYerHeader
-        isExpert={isExpert}
-        left={
+      <AppHeader
+        onProjectSelect={handleSelectProject}
+        projectsRefreshTrigger={projectRefreshTrigger}
+        extraRight={selectedProject ? (
           <button
-            onClick={() => setShowMobileProjects(true)}
-            className="md:hidden p-2 text-[var(--earth-sand)] hover:text-white hover:bg-white/10 rounded-lg transition"
-            title={user ? "My Projects" : "Local Projects"}
-            aria-label={user ? "My Projects" : "Local Projects"}
+            onClick={() => setShowMobileShopping(true)}
+            className="md:hidden relative p-2 text-[var(--earth-sand)] hover:text-white hover:bg-white/10 rounded-lg transition"
+            title="Shopping List"
+            aria-label="Shopping List"
           >
-            <Menu size={22} />
+            <ShoppingCart size={22} />
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-forest-green text-white text-xs rounded-full flex items-center justify-center font-medium">!</span>
           </button>
-        }
-        extraRight={
-          <>
-            {selectedProject && (
-              <button
-                onClick={() => setShowMobileShopping(true)}
-                className="md:hidden relative p-2 text-[var(--earth-sand)] hover:text-white hover:bg-white/10 rounded-lg transition"
-                title="Shopping List"
-                aria-label="Shopping List"
-              >
-                <ShoppingCart size={22} />
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-forest-green text-white text-xs rounded-full flex items-center justify-center font-medium">!</span>
-              </button>
-            )}
-            <Button
-              variant="secondary"
-              size="sm"
-              leftIcon={Package}
-              iconSize={18}
-              onClick={() => setShowInventory(true)}
-              title="View your tool inventory"
-            >
-              <span className="hidden sm:inline">My Tools</span>
-            </Button>
-          </>
-        }
+        ) : undefined}
       />
 
       {/* Content row: sidebar + main */}
@@ -267,11 +214,6 @@ export default function ChatPage() {
         </div>
       </div>
 
-      <InventoryPanel
-        userId={user?.id ?? ''}
-        isOpen={showInventory}
-        onClose={() => setShowInventory(false)}
-      />
     </div>
   );
 }

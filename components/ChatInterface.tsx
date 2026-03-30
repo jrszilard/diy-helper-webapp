@@ -38,6 +38,9 @@ export default function ChatInterface({
 
   // Hydrate chat state from sessionStorage (set by landing page redirect)
   useEffect(() => {
+    const resumeId = sessionStorage.getItem('diy-helper-resume-conversation-id');
+    sessionStorage.removeItem('diy-helper-resume-conversation-id');
+
     try {
       const storedConvId = sessionStorage.getItem('diy-helper-conversation-id');
       const storedMessages = sessionStorage.getItem('diy-helper-chat-messages');
@@ -51,6 +54,18 @@ export default function ChatInterface({
       sessionStorage.removeItem('diy-helper-chat-messages');
     } catch {
       // ignore parse errors
+    }
+
+    // Resume a conversation from history (ID only — fetch messages from API)
+    if (resumeId) {
+      fetch(`/api/conversations/${resumeId}/messages`)
+        .then(r => r.ok ? r.json() : null)
+        .then((msgs: Array<{ role: string; content: string }> | null) => {
+          if (msgs && msgs.length > 0) {
+            chat.handleSelectConversation(resumeId, msgs as Message[]);
+          }
+        })
+        .catch(() => {/* ignore */});
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

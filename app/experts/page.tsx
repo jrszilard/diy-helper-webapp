@@ -2,9 +2,10 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Users } from 'lucide-react';
-import Link from 'next/link';
-import { Wrench } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
+import Button from '@/components/ui/Button';
+import EmptyState from '@/components/ui/EmptyState';
+import AppHeader from '@/components/AppHeader';
 import ExpertSearchFilters from '@/components/marketplace/ExpertSearchFilters';
 import ExpertCard from '@/components/marketplace/ExpertCard';
 import type { ExpertProfile } from '@/lib/marketplace/types';
@@ -55,28 +56,13 @@ export default function ExpertsBrowsePage() {
   }, [fetchExperts]);
 
   return (
-    <div className="min-h-screen bg-earth-cream">
-      <header className="bg-surface border-b border-earth-sand shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="bg-gradient-to-br from-terracotta to-terracotta-dark p-1.5 rounded-lg">
-              <Wrench className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-lg font-bold text-foreground">DIY Helper</span>
-          </Link>
-          <Link
-            href="/experts/register"
-            className="text-sm font-medium text-slate-blue hover:text-slate-blue-dark transition-colors"
-          >
-            Become an Expert
-          </Link>
-        </div>
-      </header>
+    <div className="min-h-screen bg-earth-brown-dark">
+      <AppHeader />
 
       <main className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-6">
-          <Users size={24} className="text-slate-blue" />
-          <h1 className="text-2xl font-bold text-foreground">Find an Expert</h1>
+          <Users size={24} className="text-white/50" />
+          <h1 className="text-2xl font-bold text-earth-cream">Find an Expert</h1>
         </div>
 
         <div className="mb-6">
@@ -85,20 +71,21 @@ export default function ExpertsBrowsePage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Spinner size="lg" className="text-terracotta" />
+            <Spinner size="lg" color="primary" />
           </div>
         ) : error ? (
-          <div className="text-center py-12">
-            <p className="text-sm text-rust mb-3">Something went wrong loading experts.</p>
-            <button onClick={fetchExperts} className="text-sm font-medium text-slate-blue hover:underline">
+          <div className="text-center py-12 space-y-3">
+            <p className="text-sm text-rust">Something went wrong loading experts.</p>
+            <Button variant="ghost" onClick={fetchExperts} className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10">
               Try again
-            </button>
+            </Button>
           </div>
         ) : experts.length === 0 ? (
-          <div className="text-center py-12">
-            <Users size={40} className="mx-auto text-earth-sand mb-3" />
-            <p className="text-sm text-earth-brown">No experts found matching your criteria</p>
-          </div>
+          <EmptyState
+            icon={Users}
+            description="No experts found matching your criteria"
+            className="py-12 [&_p]:text-white/50 [&_svg]:text-white/20"
+          />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {experts.map(expert => (
