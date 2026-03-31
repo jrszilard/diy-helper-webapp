@@ -4,12 +4,12 @@ import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { redirectToSignIn } from '@/lib/auth-redirect';
-import { ArrowLeft } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
 import DIYerHeader from '@/components/DIYerHeader';
-import Button from '@/components/ui/Button';
 import QASubmitForm from '@/components/marketplace/QASubmitForm';
 import QAQuestionList from '@/components/marketplace/QAQuestionList';
+import SectionHeader from '@/components/ui/SectionHeader';
 import type { QAQuestion, ExpertContext } from '@/lib/marketplace/types';
 
 function QAPageContent() {
@@ -18,6 +18,7 @@ function QAPageContent() {
   const reportId = searchParams.get('reportId') || undefined;
   const targetExpertId = searchParams.get('targetExpertId') || undefined;
   const targetExpertName = searchParams.get('targetExpertName') || undefined;
+
   // Read prefill from sessionStorage (set by landing page redirect)
   const [initialQuestion, setInitialQuestion] = useState<string | undefined>();
   const [initialCategory, setInitialCategory] = useState<string | undefined>();
@@ -111,6 +112,8 @@ function QAPageContent() {
 
   if (!authenticated) return null;
 
+  const showSubmitForm = !!(reportId || targetExpertId || initialQuestion);
+
   const handleSuccess = (questionId: string) => {
     router.push(`/marketplace/qa/${questionId}`);
   };
@@ -118,28 +121,34 @@ function QAPageContent() {
   return (
     <div className="min-h-screen bg-earth-brown-dark">
       <DIYerHeader />
-
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-        <Button variant="ghost" href="/chat" leftIcon={ArrowLeft} size="sm" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10">
-          Back to Chat
-        </Button>
-        <QASubmitForm
-          reportId={reportId}
-          reportContext={reportContext}
-          expertContext={expertContext}
-          targetExpertId={targetExpertId}
-          targetExpertName={targetExpertName}
-          initialQuestion={initialQuestion}
-          initialCategory={initialCategory}
-          onSuccess={handleSuccess}
-        />
-
-        {myQuestions.length > 0 && (
-          <div>
-            <h2 className="text-xl font-bold text-white mb-4">Your Questions</h2>
-            <QAQuestionList questions={myQuestions} />
-          </div>
+        {showSubmitForm && (
+          <QASubmitForm
+            reportId={reportId}
+            reportContext={reportContext}
+            expertContext={expertContext}
+            targetExpertId={targetExpertId}
+            targetExpertName={targetExpertName}
+            initialQuestion={initialQuestion}
+            initialCategory={initialCategory}
+            onSuccess={handleSuccess}
+          />
         )}
+
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+            <MessageSquare className="w-6 h-6 text-white/50" />
+            My Questions
+          </h1>
+          {myQuestions.length > 0 ? (
+            <QAQuestionList questions={myQuestions} />
+          ) : (
+            <div className="text-center py-16 text-white/40">
+              <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">No questions yet. Ask an expert from the home page.</p>
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );

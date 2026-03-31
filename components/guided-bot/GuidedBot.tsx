@@ -16,22 +16,29 @@ import PreferenceCards from './PreferenceCards';
 import ProjectBrief from './ProjectBrief';
 import AgentProgress from '@/components/AgentProgress';
 import ReportView from '@/components/ReportView';
-import { LogIn } from 'lucide-react';
+import { LogIn, FolderPlus } from 'lucide-react';
+import Button from '@/components/ui/Button';
+import SaveToProjectModal from '@/components/SaveToProjectModal';
 
 export default function GuidedBot() {
   const bot = useGuidedBot();
   const agentRun = useAgentRun();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
 
   // Check auth state
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsAuthenticated(!!session?.user);
+      setUserId(session?.user?.id ?? null);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session?.user);
+      setUserId(session?.user?.id ?? null);
     });
 
     return () => subscription.unsubscribe();
@@ -144,22 +151,48 @@ export default function GuidedBot() {
           />
         </div>
 
-        {/* Auth CTA for unauthenticated users */}
-        {!isAuthenticated && (
-          <div className="bg-[#FDF8F3] border-t border-earth-sand p-4">
-            <div className="flex items-center justify-between gap-4">
-              <p className="text-sm text-[var(--warm-brown)]">
-                Sign in to save your project plan, track materials, and access it later.
-              </p>
-              <a
-                href="/chat"
-                className="flex items-center gap-2 px-4 py-2 bg-terracotta text-white text-sm font-semibold rounded-lg hover:bg-terracotta-dark transition-colors whitespace-nowrap"
-              >
-                <LogIn className="w-4 h-4" />
-                Sign In
-              </a>
-            </div>
+        {/* Bottom CTA */}
+        <div className="bg-[#FDF8F3] border-t border-earth-sand p-4">
+          <div className="flex items-center justify-between gap-4">
+            {isAuthenticated && userId ? (
+              <>
+                <p className="text-sm text-[var(--warm-brown)]">
+                  {savedProjectId ? 'Project saved! Open it in chat to track materials.' : 'Save this plan to your projects to track materials and access it later.'}
+                </p>
+                {!savedProjectId && (
+                  <Button variant="primary" size="sm" leftIcon={FolderPlus} iconSize={16} onClick={() => setShowSaveModal(true)}>
+                    Save to Project
+                  </Button>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-[var(--warm-brown)]">
+                  Sign in to save your project plan, track materials, and access it later.
+                </p>
+                <a
+                  href="/chat"
+                  className="flex items-center gap-2 px-4 py-2 bg-terracotta text-white text-sm font-semibold rounded-lg hover:bg-terracotta-dark transition-colors whitespace-nowrap"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Sign In
+                </a>
+              </>
+            )}
           </div>
+        </div>
+
+        {userId && (
+          <SaveToProjectModal
+            isOpen={showSaveModal}
+            onClose={() => setShowSaveModal(false)}
+            userId={userId}
+            defaultName={bot.gathered.projectType || 'DIY Project'}
+            onSaved={(projectId) => {
+              setSavedProjectId(projectId);
+              setShowSaveModal(false);
+            }}
+          />
         )}
       </div>
     );

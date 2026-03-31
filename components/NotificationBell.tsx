@@ -52,7 +52,7 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-earth-brown hover:text-foreground hover:bg-earth-tan rounded-lg transition-colors"
+        className="relative p-2 text-[var(--earth-sand)] hover:text-white hover:bg-white/10 rounded-lg transition-colors"
         aria-label="Notifications"
       >
         <Bell size={20} />

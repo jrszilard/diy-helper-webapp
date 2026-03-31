@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { LogOut, ChevronDown, FolderOpen, MessageSquare, Mail, Users, Award, Settings, User } from 'lucide-react';
+import { LogOut, ChevronDown, Mail, Settings, User } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import TextInput from '@/components/ui/TextInput';
 import Modal from '@/components/ui/Modal';
@@ -104,13 +104,9 @@ export default function AuthButton({
           { label: 'Sign Out', icon: LogOut, onClick: handleSignOut, danger: true, dividerBefore: true },
         ]
       : [
-          { label: 'My Projects', icon: FolderOpen, href: '/chat' },
-          { label: 'My Questions', icon: MessageSquare, href: '/marketplace/qa' },
           { label: 'My Profile', icon: User, href: '/profile' },
           { label: 'Settings', icon: Settings, href: '/settings' },
           { label: 'Messages', icon: Mail, href: '/messages' },
-          { label: 'Find an Expert', icon: Users, href: '/experts' },
-          { label: 'Become an Expert', icon: Award, href: '/experts/register' },
           { label: 'Sign Out', icon: LogOut, onClick: handleSignOut, danger: true, dividerBefore: true },
         ];
 

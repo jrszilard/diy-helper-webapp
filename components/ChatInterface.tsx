@@ -9,6 +9,7 @@ import SaveMaterialsDialog from './SaveMaterialsDialog';
 import ConversationList from './ConversationList';
 import ProjectPlanner from './ProjectPlanner';
 import Button from '@/components/ui/Button';
+import { supabase } from '@/lib/supabase';
 import { useChat } from '@/hooks/useChat';
 import { useProjectActions } from '@/hooks/useProjectActions';
 import { analyzeTerminology } from '@/lib/intelligence/trade-terminology';
@@ -38,6 +39,9 @@ export default function ChatInterface({
 
   // Hydrate chat state from sessionStorage (set by landing page redirect)
   useEffect(() => {
+    const resumeId = sessionStorage.getItem('diy-helper-resume-conversation-id');
+    sessionStorage.removeItem('diy-helper-resume-conversation-id');
+
     try {
       const storedConvId = sessionStorage.getItem('diy-helper-conversation-id');
       const storedMessages = sessionStorage.getItem('diy-helper-chat-messages');
@@ -51,6 +55,23 @@ export default function ChatInterface({
       sessionStorage.removeItem('diy-helper-chat-messages');
     } catch {
       // ignore parse errors
+    }
+
+    // Resume a conversation from history (ID only — fetch messages from API)
+    if (resumeId) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        const headers: Record<string, string> = {};
+        if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+        fetch(`/api/conversations/${resumeId}/messages`, { headers })
+          .then(r => r.ok ? r.json() : null)
+          .then((data) => {
+            const msgs: Array<{ role: string; content: string }> | null = data?.messages ?? data;
+            if (msgs && msgs.length > 0) {
+              chat.handleSelectConversation(resumeId, msgs as Message[]);
+            }
+          })
+          .catch(() => {/* ignore */});
+      });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
-import Link from 'next/link';
+import Button from '@/components/ui/Button';
+import AppHeader from '@/components/AppHeader';
 import ExpertProfileView from '@/components/marketplace/ExpertProfileView';
 import type { ExpertProfile } from '@/lib/marketplace/types';
 
@@ -55,40 +56,41 @@ export default function ExpertDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-earth-cream flex items-center justify-center">
-        <Spinner size="lg" className="text-terracotta" />
+      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
+        <Spinner size="lg" color="primary" />
       </div>
     );
   }
 
   if (error || !expert) {
     return (
-      <div className="min-h-screen bg-earth-cream flex items-center justify-center">
+      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
         <div className="text-center">
-          <p className="text-sm text-earth-brown mb-4">Expert not found</p>
-          <Link href="/experts" className="text-sm text-slate-blue hover:underline">
+          <p className="text-sm text-white/50 mb-4">Expert not found</p>
+          <Button variant="ghost" href="/experts" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10">
             Browse Experts
-          </Link>
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-earth-cream">
-      <header className="bg-surface border-b border-earth-sand shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 py-4">
-          <Link
-            href="/experts"
-            className="flex items-center gap-1.5 text-sm text-slate-blue hover:text-slate-blue-dark transition-colors"
-          >
-            <ArrowLeft size={16} />
-            Back to Experts
-          </Link>
-        </div>
-      </header>
+    <div className="min-h-screen bg-earth-brown-dark">
+      <AppHeader />
 
       <main className="max-w-3xl mx-auto px-4 py-8">
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            href="/experts"
+            leftIcon={ArrowLeft}
+            iconSize={16}
+            className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10"
+          >
+            Back to Experts
+          </Button>
+        </div>
         <ExpertProfileView expert={expert} reviews={reviews} />
       </main>
     </div>
