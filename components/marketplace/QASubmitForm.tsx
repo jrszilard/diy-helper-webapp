@@ -274,21 +274,21 @@ export default function QASubmitForm({
   const needsPayment = !isFirstQuestion;
 
   return (
-    <div className="bg-white border border-earth-sand rounded-lg p-6">
+    <div className="bg-white/5 border border-white/10 rounded-lg p-6">
       {/* Test mode banner */}
       {isTestMode && (
-        <div className="mb-4 p-3 bg-amber-50 border border-amber-300 rounded-lg flex items-center gap-2">
-          <Zap size={16} className="text-amber-600 flex-shrink-0" />
-          <p className="text-sm text-amber-800 font-medium">
+        <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center gap-2">
+          <Zap size={16} className="text-amber-400 flex-shrink-0" />
+          <p className="text-sm text-amber-300 font-medium">
             Test Mode — Using fake payment. No real charges will occur.
           </p>
         </div>
       )}
 
-      <h2 className="text-lg font-bold text-foreground mb-1">
+      <h2 className="text-lg font-bold text-earth-cream mb-1">
         {targetExpertName ? `Get Expert Guidance from ${targetExpertName}` : 'Get Expert Guidance on Your Project'}
       </h2>
-      <p className="text-sm text-earth-brown mb-4">
+      <p className="text-sm text-white/60 mb-4">
         {expertContext
           ? 'Your AI report gives the expert full context before they even start — no explaining from scratch.'
           : 'Connect with a verified tradesperson who can answer the questions AI can\u2019t.'}
@@ -306,44 +306,44 @@ export default function QASubmitForm({
       )}
 
       {/* What you get — value messaging */}
-      <div className="mb-4 p-3 bg-slate-blue/5 border border-slate-blue/20 rounded-lg">
+      <div className="mb-4 p-3 bg-slate-blue/10 border border-slate-blue/20 rounded-lg">
         <p className="text-xs text-slate-blue font-semibold mb-2">What you get that a phone call can&apos;t provide</p>
         <div className="flex flex-col gap-1.5">
           <div className="flex items-start gap-2">
             <FileCheck size={14} className="text-slate-blue flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-slate-blue"><strong>Pre-contextualized answer</strong> — your expert sees your full AI report, photos, and building codes upfront</p>
+            <p className="text-xs text-white/60"><strong className="text-slate-blue">Pre-contextualized answer</strong> — your expert sees your full AI report, photos, and building codes upfront</p>
           </div>
           <div className="flex items-start gap-2">
             <MessageSquare size={14} className="text-slate-blue flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-slate-blue"><strong>Documented record</strong> — every answer stays with your project forever, not lost after a call</p>
+            <p className="text-xs text-white/60"><strong className="text-slate-blue">Documented record</strong> — every answer stays with your project forever, not lost after a call</p>
           </div>
           <div className="flex items-start gap-2">
             <Shield size={14} className="text-slate-blue flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-slate-blue"><strong>Payment protection</strong> — only charged when an expert claims; full refund if unanswered</p>
+            <p className="text-xs text-white/60"><strong className="text-slate-blue">Payment protection</strong> — only charged when an expert claims; full refund if unanswered</p>
           </div>
           <div className="flex items-start gap-2">
             <Users size={14} className="text-slate-blue flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-slate-blue"><strong>Verified tradespeople</strong> — rated experts matched by specialty to your project</p>
+            <p className="text-xs text-white/60"><strong className="text-slate-blue">Verified tradespeople</strong> — rated experts matched by specialty to your project</p>
           </div>
         </div>
       </div>
 
       {targetExpertId && targetExpertName && (
-        <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
-          <p className="text-xs text-purple-600 font-medium">Direct Question</p>
-          <p className="text-sm text-foreground">Sending directly to {targetExpertName}</p>
+        <div className="bg-[var(--status-waiting)]/10 border border-[var(--status-waiting)]/30 rounded-lg p-3 mb-4">
+          <p className="text-xs text-[var(--status-waiting)] font-medium">Direct Question</p>
+          <p className="text-sm text-earth-cream">Sending directly to {targetExpertName}</p>
         </div>
       )}
 
       {reportContext?.projectSummary && !expertContext && (
-        <div className="bg-earth-tan/50 rounded-lg p-3 mb-4">
-          <p className="text-xs text-earth-brown font-medium mb-1">Project Context</p>
-          <p className="text-sm text-foreground">{reportContext.projectSummary}</p>
+        <div className="bg-white/5 rounded-lg p-3 mb-4">
+          <p className="text-xs text-white/50 font-medium mb-1">Project Context</p>
+          <p className="text-sm text-earth-cream">{reportContext.projectSummary}</p>
         </div>
       )}
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+        <div className="mb-4 p-3 bg-rust/10 border border-rust/30 rounded-lg text-sm text-rust">
           {error}
         </div>
       )}
@@ -351,14 +351,15 @@ export default function QASubmitForm({
       <div className="space-y-4">
         {/* Category */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Category</label>
+          <label className="block text-sm font-medium text-earth-cream mb-1">Category</label>
           <Select
             value={category}
             onChange={e => setCategory(e.target.value)}
             fullWidth
+            className="bg-white/10 text-white border-white/20"
           >
             {CATEGORIES.map(c => (
-              <option key={c} value={c}>
+              <option key={c} value={c} className="bg-[var(--earth-brown-dark)] text-white">
                 {c.charAt(0).toUpperCase() + c.slice(1)}
               </option>
             ))}
@@ -367,16 +368,18 @@ export default function QASubmitForm({
 
         {/* Question */}
         <div>
+          <label className="block text-sm font-medium text-earth-cream mb-1">Your Question</label>
           <Textarea
-            label="Your Question"
             value={questionText}
             onChange={e => setQuestionText(e.target.value)}
             rows={5}
             fullWidth
             resize="none"
             placeholder="Describe your question in detail..."
+            className="bg-white/10 border-white/20 placeholder-white/40"
+            style={{ color: 'var(--earth-cream)' }}
           />
-          <p className="text-xs text-[var(--muted)] mt-1">{questionText.length} characters (minimum 20)</p>
+          <p className="text-xs text-white/40 mt-1">{questionText.length} characters (minimum 20)</p>
         </div>
 
         {/* Photos */}
@@ -386,15 +389,16 @@ export default function QASubmitForm({
           maxFiles={3}
           maxSizeMB={5}
           label="Photos"
+          variant="dark"
         />
 
         {/* ── Payment Section (always visible) ── */}
         {needsPayment && (
-          <div className={`border rounded-lg p-4 ${paymentMethodId ? 'border-forest-green bg-forest-green/5' : 'border-earth-sand bg-earth-tan/30'}`}>
+          <div className={`border rounded-lg p-4 ${paymentMethodId ? 'border-forest-green/30 bg-forest-green/10' : 'border-white/10 bg-white/5'}`}>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <CreditCard size={16} className={paymentMethodId ? 'text-forest-green' : 'text-earth-brown'} />
-                <h3 className="text-sm font-semibold text-foreground">Payment Method</h3>
+                <CreditCard size={16} className={paymentMethodId ? 'text-forest-green' : 'text-white/50'} />
+                <h3 className="text-sm font-semibold text-earth-cream">Payment Method</h3>
               </div>
               {paymentMethodId && (
                 <span className="flex items-center gap-1 text-xs text-forest-green font-medium">
@@ -413,14 +417,14 @@ export default function QASubmitForm({
                   </p>
                 </div>
                 {isTestMode && (
-                  <p className="text-xs text-amber-600 font-medium">
+                  <p className="text-xs text-amber-400 font-medium">
                     Test mode: pm_{customerId?.slice(-8) || 'test'} (fake card)
                   </p>
                 )}
               </div>
             ) : (
               <div className="space-y-3">
-                <p className="text-xs text-earth-brown">
+                <p className="text-xs text-white/50">
                   Save a payment method to submit your question. You won&apos;t be charged now — only when an expert claims it.
                 </p>
                 <Button
@@ -438,7 +442,7 @@ export default function QASubmitForm({
             )}
 
             {creditBalanceCents > 0 && (
-              <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-earth-sand/50">
+              <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-white/10">
                 <Wallet size={14} className="text-forest-green" />
                 <span className="text-sm text-forest-green font-medium">
                   {formatPrice(creditBalanceCents, true)} in credits will be applied first
@@ -450,53 +454,53 @@ export default function QASubmitForm({
 
         {/* ── Dynamic Price Breakdown ── */}
         {!isFirstQuestion && dynamicPricing?.tier && (
-          <div className="p-3 bg-earth-cream border border-earth-sand rounded-lg">
+          <div className="p-3 bg-white/5 border border-white/10 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <TrendingUp size={14} className="text-terracotta" />
-                <span className="text-sm font-semibold text-foreground">
+                <span className="text-sm font-semibold text-earth-cream">
                   {dynamicPricing.tierLabel} Question — {formatPrice(dynamicPricing.priceCents)}
                 </span>
               </div>
-              {pricingLoading && <Spinner size="sm" className="text-[var(--muted)]" />}
+              {pricingLoading && <Spinner size="sm" className="text-white/30" />}
             </div>
-            <div className="flex items-center gap-4 text-xs text-earth-brown">
+            <div className="flex items-center gap-4 text-xs text-white/50">
               <span>You pay <strong>{formatPrice(dynamicPricing.priceCents, true)}</strong></span>
-              <span className="text-[var(--muted)]">&rarr;</span>
+              <span className="text-white/30">&rarr;</span>
               <span>Expert earns <strong className="text-forest-green">{formatPrice(dynamicPricing.expertPayoutCents, true)}</strong></span>
-              <span className="text-[var(--muted)]">&rarr;</span>
+              <span className="text-white/30">&rarr;</span>
               <span>Protected by escrow</span>
             </div>
             {dynamicPricing.factors && dynamicPricing.factors.length > 0 && (
-              <p className="text-[10px] text-[var(--muted)] mt-1.5">
+              <p className="text-[10px] text-white/30 mt-1.5">
                 Based on: {dynamicPricing.factors.join(' · ')}
               </p>
             )}
-            <p className="text-[10px] text-[var(--muted)] mt-0.5">
+            <p className="text-[10px] text-white/30 mt-0.5">
               A service call for this would cost $75-150
             </p>
           </div>
         )}
 
         {/* ── Price + Submit ── */}
-        <div className="flex items-center justify-between pt-2 border-t border-earth-sand/50">
+        <div className="flex items-center justify-between pt-2 border-t border-white/10">
           <div>
             {isFirstQuestion ? (
               <div>
                 <span className="text-sm font-bold text-forest-green">FREE — First question on us!</span>
-                <p className="text-xs text-earth-brown mt-0.5">No payment method needed</p>
+                <p className="text-xs text-white/50 mt-0.5">No payment method needed</p>
               </div>
             ) : dynamicPricing?.tier ? (
               <div>
-                <span className="text-sm font-medium text-foreground">
+                <span className="text-sm font-medium text-earth-cream">
                   {dynamicPricing.tierLabel}: {formatPrice(dynamicPricing.priceCents)}
                 </span>
-                <p className="text-xs text-earth-brown mt-0.5">Charged only when an expert claims</p>
+                <p className="text-xs text-white/50 mt-0.5">Charged only when an expert claims</p>
               </div>
             ) : (
               <div>
-                <span className="text-sm font-medium text-foreground">Price: $5 - $8</span>
-                <p className="text-xs text-earth-brown mt-0.5">Charged only when an expert claims</p>
+                <span className="text-sm font-medium text-earth-cream">Price: $5 - $8</span>
+                <p className="text-xs text-white/50 mt-0.5">Charged only when an expert claims</p>
               </div>
             )}
           </div>
