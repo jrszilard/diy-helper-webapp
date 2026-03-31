@@ -34,12 +34,20 @@ export default function SaveToProjectModal({
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
-  // Load existing projects when modal opens
+  // Sync default name and reset state when modal opens
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      // Reset loaded so we re-fetch next time (picks up newly created projects)
+      setLoaded(false);
+      return;
+    }
     setNewProjectName(defaultName);
     setSavedProjectId(null);
-    if (loaded) return;
+  }, [isOpen, defaultName]);
+
+  // Fetch existing projects when modal opens (and userId/loaded changes)
+  useEffect(() => {
+    if (!isOpen || loaded) return;
     supabase
       .from('projects')
       .select('id, name')
@@ -50,7 +58,7 @@ export default function SaveToProjectModal({
         setExistingProjects(data ?? []);
         setLoaded(true);
       });
-  }, [isOpen]);
+  }, [isOpen, userId, loaded]);
 
   const saveToNewProject = async () => {
     if (!newProjectName.trim()) return;

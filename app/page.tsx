@@ -96,12 +96,9 @@ export default function LandingPage() {
                     <MessageSquare className="w-4 h-4 text-white/50" />
                     Recent conversations
                   </h2>
-                  <button
-                    onClick={() => { window.location.href = '/chat'; }}
-                    className="flex items-center gap-1 text-sm text-white/50 hover:text-white transition-colors"
-                  >
+                  <Button variant="ghost" href="/chat" size="sm" className="text-white/50 hover:text-white hover:bg-white/10">
                     View all <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                  </Button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   {conversations.map((conv) => (

@@ -9,6 +9,7 @@ import SaveMaterialsDialog from './SaveMaterialsDialog';
 import ConversationList from './ConversationList';
 import ProjectPlanner from './ProjectPlanner';
 import Button from '@/components/ui/Button';
+import { supabase } from '@/lib/supabase';
 import { useChat } from '@/hooks/useChat';
 import { useProjectActions } from '@/hooks/useProjectActions';
 import { analyzeTerminology } from '@/lib/intelligence/trade-terminology';
@@ -58,14 +59,19 @@ export default function ChatInterface({
 
     // Resume a conversation from history (ID only — fetch messages from API)
     if (resumeId) {
-      fetch(`/api/conversations/${resumeId}/messages`)
-        .then(r => r.ok ? r.json() : null)
-        .then((msgs: Array<{ role: string; content: string }> | null) => {
-          if (msgs && msgs.length > 0) {
-            chat.handleSelectConversation(resumeId, msgs as Message[]);
-          }
-        })
-        .catch(() => {/* ignore */});
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        const headers: Record<string, string> = {};
+        if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+        fetch(`/api/conversations/${resumeId}/messages`, { headers })
+          .then(r => r.ok ? r.json() : null)
+          .then((data) => {
+            const msgs: Array<{ role: string; content: string }> | null = data?.messages ?? data;
+            if (msgs && msgs.length > 0) {
+              chat.handleSelectConversation(resumeId, msgs as Message[]);
+            }
+          })
+          .catch(() => {/* ignore */});
+      });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

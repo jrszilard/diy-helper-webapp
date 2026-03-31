@@ -102,7 +102,7 @@ export default function AppHeader({
       {showProjects && (
         <div className="fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowProjects(false)} />
-          <div className="absolute left-0 top-0 bottom-0 w-[85vw] max-w-80 bg-[#1E1A17] shadow-xl animate-slide-in-left flex flex-col">
+          <div className="absolute left-0 top-0 bottom-0 w-[85vw] max-w-80 bg-[var(--earth-brown-dark)] shadow-xl animate-slide-in-left flex flex-col">
             <div className="flex items-center justify-between p-4 border-b border-[var(--blueprint-grid-major)]">
               <h2 className="font-bold text-lg text-white">My Projects</h2>
               <button onClick={() => setShowProjects(false)} className="p-2 hover:bg-white/10 rounded-lg transition-colors text-[var(--earth-sand)]" aria-label="Close">
@@ -123,7 +123,7 @@ export default function AppHeader({
       {showQuestions && (
         <div className="fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowQuestions(false)} />
-          <div className="absolute right-0 top-0 bottom-0 w-[85vw] max-w-md bg-[#1E1A17] shadow-xl animate-slide-in-right flex flex-col">
+          <div className="absolute right-0 top-0 bottom-0 w-[85vw] max-w-md bg-[var(--earth-brown-dark)] shadow-xl animate-slide-in-right flex flex-col">
             <div className="flex items-center justify-between p-4 border-b border-[var(--blueprint-grid-major)]">
               <h2 className="font-bold text-lg text-white flex items-center gap-2">
                 <HelpCircle size={18} className="text-white/50" />
@@ -162,23 +162,23 @@ export default function AppHeader({
               )}
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1 sm:gap-3">
               {user && (
                 <Button variant="ghost" size="sm" leftIcon={FolderOpen} iconSize={18} onClick={() => setShowProjects(true)} className={btnClass}>
-                  Projects
+                  <span className="hidden sm:inline">Projects</span>
                 </Button>
               )}
               {user && (
                 <Button variant="ghost" size="sm" leftIcon={Package} iconSize={18} onClick={() => setShowInventory(true)} className={btnClass}>
-                  My Tools
+                  <span className="hidden sm:inline">My Tools</span>
                 </Button>
               )}
               {user && (
                 <Button variant="ghost" size="sm" leftIcon={HelpCircle} iconSize={18} onClick={openQuestionsDrawer} className={btnClass}>
-                  My Questions
+                  <span className="hidden sm:inline">My Questions</span>
                 </Button>
               )}
-              <Button variant="ghost" size="sm" leftIcon={Users} iconSize={18} href="/experts" className={btnClass}>
+              <Button variant="ghost" size="sm" leftIcon={Users} iconSize={18} href="/experts" className={`${btnClass} hidden sm:inline-flex`}>
                 Find an Expert
               </Button>
               {extraRight}

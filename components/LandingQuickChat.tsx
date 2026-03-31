@@ -33,6 +33,7 @@ export default function LandingQuickChat({ initialConversationId }: { initialCon
   const [conversationId, setConversationId] = useState<string | null>(initialConversationId ?? null);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showMaterialsModal, setShowMaterialsModal] = useState(false);
@@ -64,6 +65,13 @@ export default function LandingQuickChat({ initialConversationId }: { initialCon
       } catch {}
     });
   }, [initialConversationId]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, streamingContent]);
 
   const defaultProjectName = messages.find(m => m.role === 'user')?.content.slice(0, 60) ?? '';
 
@@ -255,7 +263,7 @@ export default function LandingQuickChat({ initialConversationId }: { initialCon
       setIsStreaming(false);
       setStreamingContent('');
     }
-  }, [input, isStreaming, messages]);
+  }, [input, isStreaming, messages, conversationId]);
 
   const hasConversation = messages.length > 0;
   const showMaterialsButton = userId && hasMaterialsInChat && !savedProjectId;
@@ -264,7 +272,7 @@ export default function LandingQuickChat({ initialConversationId }: { initialCon
   return (
     <div className="space-y-4">
       {/* Messages */}
-      <div className="space-y-3">
+      <div ref={scrollRef} className="max-h-[60vh] overflow-y-auto space-y-3">
         {messages.map((msg, idx) => (
           <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div
