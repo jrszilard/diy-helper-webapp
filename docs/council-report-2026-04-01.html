@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM Council Report — Unified Landing Page Design</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8f7f5; color: #1a1a1a; line-height: 1.6; }
+  .container { max-width: 800px; margin: 0 auto; padding: 24px 20px; }
+
+  /* Header */
+  .header { background: #1a1410; color: #e8d5b5; padding: 32px 0; margin-bottom: 32px; }
+  .header .container { display: flex; flex-direction: column; gap: 8px; }
+  .header h1 { font-size: 24px; font-weight: 700; color: #fff; }
+  .header .subtitle { font-size: 14px; color: #b8a88a; }
+  .header .meta { font-size: 12px; color: #8a7a6a; margin-top: 8px; }
+
+  /* Question block */
+  .question { background: #fff; border: 1px solid #e0dcd5; border-radius: 12px; padding: 20px; margin-bottom: 28px; }
+  .question h2 { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #8a7a6a; margin-bottom: 8px; }
+  .question p { font-size: 14px; color: #444; }
+
+  /* Verdict sections */
+  .verdict-section { background: #fff; border: 1px solid #e0dcd5; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .verdict-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; color: #1a1410; }
+  .verdict-section p { font-size: 14px; color: #333; margin-bottom: 10px; }
+  .verdict-section strong { color: #1a1410; }
+
+  /* Highlight boxes */
+  .highlight { background: #faf5ed; border-left: 3px solid #c45a3c; padding: 14px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 14px; }
+  .highlight.green { border-left-color: #3a6a3a; background: #f2f7f2; }
+  .highlight.blue { border-left-color: #3a5a8a; background: #f2f5fa; }
+
+  /* Agreement visual */
+  .agreement-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .agreement-item { padding: 12px; border-radius: 8px; font-size: 13px; }
+  .agreement-item.agree { background: #e8f5e8; border: 1px solid #c5e0c5; }
+  .agreement-item.clash { background: #fff5e8; border: 1px solid #e0d5c0; }
+  .agreement-item .label { font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .agreement-item.agree .label { color: #3a6a3a; }
+  .agreement-item.clash .label { color: #b8862d; }
+
+  /* Advisor cards */
+  .advisor-grid { display: grid; gap: 8px; margin: 16px 0; }
+  .advisor-position { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; font-size: 13px; }
+  .advisor-name { font-weight: 600; min-width: 160px; }
+  .advisor-stance { color: #555; flex: 1; }
+  .pos-support { background: #e8f5e8; }
+  .pos-critique { background: #fde8e8; }
+  .pos-expand { background: #e8edf5; }
+  .pos-neutral { background: #f5f3ee; }
+
+  /* Collapsible */
+  details { margin: 12px 0; }
+  summary { cursor: pointer; font-weight: 600; font-size: 14px; color: #555; padding: 10px 14px; background: #f5f3ee; border-radius: 8px; list-style: none; display: flex; align-items: center; gap: 8px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: '\\25B6'; font-size: 10px; transition: transform 0.2s; }
+  details[open] summary::before { transform: rotate(90deg); }
+  details .content { padding: 14px; font-size: 13px; color: #444; line-height: 1.7; border-left: 2px solid #e0dcd5; margin-left: 12px; margin-top: 8px; }
+
+  /* One thing */
+  .one-thing { background: linear-gradient(135deg, #1a1410, #2a2018); color: #e8d5b5; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .one-thing h2 { color: #fff; font-size: 18px; margin-bottom: 8px; }
+  .one-thing p { font-size: 14px; color: #c8b898; }
+  .one-thing .action { background: #c45a3c; color: #fff; padding: 10px 16px; border-radius: 8px; display: inline-block; margin-top: 12px; font-weight: 600; font-size: 14px; }
+
+  /* Footer */
+  .footer { text-align: center; padding: 24px 0; font-size: 12px; color: #999; border-top: 1px solid #e0dcd5; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="container">
+    <h1>LLM Council Verdict</h1>
+    <div class="subtitle">Unified Landing Page Chat Hub — Hero-to-Chat Morph Design Review</div>
+    <div class="meta">5 advisors | 5 peer reviews | April 1, 2026</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="question">
+    <h2>The Question</h2>
+    <p>Should we consolidate a DIY home improvement webapp from a landing page + separate /chat page into a single "Hero-to-Chat Morph" pattern? The landing page becomes the primary experience with unified AI intent classification replacing separate Quick Answer and Plan a Project tabs. All power features surface via header drawers. Key risk: users bouncing to ChatGPT.</p>
+  </div>
+
+  <!-- Advisor Positions -->
+  <div class="verdict-section">
+    <h2>Advisor Positions at a Glance</h2>
+    <div class="advisor-grid">
+      <div class="advisor-position pos-critique">
+        <span class="advisor-name">The Contrarian</span>
+        <span class="advisor-stance">Intent router is untested load-bearing wall. Drawers bury core features. Morph hides differentiators at the wrong moment.</span>
+      </div>
+      <div class="advisor-position pos-critique">
+        <span class="advisor-name">First Principles</span>
+        <span class="advisor-stance">Wrong problem. Chat box = ChatGPT wrapper mental model. Must show irreplaceable value in 8 seconds before asking for input.</span>
+      </div>
+      <div class="advisor-position pos-expand">
+        <span class="advisor-name">The Expansionist</span>
+        <span class="advisor-stance">Morph is right but undersold. Lead with outputs not inputs. "Home brain" memory is the real moat. Chips should signal capabilities.</span>
+      </div>
+      <div class="advisor-position pos-neutral">
+        <span class="advisor-name">The Outsider</span>
+        <span class="advisor-stance">Tab naming implies AI isn't authoritative. Headline doesn't answer "why not ChatGPT?" Morph transition is disorienting without signals.</span>
+      </div>
+      <div class="advisor-position pos-support">
+        <span class="advisor-name">The Executor</span>
+        <span class="advisor-stance">Existing code supports this — 3-week build. Ship morph first, validate, then tackle wizard replacement.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agreement/Disagreement visual -->
+  <div class="verdict-section">
+    <h2>Where the Council Agrees</h2>
+    <div class="agreement-grid">
+      <div class="agreement-item agree">
+        <div class="label">High Confidence</div>
+        The intent router is the riskiest dependency. Its failure modes are invisible and there's no user correction mechanism.
+      </div>
+      <div class="agreement-item agree">
+        <div class="label">High Confidence</div>
+        The hero leads with the wrong thing. Chat is a commodity. Differentiators are buried as badges and supporting text.
+      </div>
+      <div class="agreement-item agree">
+        <div class="label">High Confidence</div>
+        Suggestion chips demonstrate topics, not capabilities. They should signal what ChatGPT cannot do.
+      </div>
+      <div class="agreement-item agree">
+        <div class="label">High Confidence</div>
+        Feature discovery is broken. Header drawers bury core value props (shopping list, tool inventory) that most users won't find.
+      </div>
+    </div>
+  </div>
+
+  <div class="verdict-section">
+    <h2>Where the Council Clashes</h2>
+    <div class="agreement-grid">
+      <div class="agreement-item clash">
+        <div class="label">Tension: Ship Fast vs. Rethink First</div>
+        The Executor says ship the morph in 3 weeks with existing code. First Principles says the pattern leads with the wrong thing and no iteration will fix it. <strong>Resolution:</strong> Both can be true — ship the morph but redesign what the hero says and what the first response shows.
+      </div>
+      <div class="agreement-item clash">
+        <div class="label">Tension: Plan CTA — Trap or Core Flow?</div>
+        The Contrarian calls "Plan This Project" a commitment trap. The Executor treats it as straightforward. <strong>Resolution:</strong> The CTA needs to be earned — produce visible concrete output first, then the CTA is a natural next step.
+      </div>
+    </div>
+  </div>
+
+  <div class="verdict-section">
+    <h2>Blind Spots the Council Caught</h2>
+    <p>These emerged only through the peer review round — no individual advisor addressed them:</p>
+
+    <div class="highlight">
+      <strong>Trust failure and error states are existential.</strong> For a tool giving advice about electrical panels, structural loads, and building codes, a confident wrong answer produces real-world harm. The UI must communicate confidence levels, flag uncertainty, and have recovery paths. This belongs in V1.
+    </div>
+
+    <div class="highlight blue">
+      <strong>The "Ask an Expert" tab is doing unexamined strategic work.</strong> The tab label implies AI isn't expert-level. But handled correctly, the expert tab is the trust anchor — knowing a human is one click away makes AI advice feel safer. Position it as escalation ("Get Expert Review"), not competition.
+    </div>
+
+    <div class="highlight green">
+      <strong>The /chat redirect needs state migration.</strong> Existing users have bookmarks, session state, and muscle memory. A hard redirect without handling produces support load at launch.
+    </div>
+  </div>
+
+  <!-- The Recommendation -->
+  <div class="verdict-section">
+    <h2>The Recommendation</h2>
+    <p><strong>Ship the morph, but redesign what the hero says and what the first AI response shows.</strong></p>
+
+    <p>The architecture is close enough to correct. But the hero headline must answer the ChatGPT question before anyone types. Not "ask anything about your home" — something that names the irreplaceable output: real prices, code compliance, jurisdiction-aware permits.</p>
+
+    <p>Then the first AI response — whatever the query — must contain something structurally impossible to get from ChatGPT: a price-linked materials item, a code reference with jurisdiction, a local permit note. One concrete artifact that proves the system is different.</p>
+
+    <p><strong>On the intent router:</strong> Add a visible micro-signal after routing — a line like "Got it — this sounds like a mid-project structural issue" — so users can confirm or redirect. Converts a silent failure point into a conversational checkpoint.</p>
+
+    <p><strong>On "Ask an Expert":</strong> Rename to "Get Expert Review" or "Talk to a Pro" — implies the AI handled it and the human validates, which is the correct mental model.</p>
+
+    <p><strong>On trust:</strong> Define confidence tiers before launch. High confidence answers render differently from low confidence ones. Users need a visual signal, not a disclaimer.</p>
+  </div>
+
+  <div class="one-thing">
+    <h2>The One Thing to Do First</h2>
+    <p>Write the hero headline — not as a design task, but as a strategic forcing function. The constraint: it must be something that is false or impossible for ChatGPT to say. If you can't write that headline, the design is not ready to build. If you can, everything downstream — morph trigger, suggestion chips, first AI response format, tab naming — falls into alignment around that answer.</p>
+    <div class="action">Write the headline that ChatGPT can't claim</div>
+  </div>
+
+  <!-- Collapsible advisor responses -->
+  <details>
+    <summary>The Contrarian — Full Response</summary>
+    <div class="content">
+      The intent router is the load-bearing wall you haven't stress-tested. Everything downstream depends on it correctly classifying "my deck is rotting near the ledger board" as mid_project or full_project — but ambiguous messages will misclassify constantly, and the user has no way to correct it without breaking the conversational flow you're protecting. What's the recovery path when the AI treats a $15k structural repair like a quick question?<br><br>
+      The "Plan This Project" CTA is a commitment trap. You're asking users to trust a pipeline they've never seen produce anything, based on one exchange. If the agent pipeline runs for 30 seconds and returns a mediocre plan, you've lost them permanently — and they'll tell ChatGPT about it.<br><br>
+      The hero-to-morph pattern hides your differentiators at exactly the wrong moment. Suggestion chips and badges disappear the instant someone types. But that's when they most need to understand why this isn't just another chat box. Header drawers for power features assumes users will discover them. They won't. Tool inventory and shopping lists are core value props — burying them in drawers means most users will never know they exist.<br><br>
+      The biggest unasked question: what happens to existing users with the /chat redirect?
+    </div>
+  </details>
+
+  <details>
+    <summary>The First Principles Thinker — Full Response</summary>
+    <div class="content">
+      The real problem isn't the UI pattern. It's the value discovery problem. Users land, see a chat box, and their mental model immediately collapses to "this is just another ChatGPT wrapper." The Hero-to-Chat Morph doesn't solve this — it reinforces it. You're leading with the commodity feature (chat) and burying the differentiators as supporting text nobody reads.<br><br>
+      Ask the foundational question: why do people bounce to ChatGPT? Not because the UI is wrong. Because they don't believe this will be better than what they already have. The morph pattern solves a navigation problem nobody has.<br><br>
+      The actual job-to-be-done for a DIY homeowner isn't "chat with AI." It's "confidently complete a project without expensive mistakes." What's the fastest path to demonstrating irreplaceable value? Probably not a blank chat input — it's showing a concrete output they couldn't get from ChatGPT: a real materials list with Home Depot prices, a permit-aware project plan, a code compliance note. Let them see the output before they invest in the input.<br><br>
+      The question to answer before any design decision: What is the single thing a user could see in 8 seconds that ChatGPT provably cannot give them? Design backwards from that.
+    </div>
+  </details>
+
+  <details>
+    <summary>The Expansionist — Full Response</summary>
+    <div class="content">
+      The Hero-to-Morph is the right call, but you're underselling the biggest unlock here: this is the first DIY AI that remembers your house. Every generic AI session starts cold. You're sitting on Supabase — which means you can accumulate a persistent home profile across sessions. After someone asks about their deck, their bathroom tile, their HVAC — the app knows their house better than they do. That's not a chat feature, that's a home brain.<br><br>
+      The agent pipeline for full_project is your actual moat, not the chat interface. ChatGPT can answer questions. It cannot produce a code-compliant materials list with real store prices and a phased timeline in one flow. Lead with the output, not the input. Show a finished project report in the hero — collapsed, scannable — before users even type anything.<br><br>
+      Adjacent opportunity: contractor handoff. When a DIYer realizes mid-project they're in over their head, they need a contractor. The expert marketplace is positioned as Q&A, but it could be a warm handoff with full project context pre-loaded.<br><br>
+      The suggestion chips aren't just UX affordances — they're the fastest way to communicate capability scope. Make them surprising: "Is my electrical panel safe for this?" signals code-compliance.
+    </div>
+  </details>
+
+  <details>
+    <summary>The Outsider — Full Response</summary>
+    <div class="content">
+      The "Hero-to-Chat Morph" is clever to you because you've been staring at it. To a first-time visitor, the page just... changes. That's disorienting without a clear signal of why it changed.<br><br>
+      The two-tab label problem is real: "Ask Anything" versus "Ask an Expert" — the natural question is "what's the first tab, a non-expert?" The implication is the AI is less authoritative. You want the opposite impression.<br><br>
+      "What are you working on?" is fine as a prompt, but nothing on the hero immediately answers the question a skeptical new user is actually asking: "Why shouldn't I just use ChatGPT for this?" Your differentiator badges are doing that work, but badges get ignored. That answer needs to be in the headline or the first sentence below it.<br><br>
+      The intent router is invisible by design, but invisibility has a cost. When the AI silently decides someone asking about a leaky faucet is a "quick question" versus a "full project," users who expected more will think the app is limited. You need a micro-signal that tells users the system understood what they're dealing with.<br><br>
+      Suggestion chips: if they're generic, they signal nothing unique. They need to demonstrate capability, not just topics.
+    </div>
+  </details>
+
+  <details>
+    <summary>The Executor — Full Response</summary>
+    <div class="content">
+      The intent router already exists at /lib/intelligence/intent-router.ts and the four classifications are already live in /app/api/chat/route.ts. LandingQuickChat is 427 lines and already handles streaming, materials extraction, and save-to-project.<br><br>
+      Execution sequence: Week 1, two concrete tasks. First: add a redirect to /app/chat/page.tsx — one line, done in an hour. Second: strip the three-tab system from LandingHero.tsx and replace with two tabs.<br><br>
+      Week 2, the hero morph. LandingQuickChat already tracks hasConversation = messages.length > 0. Add headline + suggestion chips that render when !hasConversation and hide when the first message fires. No new state needed.<br><br>
+      Week 3, the CTA for full_project. The /api/chat/route.ts already calls classifyIntent(). When it returns full_project, emit a new SSE event type to the client. LandingQuickChat reads it and renders a "Plan This Project" button after the first AI response.<br><br>
+      The GuidedBot replacement is the heaviest lift — roughly 2 weeks. Don't start there. Validate the morph and CTA pattern first. Header drawers can run in parallel.
+    </div>
+  </details>
+
+  <details>
+    <summary>Peer Review Highlights</summary>
+    <div class="content">
+      <strong>Unanimous strongest response:</strong> First Principles Thinker (B) — "the 8-second ChatGPT test" was recognized by all 5 reviewers as the most actionable strategic framing.<br><br>
+      <strong>Unanimous biggest blind spot:</strong> The Executor (E) — all reviewers flagged the purely tactical approach that assumes the design is correct before validating it.<br><br>
+      <strong>Three themes emerged from "what all missed":</strong><br>
+      1. Trust failure / error states — confident wrong answers about structural or electrical work have real-world consequences (3/5 reviewers)<br>
+      2. The "Ask an Expert" tab relationship to the AI tab — business model tension, trust anchor potential, cannibalization risk (2/5 reviewers)<br>
+      3. Trust calibration signals — how the UI communicates confidence in AI answers (2/5 reviewers)
+    </div>
+  </details>
+
+  <div class="footer">
+    LLM Council Report | April 1, 2026 | Topic: DIY Helper Webapp — Unified Landing Page Design<br>
+    5 advisors (Contrarian, First Principles, Expansionist, Outsider, Executor) | 5 peer reviews | 1 chairman synthesis
+  </div>
+
+</div>
+</body>
+</html>
