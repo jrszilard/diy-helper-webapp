@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
       ));
     }
 
-    const { message, history, streaming, conversationId: existingConversationId, image } = parsed.data;
+    const { message, history, streaming, conversationId: existingConversationId, image, planningMode } = parsed.data;
 
     logger.info('Chat request', { requestId, streaming, historyLength: history.length, hasConversationId: !!existingConversationId, hasImage: !!image });
 
@@ -130,12 +130,14 @@ export async function POST(req: NextRequest) {
 
     // ── Intent Classification ─────────────────────────────────────
     let intentType: IntentType | undefined;
+    let intentConfidence: number | undefined;
     if (!existingConversationId && prunedHistory.length === 0) {
       const classification = await classifyIntent(message, {
         hasActiveProjects: false,
       });
       if (classification.confidence >= config.intelligence.confidenceThreshold) {
         intentType = classification.intent;
+        intentConfidence = classification.confidence;
       }
       logger.info('Intent classified', {
         requestId,
@@ -158,7 +160,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const activeSystemPrompt = intentType ? getSystemPrompt(intentType) : systemPrompt;
+    const activeSystemPrompt = getSystemPrompt(intentType, planningMode);
 
     // ── Skill Calibration ─────────────────────────────────────────
     let calibratedPrompt = activeSystemPrompt;
@@ -206,6 +208,11 @@ export async function POST(req: NextRequest) {
             message: image ? 'Analyzing your image...' : 'Analyzing your question...',
             icon: '🤔'
           });
+
+          // Emit intent classification to client for micro-signal display
+          if (intentType) {
+            sendEvent({ type: 'intent', intent: intentType, confidence: intentConfidence });
+          }
 
           const messages: Anthropic.MessageParam[] = [
             ...(prunedHistory as Anthropic.MessageParam[]),
