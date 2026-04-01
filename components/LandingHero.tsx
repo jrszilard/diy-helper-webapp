@@ -1,65 +1,91 @@
 'use client';
 
 import { useState } from 'react';
-import { Zap, ClipboardList, HardHat } from 'lucide-react';
+import { MessageSquare, HardHat } from 'lucide-react';
 import LandingQuickChat from './LandingQuickChat';
 import LandingExpertForm from './LandingExpertForm';
-import GuidedBot from './guided-bot/GuidedBot';
 
-type TabId = 'quick' | 'plan' | 'expert';
+type TabId = 'chat' | 'expert';
 
 const TABS = [
-  { id: 'quick' as TabId, icon: Zap, label: 'Quick Answer' },
-  { id: 'plan' as TabId, icon: ClipboardList, label: 'Plan a Project' },
-  { id: 'expert' as TabId, icon: HardHat, label: 'Ask an Expert' },
+  { id: 'chat' as TabId, icon: MessageSquare, label: 'Ask Anything' },
+  { id: 'expert' as TabId, icon: HardHat, label: 'Talk to a Pro' },
 ];
 
-export default function LandingHero() {
-  const [activeTab, setActiveTab] = useState<TabId>('plan');
-  const [planMounted, setPlanMounted] = useState(true);
+const SUGGESTION_CHIPS = [
+  { emoji: '🔧', text: "I'm mid-project \u2014 my mortar isn't setting" },
+  { emoji: '🔌', text: 'Is my electrical panel safe for a hot tub?' },
+  { emoji: '🛁', text: 'Price out a bathroom remodel' },
+  { emoji: '📋', text: 'What permits do I need for a deck?' },
+];
 
-  const handleTabChange = (tab: TabId) => {
-    setActiveTab(tab);
-    if (tab === 'plan' && !planMounted) {
-      setPlanMounted(true);
-    }
-  };
+interface LandingHeroProps {
+  /** When true, hide the hero headline/chips and show only the chat */
+  chatActive?: boolean;
+  /** Called when the user sends their first message */
+  onFirstMessage?: () => void;
+  /** Conversation ID to resume */
+  initialConversationId?: string;
+  /** Called when materials are extracted (for header badge) */
+  onMaterialsDetected?: (count: number) => void;
+}
+
+export default function LandingHero({
+  chatActive = false,
+  onFirstMessage,
+  initialConversationId,
+  onMaterialsDetected,
+}: LandingHeroProps) {
+  const [activeTab, setActiveTab] = useState<TabId>('chat');
 
   return (
     <div>
+      {/* Hero headline — hidden when chat is active */}
+      {!chatActive && (
+        <div className="text-center mb-[var(--space-l)]">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3 leading-tight">
+            Plan it. Price it. Ask a pro. Build it right.
+          </h1>
+          <p className="text-base text-white/50 max-w-lg mx-auto leading-relaxed">
+            Quick answers when you&apos;re mid-build. Full project plans when you&apos;re starting fresh. Real material pricing. Real tradespeople.
+          </p>
+        </div>
+      )}
+
       {/* Tab bar */}
-      <div className="flex gap-1 mb-[var(--space-m)]">
-        {TABS.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                isActive
-                  ? 'bg-white/15 text-white'
-                  : 'text-white/50 hover:text-white/80 hover:bg-white/5'
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              {tab.label}
-            </button>
-          );
-        })}
+      <div className="flex justify-center mb-[var(--space-m)]">
+        <div className="inline-flex gap-1 bg-white/5 p-1 rounded-2xl">
+          {TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                  isActive
+                    ? 'bg-white/15 text-white'
+                    : 'text-white/40 hover:text-white/70 hover:bg-white/5'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Content */}
+      {/* Tab content */}
       <div>
-        <div className={activeTab === 'quick' ? '' : 'hidden'} aria-hidden={activeTab !== 'quick'}>
-          <LandingQuickChat />
+        <div className={activeTab === 'chat' ? '' : 'hidden'} aria-hidden={activeTab !== 'chat'}>
+          <LandingQuickChat
+            initialConversationId={initialConversationId}
+            onFirstMessage={onFirstMessage}
+            onMaterialsDetected={onMaterialsDetected}
+            suggestionChips={chatActive ? undefined : SUGGESTION_CHIPS}
+          />
         </div>
-
-        {planMounted && (
-          <div className={activeTab === 'plan' ? '' : 'hidden'} aria-hidden={activeTab !== 'plan'}>
-            <GuidedBot />
-          </div>
-        )}
 
         <div className={activeTab === 'expert' ? '' : 'hidden'} aria-hidden={activeTab !== 'expert'}>
           <LandingExpertForm />

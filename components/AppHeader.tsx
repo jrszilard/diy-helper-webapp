@@ -2,7 +2,7 @@
 
 import { useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { FolderOpen, Package, HelpCircle, Users, X, ChevronLeft } from 'lucide-react';
+import { FolderOpen, Package, HelpCircle, Users, X, ChevronLeft, ShoppingCart } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useExpertStatus } from '@/hooks/useExpertStatus';
 import AppLogo from './AppLogo';
@@ -29,6 +29,8 @@ interface AppHeaderProps {
   onProjectSelect?: (project: Project | null) => void;
   /** Pass the page's project-refresh counter so the drawer sidebar stays in sync */
   projectsRefreshTrigger?: number;
+  /** Number of materials detected — shows badge in header */
+  materialsCount?: number;
 }
 
 export default function AppHeader({
@@ -38,6 +40,7 @@ export default function AppHeader({
   onBack,
   onProjectSelect,
   projectsRefreshTrigger,
+  materialsCount,
 }: AppHeaderProps) {
   const [user, setUser] = useState<{ id: string; email?: string; name?: string } | null>(null);
   const [showAuth, setShowAuth] = useState(false);
@@ -177,6 +180,15 @@ export default function AppHeader({
                 <Button variant="ghost" size="sm" leftIcon={HelpCircle} iconSize={18} onClick={openQuestionsDrawer} className={btnClass}>
                   <span className="hidden sm:inline">My Questions</span>
                 </Button>
+              )}
+              {materialsCount && materialsCount > 0 && (
+                <span className={`${btnClass} relative flex items-center gap-1 px-2 py-1 text-sm`}>
+                  <ShoppingCart size={18} />
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-terracotta text-white text-[10px] rounded-full flex items-center justify-center font-bold">
+                    {materialsCount}
+                  </span>
+                  <span className="hidden sm:inline ml-1">Materials</span>
+                </span>
               )}
               <Button variant="ghost" size="sm" leftIcon={Users} iconSize={18} href="/experts" className={`${btnClass} hidden sm:inline-flex`}>
                 Find an Expert
