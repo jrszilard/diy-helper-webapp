@@ -1,0 +1,272 @@
+<h2>Option C: Hero-to-Chat Morph — Detailed Flow</h2>
+<p class="subtitle">Three states: Hero (new/returning), Active Chat, and how features surface</p>
+
+<div class="section">
+  <h3>State 1: Hero (First Visit / New Chat)</h3>
+  <div class="split">
+    <!-- Desktop -->
+    <div class="mockup">
+      <div class="mockup-header">Desktop (1280px)</div>
+      <div class="mockup-body" style="background:#1a1410;padding:0;overflow:hidden">
+        <!-- Nav -->
+        <div style="background:#2a2018;padding:8px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.06)">
+          <span style="font-weight:bold;color:#e8d5b5;font-size:12px">🔨 DIY Helper</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="padding:3px 8px;font-size:9px;color:rgba(255,255,255,0.5)">Projects</span>
+            <span style="padding:3px 8px;font-size:9px;color:rgba(255,255,255,0.5)">My Tools</span>
+            <span style="padding:3px 8px;font-size:9px;color:rgba(255,255,255,0.5)">Experts</span>
+            <span style="background:#c45a3c;padding:3px 10px;border-radius:6px;font-size:9px;color:white">Sign In</span>
+          </div>
+        </div>
+        <!-- Centered hero -->
+        <div style="text-align:center;padding:40px 20px 20px;max-width:520px;margin:0 auto">
+          <div style="font-size:20px;font-weight:bold;color:#fff;margin-bottom:8px;line-height:1.2">What are you working on?</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:16px;line-height:1.5">DIY advice that knows building codes, generates material lists<br>with real prices, and plans your project step by step.</div>
+          <!-- Tabs -->
+          <div style="display:inline-flex;gap:4px;background:rgba(255,255,255,0.05);padding:3px;border-radius:14px;margin-bottom:16px">
+            <span style="background:rgba(255,255,255,0.12);padding:5px 16px;border-radius:12px;font-size:10px;color:#fff;font-weight:600">Ask Anything</span>
+            <span style="padding:5px 16px;border-radius:12px;font-size:10px;color:rgba(255,255,255,0.4)">Ask an Expert</span>
+          </div>
+          <!-- Input -->
+          <div style="background:rgba(255,255,255,0.08);border-radius:16px;padding:14px 16px;text-align:left;border:1px solid rgba(255,255,255,0.08)">
+            <div style="color:rgba(255,255,255,0.3);font-size:11px;margin-bottom:10px">Describe your project or ask a question...</div>
+            <div style="display:flex;justify-content:flex-end">
+              <span style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);padding:4px 10px;border-radius:8px;font-size:9px">Send ↑</span>
+            </div>
+          </div>
+          <!-- Chips -->
+          <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:14px">
+            <span style="background:rgba(255,255,255,0.05);padding:6px 12px;border-radius:20px;font-size:9px;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.08)">🔌 Do I need a permit for electrical?</span>
+            <span style="background:rgba(255,255,255,0.05);padding:6px 12px;border-radius:20px;font-size:9px;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.08)">🚿 Fix a leaky faucet</span>
+            <span style="background:rgba(255,255,255,0.05);padding:6px 12px;border-radius:20px;font-size:9px;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.08)">🪵 Plan a deck build</span>
+            <span style="background:rgba(255,255,255,0.05);padding:6px 12px;border-radius:20px;font-size:9px;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.08)">🏠 Bathroom remodel</span>
+          </div>
+          <!-- Differentiators -->
+          <div style="display:flex;gap:16px;justify-content:center;margin-top:18px;font-size:9px;color:rgba(255,255,255,0.3)">
+            <span>✓ Code-compliant</span>
+            <span>✓ Material pricing</span>
+            <span>✓ Project plans</span>
+            <span>✓ Real experts</span>
+          </div>
+        </div>
+        <!-- Recent conversations (logged-in users) -->
+        <div style="max-width:520px;margin:16px auto 20px;padding:0 20px">
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Recent conversations</div>
+          <div style="display:flex;gap:6px">
+            <div style="flex:1;background:rgba(255,255,255,0.04);padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06)">
+              <div style="font-size:9px;color:rgba(255,255,255,0.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Bathroom remodel plan</div>
+              <div style="font-size:8px;color:rgba(255,255,255,0.2);margin-top:2px">2h ago</div>
+            </div>
+            <div style="flex:1;background:rgba(255,255,255,0.04);padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06)">
+              <div style="font-size:9px;color:rgba(255,255,255,0.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Deck permit questions</div>
+              <div style="font-size:8px;color:rgba(255,255,255,0.2);margin-top:2px">1d ago</div>
+            </div>
+            <div style="flex:1;background:rgba(255,255,255,0.04);padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06)">
+              <div style="font-size:9px;color:rgba(255,255,255,0.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Wire gauge for 20-amp</div>
+              <div style="font-size:8px;color:rgba(255,255,255,0.2);margin-top:2px">3d ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Mobile -->
+    <div class="mockup">
+      <div class="mockup-header">Mobile (375px)</div>
+      <div class="mockup-body" style="background:#1a1410;padding:0;overflow:hidden;max-width:280px;margin:0 auto">
+        <!-- Nav -->
+        <div style="background:#2a2018;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.06)">
+          <span style="font-weight:bold;color:#e8d5b5;font-size:11px">🔨</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span style="font-size:8px;color:rgba(255,255,255,0.5)">📁</span>
+            <span style="font-size:8px;color:rgba(255,255,255,0.5)">🔧</span>
+            <span style="font-size:8px;color:rgba(255,255,255,0.5)">🔔</span>
+            <span style="background:#c45a3c;padding:2px 8px;border-radius:4px;font-size:8px;color:white">Sign In</span>
+          </div>
+        </div>
+        <!-- Hero - more compact -->
+        <div style="text-align:center;padding:28px 16px 12px">
+          <div style="font-size:16px;font-weight:bold;color:#fff;margin-bottom:6px">What are you working on?</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-bottom:12px;line-height:1.4">Code-compliant advice, material lists with prices, and full project plans.</div>
+          <!-- Tabs -->
+          <div style="display:inline-flex;gap:3px;background:rgba(255,255,255,0.05);padding:2px;border-radius:12px;margin-bottom:12px">
+            <span style="background:rgba(255,255,255,0.12);padding:4px 14px;border-radius:10px;font-size:9px;color:#fff;font-weight:600">Ask Anything</span>
+            <span style="padding:4px 14px;border-radius:10px;font-size:9px;color:rgba(255,255,255,0.4)">Expert</span>
+          </div>
+          <!-- Input -->
+          <div style="background:rgba(255,255,255,0.08);border-radius:14px;padding:12px;text-align:left;border:1px solid rgba(255,255,255,0.08)">
+            <div style="color:rgba(255,255,255,0.3);font-size:10px;margin-bottom:8px">Describe your project...</div>
+            <div style="display:flex;justify-content:flex-end">
+              <span style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);padding:3px 8px;border-radius:6px;font-size:8px">↑</span>
+            </div>
+          </div>
+          <!-- Chips - 2 column on mobile -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:10px;text-align:left">
+            <span style="background:rgba(255,255,255,0.05);padding:8px;border-radius:10px;font-size:8px;color:rgba(255,255,255,0.5)">🔌 Electrical permit?</span>
+            <span style="background:rgba(255,255,255,0.05);padding:8px;border-radius:10px;font-size:8px;color:rgba(255,255,255,0.5)">🚿 Leaky faucet</span>
+            <span style="background:rgba(255,255,255,0.05);padding:8px;border-radius:10px;font-size:8px;color:rgba(255,255,255,0.5)">🪵 Plan a deck</span>
+            <span style="background:rgba(255,255,255,0.05);padding:8px;border-radius:10px;font-size:8px;color:rgba(255,255,255,0.5)">🏠 Bathroom reno</span>
+          </div>
+          <!-- Differentiators -->
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;font-size:7px;color:rgba(255,255,255,0.25);flex-wrap:wrap">
+            <span>✓ Code-compliant</span>
+            <span>✓ Pricing</span>
+            <span>✓ Plans</span>
+            <span>✓ Experts</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>State 2: Active Chat (After First Message)</h3>
+  <div class="split">
+    <!-- Desktop -->
+    <div class="mockup">
+      <div class="mockup-header">Desktop — Chat Active</div>
+      <div class="mockup-body" style="background:#1a1410;padding:0;overflow:hidden">
+        <!-- Nav (same) -->
+        <div style="background:#2a2018;padding:8px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.06)">
+          <span style="font-weight:bold;color:#e8d5b5;font-size:12px">🔨 DIY Helper</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="padding:3px 8px;font-size:9px;color:rgba(255,255,255,0.5)">Projects</span>
+            <span style="padding:3px 8px;font-size:9px;color:rgba(255,255,255,0.5)">My Tools</span>
+            <span style="background:rgba(196,90,60,0.2);padding:3px 8px;border-radius:6px;font-size:9px;color:#c45a3c;border:1px solid rgba(196,90,60,0.3)">🛒 Materials (3)</span>
+            <span style="padding:3px 8px;font-size:9px;color:rgba(255,255,255,0.5)">History</span>
+            <span style="background:#3a6a3a;padding:3px 10px;border-radius:6px;font-size:9px;color:white">Justin</span>
+          </div>
+        </div>
+        <!-- Chat messages area -->
+        <div style="padding:12px 20px;max-width:680px;margin:0 auto">
+          <!-- User message -->
+          <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+            <div style="background:#c45a3c;color:white;padding:8px 12px;border-radius:14px 14px 4px 14px;font-size:10px;max-width:75%">I want to build a deck in my backyard. It's about 12x16 feet. What do I need?</div>
+          </div>
+          <!-- Assistant message -->
+          <div style="display:flex;justify-content:flex-start;margin-bottom:10px">
+            <div style="background:rgba(255,255,255,0.08);color:#d4c4a8;padding:10px 14px;border-radius:14px 14px 14px 4px;font-size:10px;max-width:85%;line-height:1.5">
+              <div style="font-weight:600;margin-bottom:4px;color:#fff">Great project! A 12x16 deck is a solid size. Here's what you'll need:</div>
+              <div style="margin-bottom:6px"><strong style="color:#e8d5b5">📋 Permits:</strong> Most areas require a building permit for decks over 200 sq ft.</div>
+              <div style="margin-bottom:6px"><strong style="color:#e8d5b5">🪵 Materials:</strong></div>
+              <div style="background:rgba(0,0,0,0.2);padding:6px 8px;border-radius:6px;font-size:9px;margin-bottom:6px">
+                • 4x4 posts (6) — $12-18 ea<br>
+                • 2x8 joists (14) — $8-14 ea<br>
+                • 2x6 decking boards (32) — $6-12 ea<br>
+                • Concrete footings (6) — $5-8 ea<br>
+                • Hardware — ~$85
+              </div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.4)">💰 Estimated total: $650 – $1,200</div>
+            </div>
+          </div>
+          <!-- Action buttons -->
+          <div style="display:flex;gap:6px;margin-bottom:10px;margin-left:4px">
+            <span style="background:#3a6a3a;color:white;padding:4px 10px;border-radius:8px;font-size:9px">🛒 Save Materials</span>
+            <span style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);padding:4px 10px;border-radius:8px;font-size:9px">📁 Save to Project</span>
+            <span style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);padding:4px 10px;border-radius:8px;font-size:9px">✨ Plan This Project</span>
+          </div>
+        </div>
+        <!-- Input -->
+        <div style="border-top:1px solid rgba(255,255,255,0.06);padding:10px 20px">
+          <div style="max-width:680px;margin:0 auto;background:rgba(255,255,255,0.08);border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:8px">
+            <span style="color:rgba(255,255,255,0.3);font-size:10px;flex:1">Ask a follow-up...</span>
+            <span style="background:#c45a3c;color:white;padding:4px 8px;border-radius:8px;font-size:9px">↑</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Mobile -->
+    <div class="mockup">
+      <div class="mockup-header">Mobile — Chat Active</div>
+      <div class="mockup-body" style="background:#1a1410;padding:0;overflow:hidden;max-width:280px;margin:0 auto">
+        <!-- Compact nav -->
+        <div style="background:#2a2018;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.06)">
+          <span style="font-weight:bold;color:#e8d5b5;font-size:10px">🔨</span>
+          <div style="display:flex;gap:4px;align-items:center">
+            <span style="font-size:8px;color:rgba(255,255,255,0.4)">📁</span>
+            <span style="font-size:8px;color:rgba(255,255,255,0.4)">🔧</span>
+            <span style="background:rgba(196,90,60,0.2);padding:2px 6px;border-radius:4px;font-size:8px;color:#c45a3c">🛒 3</span>
+            <span style="font-size:8px;color:rgba(255,255,255,0.4)">📋</span>
+          </div>
+        </div>
+        <!-- Messages -->
+        <div style="padding:10px;min-height:140px">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+            <div style="background:#c45a3c;color:white;padding:6px 10px;border-radius:12px 12px 3px 12px;font-size:9px;max-width:80%">I want to build a deck. 12x16 feet.</div>
+          </div>
+          <div style="display:flex;justify-content:flex-start;margin-bottom:6px">
+            <div style="background:rgba(255,255,255,0.08);color:#d4c4a8;padding:8px 10px;border-radius:12px 12px 12px 3px;font-size:9px;max-width:85%;line-height:1.4">
+              <div style="font-weight:600;color:#fff;margin-bottom:3px">Great project!</div>
+              <div style="margin-bottom:3px">📋 Permits required for 200+ sq ft</div>
+              <div style="margin-bottom:3px">🪵 Materials: posts, joists, decking...</div>
+              <div style="color:rgba(255,255,255,0.4);font-size:8px">💰 Est: $650–$1,200</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-left:2px">
+            <span style="background:#3a6a3a;color:white;padding:3px 8px;border-radius:6px;font-size:8px">🛒 Save</span>
+            <span style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);padding:3px 8px;border-radius:6px;font-size:8px">📁 Project</span>
+            <span style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);padding:3px 8px;border-radius:6px;font-size:8px">✨ Plan</span>
+          </div>
+        </div>
+        <!-- Input -->
+        <div style="border-top:1px solid rgba(255,255,255,0.06);padding:8px 10px">
+          <div style="background:rgba(255,255,255,0.08);border-radius:12px;padding:8px 10px;display:flex;align-items:center;gap:6px">
+            <span style="color:rgba(255,255,255,0.3);font-size:9px;flex:1">Follow-up...</span>
+            <span style="background:#c45a3c;color:white;padding:3px 6px;border-radius:6px;font-size:8px">↑</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>State 3: Features Surface Contextually</h3>
+  <p class="subtitle">Shopping list, project planner, and materials appear as drawers/panels — not page navigation</p>
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">Materials detected → Shopping badge + Save action</div>
+      <div class="mockup-body" style="background:#1a1410;padding:16px;text-align:center">
+        <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:10px">When the AI detects materials in a response:</div>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <div style="background:rgba(58,106,58,0.2);border:1px solid rgba(58,106,58,0.4);padding:10px 14px;border-radius:10px;text-align:left">
+            <div style="font-size:9px;color:#5a8a5a;font-weight:600;margin-bottom:3px">Header badge appears</div>
+            <div style="background:rgba(196,90,60,0.2);padding:3px 8px;border-radius:6px;font-size:10px;color:#c45a3c;display:inline-block;border:1px solid rgba(196,90,60,0.3)">🛒 Materials (6)</div>
+          </div>
+          <div style="background:rgba(58,106,58,0.2);border:1px solid rgba(58,106,58,0.4);padding:10px 14px;border-radius:10px;text-align:left">
+            <div style="font-size:9px;color:#5a8a5a;font-weight:600;margin-bottom:3px">Inline action button</div>
+            <div style="background:#3a6a3a;padding:4px 10px;border-radius:8px;font-size:10px;color:white;display:inline-block">🛒 Save Materials to Project</div>
+          </div>
+          <div style="background:rgba(58,106,58,0.2);border:1px solid rgba(58,106,58,0.4);padding:10px 14px;border-radius:10px;text-align:left">
+            <div style="font-size:9px;color:#5a8a5a;font-weight:600;margin-bottom:3px">Tap badge → drawer slides in</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.4)">Full shopping list view with<br>quantities, prices, categories</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mockup">
+      <div class="mockup-header">Full project intent → Plan pipeline surfaces</div>
+      <div class="mockup-body" style="background:#1a1410;padding:16px;text-align:center">
+        <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:10px">When AI classifies as full_project intent:</div>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:10px 14px;border-radius:10px;text-align:left;max-width:320px;width:100%">
+            <div style="font-size:9px;color:rgba(255,255,255,0.5);margin-bottom:4px">AI responds conversationally, then offers:</div>
+            <div style="background:rgba(255,255,255,0.04);padding:8px;border-radius:8px;font-size:10px;color:#d4c4a8;line-height:1.5">
+              "This sounds like a bigger project! I can help with a quick answer now, or I can <strong style="color:#c45a3c">create a full project plan</strong> with detailed steps, materials, cost estimates, and permit requirements."
+            </div>
+          </div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.3)">↓ User clicks "Plan This Project" ↓</div>
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:10px 14px;border-radius:10px;text-align:left;max-width:320px;width:100%">
+            <div style="font-size:9px;color:rgba(255,255,255,0.5);margin-bottom:4px">AI gathers info conversationally:</div>
+            <div style="font-size:10px;color:#d4c4a8;line-height:1.6">
+              "To build the best plan, a few quick questions:<br>
+              📍 <em>What's your zip code?</em> (for local codes & pricing)<br>
+              🔧 <em>What tools do you have?</em><br>
+              💰 <em>Budget range?</em>"
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

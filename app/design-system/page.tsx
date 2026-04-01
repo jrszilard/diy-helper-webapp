@@ -22,15 +22,7 @@ import AppLogo from '@/components/AppLogo';
 import GlobalHeader from '@/components/GlobalHeader';
 import Dropdown from '@/components/ui/Dropdown';
 import Toggle from '@/components/ui/Toggle';
-import BotMessage, { TypingIndicator } from '@/components/guided-bot/BotMessage';
-import UserMessage from '@/components/guided-bot/UserMessage';
-import BotInput from '@/components/guided-bot/BotInput';
-import ProjectCards from '@/components/guided-bot/ProjectCards';
-import ScopeInput from '@/components/guided-bot/ScopeInput';
-import LocationInput from '@/components/guided-bot/LocationInput';
-import ToolsInput from '@/components/guided-bot/ToolsInput';
-import PreferenceCards from '@/components/guided-bot/PreferenceCards';
-import ProjectBrief from '@/components/guided-bot/ProjectBrief';
+
 import {
   Wrench, ArrowRight, Plus, Trash2, Check, X, Home, Settings,
   Bell, Menu, MessageSquare, Users, Package, ShoppingCart, Search, MapPin,
@@ -670,88 +662,7 @@ export default function DesignSystemPage() {
           </Row>
         </Section>
 
-        {/* ── Dark Theme — Bot Messages ────────────────────────────────────── */}
-        <DarkSection title="Dark Theme — Bot Messages" label="BotMessage · UserMessage · TypingIndicator">
-          <BotMessage content="Hi! What are you building today?" animate={false} />
-          <UserMessage content="I want to build a 12x16 deck in my backyard" />
-          <BotMessage content="Great choice! A 12×16 deck is a manageable weekend project. **What city and state** is this in? Local codes affect the build." animate={false} />
-          <TypingIndicator />
-        </DarkSection>
-
-        {/* ── Dark Theme — BotInput ────────────────────────────────────────── */}
-        <DarkSection title="Dark Theme — BotInput" label="Initial state: large textarea with send button">
-          <BotInput phase="project" onSend={() => {}} disabled={false} />
-        </DarkSection>
-
-        {/* ── Dark Theme — ProjectCards ────────────────────────────────────── */}
-        <DarkSection title="Dark Theme — ProjectCards" label="Quick-select project tiles shown before conversation starts">
-          <ProjectCards onSelectProject={() => {}} />
-        </DarkSection>
-
-        {/* ── Dark Theme — ScopeInput ──────────────────────────────────────── */}
-        <DarkSection title="Dark Theme — ScopeInput" label="Context-aware dimension + details form">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <p className="text-xs text-white/40 mb-2">outdoor</p>
-              <ScopeInput projectType="outdoor" onSubmit={() => {}} />
-            </div>
-            <div>
-              <p className="text-xs text-white/40 mb-2">electrical</p>
-              <ScopeInput projectType="electrical" onSubmit={() => {}} />
-            </div>
-          </div>
-        </DarkSection>
-
-        {/* ── Dark Theme — LocationInput ───────────────────────────────────── */}
-        <DarkSection title="Dark Theme — LocationInput" label="City + state selection">
-          <div className="max-w-sm">
-            <LocationInput onSubmit={() => {}} />
-          </div>
-        </DarkSection>
-
-        {/* ── Dark Theme — ToolsInput ──────────────────────────────────────── */}
-        <DarkSection title="Dark Theme — ToolsInput" label="Optional tools & materials textarea with skip">
-          <div className="max-w-sm">
-            <ToolsInput onSubmit={() => {}} onSkip={() => {}} />
-          </div>
-        </DarkSection>
-
-        {/* ── Dark Theme — PreferenceCards ─────────────────────────────────── */}
-        <DarkSection title="Dark Theme — PreferenceCards" label="Experience and budget selection cards">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <p className="text-xs text-white/40 mb-2">experience</p>
-              <PreferenceCards type="experience" onSelect={() => {}} />
-            </div>
-            <div>
-              <p className="text-xs text-white/40 mb-2">budget</p>
-              <PreferenceCards type="budget" onSelect={() => {}} />
-            </div>
-          </div>
-        </DarkSection>
-
-        {/* ── Dark Theme — ProjectBrief ────────────────────────────────────── */}
-        <DarkSection title="Dark Theme — ProjectBrief" label="Summary card before generating the plan">
-          <div className="max-w-sm">
-            <ProjectBrief
-              gathered={{
-                projectType: 'outdoor',
-                projectDescription: 'Build a 12x16 pressure-treated deck',
-                dimensions: '12x16 feet',
-                scopeDetails: 'Flat yard, no existing structure',
-                city: 'Austin',
-                state: 'Texas',
-                experienceLevel: 'intermediate',
-                budgetLevel: 'mid-range',
-                existingTools: 'drill, circular saw, tape measure',
-                timeframe: null,
-              }}
-              onEdit={() => {}}
-              onSubmit={() => {}}
-              isSubmitting={false}
-            />
-          </div>
-        </DarkSection>
+        {/* Guided bot components removed — replaced by unified chat */}
 
       </div>
     </div>

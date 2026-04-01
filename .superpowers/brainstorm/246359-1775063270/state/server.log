@@ -1,0 +1,5 @@
+{"type":"server-started","port":60574,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:60574","screen_dir":"/home/justin/lakeshore-studio/ai-projects/diy-helper-webapp/.superpowers/brainstorm/246359-1775063270/content","state_dir":"/home/justin/lakeshore-studio/ai-projects/diy-helper-webapp/.superpowers/brainstorm/246359-1775063270/state"}
+{"type":"screen-added","file":"/home/justin/lakeshore-studio/ai-projects/diy-helper-webapp/.superpowers/brainstorm/246359-1775063270/content/option-c-detailed.html"}
+{"type":"screen-added","file":"/home/justin/lakeshore-studio/ai-projects/diy-helper-webapp/.superpowers/brainstorm/246359-1775063270/content/waiting.html"}
+{"type":"screen-added","file":"/home/justin/lakeshore-studio/ai-projects/diy-helper-webapp/.superpowers/brainstorm/246359-1775063270/content/waiting-2.html"}
+{"type":"server-stopped","reason":"idle timeout"}
