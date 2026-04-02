@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ArrowUp, FolderPlus, ShoppingCart } from 'lucide-react';
+import { ArrowUp, FolderPlus, ShoppingCart, Package, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { sanitizeHref } from '@/lib/security';
 import { supabase } from '@/lib/supabase';
@@ -15,6 +15,7 @@ import PlanningCTA from '@/components/PlanningCTA';
 import AgentProgress from '@/components/AgentProgress';
 import ReportView from '@/components/ReportView';
 import ContextualHint from '@/components/ui/ContextualHint';
+import GuestExpertCallout from '@/components/GuestExpertCallout';
 import SaveMaterialsDialog from '@/components/SaveMaterialsDialog';
 import { useProjectActions } from '@/hooks/useProjectActions';
 import type { IntentType } from '@/lib/intelligence/types';
@@ -235,6 +236,24 @@ export default function LandingQuickChat({
 
   return (
     <div className="space-y-4">
+      {/* Inventory detection toast */}
+      {chat.inventoryNotification && (
+        <div className="flex items-start gap-2 bg-forest-green/20 border border-forest-green/30 text-earth-cream rounded-lg px-3 py-2.5 text-sm">
+          <Package className="w-4 h-4 flex-shrink-0 mt-0.5 text-forest-green" />
+          <span className="flex-1">
+            {chat.inventoryNotification.added.length > 0 && (
+              <>Added to inventory: {chat.inventoryNotification.added.join(', ')}. </>
+            )}
+            {chat.inventoryNotification.existing.length > 0 && (
+              <>Already tracked: {chat.inventoryNotification.existing.join(', ')}.</>
+            )}
+          </span>
+          <button onClick={() => chat.setInventoryNotification(null)} className="flex-shrink-0 p-0.5 rounded hover:bg-white/10" aria-label="Dismiss">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* Messages */}
       <div ref={scrollRef} className="max-h-[60vh] overflow-y-auto space-y-3">
         {chat.messages.map((msg, idx) => (
@@ -305,6 +324,13 @@ export default function LandingQuickChat({
             )}
           </div>
         ))}
+
+        {/* Expert upsell for guests after 3+ messages */}
+        {!userId && (
+          <GuestExpertCallout
+            messageCount={chat.messages.filter(m => m.role === 'assistant').length}
+          />
+        )}
 
         {/* Streaming content */}
         {chat.isStreaming && chat.streamingContent && (

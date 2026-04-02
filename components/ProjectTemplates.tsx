@@ -70,7 +70,7 @@ export default function ProjectTemplates({
     } else {
       // Store the starter prompt and navigate to chat
       sessionStorage.setItem('initialChatMessage', template.starterPrompt);
-      router.push('/chat');
+      router.push('/');
     }
   };
 
