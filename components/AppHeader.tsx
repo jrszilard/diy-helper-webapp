@@ -13,6 +13,7 @@ import ProjectsSidebar from './ProjectsSidebar';
 import InventoryPanel from './InventoryPanel';
 import QAQuestionList from './marketplace/QAQuestionList';
 import ExpertQuickBar from './ExpertQuickBar';
+import ShoppingListView from './ShoppingListView';
 import type { QAQuestion } from '@/lib/marketplace/types';
 import type { Project } from '@/types';
 
@@ -47,6 +48,9 @@ export default function AppHeader({
   const [showProjects, setShowProjects] = useState(false);
   const [showInventory, setShowInventory] = useState(false);
   const [showQuestions, setShowQuestions] = useState(false);
+  const [showShoppingList, setShowShoppingList] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [shoppingProjects, setShoppingProjects] = useState<Project[]>([]);
   const [myQuestions, setMyQuestions] = useState<QAQuestion[]>([]);
   const [questionsLoaded, setQuestionsLoaded] = useState(false);
   const { isExpert, expert, openQueueCount } = useExpertStatus();
@@ -73,6 +77,15 @@ export default function AppHeader({
     if (params.get('signIn') === 'true' && !user) setShowAuth(true);
   }, [user]);
 
+  // Load projects when shopping drawer opens without a selection
+  useEffect(() => {
+    if (showShoppingList && !selectedProject && user) {
+      supabase.from('projects').select('*').eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .then(({ data }) => { if (data) setShoppingProjects(data); });
+    }
+  }, [showShoppingList, selectedProject, user]);
+
   const openQuestionsDrawer = async () => {
     setShowQuestions(true);
     if (questionsLoaded) return;
@@ -89,10 +102,11 @@ export default function AppHeader({
   };
 
   const handleProjectSelect = (project: Project | null) => {
+    setSelectedProject(project);
     if (onProjectSelect) {
       onProjectSelect(project);
     } else if (project) {
-      router.push('/chat');
+      router.push('/');
     }
     setShowProjects(false);
   };
@@ -143,6 +157,51 @@ export default function AppHeader({
         </div>
       )}
 
+      {showShoppingList && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setShowShoppingList(false)} />
+          <div className="absolute right-0 top-0 bottom-0 w-[90vw] max-w-lg bg-[var(--earth-brown-dark)] shadow-xl animate-slide-in-right flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-[var(--blueprint-grid-major)]">
+              <h2 className="font-bold text-lg text-white flex items-center gap-2">
+                <ShoppingCart size={18} className="text-white/50" />
+                Shopping List
+              </h2>
+              <button onClick={() => setShowShoppingList(false)} className="p-2 hover:bg-white/10 rounded-lg transition-colors text-[var(--earth-sand)]" aria-label="Close">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {selectedProject ? (
+                <ShoppingListView project={selectedProject} isMobile={true} />
+              ) : (
+                <div className="p-4">
+                  <p className="text-sm text-white/60 mb-3">Select a project to view its shopping list:</p>
+                  {shoppingProjects.length === 0 ? (
+                    <div className="text-center py-8 text-white/40">
+                      <ShoppingCart className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                      <p className="text-sm">No projects yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {shoppingProjects.map(p => (
+                        <button
+                          key={p.id}
+                          onClick={() => setSelectedProject(p)}
+                          className="w-full text-left px-3 py-2.5 rounded-lg border border-white/[0.06] hover:border-forest-green/40 hover:bg-white/10 transition-colors"
+                        >
+                          <div className="text-sm font-medium text-white">{p.name}</div>
+                          {p.description && <div className="text-xs text-white/50 mt-0.5 truncate">{p.description}</div>}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Inventory panel */}
       {user && (
         <InventoryPanel userId={user.id} isOpen={showInventory} onClose={() => setShowInventory(false)} />
@@ -168,27 +227,29 @@ export default function AppHeader({
             <div className="flex items-center gap-1 sm:gap-3">
               {user && (
                 <Button variant="ghost" size="sm" leftIcon={FolderOpen} iconSize={18} onClick={() => setShowProjects(true)} className={btnClass}>
-                  <span className="hidden sm:inline">Projects</span>
+                  <span className="text-xs sm:text-sm">Projects</span>
                 </Button>
               )}
               {user && (
                 <Button variant="ghost" size="sm" leftIcon={Package} iconSize={18} onClick={() => setShowInventory(true)} className={btnClass}>
-                  <span className="hidden sm:inline">My Tools</span>
+                  <span className="text-xs sm:text-sm">My Tools</span>
                 </Button>
               )}
               {user && (
                 <Button variant="ghost" size="sm" leftIcon={HelpCircle} iconSize={18} onClick={openQuestionsDrawer} className={btnClass}>
-                  <span className="hidden sm:inline">My Questions</span>
+                  <span className="text-xs sm:text-sm">My Questions</span>
                 </Button>
               )}
-              {materialsCount && materialsCount > 0 && (
-                <span className={`${btnClass} relative flex items-center gap-1 px-2 py-1 text-sm`}>
+              {user && (
+                <button onClick={() => setShowShoppingList(true)} className={`${btnClass} relative flex items-center gap-1 px-2 py-1 text-sm rounded-lg hover:bg-white/10 transition-colors`}>
                   <ShoppingCart size={18} />
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-terracotta text-white text-[10px] rounded-full flex items-center justify-center font-bold">
-                    {materialsCount}
-                  </span>
-                  <span className="hidden sm:inline ml-1">Materials</span>
-                </span>
+                  {materialsCount && materialsCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-terracotta text-white text-[10px] rounded-full flex items-center justify-center font-bold">
+                      {materialsCount}
+                    </span>
+                  )}
+                  <span className="text-xs sm:text-sm ml-1">Shopping</span>
+                </button>
               )}
               <Button variant="ghost" size="sm" leftIcon={Users} iconSize={18} href="/experts" className={`${btnClass} hidden sm:inline-flex`}>
                 Find an Expert

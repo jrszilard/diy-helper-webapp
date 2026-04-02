@@ -113,7 +113,7 @@ function SettingsContent() {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Button
           variant="ghost"
-          href="/chat"
+          href="/"
           leftIcon={ArrowLeft}
           size="sm"
           className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10 mb-6"

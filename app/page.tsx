@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import LandingHero from '@/components/LandingHero';
 import AppHeader from '@/components/AppHeader';
 import AppLogo from '@/components/AppLogo';
@@ -46,14 +46,6 @@ export default function LandingPage() {
       else setConversations([]);
     });
 
-    // Check for session state from /chat redirect
-    const storedConvId = sessionStorage.getItem('diy-helper-conversation-id');
-    if (storedConvId) {
-      setActiveChatConversationId(storedConvId);
-      setChatActive(true);
-      sessionStorage.removeItem('diy-helper-conversation-id');
-    }
-
     return () => subscription.unsubscribe();
   }, []);
 
@@ -77,12 +69,30 @@ export default function LandingPage() {
     setChatActive(false);
   };
 
+  const handleProjectSelect = useCallback(async (project: { id: string } | null) => {
+    if (!project) return;
+    // Find the most recent conversation for this project
+    const { data } = await supabase
+      .from('conversations')
+      .select('id')
+      .eq('project_id', project.id)
+      .order('updated_at', { ascending: false })
+      .limit(1);
+    if (data && data.length > 0) {
+      openConversation(data[0].id);
+    } else {
+      // No conversation yet — just activate chat
+      setChatActive(true);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-earth-brown-dark">
       <AppHeader
         showBack={chatActive}
         backLabel="New Chat"
         onBack={handleNewChat}
+        onProjectSelect={handleProjectSelect}
         materialsCount={materialsCount > 0 ? materialsCount : undefined}
       />
 

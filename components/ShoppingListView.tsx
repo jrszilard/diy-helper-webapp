@@ -22,6 +22,9 @@ import {
 import MaterialsExport from './MaterialsExport';
 import { ShoppingSearchSkeleton } from './SkeletonLoader';
 import TextInput from '@/components/ui/TextInput';
+import ContextualHint from '@/components/ui/ContextualHint';
+import ShoppingTripList from './ShoppingTripList';
+import ShoppingTripChecklist from './ShoppingTripChecklist';
 import { useStoreSearch } from '@/hooks/useStoreSearch';
 import type { StoreResult } from '@/hooks/useStoreSearch';
 
@@ -58,6 +61,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editQuantity, setEditQuantity] = useState<number>(1);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [activeTripId, setActiveTripId] = useState<string | null>(null);
 
   const storeSearch = useStoreSearch();
   const [priceSyncNotification, setPriceSyncNotification] = useState<string | null>(null);
@@ -88,10 +92,13 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
         })));
       }
     } else {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('shopping_list_items').select('*')
         .eq('project_id', project.id)
         .order('created_at', { ascending: true });
+      if (error) {
+        console.error('Error loading shopping list items:', error);
+      }
       if (data) setItems(data);
     }
   };
@@ -251,7 +258,30 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
         </div>
       )}
 
-      {!isMobile && (
+      <ContextualHint hintKey="shopping">
+        Create a shopping checklist to take to the store — your progress is saved
+      </ContextualHint>
+
+      {/* Shopping Trips — only for authenticated projects */}
+      {project && !isGuestProject && !activeTripId && (
+        <div className="mb-6 pb-4 border-b border-white/[0.06]">
+          <ShoppingTripList
+            projectId={project.id}
+            projectName={project.name}
+            onOpenChecklist={(tripId) => setActiveTripId(tripId)}
+          />
+        </div>
+      )}
+
+      {/* Active trip checklist view — replaces the item list */}
+      {activeTripId && (
+        <ShoppingTripChecklist
+          tripId={activeTripId}
+          onBack={() => setActiveTripId(null)}
+        />
+      )}
+
+      {!activeTripId && !isMobile && (
         <div className="mb-6">
           <div className="flex items-start justify-between">
             <div>
@@ -277,21 +307,21 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
         </div>
       )}
 
-      {items.length === 0 ? (
+      {!activeTripId && items.length === 0 ? (
         <div className={`text-center ${isMobile ? 'py-16' : 'py-12'}`}>
-          <ShoppingCart className={`${isMobile ? 'w-16 h-16' : 'w-12 h-12'} mx-auto mb-3 opacity-50 text-earth-sand`} />
-          <p className={`text-earth-brown ${isMobile ? 'text-lg' : ''}`}>No items yet</p>
-          <p className={`${isMobile ? 'text-base' : 'text-sm'} mt-1 text-earth-brown-light`}>Products will appear here automatically</p>
+          <ShoppingCart className={`${isMobile ? 'w-16 h-16' : 'w-12 h-12'} mx-auto mb-3 opacity-30 text-white/30`} />
+          <p className={`text-white/70 ${isMobile ? 'text-lg' : ''}`}>No items yet</p>
+          <p className={`${isMobile ? 'text-base' : 'text-sm'} mt-1 text-white/40`}>Products will appear here automatically</p>
         </div>
-      ) : (
+      ) : !activeTripId ? (
         <div>
           {/* Progress bar */}
           <div className="mb-4">
             <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-earth-brown">{purchasedCount} of {items.length} items purchased</span>
+              <span className="text-white/60">{purchasedCount} of {items.length} items purchased</span>
               <span className="text-forest-green font-medium">{Math.round((purchasedCount / items.length) * 100)}%</span>
             </div>
-            <div className="h-2 bg-earth-tan rounded-full overflow-hidden">
+            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
               <div className="h-full bg-forest-green rounded-full transition-all duration-300"
                 style={{ width: `${(purchasedCount / items.length) * 100}%` }} />
             </div>
@@ -299,28 +329,28 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
 
           <div className={`mb-4 ${isMobile ? 'space-y-3' : 'flex gap-2'}`}>
             <button onClick={() => setShowSearchPanel(!showSearchPanel)}
-              className={`flex items-center justify-center gap-2 px-4 py-3 bg-slate-blue text-white rounded-xl hover:bg-slate-blue-dark active:bg-[#3D5160] transition ${isMobile ? 'w-full text-base' : ''}`}>
+              className={`flex items-center justify-center gap-2 px-4 py-3 bg-slate-blue text-white rounded-xl hover:bg-slate-blue-dark active:bg-slate-blue-dark transition ${isMobile ? 'w-full text-base' : ''}`}>
               <Search className={isMobile ? 'w-5 h-5' : 'w-4 h-4'} />
               {showSearchPanel ? 'Hide Search' : 'Search Local Stores'}
             </button>
             {isMobile && (
               <button onClick={() => setShowExportModal(true)}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-[var(--status-research-bg)] text-slate-blue rounded-xl hover:bg-[#D4E4F0] transition w-full">
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 text-white/70 rounded-xl hover:bg-white/15 transition w-full">
                 <Download className="w-5 h-5" /> Export List
               </button>
             )}
             {selectedItems.size > 0 && (
-              <div className={`flex items-center justify-center gap-2 px-4 py-2 bg-[var(--status-research-bg)] text-slate-blue rounded-xl font-medium ${isMobile ? 'w-full' : ''}`}>
+              <div className={`flex items-center justify-center gap-2 px-4 py-2 bg-white/10 text-white/70 rounded-xl font-medium ${isMobile ? 'w-full' : ''}`}>
                 {selectedItems.size} item(s) selected
               </div>
             )}
           </div>
 
           {showSearchPanel && (
-            <div className="mb-6 p-4 bg-earth-cream border border-earth-sand rounded-xl">
+            <div className="mb-6 p-4 bg-white/5 border border-white/[0.06] rounded-xl">
               <div className="flex items-center gap-2 mb-4">
                 <MapPin className="w-5 h-5 text-terracotta" />
-                <h3 className="font-semibold text-foreground">Search Local Stores</h3>
+                <h3 className="font-semibold text-white">Search Local Stores</h3>
               </div>
               <div className={`${isMobile ? 'space-y-3' : 'flex gap-2'} mb-3`}>
                 <TextInput
@@ -333,19 +363,19 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                 />
                 <button onClick={handleSearchStores}
                   disabled={selectedItems.size === 0 || !location.trim() || storeSearch.isSearching}
-                  className={`px-6 py-3 bg-terracotta text-white rounded-xl hover:bg-terracotta-dark active:bg-[#8B4D33] disabled:bg-earth-sand disabled:cursor-not-allowed transition ${isMobile ? 'w-full text-base font-medium' : ''}`}>
+                  className={`px-6 py-3 bg-terracotta text-white rounded-xl hover:bg-terracotta-dark active:bg-terracotta-dark disabled:bg-white/10 disabled:text-white/30 disabled:cursor-not-allowed transition ${isMobile ? 'w-full text-base font-medium' : ''}`}>
                   {storeSearch.isSearching ? 'Searching...' : 'Search'}
                 </button>
               </div>
-              <p className={`${isMobile ? 'text-base' : 'text-sm'} text-earth-brown`}>
+              <p className={`${isMobile ? 'text-base' : 'text-sm'} text-white/50`}>
                 Select items below with checkboxes, then search to find products at nearby stores
               </p>
               {storeSearch.searchError && (
-                <div className="mt-3 p-3 bg-[#FADDD0] border border-[#E8A990] rounded-xl flex items-center gap-3">
+                <div className="mt-3 p-3 bg-rust/15 border border-rust/30 rounded-xl flex items-center gap-3">
                   <AlertCircle className="w-5 h-5 text-rust flex-shrink-0" />
                   <p className="text-sm text-rust flex-1">{storeSearch.searchError}</p>
                   <button onClick={() => { storeSearch.setSearchError(null); handleSearchStores(); }}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-rust text-white rounded-lg hover:bg-[#9A4830] text-sm font-medium flex-shrink-0">
+                    className="flex items-center gap-1 px-3 py-1.5 bg-rust text-white rounded-lg hover:bg-rust text-sm font-medium flex-shrink-0">
                     <RefreshCw className="w-4 h-4" /> Retry
                   </button>
                 </div>
@@ -357,8 +387,8 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
           <div className="space-y-6">
             {Object.entries(groupedItems).map(([category, categoryItems]) => (
               <div key={category}>
-                <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-foreground mb-3 uppercase tracking-wide`}>{category}</h3>
-                <div className="bg-white rounded-xl border border-earth-sand divide-y divide-earth-tan">
+                <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-white/50 mb-3 uppercase tracking-wide`}>{category}</h3>
+                <div className="bg-white rounded-xl border border-white/[0.06] divide-y divide-earth-tan">
                   {categoryItems.map((item) => (
                     <div key={item.id}>
                       <div className={`p-4 ${item.purchased ? 'bg-gray-50' : ''} ${isMobile ? 'active:bg-earth-cream' : ''}`}>
@@ -386,7 +416,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                                 {item.product_name}
                               </span>
                               {item.required && !item.purchased && (
-                                <span className="text-xs bg-[#FADDD0] text-rust px-2 py-0.5 rounded font-medium">Required</span>
+                                <span className="text-xs bg-rust/15 text-rust px-2 py-0.5 rounded font-medium">Required</span>
                               )}
                             </div>
                             {editingItem === item.id ? (
@@ -422,7 +452,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
                             </div>
                           )}
                           <button onClick={() => deleteItem(item.id)}
-                            className="p-2 text-earth-sand hover:text-rust transition rounded-lg hover:bg-[#FADDD0]"
+                            className="p-2 text-earth-sand hover:text-rust transition rounded-lg hover:bg-rust/15"
                             title="Remove item" aria-label="Remove item from list">
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -431,7 +461,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
 
                       {/* Per-item search error */}
                       {storeSearch.itemErrors[item.id] && (
-                        <div className="px-4 py-2 bg-[#FADDD0] border-t border-[#E8A990]">
+                        <div className="px-4 py-2 bg-rust/15 border-t border-rust/30">
                           <div className="flex items-center gap-2 text-sm text-rust">
                             <AlertCircle className="w-4 h-4 flex-shrink-0" />
                             <span>{storeSearch.itemErrors[item.id]}</span>
@@ -468,7 +498,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
             )}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -476,13 +506,13 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
 function TotalBar({ icon, label, value, color, isMobile, strikethrough }: {
   icon: React.ReactNode; label: string; value: number; color: 'blue' | 'muted' | 'green'; isMobile?: boolean; strikethrough?: boolean;
 }) {
-  const bgColors = { blue: 'bg-[var(--status-research-bg)] border-[#B8D0E4]', muted: 'bg-earth-cream border-earth-sand', green: 'bg-[var(--status-complete-bg)] border-[#B8D8C4]' };
-  const textColors = { blue: 'text-slate-blue', muted: 'text-earth-brown', green: 'text-forest-green' };
+  const bgColors = { blue: 'bg-white/10 border-slate-blue/20', muted: 'bg-white/5 border-white/[0.06]', green: 'bg-white/10 border-forest-green/20' };
+  const textColors = { blue: 'text-slate-blue', muted: 'text-white/40', green: 'text-forest-green' };
   return (
     <div className={`${bgColors[color]} border rounded-xl p-4 flex items-center justify-between`}>
       <div className="flex items-center gap-2">
         {icon}
-        <span className={`font-bold text-foreground ${isMobile ? 'text-base' : ''}`}>{label}</span>
+        <span className={`font-bold text-white ${isMobile ? 'text-base' : ''}`}>{label}</span>
       </div>
       <span className={`${isMobile ? 'text-2xl' : 'text-2xl'} font-bold ${textColors[color]} ${strikethrough ? 'line-through' : ''}`}>
         ${value.toFixed(2)}
@@ -531,7 +561,7 @@ function StoreSearchResults({ results, priceRange }: {
                       {result.productName}
                     </div>
                   )}
-                  {result.sku && <div className="text-xs text-[#9B8B7D]">SKU: {result.sku}</div>}
+                  {result.sku && <div className="text-xs text-earth-brown-light">SKU: {result.sku}</div>}
                   <div className="text-xs text-earth-brown">{result.distance}</div>
                 </div>
                 <div className="text-right">
@@ -551,7 +581,7 @@ function StoreSearchResults({ results, priceRange }: {
                     <span className={`text-xs px-2 py-0.5 rounded font-medium ${
                       result.availability === 'in-stock' ? 'bg-[var(--status-complete-bg)] text-forest-green' :
                       result.availability === 'limited' ? 'bg-[var(--status-progress-bg)] text-terracotta' :
-                      result.availability === 'out-of-stock' ? 'bg-[#FADDD0] text-rust' : 'bg-[var(--status-research-bg)] text-slate-blue'
+                      result.availability === 'out-of-stock' ? 'bg-rust/15 text-rust' : 'bg-[var(--status-research-bg)] text-slate-blue'
                     }`}>
                       {result.availability.replace(/-/g, ' ').toUpperCase()}
                     </span>

@@ -96,7 +96,7 @@ export default function ExpertHelpDropdown({
                       <p className="text-sm font-medium text-foreground">{label}</p>
                       <p className="text-xs text-forest-green font-medium mt-0.5">First question free with a new account</p>
                       <a
-                        href="/chat"
+                        href="/"
                         onClick={() => {
                           localStorage.setItem('expert-callout-referral', 'true');
                           setIsOpen(false);

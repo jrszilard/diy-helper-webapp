@@ -118,7 +118,7 @@ export default function WhyDIYHelper() {
 
   const handleTryIt = () => {
     sessionStorage.setItem('initialChatMessage', scenario.question);
-    router.push('/chat');
+    router.push('/');
   };
 
   return (

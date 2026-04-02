@@ -169,7 +169,7 @@ export default function QADetailPage() {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.push('/chat');
+        router.push('/');
         return;
       }
       setCurrentUserId(user.id);

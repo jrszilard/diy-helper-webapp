@@ -10,6 +10,7 @@ import {
 import { supabase } from '@/lib/supabase';
 import type { ReportSection, ProjectReportRecord, ReportOutput } from '@/lib/agents/types';
 import { sanitizeHref } from '@/lib/security';
+import ContextualHint from '@/components/ui/ContextualHint';
 import ExpertHelpDropdown from '@/components/marketplace/ExpertHelpDropdown';
 import ProjectTimeline from '@/components/marketplace/ProjectTimeline';
 
@@ -142,6 +143,13 @@ export default function ReportView({
           </button>
         </div>
       )}
+
+      {/* Feature hint */}
+      <div className="px-4 pt-2 print:hidden">
+        <ContextualHint hintKey="report">
+          You can save this project and come back to it anytime from <strong>Projects</strong> ↑
+        </ContextualHint>
+      </div>
 
       {/* Header */}
       <div className="bg-surface border-b border-earth-sand p-4 print:hidden">
@@ -281,7 +289,7 @@ export default function ReportView({
             </div>
             <div className="flex items-center gap-2">
               <a
-                href="/chat"
+                href="/"
                 className="flex items-center gap-2 px-4 py-2 bg-terracotta text-white text-sm font-semibold rounded-lg hover:bg-terracotta-dark transition-colors whitespace-nowrap"
               >
                 <LogIn size={16} />

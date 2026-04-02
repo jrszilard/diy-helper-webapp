@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import TextInput from '@/components/ui/TextInput';
 import Spinner from '@/components/ui/Spinner';
+import ContextualHint from '@/components/ui/ContextualHint';
 
 interface Project {
   id: string;
@@ -96,9 +97,12 @@ export default function SaveToProjectModal({
           <div>
             <p className="font-bold text-lg text-foreground">Saved!</p>
             <p className="text-sm text-earth-brown mt-1">Your project has been saved.</p>
+            <ContextualHint hintKey="tools">
+              Your tools in <strong>My Tools</strong> ↑ are auto-excluded from future shopping lists
+            </ContextualHint>
           </div>
           <div className="flex gap-2 justify-center">
-            <Button variant="primary" href="/chat" rightIcon={ArrowRight} iconSize={16}>
+            <Button variant="primary" href="/" rightIcon={ArrowRight} iconSize={16}>
               Open in chat
             </Button>
             <Button variant="ghost" onClick={onClose}>Done</Button>

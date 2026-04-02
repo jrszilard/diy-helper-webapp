@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { ArrowUp, FolderPlus, ShoppingCart } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { ArrowUp, FolderPlus, ShoppingCart, Package, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { sanitizeHref } from '@/lib/security';
 import { supabase } from '@/lib/supabase';
 import { useChat } from '@/hooks/useChat';
 import { useAgentRun } from '@/hooks/useAgentRun';
@@ -13,6 +14,10 @@ import IntentSignal from '@/components/IntentSignal';
 import PlanningCTA from '@/components/PlanningCTA';
 import AgentProgress from '@/components/AgentProgress';
 import ReportView from '@/components/ReportView';
+import ContextualHint from '@/components/ui/ContextualHint';
+import GuestExpertCallout from '@/components/GuestExpertCallout';
+import SaveMaterialsDialog from '@/components/SaveMaterialsDialog';
+import { useProjectActions } from '@/hooks/useProjectActions';
 import type { IntentType } from '@/lib/intelligence/types';
 import type { StartAgentRunRequest } from '@/lib/agents/types';
 
@@ -34,6 +39,25 @@ export default function LandingQuickChat({
   onMaterialsDetected,
   suggestionChips,
 }: LandingQuickChatProps) {
+  const mdComponents = {
+    p: ({ children }: { children?: React.ReactNode }) => <p className="mb-2 text-earth-cream">{children}</p>,
+    ul: ({ children }: { children?: React.ReactNode }) => <ul className="list-disc ml-4 mb-2 text-earth-cream">{children}</ul>,
+    ol: ({ children }: { children?: React.ReactNode }) => <ol className="list-decimal ml-4 mb-2 text-earth-cream">{children}</ol>,
+    li: ({ children }: { children?: React.ReactNode }) => <li className="text-earth-cream">{children}</li>,
+    h1: ({ children }: { children?: React.ReactNode }) => <h1 className="text-xl font-bold mb-2 text-earth-cream">{children}</h1>,
+    h2: ({ children }: { children?: React.ReactNode }) => <h2 className="text-lg font-bold mb-2 text-earth-cream">{children}</h2>,
+    h3: ({ children }: { children?: React.ReactNode }) => <h3 className="text-md font-bold mb-2 text-earth-cream">{children}</h3>,
+    strong: ({ children }: { children?: React.ReactNode }) => <strong className="font-bold text-earth-cream">{children}</strong>,
+    em: ({ children }: { children?: React.ReactNode }) => <em className="italic text-earth-sand">{children}</em>,
+    code: ({ children }: { children?: React.ReactNode }) => <code className="px-1 py-0.5 rounded text-sm bg-white/10 text-earth-cream">{children}</code>,
+    a: ({ children, href }: { children?: React.ReactNode; href?: string }) => (
+      <a href={sanitizeHref(href)} className="underline text-sky-300 hover:text-sky-200" target="_blank" rel="noopener noreferrer">{children}</a>
+    ),
+    blockquote: ({ children }: { children?: React.ReactNode }) => (
+      <blockquote className="border-l-4 border-terracotta pl-4 italic text-earth-sand">{children}</blockquote>
+    ),
+  };
+
   const [userId, setUserId] = useState<string | null>(null);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
@@ -48,6 +72,7 @@ export default function LandingQuickChat({
   });
 
   const agentRun = useAgentRun();
+  const projectActions = useProjectActions({ userId: userId ?? undefined });
 
   // Auth state
   useEffect(() => {
@@ -60,12 +85,16 @@ export default function LandingQuickChat({
     return () => subscription.unsubscribe();
   }, []);
 
-  // Clear stale chat/agent state on fresh mount (no explicit conversation to resume)
+  // On mount: let useChat handle resume from localStorage.
+  // Only clear state if no explicit conversation and no stored conversation.
   useEffect(() => {
-    if (!initialConversationId) {
+    if (initialConversationId) return;
+    const storedConvId = localStorage.getItem('diy-helper-conversation-id');
+    if (!storedConvId) {
       chat.handleNewChat();
-      agentRun.reset();
     }
+    // useChat already loads stored messages + conversationId on mount
+    agentRun.reset();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -133,6 +162,45 @@ export default function LandingQuickChat({
     chat.sendMessageWithContent(text);
   }, [chat]);
 
+  const [newProjectName, setNewProjectName] = useState('');
+
+  const saveToProject = useCallback(async (targetProjectId: string, isGuestProject: boolean = false) => {
+    if (!chat.extractedMaterials) return;
+    try {
+      const count = await projectActions.saveMaterials(
+        targetProjectId,
+        chat.extractedMaterials.materials,
+        isGuestProject || projectActions.isGuestMode
+      );
+      if (count > 0) {
+        setSavedProjectId(targetProjectId);
+        chat.setShowSaveDialog(false);
+        chat.setExtractedMaterials(null);
+        let successMsg = `Saved ${count} items to your project!`;
+        if (chat.extractedMaterials.owned_items?.length) {
+          successMsg += ` (${chat.extractedMaterials.owned_items.length} items you already own were excluded)`;
+        }
+        chat.setMessages(prev => [...prev, { role: 'assistant', content: successMsg }]);
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      console.error('Error saving materials:', message);
+      chat.setMessages(prev => [...prev, { role: 'assistant', content: `Failed to save materials: ${message}. Please try again.` }]);
+      chat.setShowSaveDialog(false);
+    }
+  }, [chat, projectActions]);
+
+  const createNewProjectAndSave = useCallback(async () => {
+    if (!chat.extractedMaterials) return;
+    const project = await projectActions.createProject(
+      chat.extractedMaterials.project_description || 'My DIY Project',
+      `Created ${new Date().toLocaleDateString()}`
+    );
+    if (project) {
+      await saveToProject(project.id, projectActions.isGuestMode);
+    }
+  }, [chat.extractedMaterials, projectActions, saveToProject]);
+
   const defaultProjectName = chat.messages.find(m => m.role === 'user')?.content.slice(0, 60) ?? '';
   const hasConversation = chat.messages.length > 0;
   const showMaterialsButton = userId && chat.showMaterialsBanner && !savedProjectId;
@@ -170,6 +238,24 @@ export default function LandingQuickChat({
 
   return (
     <div className="space-y-4">
+      {/* Inventory detection toast */}
+      {chat.inventoryNotification && (
+        <div className="flex items-start gap-2 bg-forest-green/20 border border-forest-green/30 text-earth-cream rounded-lg px-3 py-2.5 text-sm">
+          <Package className="w-4 h-4 flex-shrink-0 mt-0.5 text-forest-green" />
+          <span className="flex-1">
+            {chat.inventoryNotification.added.length > 0 && (
+              <>Added to inventory: {chat.inventoryNotification.added.join(', ')}. </>
+            )}
+            {chat.inventoryNotification.existing.length > 0 && (
+              <>Already tracked: {chat.inventoryNotification.existing.join(', ')}.</>
+            )}
+          </span>
+          <button onClick={() => chat.setInventoryNotification(null)} className="flex-shrink-0 p-0.5 rounded hover:bg-white/10" aria-label="Dismiss">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* Messages */}
       <div ref={scrollRef} className="max-h-[60vh] overflow-y-auto space-y-3">
         {chat.messages.map((msg, idx) => (
@@ -184,7 +270,7 @@ export default function LandingQuickChat({
               >
                 {msg.role === 'assistant' ? (
                   <div className="prose prose-sm prose-invert max-w-none">
-                    <ReactMarkdown>{msg.content.replace(/---PLANNING_READY---/g, '')}</ReactMarkdown>
+                    <ReactMarkdown components={mdComponents}>{msg.content.replace(/---PLANNING_READY---/g, '')}</ReactMarkdown>
                   </div>
                 ) : (
                   <p>{msg.content}</p>
@@ -216,6 +302,11 @@ export default function LandingQuickChat({
                     )}
                   </Button>
                 )}
+                {showMaterialsButton && (
+                  <ContextualHint hintKey="materials">
+                    Save these to a project to track purchases and search local store prices
+                  </ContextualHint>
+                )}
                 {userId && !savedProjectId && !showMaterialsButton && hasConversation && (
                   <Button
                     variant="ghost"
@@ -236,12 +327,19 @@ export default function LandingQuickChat({
           </div>
         ))}
 
+        {/* Expert upsell for guests after 3+ messages */}
+        {!userId && (
+          <GuestExpertCallout
+            messageCount={chat.messages.filter(m => m.role === 'assistant').length}
+          />
+        )}
+
         {/* Streaming content */}
         {chat.isStreaming && chat.streamingContent && (
           <div className="flex justify-start">
             <div className="max-w-[85%] bg-white/10 text-earth-cream rounded-2xl rounded-bl-md px-4 py-3">
               <div className="prose prose-sm prose-invert max-w-none">
-                <ReactMarkdown>{chat.streamingContent}</ReactMarkdown>
+                <ReactMarkdown components={mdComponents}>{chat.streamingContent}</ReactMarkdown>
               </div>
             </div>
           </div>
@@ -314,6 +412,25 @@ export default function LandingQuickChat({
           ))}
         </div>
       )}
+
+      {/* Materials save dialog */}
+      <SaveMaterialsDialog
+        showSaveDialog={chat.showSaveDialog}
+        showCreateProjectDialog={false}
+        showAuthPrompt={!userId && chat.showSaveDialog}
+        extractedMaterials={chat.extractedMaterials}
+        projects={projectActions.projects}
+        guestProjects={projectActions.guestProjects}
+        isGuestMode={projectActions.isGuestMode}
+        newProjectName={newProjectName}
+        onNewProjectNameChange={setNewProjectName}
+        onSaveToProject={saveToProject}
+        onCreateNewProjectAndSave={createNewProjectAndSave}
+        onConfirmCreateProject={createNewProjectAndSave}
+        onCloseSaveDialog={() => chat.setShowSaveDialog(false)}
+        onCloseCreateDialog={() => chat.setShowSaveDialog(false)}
+        onCloseAuthPrompt={() => chat.setShowSaveDialog(false)}
+      />
 
       {/* Save to Project modal */}
       {userId && (

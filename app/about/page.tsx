@@ -73,7 +73,7 @@ export default function AboutPage() {
                 Become an Expert
               </Button>
               <Link
-                href="/chat"
+                href="/"
                 className="bg-terracotta text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-terracotta-dark transition-colors"
               >
                 Get Started
@@ -141,7 +141,7 @@ export default function AboutPage() {
                   </li>
                 ))}
               </ul>
-              <Button variant="tertiary" size="lg" href="/chat" rightIcon={ArrowRight}>
+              <Button variant="tertiary" size="lg" href="/" rightIcon={ArrowRight}>
                 Start My Project
               </Button>
             </div>
@@ -319,7 +319,7 @@ export default function AboutPage() {
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-[var(--space-s)]">
                   <Link
-                    href="/chat"
+                    href="/"
                     className="inline-flex items-center gap-3 bg-white text-[#3E2723] px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#F5F0E6] transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
                   >
                     <span>Start My Project</span>
