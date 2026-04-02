@@ -52,6 +52,24 @@ export default function LandingHero({
         </div>
       )}
 
+      {/* Value bar — visible only in hero state */}
+      {!chatActive && (
+        <div className="flex justify-center gap-5 sm:gap-6 py-2.5 mb-[var(--space-m)] max-w-[520px] mx-auto border-t border-b border-white/[0.06] flex-wrap">
+          <span className="flex items-center gap-1.5 text-xs text-white/55 font-medium">
+            <span className="text-sm">🛒</span> Local store prices
+          </span>
+          <span className="flex items-center gap-1.5 text-xs text-white/55 font-medium">
+            <span className="text-sm">📋</span> Smart shopping lists
+          </span>
+          <span className="flex items-center gap-1.5 text-xs text-white/55 font-medium">
+            <span className="text-sm">🔧</span> Tool inventory
+          </span>
+          <span className="flex items-center gap-1.5 text-xs text-white/55 font-medium">
+            <span className="text-sm">🏠</span> Building codes
+          </span>
+        </div>
+      )}
+
       {/* Tab bar */}
       <div className="flex justify-center mb-[var(--space-m)]">
         <div className="inline-flex gap-1 bg-white/5 p-1 rounded-2xl">

@@ -168,17 +168,17 @@ export default function AppHeader({
             <div className="flex items-center gap-1 sm:gap-3">
               {user && (
                 <Button variant="ghost" size="sm" leftIcon={FolderOpen} iconSize={18} onClick={() => setShowProjects(true)} className={btnClass}>
-                  <span className="hidden sm:inline">Projects</span>
+                  <span className="text-xs sm:text-sm">Projects</span>
                 </Button>
               )}
               {user && (
                 <Button variant="ghost" size="sm" leftIcon={Package} iconSize={18} onClick={() => setShowInventory(true)} className={btnClass}>
-                  <span className="hidden sm:inline">My Tools</span>
+                  <span className="text-xs sm:text-sm">My Tools</span>
                 </Button>
               )}
               {user && (
                 <Button variant="ghost" size="sm" leftIcon={HelpCircle} iconSize={18} onClick={openQuestionsDrawer} className={btnClass}>
-                  <span className="hidden sm:inline">My Questions</span>
+                  <span className="text-xs sm:text-sm">My Questions</span>
                 </Button>
               )}
               {materialsCount && materialsCount > 0 && (
