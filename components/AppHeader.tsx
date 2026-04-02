@@ -50,6 +50,7 @@ export default function AppHeader({
   const [showQuestions, setShowQuestions] = useState(false);
   const [showShoppingList, setShowShoppingList] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [shoppingProjects, setShoppingProjects] = useState<Project[]>([]);
   const [myQuestions, setMyQuestions] = useState<QAQuestion[]>([]);
   const [questionsLoaded, setQuestionsLoaded] = useState(false);
   const { isExpert, expert, openQueueCount } = useExpertStatus();
@@ -75,6 +76,15 @@ export default function AppHeader({
     const params = new URLSearchParams(window.location.search);
     if (params.get('signIn') === 'true' && !user) setShowAuth(true);
   }, [user]);
+
+  // Load projects when shopping drawer opens without a selection
+  useEffect(() => {
+    if (showShoppingList && !selectedProject && user) {
+      supabase.from('projects').select('*').eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .then(({ data }) => { if (data) setShoppingProjects(data); });
+    }
+  }, [showShoppingList, selectedProject, user]);
 
   const openQuestionsDrawer = async () => {
     setShowQuestions(true);
@@ -147,7 +157,6 @@ export default function AppHeader({
         </div>
       )}
 
-      {/* Shopping list drawer */}
       {showShoppingList && (
         <div className="fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowShoppingList(false)} />
@@ -165,10 +174,27 @@ export default function AppHeader({
               {selectedProject ? (
                 <ShoppingListView project={selectedProject} isMobile={true} />
               ) : (
-                <div className="p-6 text-center text-earth-brown-light">
-                  <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                  <p className="font-medium">No project selected</p>
-                  <p className="text-sm mt-1">Select a project from <strong>Projects</strong> first, then open Shopping to see your materials list.</p>
+                <div className="p-4">
+                  <p className="text-sm text-earth-brown-light mb-3">Select a project to view its shopping list:</p>
+                  {shoppingProjects.length === 0 ? (
+                    <div className="text-center py-8 text-earth-brown-light">
+                      <ShoppingCart className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                      <p className="text-sm">No projects yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {shoppingProjects.map(p => (
+                        <button
+                          key={p.id}
+                          onClick={() => setSelectedProject(p)}
+                          className="w-full text-left px-3 py-2.5 rounded-lg border border-earth-sand/30 hover:border-forest-green/40 hover:bg-earth-cream/50 transition-colors"
+                        >
+                          <div className="text-sm font-medium text-foreground">{p.name}</div>
+                          {p.description && <div className="text-xs text-earth-brown-light mt-0.5 truncate">{p.description}</div>}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
