@@ -1,46 +1,55 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowUp, FolderPlus, ShoppingCart } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/lib/supabase';
+import { useChat } from '@/hooks/useChat';
+import { useAgentRun } from '@/hooks/useAgentRun';
 import Spinner from '@/components/ui/Spinner';
 import Button from '@/components/ui/Button';
 import SaveToProjectModal from '@/components/SaveToProjectModal';
-import { extractMaterialsData } from '@/components/ChatMessages';
-import type { ExtractedMaterials } from '@/types';
+import IntentSignal from '@/components/IntentSignal';
+import PlanningCTA from '@/components/PlanningCTA';
+import AgentProgress from '@/components/AgentProgress';
+import ReportView from '@/components/ReportView';
+import type { IntentType } from '@/lib/intelligence/types';
+import type { StartAgentRunRequest } from '@/lib/agents/types';
 
-const POPULAR_QUESTIONS = [
-  'Do I need a permit to finish my basement?',
-  'Can I mix PEX and copper pipe?',
-  'What size wire for a 20-amp circuit?',
-  'How to fix a leaky faucet',
-];
-
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
+interface SuggestionChip {
+  emoji: string;
+  text: string;
 }
 
-const MATERIALS_KEYWORDS = ["you'll need", "you will need", "materials list", "shopping list", "supplies needed", "materials needed", "items needed", "tools needed"];
+interface LandingQuickChatProps {
+  initialConversationId?: string;
+  onFirstMessage?: () => void;
+  onMaterialsDetected?: (count: number) => void;
+  suggestionChips?: SuggestionChip[];
+}
 
-export default function LandingQuickChat({ initialConversationId }: { initialConversationId?: string } = {}) {
+export default function LandingQuickChat({
+  initialConversationId,
+  onFirstMessage,
+  onMaterialsDetected,
+  suggestionChips,
+}: LandingQuickChatProps) {
   const [userId, setUserId] = useState<string | null>(null);
-  const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [streamingContent, setStreamingContent] = useState('');
-  const [conversationId, setConversationId] = useState<string | null>(initialConversationId ?? null);
-  const [error, setError] = useState<string | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
   const [showSaveModal, setShowSaveModal] = useState(false);
-  const [showMaterialsModal, setShowMaterialsModal] = useState(false);
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
-  const [extractedMaterials, setExtractedMaterials] = useState<ExtractedMaterials | null>(null);
-  const [isExtractingMaterials, setIsExtractingMaterials] = useState(false);
+  const [detectedIntent, setDetectedIntent] = useState<IntentType | null>(null);
+  const [isPlanning, setIsPlanning] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const hasSentFirstMessage = useRef(false);
 
+  const chat = useChat({
+    projectId: undefined,
+    conversationId: initialConversationId,
+  });
+
+  const agentRun = useAgentRun();
+
+  // Auth state
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUserId(session?.user?.id ?? null);
@@ -51,261 +60,195 @@ export default function LandingQuickChat({ initialConversationId }: { initialCon
     return () => subscription.unsubscribe();
   }, []);
 
+  // Clear stale chat/agent state on fresh mount (no explicit conversation to resume)
   useEffect(() => {
-    if (!initialConversationId) return;
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      const headers: Record<string, string> = {};
-      if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
-      try {
-        const res = await fetch(`/api/conversations/${initialConversationId}/messages`, { headers });
-        if (!res.ok) return;
-        const data = await res.json();
-        const msgs: Array<{ role: string; content: string }> = data.messages ?? data;
-        if (msgs.length > 0) setMessages(msgs as Message[]);
-      } catch {}
-    });
-  }, [initialConversationId]);
+    if (!initialConversationId) {
+      chat.handleNewChat();
+      agentRun.reset();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Auto-scroll to bottom when messages change
+  // Auto-scroll
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, streamingContent]);
+  }, [chat.messages, chat.streamingContent, agentRun.phases]);
 
-  const defaultProjectName = messages.find(m => m.role === 'user')?.content.slice(0, 60) ?? '';
-
-  // Check if the last assistant message likely has materials
-  const hasMaterialsInChat = useMemo(() => {
-    const lastAssistant = [...messages].reverse().find(m => m.role === 'assistant');
-    if (!lastAssistant) return false;
-    const lower = lastAssistant.content.toLowerCase();
-    return MATERIALS_KEYWORDS.some(kw => lower.includes(kw));
-  }, [messages]);
-
-  const storeSessionHandoff = (projectId: string) => {
-    if (conversationId) sessionStorage.setItem('diy-helper-conversation-id', conversationId);
-    if (messages.length > 0) sessionStorage.setItem('diy-helper-chat-messages', JSON.stringify(messages));
-    sessionStorage.setItem('diy-helper-project-id', projectId);
-  };
-
-  const handleSaved = (projectId: string) => {
-    setSavedProjectId(projectId);
-    storeSessionHandoff(projectId);
-  };
-
-  const handleMaterialsSaved = async (projectId: string) => {
-    setSavedProjectId(projectId);
-    storeSessionHandoff(projectId);
-
-    if (extractedMaterials && userId) {
-      const items = extractedMaterials.materials.map(mat => ({
-        project_id: projectId,
-        user_id: userId,
-        product_name: mat.name,
-        quantity: parseInt(mat.quantity) || 1,
-        category: mat.category || 'General',
-        price: mat.estimated_price ? parseFloat(mat.estimated_price.replace(/[^0-9.]/g, '')) || null : null,
-        required: mat.required !== false,
-      }));
-      await supabase.from('shopping_list_items').insert(items);
+  // Detect first message for hero morph
+  useEffect(() => {
+    if (chat.messages.length > 0 && !hasSentFirstMessage.current) {
+      hasSentFirstMessage.current = true;
+      onFirstMessage?.();
     }
-  };
+  }, [chat.messages.length, onFirstMessage]);
 
-  const handleSaveMaterials = useCallback(async () => {
-    if (isExtractingMaterials) return;
-
-    // Use already-extracted materials if available
-    if (extractedMaterials) {
-      setShowMaterialsModal(true);
-      return;
+  // Notify parent about extracted materials
+  useEffect(() => {
+    if (chat.extractedMaterials?.materials?.length) {
+      onMaterialsDetected?.(chat.extractedMaterials.materials.length);
     }
+  }, [chat.extractedMaterials, onMaterialsDetected]);
 
-    // Check for embedded JSON in the last assistant message
-    const lastAssistant = [...messages].reverse().find(m => m.role === 'assistant');
-    if (lastAssistant) {
-      const inline = extractMaterialsData(lastAssistant.content);
-      if (inline && inline.materials.length > 0) {
-        setExtractedMaterials(inline);
-        setShowMaterialsModal(true);
-        return;
-      }
+  // Detect planning ready marker in assistant messages
+  useEffect(() => {
+    if (!isPlanning) return;
+    const lastAssistant = [...chat.messages].reverse().find(m => m.role === 'assistant');
+    if (lastAssistant?.content.includes('---PLANNING_READY---')) {
+      triggerAgentPipeline();
     }
+  }, [chat.messages, isPlanning]);
 
-    // Fall back to the extract API
-    setIsExtractingMaterials(true);
-    try {
-      const session = (await supabase.auth.getSession()).data.session;
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+  const triggerAgentPipeline = useCallback(async () => {
+    if (agentRun.isRunning) return;
 
-      const res = await fetch('/api/extract-materials', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          conversationContext: messages.map(m => ({ role: m.role, content: m.content })),
-        }),
-      });
+    const allContent = chat.messages.map(m => m.content).join('\n');
+    const cityMatch = allContent.match(/(?:in|near|from)\s+([A-Z][a-z]+(?:\s[A-Z][a-z]+)?),?\s*([A-Z]{2})/);
+    const projectDesc = chat.messages.find(m => m.role === 'user')?.content || 'DIY Project';
+    const budgetMatch = allContent.toLowerCase().match(/\b(budget|mid-range|premium)\b/);
+    const expMatch = allContent.toLowerCase().match(/\b(beginner|intermediate|advanced)\b/);
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.materials?.length > 0) {
-          setExtractedMaterials(data);
-          setShowMaterialsModal(true);
-        } else {
-          setError('No materials list found in this conversation.');
-        }
-      } else {
-        setError('Could not extract materials. Please try again.');
-      }
-    } catch {
-      setError('Could not extract materials. Please try again.');
-    } finally {
-      setIsExtractingMaterials(false);
-    }
-  }, [isExtractingMaterials, extractedMaterials, messages]);
+    const request: StartAgentRunRequest = {
+      projectDescription: projectDesc.slice(0, 500),
+      city: cityMatch?.[1] || '',
+      state: cityMatch?.[2] || '',
+      budgetLevel: (budgetMatch?.[1] as 'budget' | 'mid-range' | 'premium') || 'mid-range',
+      experienceLevel: (expMatch?.[1] as 'beginner' | 'intermediate' | 'advanced') || 'intermediate',
+    };
 
-  const handleSend = useCallback(async (text?: string) => {
-    const message = (text || input).trim();
-    if (!message || isStreaming) return;
+    await agentRun.startRun(request);
+  }, [chat.messages, agentRun]);
 
-    setInput('');
-    setError(null);
-    setExtractedMaterials(null);
-    setMessages(prev => [...prev, { role: 'user', content: message }]);
-    setIsStreaming(true);
-    setStreamingContent('');
+  const handleStartPlanning = useCallback(() => {
+    setIsPlanning(true);
+    chat.sendMessageWithContent("Yes, let's create a full project plan!");
+  }, [chat]);
 
-    try {
-      let authHeaders: Record<string, string> = {};
-      try {
-        const session = (await supabase.auth.getSession()).data.session;
-        if (session?.access_token) {
-          authHeaders = { Authorization: `Bearer ${session.access_token}` };
-        }
-      } catch {
-        // Unauthenticated is fine
-      }
+  const handleSend = useCallback(() => {
+    chat.sendMessage();
+  }, [chat]);
 
-      abortRef.current = new AbortController();
+  const handleChipClick = useCallback((text: string) => {
+    chat.sendMessageWithContent(text);
+  }, [chat]);
 
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...authHeaders },
-        body: JSON.stringify({
-          message,
-          history: messages.map(m => ({ role: m.role, content: m.content })),
-          streaming: true,
-        }),
-        signal: abortRef.current.signal,
-      });
+  const defaultProjectName = chat.messages.find(m => m.role === 'user')?.content.slice(0, 60) ?? '';
+  const hasConversation = chat.messages.length > 0;
+  const showMaterialsButton = userId && chat.showMaterialsBanner && !savedProjectId;
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error || 'Something went wrong. Please try again.');
-        setIsStreaming(false);
-        return;
-      }
+  // Agent pipeline: show report when complete (only if we have a conversation)
+  if (agentRun.report && hasConversation) {
+    return (
+      <div className="space-y-4">
+        <ReportView
+          report={agentRun.report}
+          onBack={() => agentRun.reset()}
+          reportId={agentRun.reportId || undefined}
+          isAuthenticated={!!userId}
+        />
+      </div>
+    );
+  }
 
-      const reader = res.body?.getReader();
-      if (!reader) {
-        setError('Unable to read response.');
-        setIsStreaming(false);
-        return;
-      }
-
-      const decoder = new TextDecoder();
-      let accumulated = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          try {
-            const event = JSON.parse(line.slice(6));
-            switch (event.type) {
-              case 'text':
-                accumulated += event.content;
-                setStreamingContent(accumulated);
-                break;
-              case 'error':
-                setError(event.content || 'An error occurred.');
-                break;
-              case 'done':
-                if (event.conversationId) {
-                  setConversationId(event.conversationId);
-                }
-                break;
-            }
-          } catch {
-            // Ignore parse errors
-          }
-        }
-      }
-
-      if (accumulated) {
-        setMessages(prev => [...prev, { role: 'assistant', content: accumulated }]);
-        // Auto-detect embedded materials JSON
-        const inline = extractMaterialsData(accumulated);
-        if (inline && inline.materials.length > 0) {
-          setExtractedMaterials(inline);
-        }
-      }
-    } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') return;
-      setError('Something went wrong. Please try again.');
-    } finally {
-      setIsStreaming(false);
-      setStreamingContent('');
-    }
-  }, [input, isStreaming, messages, conversationId]);
-
-  const hasConversation = messages.length > 0;
-  const showMaterialsButton = userId && hasMaterialsInChat && !savedProjectId;
-  const showSaveButton = userId && !showMaterialsButton && !savedProjectId;
+  // Agent pipeline: show progress when actively running
+  if (agentRun.isRunning) {
+    return (
+      <div className="space-y-4">
+        <AgentProgress
+          phases={agentRun.phases}
+          overallProgress={agentRun.overallProgress}
+          projectDescription={chat.messages.find(m => m.role === 'user')?.content || ''}
+          location=""
+          error={agentRun.error}
+          onCancel={() => agentRun.cancel()}
+          onRetry={agentRun.runId ? () => agentRun.retryRun(agentRun.runId!) : undefined}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
       {/* Messages */}
       <div ref={scrollRef} className="max-h-[60vh] overflow-y-auto space-y-3">
-        {messages.map((msg, idx) => (
-          <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div
-              className={`max-w-[85%] ${
-                msg.role === 'user'
-                  ? 'bg-terracotta text-white rounded-2xl rounded-br-md px-4 py-2.5'
-                  : 'bg-white/10 text-earth-cream rounded-2xl rounded-bl-md px-4 py-3'
-              }`}
-            >
-              {msg.role === 'assistant' ? (
-                <div className="prose prose-sm prose-invert max-w-none">
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
-                </div>
-              ) : (
-                <p>{msg.content}</p>
-              )}
+        {chat.messages.map((msg, idx) => (
+          <div key={idx}>
+            <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div
+                className={`max-w-[85%] ${
+                  msg.role === 'user'
+                    ? 'bg-terracotta text-white rounded-2xl rounded-br-md px-4 py-2.5'
+                    : 'bg-white/10 text-earth-cream rounded-2xl rounded-bl-md px-4 py-3'
+                }`}
+              >
+                {msg.role === 'assistant' ? (
+                  <div className="prose prose-sm prose-invert max-w-none">
+                    <ReactMarkdown>{msg.content.replace(/---PLANNING_READY---/g, '')}</ReactMarkdown>
+                  </div>
+                ) : (
+                  <p>{msg.content}</p>
+                )}
+              </div>
             </div>
+
+            {/* Intent micro-signal after first assistant message */}
+            {msg.role === 'assistant' && idx === 1 && detectedIntent && (
+              <IntentSignal intent={detectedIntent} />
+            )}
+
+            {/* Action buttons after last assistant message */}
+            {msg.role === 'assistant' && idx === chat.messages.length - 1 && !chat.isLoading && (
+              <div className="flex items-center gap-2 mt-2 ml-1 flex-wrap">
+                {showMaterialsButton && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    leftIcon={ShoppingCart}
+                    iconSize={16}
+                    onClick={chat.handleAutoExtractMaterials}
+                    disabled={chat.isAutoExtracting}
+                  >
+                    {chat.isAutoExtracting ? (
+                      <span className="flex items-center gap-2"><Spinner size="sm" /> Extracting...</span>
+                    ) : (
+                      'Save Materials'
+                    )}
+                  </Button>
+                )}
+                {userId && !savedProjectId && !showMaterialsButton && hasConversation && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    leftIcon={FolderPlus}
+                    iconSize={16}
+                    onClick={() => setShowSaveModal(true)}
+                    className="bg-white/8 text-white/70 hover:text-white hover:bg-white/15 border border-white/10"
+                  >
+                    Save to Project
+                  </Button>
+                )}
+                {detectedIntent === 'full_project' && !isPlanning && (
+                  <PlanningCTA onStartPlanning={handleStartPlanning} isPlanning={isPlanning} />
+                )}
+              </div>
+            )}
           </div>
         ))}
 
         {/* Streaming content */}
-        {isStreaming && streamingContent && (
+        {chat.isStreaming && chat.streamingContent && (
           <div className="flex justify-start">
             <div className="max-w-[85%] bg-white/10 text-earth-cream rounded-2xl rounded-bl-md px-4 py-3">
               <div className="prose prose-sm prose-invert max-w-none">
-                <ReactMarkdown>{streamingContent}</ReactMarkdown>
+                <ReactMarkdown>{chat.streamingContent}</ReactMarkdown>
               </div>
             </div>
           </div>
         )}
 
         {/* Loading spinner */}
-        {isStreaming && !streamingContent && (
+        {chat.isLoading && !chat.streamingContent && (
           <div className="flex justify-start">
             <div className="bg-white/10 rounded-2xl rounded-bl-md px-4 py-3">
               <Spinner size="sm" />
@@ -315,87 +258,38 @@ export default function LandingQuickChat({ initialConversationId }: { initialCon
       </div>
 
       {/* Error */}
-      {error && (
+      {chat.failedMessage && (
         <div className="bg-red-900/30 border border-red-500/30 text-red-200 rounded-lg p-3 text-sm">
-          {error}
-          <button onClick={() => setError(null)} className="ml-2 underline">
-            Dismiss
+          Failed to send message.
+          <button onClick={chat.handleRetry} className="ml-2 underline">
+            Retry
           </button>
         </div>
-      )}
-
-      {/* Actions */}
-      {hasConversation && !isStreaming && (
-        <div className="flex items-center gap-3 flex-wrap">
-          {showMaterialsButton && (
-            <Button
-              variant="primary"
-              size="sm"
-              leftIcon={isExtractingMaterials ? undefined : ShoppingCart}
-              iconSize={16}
-              onClick={handleSaveMaterials}
-              disabled={isExtractingMaterials}
-            >
-              {isExtractingMaterials ? (
-                <span className="flex items-center gap-2"><Spinner size="sm" /> Extracting...</span>
-              ) : (
-                'Save Materials'
-              )}
-            </Button>
-          )}
-          {showSaveButton && (
-            <Button variant="primary" size="sm" leftIcon={FolderPlus} iconSize={16} onClick={() => setShowSaveModal(true)}>
-              Save to Project
-            </Button>
-          )}
-        </div>
-      )}
-
-      {/* Save to Project modal (no materials) */}
-      {userId && (
-        <SaveToProjectModal
-          isOpen={showSaveModal}
-          onClose={() => setShowSaveModal(false)}
-          userId={userId}
-          defaultName={defaultProjectName}
-          onSaved={handleSaved}
-        />
-      )}
-
-      {/* Save Materials modal */}
-      {userId && (
-        <SaveToProjectModal
-          isOpen={showMaterialsModal}
-          onClose={() => setShowMaterialsModal(false)}
-          userId={userId}
-          defaultName={extractedMaterials?.project_description || defaultProjectName}
-          onSaved={handleMaterialsSaved}
-        />
       )}
 
       {/* Input area */}
       <div className="bg-white/10 rounded-2xl p-4">
         <textarea
-          value={input}
-          onChange={e => setInput(e.target.value)}
+          value={chat.input}
+          onChange={e => chat.setInput(e.target.value)}
           onKeyDown={e => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
               handleSend();
             }
           }}
-          placeholder={hasConversation ? 'Ask a follow-up...' : 'Ask a quick DIY question...'}
+          placeholder={hasConversation ? 'Ask a follow-up...' : 'Describe your project or ask a question...'}
           className="w-full bg-transparent text-earth-cream placeholder-earth-cream/40 text-base resize-none focus:outline-none disabled:opacity-50"
-          disabled={isStreaming}
+          disabled={chat.isLoading}
           rows={2}
         />
         <div className="flex justify-end mt-2">
           <button
-            onClick={() => handleSend()}
-            disabled={isStreaming || !input.trim()}
+            onClick={handleSend}
+            disabled={chat.isLoading || !chat.input.trim()}
             aria-label="Send message"
             className={`p-2 rounded-xl transition-all ${
-              input.trim() && !isStreaming
+              chat.input.trim() && !chat.isLoading
                 ? 'bg-terracotta text-white hover:bg-terracotta-dark'
                 : 'text-white/30 cursor-not-allowed'
             }`}
@@ -405,22 +299,34 @@ export default function LandingQuickChat({ initialConversationId }: { initialCon
         </div>
       </div>
 
-      {/* Popular question chips */}
-      {!hasConversation && (
+      {/* Suggestion chips */}
+      {!hasConversation && suggestionChips && (
         <div className="grid grid-cols-2 gap-2">
-          {POPULAR_QUESTIONS.map((q, idx) => (
+          {suggestionChips.map((chip, idx) => (
             <button
               key={idx}
-              onClick={() => {
-                setInput(q);
-                handleSend(q);
-              }}
-              className="rounded-2xl bg-white/10 hover:bg-white/15 text-left transition-all p-4 text-earth-cream font-semibold text-sm leading-tight"
+              onClick={() => handleChipClick(chip.text)}
+              className="rounded-2xl bg-white/5 hover:bg-white/10 border border-white/8 text-left transition-all p-4 text-earth-cream font-semibold text-sm leading-tight"
             >
-              {q}
+              <span className="mr-1.5">{chip.emoji}</span>
+              {chip.text}
             </button>
           ))}
         </div>
+      )}
+
+      {/* Save to Project modal */}
+      {userId && (
+        <SaveToProjectModal
+          isOpen={showSaveModal}
+          onClose={() => setShowSaveModal(false)}
+          userId={userId}
+          defaultName={defaultProjectName}
+          onSaved={(projectId) => {
+            setSavedProjectId(projectId);
+            setShowSaveModal(false);
+          }}
+        />
       )}
     </div>
   );

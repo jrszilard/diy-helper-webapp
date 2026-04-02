@@ -24,6 +24,7 @@ export const ChatRequestSchema = z.object({
     base64: z.string().max(8_000_000, 'Image too large'),
     mediaType: z.enum(['image/jpeg', 'image/png', 'image/webp', 'image/gif']),
   }).optional(),
+  planningMode: z.boolean().optional(),
 });
 
 export const SearchStoresRequestSchema = z.object({

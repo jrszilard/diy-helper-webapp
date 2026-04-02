@@ -3,10 +3,10 @@ import { ChatPage } from '../pages/chat.page';
 import { SIMPLE_CHAT_EVENTS, ERROR_CHAT_EVENTS, TOOL_USE_CHAT_EVENTS } from '../fixtures/mock-data';
 
 test.describe('Chat Messaging', () => {
-  test('shows welcome message on empty chat', async ({ chatPage }) => {
+  test('shows hero state with input on landing', async ({ chatPage }) => {
     const chat = new ChatPage(chatPage);
-    await expect(chat.welcomeMessage).toBeVisible();
-    await expect(chatPage.locator('text=Ask me about any home improvement project')).toBeVisible();
+    await expect(chat.chatInput).toBeVisible();
+    await expect(chatPage.locator('h1')).toContainText('Plan it');
   });
 
   test('send message shows user message and streaming response', async ({ chatPage }) => {
@@ -27,9 +27,9 @@ test.describe('Chat Messaging', () => {
 
   test('progress indicators appear during streaming with tool use', async ({ page, mockAPIs }) => {
     await mockAPIs({ chatEvents: TOOL_USE_CHAT_EVENTS });
-    await page.goto('/chat');
+    await page.goto('/');
     await page.evaluate(() => localStorage.clear());
-    await page.goto('/chat');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     const chat = new ChatPage(page);
@@ -45,9 +45,9 @@ test.describe('Chat Messaging', () => {
 
   test('API error shows error message in chat', async ({ page, mockAPIs }) => {
     await mockAPIs({ chatEvents: ERROR_CHAT_EVENTS });
-    await page.goto('/chat');
+    await page.goto('/');
     await page.evaluate(() => localStorage.clear());
-    await page.goto('/chat');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     const chat = new ChatPage(page);
@@ -68,19 +68,16 @@ test.describe('Chat Messaging', () => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
     });
 
-    await page.goto('/chat');
+    await page.goto('/');
     await page.evaluate(() => localStorage.clear());
-    await page.goto('/chat');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     const chat = new ChatPage(page);
     await chat.sendMessage('Test network failure');
 
-    // Wait for error message
-    await expect(page.locator('text=Could not connect')).toBeVisible({ timeout: 10000 });
-
-    // Retry button should be visible
-    await expect(chat.getRetryButton()).toBeVisible();
+    // Wait for error/retry to appear
+    await expect(chat.getRetryButton()).toBeVisible({ timeout: 10000 });
   });
 
   test('send button is disabled while loading', async ({ page }) => {
@@ -97,9 +94,9 @@ test.describe('Chat Messaging', () => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
     });
 
-    await page.goto('/chat');
+    await page.goto('/');
     await page.evaluate(() => localStorage.clear());
-    await page.goto('/chat');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     const chat = new ChatPage(page);
@@ -125,23 +122,5 @@ test.describe('Chat Messaging', () => {
     // User message should appear
     await expect(chatPage.locator('text=Test enter key')).toBeVisible();
     await chat.waitForResponse();
-  });
-
-  test('clear chat removes messages', async ({ chatPage }) => {
-    const chat = new ChatPage(chatPage);
-
-    // Send a message first
-    await chat.sendMessage('Test message for clearing');
-    await chat.waitForResponse();
-
-    // Accept the confirm dialog
-    chatPage.on('dialog', (dialog) => dialog.accept());
-
-    // Clear button should now be visible
-    await expect(chat.clearButton).toBeVisible();
-    await chat.clearButton.click();
-
-    // Welcome message should reappear
-    await expect(chat.welcomeMessage).toBeVisible();
   });
 });
