@@ -13,6 +13,7 @@ import ProjectsSidebar from './ProjectsSidebar';
 import InventoryPanel from './InventoryPanel';
 import QAQuestionList from './marketplace/QAQuestionList';
 import ExpertQuickBar from './ExpertQuickBar';
+import ShoppingListView from './ShoppingListView';
 import type { QAQuestion } from '@/lib/marketplace/types';
 import type { Project } from '@/types';
 
@@ -47,6 +48,8 @@ export default function AppHeader({
   const [showProjects, setShowProjects] = useState(false);
   const [showInventory, setShowInventory] = useState(false);
   const [showQuestions, setShowQuestions] = useState(false);
+  const [showShoppingList, setShowShoppingList] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [myQuestions, setMyQuestions] = useState<QAQuestion[]>([]);
   const [questionsLoaded, setQuestionsLoaded] = useState(false);
   const { isExpert, expert, openQueueCount } = useExpertStatus();
@@ -89,6 +92,7 @@ export default function AppHeader({
   };
 
   const handleProjectSelect = (project: Project | null) => {
+    setSelectedProject(project);
     if (onProjectSelect) {
       onProjectSelect(project);
     } else if (project) {
@@ -143,6 +147,35 @@ export default function AppHeader({
         </div>
       )}
 
+      {/* Shopping list drawer */}
+      {showShoppingList && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setShowShoppingList(false)} />
+          <div className="absolute right-0 top-0 bottom-0 w-[90vw] max-w-lg bg-white shadow-xl animate-slide-in-right flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-earth-sand">
+              <h2 className="font-bold text-lg text-foreground flex items-center gap-2">
+                <ShoppingCart size={18} className="text-earth-brown" />
+                Shopping List
+              </h2>
+              <button onClick={() => setShowShoppingList(false)} className="p-2 hover:bg-earth-tan/30 rounded-lg transition-colors" aria-label="Close">
+                <X size={20} className="text-earth-brown" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {selectedProject ? (
+                <ShoppingListView project={selectedProject} isMobile={true} />
+              ) : (
+                <div className="p-6 text-center text-earth-brown-light">
+                  <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <p className="font-medium">No project selected</p>
+                  <p className="text-sm mt-1">Select a project from <strong>Projects</strong> first, then open Shopping to see your materials list.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Inventory panel */}
       {user && (
         <InventoryPanel userId={user.id} isOpen={showInventory} onClose={() => setShowInventory(false)} />
@@ -181,14 +214,16 @@ export default function AppHeader({
                   <span className="text-xs sm:text-sm">My Questions</span>
                 </Button>
               )}
-              {materialsCount && materialsCount > 0 && (
-                <span className={`${btnClass} relative flex items-center gap-1 px-2 py-1 text-sm`}>
+              {user && (
+                <button onClick={() => setShowShoppingList(true)} className={`${btnClass} relative flex items-center gap-1 px-2 py-1 text-sm rounded-lg hover:bg-white/10 transition-colors`}>
                   <ShoppingCart size={18} />
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-terracotta text-white text-[10px] rounded-full flex items-center justify-center font-bold">
-                    {materialsCount}
-                  </span>
-                  <span className="hidden sm:inline ml-1">Materials</span>
-                </span>
+                  {materialsCount && materialsCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-terracotta text-white text-[10px] rounded-full flex items-center justify-center font-bold">
+                      {materialsCount}
+                    </span>
+                  )}
+                  <span className="text-xs sm:text-sm ml-1">Shopping</span>
+                </button>
               )}
               <Button variant="ghost" size="sm" leftIcon={Users} iconSize={18} href="/experts" className={`${btnClass} hidden sm:inline-flex`}>
                 Find an Expert
