@@ -85,15 +85,15 @@ export default function LandingQuickChat({
     return () => subscription.unsubscribe();
   }, []);
 
-  // On mount: resume stored conversation or start fresh
+  // On mount: let useChat handle resume from localStorage.
+  // Only clear state if no explicit conversation and no stored conversation.
   useEffect(() => {
-    if (initialConversationId) return; // Explicit conversation passed — useChat handles it
+    if (initialConversationId) return;
     const storedConvId = localStorage.getItem('diy-helper-conversation-id');
-    if (storedConvId) {
-      chat.handleSelectConversation(storedConvId, []);
-    } else {
+    if (!storedConvId) {
       chat.handleNewChat();
     }
+    // useChat already loads stored messages + conversationId on mount
     agentRun.reset();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
