@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowUp, FolderPlus, ShoppingCart } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { sanitizeHref } from '@/lib/security';
 import { supabase } from '@/lib/supabase';
 import { useChat } from '@/hooks/useChat';
 import { useAgentRun } from '@/hooks/useAgentRun';
@@ -34,6 +35,25 @@ export default function LandingQuickChat({
   onMaterialsDetected,
   suggestionChips,
 }: LandingQuickChatProps) {
+  const mdComponents = {
+    p: ({ children }: { children?: React.ReactNode }) => <p className="mb-2 text-earth-cream">{children}</p>,
+    ul: ({ children }: { children?: React.ReactNode }) => <ul className="list-disc ml-4 mb-2 text-earth-cream">{children}</ul>,
+    ol: ({ children }: { children?: React.ReactNode }) => <ol className="list-decimal ml-4 mb-2 text-earth-cream">{children}</ol>,
+    li: ({ children }: { children?: React.ReactNode }) => <li className="text-earth-cream">{children}</li>,
+    h1: ({ children }: { children?: React.ReactNode }) => <h1 className="text-xl font-bold mb-2 text-earth-cream">{children}</h1>,
+    h2: ({ children }: { children?: React.ReactNode }) => <h2 className="text-lg font-bold mb-2 text-earth-cream">{children}</h2>,
+    h3: ({ children }: { children?: React.ReactNode }) => <h3 className="text-md font-bold mb-2 text-earth-cream">{children}</h3>,
+    strong: ({ children }: { children?: React.ReactNode }) => <strong className="font-bold text-earth-cream">{children}</strong>,
+    em: ({ children }: { children?: React.ReactNode }) => <em className="italic text-earth-sand">{children}</em>,
+    code: ({ children }: { children?: React.ReactNode }) => <code className="px-1 py-0.5 rounded text-sm bg-white/10 text-earth-cream">{children}</code>,
+    a: ({ children, href }: { children?: React.ReactNode; href?: string }) => (
+      <a href={sanitizeHref(href)} className="underline text-sky-300 hover:text-sky-200" target="_blank" rel="noopener noreferrer">{children}</a>
+    ),
+    blockquote: ({ children }: { children?: React.ReactNode }) => (
+      <blockquote className="border-l-4 border-terracotta pl-4 italic text-earth-sand">{children}</blockquote>
+    ),
+  };
+
   const [userId, setUserId] = useState<string | null>(null);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
@@ -184,7 +204,7 @@ export default function LandingQuickChat({
               >
                 {msg.role === 'assistant' ? (
                   <div className="prose prose-sm prose-invert max-w-none">
-                    <ReactMarkdown>{msg.content.replace(/---PLANNING_READY---/g, '')}</ReactMarkdown>
+                    <ReactMarkdown components={mdComponents}>{msg.content.replace(/---PLANNING_READY---/g, '')}</ReactMarkdown>
                   </div>
                 ) : (
                   <p>{msg.content}</p>
@@ -241,7 +261,7 @@ export default function LandingQuickChat({
           <div className="flex justify-start">
             <div className="max-w-[85%] bg-white/10 text-earth-cream rounded-2xl rounded-bl-md px-4 py-3">
               <div className="prose prose-sm prose-invert max-w-none">
-                <ReactMarkdown>{chat.streamingContent}</ReactMarkdown>
+                <ReactMarkdown components={mdComponents}>{chat.streamingContent}</ReactMarkdown>
               </div>
             </div>
           </div>
