@@ -92,7 +92,7 @@ export default function AppHeader({
     if (onProjectSelect) {
       onProjectSelect(project);
     } else if (project) {
-      router.push('/chat');
+      router.push('/');
     }
     setShowProjects(false);
   };
