@@ -37,8 +37,8 @@ export default function ShoppingTripList({ projectId, projectName, onOpenCheckli
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-foreground">Shopping Trips</h3>
-          <p className="text-xs text-earth-brown-light">{projectName}</p>
+          <h3 className="text-sm font-semibold text-white">Shopping Trips</h3>
+          <p className="text-xs text-white/50">{projectName}</p>
         </div>
         <Button
           variant="primary"
@@ -53,7 +53,7 @@ export default function ShoppingTripList({ projectId, projectName, onOpenCheckli
 
       {/* Create trip form */}
       {showCreate && (
-        <div className="bg-earth-tan/30 border border-earth-sand/30 rounded-lg p-3 space-y-2">
+        <div className="bg-white/5 border border-white/[0.06] rounded-lg p-3 space-y-2">
           <TextInput
             value={newTripName}
             onChange={(e) => setNewTripName(e.target.value)}
@@ -74,11 +74,11 @@ export default function ShoppingTripList({ projectId, projectName, onOpenCheckli
 
       {/* Trip cards */}
       {loading && trips.length === 0 && (
-        <div className="text-sm text-earth-brown-light py-4 text-center">Loading trips...</div>
+        <div className="text-sm text-white/40 py-4 text-center">Loading trips...</div>
       )}
 
       {!loading && trips.length === 0 && !showCreate && (
-        <div className="text-sm text-earth-brown-light py-4 text-center">
+        <div className="text-sm text-white/40 py-4 text-center">
           No shopping trips yet. Create one to snapshot your current materials list.
         </div>
       )}
@@ -92,14 +92,14 @@ export default function ShoppingTripList({ projectId, projectName, onOpenCheckli
             key={trip.id}
             className={`border rounded-xl p-3.5 transition-colors ${
               isCompleted
-                ? 'bg-earth-tan/10 border-earth-sand/20 opacity-70'
-                : 'bg-white border-earth-sand/30 hover:border-forest-green/30'
+                ? 'bg-white/5 border-white/[0.06] opacity-70'
+                : 'bg-white/10 border-white/[0.06] hover:border-forest-green/30'
             }`}
           >
             <div className="flex justify-between items-start">
               <div>
-                <div className="text-sm font-semibold text-foreground">{trip.name}</div>
-                <div className="text-xs text-earth-brown-light mt-0.5">
+                <div className="text-sm font-semibold text-white">{trip.name}</div>
+                <div className="text-xs text-white/40 mt-0.5">
                   Created {new Date(trip.created_at).toLocaleDateString()}
                 </div>
               </div>
@@ -115,14 +115,14 @@ export default function ShoppingTripList({ projectId, projectName, onOpenCheckli
             {/* Progress bar */}
             <div className="mt-2.5">
               <div className="flex justify-between mb-1">
-                <span className="text-xs text-earth-brown-light">
+                <span className="text-xs text-white/40">
                   {trip.purchased_items} of {trip.total_items} items purchased
                 </span>
                 <span className={`text-xs font-semibold ${isCompleted ? 'text-forest-green' : 'text-terracotta'}`}>
                   {progress}%
                 </span>
               </div>
-              <div className="bg-earth-tan/40 rounded h-1.5 overflow-hidden">
+              <div className="bg-white/10 rounded h-1.5 overflow-hidden">
                 <div
                   className={`h-full rounded transition-all ${isCompleted ? 'bg-forest-green/60' : 'bg-forest-green'}`}
                   style={{ width: `${progress}%` }}
@@ -138,7 +138,7 @@ export default function ShoppingTripList({ projectId, projectName, onOpenCheckli
               <Button variant="ghost" size="xs" leftIcon={Printer} iconSize={14} onClick={() => onOpenChecklist(trip.id)}>
                 Print
               </Button>
-              <span className="text-xs text-earth-brown-light flex items-center ml-auto">
+              <span className="text-xs text-white/40 flex items-center ml-auto">
                 Est. ${trip.total_estimate.toFixed(0)}
               </span>
               <Button variant="ghost" size="xs" leftIcon={Trash2} iconSize={14} onClick={() => deleteTrip(trip.id)} className="text-rust hover:text-rust">

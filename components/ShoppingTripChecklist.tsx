@@ -93,7 +93,7 @@ export default function ShoppingTripChecklist({ tripId, onBack }: ShoppingTripCh
   };
 
   if (loading && !activeTrip) {
-    return <div className="text-sm text-earth-brown-light py-8 text-center">Loading checklist...</div>;
+    return <div className="text-sm text-white/40 py-8 text-center">Loading checklist...</div>;
   }
 
   if (!activeTrip) {
@@ -105,19 +105,19 @@ export default function ShoppingTripChecklist({ tripId, onBack }: ShoppingTripCh
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <button onClick={onBack} className="p-1 rounded hover:bg-earth-tan/30 transition-colors">
-            <ArrowLeft className="w-4 h-4 text-earth-brown" />
+          <button onClick={onBack} className="p-1 rounded hover:bg-white/10 transition-colors">
+            <ArrowLeft className="w-4 h-4 text-white/60" />
           </button>
           <div>
-            <h3 className="text-sm font-semibold text-foreground">{activeTrip.trip.name}</h3>
-            <p className="text-xs text-earth-brown-light">
+            <h3 className="text-sm font-semibold text-white">{activeTrip.trip.name}</h3>
+            <p className="text-xs text-white/50">
               {purchasedCount} of {totalItems} purchased · Est. ${remainingTotal.toFixed(0)} remaining
             </p>
           </div>
         </div>
         <div className="flex gap-1">
-          <button onClick={handlePrint} className="p-1.5 rounded hover:bg-earth-tan/30 transition-colors" title="Print">
-            <Printer className="w-4 h-4 text-earth-brown-light" />
+          <button onClick={handlePrint} className="p-1.5 rounded hover:bg-white/10 transition-colors" title="Print">
+            <Printer className="w-4 h-4 text-white/50" />
           </button>
         </div>
       </div>
@@ -125,29 +125,29 @@ export default function ShoppingTripChecklist({ tripId, onBack }: ShoppingTripCh
       {/* Items grouped by category */}
       {Object.entries(grouped).map(([category, items]) => (
         <div key={category}>
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-earth-brown-light pb-1.5 mb-2 border-b border-earth-sand/30">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-white/40 pb-1.5 mb-2 border-b border-white/[0.06]">
             {category}
           </div>
           {items.map(item => (
             <button
               key={item.id}
               onClick={() => handleToggle(item.id, item.purchased)}
-              className="flex items-center gap-3 w-full text-left py-2.5 border-b border-earth-tan/20 transition-colors hover:bg-earth-tan/10 -mx-1 px-1 rounded"
+              className="flex items-center gap-3 w-full text-left py-2.5 border-b border-white/[0.06] transition-colors hover:bg-white/5 -mx-1 px-1 rounded"
             >
               <div className={`w-5 h-5 rounded-md flex-shrink-0 flex items-center justify-center transition-colors ${
                 item.purchased
                   ? 'bg-forest-green'
-                  : 'border-2 border-earth-sand'
+                  : 'border-2 border-white/30'
               }`}>
                 {item.purchased && <Check className="w-3 h-3 text-white" />}
               </div>
               <div className={`flex-1 min-w-0 ${item.purchased ? 'line-through opacity-40' : ''}`}>
-                <div className="text-sm text-foreground truncate">{item.product_name}</div>
+                <div className="text-sm text-white truncate">{item.product_name}</div>
                 {item.quantity > 1 && (
-                  <div className="text-xs text-earth-brown-light">Qty: {item.quantity}</div>
+                  <div className="text-xs text-white/40">Qty: {item.quantity}</div>
                 )}
               </div>
-              <div className={`text-sm flex-shrink-0 ${item.purchased ? 'text-earth-brown-light/40' : 'text-earth-brown'}`}>
+              <div className={`text-sm flex-shrink-0 ${item.purchased ? 'text-white/20' : 'text-white/60'}`}>
                 {item.estimated_price ? `$${(item.estimated_price * item.quantity).toFixed(0)}` : '\u2014'}
               </div>
             </button>
@@ -156,14 +156,14 @@ export default function ShoppingTripChecklist({ tripId, onBack }: ShoppingTripCh
       ))}
 
       {/* Bottom summary */}
-      <div className="flex justify-between items-center pt-3 border-t border-earth-sand/40">
+      <div className="flex justify-between items-center pt-3 border-t border-white/[0.06]">
         <div>
-          <div className="text-xs text-earth-brown-light">Remaining</div>
+          <div className="text-xs text-white/40">Remaining</div>
           <div className="text-lg font-bold text-forest-green">${remainingTotal.toFixed(2)}</div>
         </div>
         <div className="text-right">
-          <div className="text-xs text-earth-brown-light">Spent</div>
-          <div className="text-lg font-bold text-earth-brown-light">${spentTotal.toFixed(2)}</div>
+          <div className="text-xs text-white/40">Spent</div>
+          <div className="text-lg font-bold text-white/30">${spentTotal.toFixed(2)}</div>
         </div>
       </div>
     </div>

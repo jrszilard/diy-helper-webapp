@@ -185,6 +185,8 @@ export default function LandingQuickChat({
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       console.error('Error saving materials:', message);
+      chat.setMessages(prev => [...prev, { role: 'assistant', content: `Failed to save materials: ${message}. Please try again.` }]);
+      chat.setShowSaveDialog(false);
     }
   }, [chat, projectActions]);
 

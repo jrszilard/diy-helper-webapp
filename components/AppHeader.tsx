@@ -160,14 +160,14 @@ export default function AppHeader({
       {showShoppingList && (
         <div className="fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowShoppingList(false)} />
-          <div className="absolute right-0 top-0 bottom-0 w-[90vw] max-w-lg bg-white shadow-xl animate-slide-in-right flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-earth-sand">
-              <h2 className="font-bold text-lg text-foreground flex items-center gap-2">
-                <ShoppingCart size={18} className="text-earth-brown" />
+          <div className="absolute right-0 top-0 bottom-0 w-[90vw] max-w-lg bg-[var(--earth-brown-dark)] shadow-xl animate-slide-in-right flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-[var(--blueprint-grid-major)]">
+              <h2 className="font-bold text-lg text-white flex items-center gap-2">
+                <ShoppingCart size={18} className="text-white/50" />
                 Shopping List
               </h2>
-              <button onClick={() => setShowShoppingList(false)} className="p-2 hover:bg-earth-tan/30 rounded-lg transition-colors" aria-label="Close">
-                <X size={20} className="text-earth-brown" />
+              <button onClick={() => setShowShoppingList(false)} className="p-2 hover:bg-white/10 rounded-lg transition-colors text-[var(--earth-sand)]" aria-label="Close">
+                <X size={20} />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto">
@@ -175,9 +175,9 @@ export default function AppHeader({
                 <ShoppingListView project={selectedProject} isMobile={true} />
               ) : (
                 <div className="p-4">
-                  <p className="text-sm text-earth-brown-light mb-3">Select a project to view its shopping list:</p>
+                  <p className="text-sm text-white/60 mb-3">Select a project to view its shopping list:</p>
                   {shoppingProjects.length === 0 ? (
-                    <div className="text-center py-8 text-earth-brown-light">
+                    <div className="text-center py-8 text-white/40">
                       <ShoppingCart className="w-10 h-10 mx-auto mb-2 opacity-30" />
                       <p className="text-sm">No projects yet</p>
                     </div>
@@ -187,10 +187,10 @@ export default function AppHeader({
                         <button
                           key={p.id}
                           onClick={() => setSelectedProject(p)}
-                          className="w-full text-left px-3 py-2.5 rounded-lg border border-earth-sand/30 hover:border-forest-green/40 hover:bg-earth-cream/50 transition-colors"
+                          className="w-full text-left px-3 py-2.5 rounded-lg border border-white/[0.06] hover:border-forest-green/40 hover:bg-white/10 transition-colors"
                         >
-                          <div className="text-sm font-medium text-foreground">{p.name}</div>
-                          {p.description && <div className="text-xs text-earth-brown-light mt-0.5 truncate">{p.description}</div>}
+                          <div className="text-sm font-medium text-white">{p.name}</div>
+                          {p.description && <div className="text-xs text-white/50 mt-0.5 truncate">{p.description}</div>}
                         </button>
                       ))}
                     </div>

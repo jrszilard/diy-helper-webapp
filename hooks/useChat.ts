@@ -68,7 +68,13 @@ const hasMaterialsContent = (content: string): boolean => {
     lowerContent.includes('you will need') ||
     lowerContent.includes('materials needed') ||
     lowerContent.includes('supplies needed') ||
-    lowerContent.includes('required materials')
+    lowerContent.includes('required materials') ||
+    lowerContent.includes('cost estimate') ||
+    lowerContent.includes('estimated cost') ||
+    lowerContent.includes('here\'s what you\'re looking at') ||
+    lowerContent.includes('total diy cost') ||
+    // Detect pricing tables: 3+ dollar amounts means a cost breakdown was given
+    (lowerContent.match(/\$\d+/g)?.length ?? 0) >= 3
   );
 };
 
