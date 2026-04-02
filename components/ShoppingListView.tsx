@@ -23,6 +23,8 @@ import MaterialsExport from './MaterialsExport';
 import { ShoppingSearchSkeleton } from './SkeletonLoader';
 import TextInput from '@/components/ui/TextInput';
 import ContextualHint from '@/components/ui/ContextualHint';
+import ShoppingTripList from './ShoppingTripList';
+import ShoppingTripChecklist from './ShoppingTripChecklist';
 import { useStoreSearch } from '@/hooks/useStoreSearch';
 import type { StoreResult } from '@/hooks/useStoreSearch';
 
@@ -59,6 +61,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editQuantity, setEditQuantity] = useState<number>(1);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [activeTripId, setActiveTripId] = useState<string | null>(null);
 
   const storeSearch = useStoreSearch();
   const [priceSyncNotification, setPriceSyncNotification] = useState<string | null>(null);
@@ -256,7 +259,26 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
         Create a shopping checklist to take to the store — your progress is saved
       </ContextualHint>
 
-      {!isMobile && (
+      {/* Shopping Trips — only for authenticated projects */}
+      {project && !isGuestProject && !activeTripId && (
+        <div className="mb-6 pb-4 border-b border-earth-sand/30">
+          <ShoppingTripList
+            projectId={project.id}
+            projectName={project.name}
+            onOpenChecklist={(tripId) => setActiveTripId(tripId)}
+          />
+        </div>
+      )}
+
+      {/* Active trip checklist view — replaces the item list */}
+      {activeTripId && (
+        <ShoppingTripChecklist
+          tripId={activeTripId}
+          onBack={() => setActiveTripId(null)}
+        />
+      )}
+
+      {!activeTripId && !isMobile && (
         <div className="mb-6">
           <div className="flex items-start justify-between">
             <div>
@@ -282,13 +304,13 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
         </div>
       )}
 
-      {items.length === 0 ? (
+      {!activeTripId && items.length === 0 ? (
         <div className={`text-center ${isMobile ? 'py-16' : 'py-12'}`}>
           <ShoppingCart className={`${isMobile ? 'w-16 h-16' : 'w-12 h-12'} mx-auto mb-3 opacity-50 text-earth-sand`} />
           <p className={`text-earth-brown ${isMobile ? 'text-lg' : ''}`}>No items yet</p>
           <p className={`${isMobile ? 'text-base' : 'text-sm'} mt-1 text-earth-brown-light`}>Products will appear here automatically</p>
         </div>
-      ) : (
+      ) : !activeTripId ? (
         <div>
           {/* Progress bar */}
           <div className="mb-4">
@@ -473,7 +495,7 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
             )}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
