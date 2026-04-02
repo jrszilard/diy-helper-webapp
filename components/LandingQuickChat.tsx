@@ -60,6 +60,15 @@ export default function LandingQuickChat({
     return () => subscription.unsubscribe();
   }, []);
 
+  // Clear stale chat/agent state on fresh mount (no explicit conversation to resume)
+  useEffect(() => {
+    if (!initialConversationId) {
+      chat.handleNewChat();
+      agentRun.reset();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Auto-scroll
   useEffect(() => {
     if (scrollRef.current) {
@@ -128,8 +137,8 @@ export default function LandingQuickChat({
   const hasConversation = chat.messages.length > 0;
   const showMaterialsButton = userId && chat.showMaterialsBanner && !savedProjectId;
 
-  // Agent pipeline: show report when complete
-  if (agentRun.report) {
+  // Agent pipeline: show report when complete (only if we have a conversation)
+  if (agentRun.report && hasConversation) {
     return (
       <div className="space-y-4">
         <ReportView
@@ -142,8 +151,8 @@ export default function LandingQuickChat({
     );
   }
 
-  // Agent pipeline: show progress when running
-  if (agentRun.isRunning || agentRun.phases.length > 0) {
+  // Agent pipeline: show progress when actively running
+  if (agentRun.isRunning) {
     return (
       <div className="space-y-4">
         <AgentProgress
