@@ -102,7 +102,7 @@ export default function SaveToProjectModal({
             </ContextualHint>
           </div>
           <div className="flex gap-2 justify-center">
-            <Button variant="primary" href="/chat" rightIcon={ArrowRight} iconSize={16}>
+            <Button variant="primary" href="/" rightIcon={ArrowRight} iconSize={16}>
               Open in chat
             </Button>
             <Button variant="ghost" onClick={onClose}>Done</Button>

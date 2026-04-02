@@ -231,7 +231,7 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
                   </label>
                   {projectsLoaded && projects.length === 0 ? (
                     <p className="text-xs text-white/40 italic">
-                      No projects yet. <Link href="/chat" className="text-slate-blue hover:underline">Start a project</Link> first to share details with an expert.
+                      No projects yet. <Link href="/" className="text-slate-blue hover:underline">Start a project</Link> first to share details with an expert.
                     </p>
                   ) : (
                     <Select

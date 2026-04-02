@@ -102,7 +102,7 @@ export default function ProfilePage() {
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Back link */}
         <Link
-          href="/chat"
+          href="/"
           className="inline-flex items-center gap-1.5 text-sm text-[var(--earth-sand)] hover:text-white mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />

@@ -289,7 +289,7 @@ export default function ReportView({
             </div>
             <div className="flex items-center gap-2">
               <a
-                href="/chat"
+                href="/"
                 className="flex items-center gap-2 px-4 py-2 bg-terracotta text-white text-sm font-semibold rounded-lg hover:bg-terracotta-dark transition-colors whitespace-nowrap"
               >
                 <LogIn size={16} />

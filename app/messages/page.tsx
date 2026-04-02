@@ -99,7 +99,7 @@ export default function DIYerMessagesPage() {
       <DIYerHeader />
       <div className="max-w-4xl mx-auto px-4 py-6">
         <div className="flex items-center gap-3 mb-6">
-          <Button variant="ghost" href="/chat" leftIcon={ArrowLeft} size="sm" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10" />
+          <Button variant="ghost" href="/" leftIcon={ArrowLeft} size="sm" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10" />
           <h2 className="text-2xl font-bold text-white">My Messages</h2>
         </div>
 

@@ -237,7 +237,7 @@ export default function DesignSystemPage() {
           </Row>
           <Row label="Right icon">
             <Button variant="primary" rightIcon={ArrowRight}>Get Started</Button>
-            <Button variant="tertiary" rightIcon={ArrowRight} href="/chat">Open Chat</Button>
+            <Button variant="tertiary" rightIcon={ArrowRight} href="/">Open Chat</Button>
           </Row>
           <Row label="As link (href)">
             <Button variant="primary" href="/" rightIcon={ArrowRight}>Go Home</Button>
