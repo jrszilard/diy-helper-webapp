@@ -15,6 +15,8 @@ import PlanningCTA from '@/components/PlanningCTA';
 import AgentProgress from '@/components/AgentProgress';
 import ReportView from '@/components/ReportView';
 import ContextualHint from '@/components/ui/ContextualHint';
+import SaveMaterialsDialog from '@/components/SaveMaterialsDialog';
+import { useProjectActions } from '@/hooks/useProjectActions';
 import type { IntentType } from '@/lib/intelligence/types';
 import type { StartAgentRunRequest } from '@/lib/agents/types';
 
@@ -69,6 +71,7 @@ export default function LandingQuickChat({
   });
 
   const agentRun = useAgentRun();
+  const projectActions = useProjectActions({ userId: userId ?? undefined });
 
   // Auth state
   useEffect(() => {
@@ -81,12 +84,16 @@ export default function LandingQuickChat({
     return () => subscription.unsubscribe();
   }, []);
 
-  // Clear stale chat/agent state on fresh mount (no explicit conversation to resume)
+  // On mount: resume stored conversation or start fresh
   useEffect(() => {
-    if (!initialConversationId) {
+    if (initialConversationId) return; // Explicit conversation passed — useChat handles it
+    const storedConvId = localStorage.getItem('diy-helper-conversation-id');
+    if (storedConvId) {
+      chat.handleSelectConversation(storedConvId, []);
+    } else {
       chat.handleNewChat();
-      agentRun.reset();
     }
+    agentRun.reset();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -153,6 +160,43 @@ export default function LandingQuickChat({
   const handleChipClick = useCallback((text: string) => {
     chat.sendMessageWithContent(text);
   }, [chat]);
+
+  const [newProjectName, setNewProjectName] = useState('');
+
+  const saveToProject = useCallback(async (targetProjectId: string, isGuestProject: boolean = false) => {
+    if (!chat.extractedMaterials) return;
+    try {
+      const count = await projectActions.saveMaterials(
+        targetProjectId,
+        chat.extractedMaterials.materials,
+        isGuestProject || projectActions.isGuestMode
+      );
+      if (count > 0) {
+        setSavedProjectId(targetProjectId);
+        chat.setShowSaveDialog(false);
+        chat.setExtractedMaterials(null);
+        let successMsg = `Saved ${count} items to your project!`;
+        if (chat.extractedMaterials.owned_items?.length) {
+          successMsg += ` (${chat.extractedMaterials.owned_items.length} items you already own were excluded)`;
+        }
+        chat.setMessages(prev => [...prev, { role: 'assistant', content: successMsg }]);
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      console.error('Error saving materials:', message);
+    }
+  }, [chat, projectActions]);
+
+  const createNewProjectAndSave = useCallback(async () => {
+    if (!chat.extractedMaterials) return;
+    const project = await projectActions.createProject(
+      chat.extractedMaterials.project_description || 'My DIY Project',
+      `Created ${new Date().toLocaleDateString()}`
+    );
+    if (project) {
+      await saveToProject(project.id, projectActions.isGuestMode);
+    }
+  }, [chat.extractedMaterials, projectActions, saveToProject]);
 
   const defaultProjectName = chat.messages.find(m => m.role === 'user')?.content.slice(0, 60) ?? '';
   const hasConversation = chat.messages.length > 0;
@@ -340,6 +384,25 @@ export default function LandingQuickChat({
           ))}
         </div>
       )}
+
+      {/* Materials save dialog */}
+      <SaveMaterialsDialog
+        showSaveDialog={chat.showSaveDialog}
+        showCreateProjectDialog={false}
+        showAuthPrompt={!userId && chat.showSaveDialog}
+        extractedMaterials={chat.extractedMaterials}
+        projects={projectActions.projects}
+        guestProjects={projectActions.guestProjects}
+        isGuestMode={projectActions.isGuestMode}
+        newProjectName={newProjectName}
+        onNewProjectNameChange={setNewProjectName}
+        onSaveToProject={saveToProject}
+        onCreateNewProjectAndSave={createNewProjectAndSave}
+        onConfirmCreateProject={createNewProjectAndSave}
+        onCloseSaveDialog={() => chat.setShowSaveDialog(false)}
+        onCloseCreateDialog={() => chat.setShowSaveDialog(false)}
+        onCloseAuthPrompt={() => chat.setShowSaveDialog(false)}
+      />
 
       {/* Save to Project modal */}
       {userId && (

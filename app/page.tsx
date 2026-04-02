@@ -46,14 +46,6 @@ export default function LandingPage() {
       else setConversations([]);
     });
 
-    // Check for session state from /chat redirect
-    const storedConvId = sessionStorage.getItem('diy-helper-conversation-id');
-    if (storedConvId) {
-      setActiveChatConversationId(storedConvId);
-      setChatActive(true);
-      sessionStorage.removeItem('diy-helper-conversation-id');
-    }
-
     return () => subscription.unsubscribe();
   }, []);
 
