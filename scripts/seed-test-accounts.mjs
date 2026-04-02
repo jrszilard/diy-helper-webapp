@@ -6,6 +6,7 @@
  *
  * Usage:  node scripts/seed-test-accounts.mjs
  *
+ * Requires TEST_ACCOUNT_PASSWORD in .env.local.
  * Idempotent — skips accounts whose email already exists.
  */
 
@@ -26,8 +27,16 @@ for (const line of envContent.split('\n')) {
 const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
 
+const testPassword = env.TEST_ACCOUNT_PASSWORD;
+
 if (!supabaseUrl || !serviceRoleKey) {
   console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local');
+  process.exit(1);
+}
+
+if (!testPassword) {
+  console.error('Missing TEST_ACCOUNT_PASSWORD in .env.local');
+  console.error('Add it first:  TEST_ACCOUNT_PASSWORD=YourPasswordHere');
   process.exit(1);
 }
 
@@ -36,8 +45,6 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
 });
 
 // ── Account definitions ──────────────────────────────────────────────────────
-
-const TEST_PASSWORD = 'TestAgent2026!';
 
 const DIYER_ACCOUNTS = [
   { envPrefix: 'TEST_DIYER_BEGINNER',      email: 'test-diyer-beginner@diyhelper.test' },
@@ -101,7 +108,7 @@ async function createAccount(email) {
 
   const { data, error } = await supabase.auth.admin.createUser({
     email,
-    password: TEST_PASSWORD,
+    password: testPassword,
     email_confirm: true, // skip email verification
   });
 
@@ -182,7 +189,7 @@ function updateEnvFile(credentials) {
     );
     content = content.replace(
       new RegExp(`^${passKey}=.*$`, 'm'),
-      `${passKey}=${TEST_PASSWORD}`
+      `${passKey}=${testPassword}`
     );
   }
 
@@ -222,7 +229,7 @@ async function main() {
   }
 
   console.log(`\nDone! ${allCredentials.length}/8 accounts ready.`);
-  console.log(`Password for all test accounts: ${TEST_PASSWORD}`);
+  console.log(`Password for all test accounts: ${testPassword}`);
 }
 
 main().catch(err => {
