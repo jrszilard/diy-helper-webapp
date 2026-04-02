@@ -14,6 +14,7 @@ import IntentSignal from '@/components/IntentSignal';
 import PlanningCTA from '@/components/PlanningCTA';
 import AgentProgress from '@/components/AgentProgress';
 import ReportView from '@/components/ReportView';
+import ContextualHint from '@/components/ui/ContextualHint';
 import type { IntentType } from '@/lib/intelligence/types';
 import type { StartAgentRunRequest } from '@/lib/agents/types';
 
@@ -235,6 +236,11 @@ export default function LandingQuickChat({
                       'Save Materials'
                     )}
                   </Button>
+                )}
+                {showMaterialsButton && (
+                  <ContextualHint hintKey="materials">
+                    Save these to a project to track purchases and search local store prices
+                  </ContextualHint>
                 )}
                 {userId && !savedProjectId && !showMaterialsButton && hasConversation && (
                   <Button

@@ -22,6 +22,7 @@ import {
 import MaterialsExport from './MaterialsExport';
 import { ShoppingSearchSkeleton } from './SkeletonLoader';
 import TextInput from '@/components/ui/TextInput';
+import ContextualHint from '@/components/ui/ContextualHint';
 import { useStoreSearch } from '@/hooks/useStoreSearch';
 import type { StoreResult } from '@/hooks/useStoreSearch';
 
@@ -250,6 +251,10 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
           </button>
         </div>
       )}
+
+      <ContextualHint hintKey="shopping">
+        Create a shopping checklist to take to the store — your progress is saved
+      </ContextualHint>
 
       {!isMobile && (
         <div className="mb-6">
