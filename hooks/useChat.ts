@@ -30,8 +30,8 @@ interface ExtractedMaterials {
   total_estimate?: number;
 }
 
-const CHAT_STORAGE_KEY = 'diy-helper-chat-messages';
-const CONVERSATION_ID_KEY = 'diy-helper-conversation-id';
+export const CHAT_STORAGE_KEY = 'diy-helper-chat-messages';
+export const CONVERSATION_ID_KEY = 'diy-helper-conversation-id';
 const INITIAL_MESSAGE_KEY = 'initialChatMessage';
 
 // Helper to load messages from localStorage
@@ -280,6 +280,13 @@ export function useChat(options: UseChatOptions = {}) {
                   if (event.toolName === 'inventory_auth_required') {
                     setInventoryNotification({ added: [], existing: [], authRequired: true });
                     setTimeout(() => setInventoryNotification(null), 5000);
+                  }
+                  // Inject video results into the message content using delimiters so
+                  // parseVideoResults() in ChatMessages can extract and render them
+                  if (event.toolName === 'video_results' && event.result) {
+                    const videoJson = JSON.stringify(event.result);
+                    accumulatedContent = `---VIDEO_DATA---\n${videoJson}\n---END_VIDEO_DATA---\n` + accumulatedContent;
+                    setStreamingContent(accumulatedContent);
                   }
                   break;
                 case 'warning':

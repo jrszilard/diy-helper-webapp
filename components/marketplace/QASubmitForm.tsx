@@ -375,11 +375,14 @@ export default function QASubmitForm({
             rows={5}
             fullWidth
             resize="none"
+            maxLength={1500}
             placeholder="Describe your question in detail..."
             className="bg-white/10 border-white/20 placeholder-white/40"
             style={{ color: 'var(--earth-cream)' }}
           />
-          <p className="text-xs text-white/40 mt-1">{questionText.length} characters (minimum 20)</p>
+          <p className={`text-xs mt-1 ${questionText.length > 1500 ? 'text-rust' : 'text-white/40'}`}>
+            {questionText.length} / 1,500 characters{questionText.length < 20 ? ' (minimum 20)' : ''}
+          </p>
         </div>
 
         {/* Photos */}
@@ -391,6 +394,25 @@ export default function QASubmitForm({
           label="Photos"
           variant="dark"
         />
+
+        {/* ── Free Question Indicator ── */}
+        {isFirstQuestion ? (
+          <div className="p-3 bg-forest-green/10 border border-forest-green/30 rounded-lg flex items-center gap-2">
+            <CheckCircle2 size={16} className="text-forest-green flex-shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-forest-green">Your first question is free!</p>
+              <p className="text-xs text-white/50 mt-0.5">No payment method needed — just ask your question and submit.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="p-3 bg-white/5 border border-white/10 rounded-lg flex items-center gap-2">
+            <CreditCard size={16} className="text-earth-cream/60 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-earth-cream">Free question used — this question costs {dynamicPricing?.tier ? formatPrice(dynamicPricing.priceCents) : '$5–$8'}</p>
+              <p className="text-xs text-white/50 mt-0.5">You&apos;re only charged when an expert claims your question.</p>
+            </div>
+          </div>
+        )}
 
         {/* ── Payment Section (always visible) ── */}
         {needsPayment && (

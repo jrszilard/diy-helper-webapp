@@ -40,7 +40,7 @@ export const UpdateExpertProfileSchema = z.object({
 // ── Q&A ─────────────────────────────────────────────────────────────────────
 
 export const SubmitQuestionSchema = z.object({
-  questionText: z.string().min(20, 'Please provide more detail').max(500),
+  questionText: z.string().min(20, 'Please provide more detail').max(1500, 'Please keep your question under 1,500 characters'),
   category: z.enum(SPECIALTIES as unknown as [string, ...string[]]),
   reportId: z.string().uuid().optional(),
   projectId: z.string().uuid().optional(),

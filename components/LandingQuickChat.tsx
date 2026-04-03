@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowUp, FolderPlus, ShoppingCart, Package, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { sanitizeHref } from '@/lib/security';
 import { supabase } from '@/lib/supabase';
 import { useChat } from '@/hooks/useChat';
@@ -55,6 +56,21 @@ export default function LandingQuickChat({
     ),
     blockquote: ({ children }: { children?: React.ReactNode }) => (
       <blockquote className="border-l-4 border-terracotta pl-4 italic text-earth-sand">{children}</blockquote>
+    ),
+    table: ({ children }: { children?: React.ReactNode }) => (
+      <table className="w-full border-collapse my-3 text-sm">{children}</table>
+    ),
+    thead: ({ children }: { children?: React.ReactNode }) => (
+      <thead>{children}</thead>
+    ),
+    th: ({ children }: { children?: React.ReactNode }) => (
+      <th className="text-left font-bold px-3 py-2 border-b-2 text-white/60 border-white/20">{children}</th>
+    ),
+    td: ({ children }: { children?: React.ReactNode }) => (
+      <td className="px-3 py-2 border-b text-white/80 border-white/10">{children}</td>
+    ),
+    tr: ({ children }: { children?: React.ReactNode }) => (
+      <tr>{children}</tr>
     ),
   };
 
@@ -203,7 +219,7 @@ export default function LandingQuickChat({
 
   const defaultProjectName = chat.messages.find(m => m.role === 'user')?.content.slice(0, 60) ?? '';
   const hasConversation = chat.messages.length > 0;
-  const showMaterialsButton = userId && chat.showMaterialsBanner && !savedProjectId;
+  const showMaterialsButton = chat.showMaterialsBanner && !savedProjectId;
 
   // Agent pipeline: show report when complete (only if we have a conversation)
   if (agentRun.report && hasConversation) {
@@ -270,7 +286,7 @@ export default function LandingQuickChat({
               >
                 {msg.role === 'assistant' ? (
                   <div className="prose prose-sm prose-invert max-w-none">
-                    <ReactMarkdown components={mdComponents}>{msg.content.replace(/---PLANNING_READY---/g, '')}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{msg.content.replace(/---PLANNING_READY---/g, '')}</ReactMarkdown>
                   </div>
                 ) : (
                   <p>{msg.content}</p>
@@ -339,7 +355,7 @@ export default function LandingQuickChat({
           <div className="flex justify-start">
             <div className="max-w-[85%] bg-white/10 text-earth-cream rounded-2xl rounded-bl-md px-4 py-3">
               <div className="prose prose-sm prose-invert max-w-none">
-                <ReactMarkdown components={mdComponents}>{chat.streamingContent}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{chat.streamingContent}</ReactMarkdown>
               </div>
             </div>
           </div>

@@ -269,6 +269,16 @@ export async function POST(req: NextRequest) {
                   } catch { /* ignore parse errors */ }
                 }
 
+                // Forward video search results so the client can render the VideoResults component
+                if (block.name === 'search_project_videos') {
+                  try {
+                    const videoData = JSON.parse(result);
+                    if (videoData.success && videoData.videos?.length > 0) {
+                      sendEvent({ type: 'tool_result', toolName: 'video_results', result: videoData });
+                    }
+                  } catch { /* ignore parse errors */ }
+                }
+
                 assistantContent.push(block);
 
                 toolResults.push({
@@ -443,6 +453,7 @@ async function handleNonStreamingRequest(
 
   let loopCount = 0;
   const maxLoops = 10;
+  let videoDataPrefix = '';
 
   while (response.stop_reason === 'tool_use' && loopCount < maxLoops) {
     loopCount++;
@@ -453,6 +464,16 @@ async function handleNonStreamingRequest(
     for (const block of response.content) {
       if (block.type === 'tool_use') {
         const result = await executeTool(block.name, block.input as Record<string, unknown>, auth);
+
+        // Capture video results for injection into the final response
+        if (block.name === 'search_project_videos') {
+          try {
+            const videoData = JSON.parse(result);
+            if (videoData.success && videoData.videos?.length > 0) {
+              videoDataPrefix = `---VIDEO_DATA---\n${result}\n---END_VIDEO_DATA---\n`;
+            }
+          } catch { /* ignore parse errors */ }
+        }
 
         assistantContent.push(block);
 
@@ -493,7 +514,7 @@ async function handleNonStreamingRequest(
     ? '\n\n> **Note:** This response required more tool calls than allowed in a single turn and may be incomplete. Try asking a follow-up to continue.'
     : '';
 
-  let finalResponse = '';
+  let finalResponse = videoDataPrefix;
   const finalContent: Anthropic.ContentBlock[] = [];
 
   for (const block of response.content) {

@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { redirectToSignIn } from '@/lib/auth-redirect';
@@ -136,16 +137,32 @@ function QAPageContent() {
         )}
 
         <div>
-          <h1 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-            <MessageSquare className="w-6 h-6 text-white/50" />
-            My Questions
-          </h1>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+              <MessageSquare className="w-6 h-6 text-white/50" />
+              My Questions
+            </h1>
+            <Link
+              href="/?tab=expert"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-terracotta hover:bg-terracotta/80 text-white rounded-lg transition-colors"
+            >
+              <MessageSquare className="w-4 h-4" />
+              Ask a Question
+            </Link>
+          </div>
           {myQuestions.length > 0 ? (
             <QAQuestionList questions={myQuestions} />
           ) : (
             <div className="text-center py-16 text-white/40">
               <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-30" />
-              <p className="text-sm">No questions yet. Ask an expert from the home page.</p>
+              <p className="text-sm mb-4">No questions yet. Connect with a verified expert to get started.</p>
+              <Link
+                href="/?tab=expert"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium bg-terracotta hover:bg-terracotta/80 text-white rounded-lg transition-colors"
+              >
+                <MessageSquare className="w-4 h-4" />
+                Talk to a Pro
+              </Link>
             </div>
           )}
         </div>

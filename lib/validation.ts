@@ -82,7 +82,7 @@ export function parseRequestBody<T>(
 
   if (!result.success) {
     const messages = result.error.issues.map(
-      (issue) => `${issue.path.join('.')}: ${issue.message}`
+      (issue) => issue.message
     );
     return { success: false, error: messages.join('; ') };
   }
