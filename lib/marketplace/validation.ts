@@ -30,6 +30,10 @@ export const UpdateExpertProfileSchema = z.object({
   qaRateCents: z.number().int().min(0).max(5000).nullable().optional(),
   isAvailable: z.boolean().optional(),
   profilePhotoUrl: z.string().url().max(500).optional(),
+  licenseNumber: z.string().max(50).nullable().optional(),
+  licenseType: z.string().max(100).nullable().optional(),
+  licenseState: z.string().max(2).nullable().optional(),
+  insuranceStatus: z.enum(['insured', 'bonded_insured']).nullable().optional(),
   specialties: z.array(z.object({
     specialty: z.enum(SPECIALTIES as unknown as [string, ...string[]]),
     yearsExperience: z.number().int().min(0).max(60).optional(),
