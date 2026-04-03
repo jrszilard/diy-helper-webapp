@@ -57,7 +57,7 @@ export const SubmitQuestionSchema = z.object({
 });
 
 export const AnswerQuestionSchema = z.object({
-  answerText: z.string().min(50, 'Please provide a more detailed answer').max(2000),
+  answerText: z.string().min(50, 'Please provide a more detailed answer').max(5000),
   answerPhotos: z.array(z.string().url()).max(3).default([]),
   recommendsProfessional: z.boolean().default(false),
   proRecommendationReason: z.string().max(500).optional(),
