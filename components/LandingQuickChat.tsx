@@ -5,6 +5,7 @@ import { ArrowUp, FolderPlus, ShoppingCart, Package, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { sanitizeHref } from '@/lib/security';
+import { cleanMessageContent } from '@/components/ChatMessages';
 import { supabase } from '@/lib/supabase';
 import { useChat } from '@/hooks/useChat';
 import { useAgentRun } from '@/hooks/useAgentRun';
@@ -286,7 +287,7 @@ export default function LandingQuickChat({
               >
                 {msg.role === 'assistant' ? (
                   <div className="prose prose-sm prose-invert max-w-none">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{msg.content.replace(/---PLANNING_READY---/g, '')}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{cleanMessageContent(msg.content).replace(/---PLANNING_READY---/g, '')}</ReactMarkdown>
                   </div>
                 ) : (
                   <p>{msg.content}</p>
@@ -355,7 +356,7 @@ export default function LandingQuickChat({
           <div className="flex justify-start">
             <div className="max-w-[85%] bg-white/10 text-earth-cream rounded-2xl rounded-bl-md px-4 py-3">
               <div className="prose prose-sm prose-invert max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{chat.streamingContent}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{cleanMessageContent(chat.streamingContent)}</ReactMarkdown>
               </div>
             </div>
           </div>
