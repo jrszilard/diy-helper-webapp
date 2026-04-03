@@ -9,12 +9,13 @@ import UsageBanner from '@/components/UsageBanner';
 import UpgradeModal from '@/components/UpgradeModal';
 import DIYerHeader from '@/components/DIYerHeader';
 import {
-  ArrowLeft, CreditCard, Zap, Crown,
+  ArrowLeft, CreditCard, Zap, Crown, LayoutDashboard, User, Shield, Banknote,
 } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
 import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
 import Badge from '@/components/ui/Badge';
+import { useExpertStatus } from '@/hooks/useExpertStatus';
 
 interface Subscription {
   tier: string;
@@ -51,6 +52,8 @@ function SettingsContent() {
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   // Show success toast if redirected from Stripe checkout
   const sessionId = searchParams.get('session_id');
+
+  const { isExpert, expert } = useExpertStatus();
 
   useEffect(() => {
     if (sessionId) {
@@ -130,100 +133,182 @@ function SettingsContent() {
             </Alert>
           )}
 
-          {/* Current Plan */}
-          <div>
-            <p className="text-sm font-semibold text-[var(--earth-sand)] uppercase tracking-wide mb-3">
-              Current Plan
-            </p>
-            <div className={`rounded-xl p-5 border ${
-              isPro
-                ? 'bg-gradient-to-br from-slate-blue/5 to-slate-blue/10 border-slate-blue/30'
-                : 'bg-earth-cream border-earth-sand'
-            }`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {isPro ? (
-                    <div className="w-10 h-10 bg-slate-blue rounded-lg flex items-center justify-center">
-                      <Crown className="w-5 h-5 text-white" />
+          {isExpert && expert && (
+            <>
+              {/* Expert Profile */}
+              <div>
+                <p className="text-sm font-semibold text-[var(--earth-sand)] uppercase tracking-wide mb-3">
+                  Expert Profile
+                </p>
+                <div className="space-y-2">
+                  <Link
+                    href="/experts/dashboard"
+                    className="flex items-center justify-between p-3 rounded-lg border border-[var(--blueprint-grid-major)] hover:bg-white/5 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <LayoutDashboard className="w-4 h-4 text-[var(--earth-sand)]" />
+                      <span className="text-sm font-medium text-white">Expert Dashboard</span>
                     </div>
-                  ) : (
-                    <div className="w-10 h-10 bg-earth-tan rounded-lg flex items-center justify-center">
-                      <Zap className="w-5 h-5 text-earth-brown" />
+                    <ArrowLeft className="w-4 h-4 text-[var(--earth-sand)] rotate-180 group-hover:text-white transition-colors" />
+                  </Link>
+                  <Link
+                    href="/experts/dashboard/profile"
+                    className="flex items-center justify-between p-3 rounded-lg border border-[var(--blueprint-grid-major)] hover:bg-white/5 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <User className="w-4 h-4 text-[var(--earth-sand)]" />
+                      <span className="text-sm font-medium text-white">Edit Expert Profile</span>
                     </div>
-                  )}
-                  <div>
-                    <div className="flex items-center gap-2">
+                    <ArrowLeft className="w-4 h-4 text-[var(--earth-sand)] rotate-180 group-hover:text-white transition-colors" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Payout Info */}
+              <div>
+                <p className="text-sm font-semibold text-[var(--earth-sand)] uppercase tracking-wide mb-3">
+                  Payouts
+                </p>
+                <div className="rounded-xl p-5 border bg-earth-cream border-earth-sand">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-forest-green/10 rounded-lg flex items-center justify-center">
+                      <Banknote className="w-5 h-5 text-forest-green" />
+                    </div>
+                    <div>
                       <span className="text-lg font-bold text-foreground">
-                        {isPro ? 'Pro' : 'Free'}
+                        {expert.stripeOnboardingComplete ? 'Stripe Connected' : 'Stripe Not Connected'}
                       </span>
-                      {isPro && <Badge variant="solid">Active</Badge>}
+                      <p className="text-sm text-earth-brown">
+                        {expert.stripeOnboardingComplete
+                          ? 'Payouts are active. Earnings are deposited to your connected account.'
+                          : 'Complete Stripe onboarding to receive payouts for Q&A answers and consultations.'
+                        }
+                      </p>
                     </div>
-                    <p className="text-sm text-earth-brown">
-                      {isPro
-                        ? 'Unlimited reports, messages, and priority expert matching'
-                        : `${usage?.reports.limit ?? 5} reports & ${usage?.chatMessages.limit ?? 30} messages per month`
-                      }
-                    </p>
                   </div>
                 </div>
-                {isPro ? (
-                  <span className="text-lg font-bold text-foreground">
-                    $9.99<span className="text-sm font-normal text-earth-brown">/mo</span>
-                  </span>
-                ) : (
-                  <span className="text-lg font-bold text-forest-green">Free</span>
+              </div>
+
+              {/* Expert Subscription */}
+              <div>
+                <p className="text-sm font-semibold text-[var(--earth-sand)] uppercase tracking-wide mb-3">
+                  Expert Subscription
+                </p>
+                <div className="rounded-xl p-5 border bg-earth-cream border-earth-sand">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-earth-tan rounded-lg flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-earth-brown" />
+                    </div>
+                    <div>
+                      <span className="text-lg font-bold text-foreground">Free Tier</span>
+                      <p className="text-sm text-earth-brown">
+                        Expert subscription tiers (Pro &amp; Premium) with queue priority and reduced fees are coming soon.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {!isExpert && (
+            <>
+              {/* Current Plan */}
+              <div>
+                <p className="text-sm font-semibold text-[var(--earth-sand)] uppercase tracking-wide mb-3">
+                  Current Plan
+                </p>
+                <div className={`rounded-xl p-5 border ${
+                  isPro
+                    ? 'bg-gradient-to-br from-slate-blue/5 to-slate-blue/10 border-slate-blue/30'
+                    : 'bg-earth-cream border-earth-sand'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {isPro ? (
+                        <div className="w-10 h-10 bg-slate-blue rounded-lg flex items-center justify-center">
+                          <Crown className="w-5 h-5 text-white" />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 bg-earth-tan rounded-lg flex items-center justify-center">
+                          <Zap className="w-5 h-5 text-earth-brown" />
+                        </div>
+                      )}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-bold text-foreground">
+                            {isPro ? 'Pro' : 'Free'}
+                          </span>
+                          {isPro && <Badge variant="solid">Active</Badge>}
+                        </div>
+                        <p className="text-sm text-earth-brown">
+                          {isPro
+                            ? 'Unlimited reports, messages, and priority expert matching'
+                            : `${usage?.reports.limit ?? 5} reports & ${usage?.chatMessages.limit ?? 30} messages per month`
+                          }
+                        </p>
+                      </div>
+                    </div>
+                    {isPro ? (
+                      <span className="text-lg font-bold text-foreground">
+                        $9.99<span className="text-sm font-normal text-earth-brown">/mo</span>
+                      </span>
+                    ) : (
+                      <span className="text-lg font-bold text-forest-green">Free</span>
+                    )}
+                  </div>
+
+                  {isPro && subscription?.currentPeriodEnd && (
+                    <p className="text-xs text-earth-brown mt-3 pt-3 border-t border-slate-blue/20">
+                      Next billing date: {new Date(subscription.currentPeriodEnd).toLocaleDateString('en-US', {
+                        year: 'numeric', month: 'long', day: 'numeric'
+                      })}
+                    </p>
+                  )}
+                </div>
+
+                {!isPro && (
+                  <Button
+                    variant="primary"
+                    leftIcon={Zap}
+                    onClick={() => setShowUpgrade(true)}
+                    className="mt-4"
+                  >
+                    Upgrade to Pro
+                  </Button>
                 )}
               </div>
 
-              {isPro && subscription?.currentPeriodEnd && (
-                <p className="text-xs text-earth-brown mt-3 pt-3 border-t border-slate-blue/20">
-                  Next billing date: {new Date(subscription.currentPeriodEnd).toLocaleDateString('en-US', {
-                    year: 'numeric', month: 'long', day: 'numeric'
-                  })}
-                </p>
-              )}
-            </div>
-
-            {!isPro && (
-              <Button
-                variant="primary"
-                leftIcon={Zap}
-                onClick={() => setShowUpgrade(true)}
-                className="mt-4"
-              >
-                Upgrade to Pro
-              </Button>
-            )}
-          </div>
-
-          {/* Usage */}
-          {usage && (
-            <div>
-              <p className="text-sm font-semibold text-[var(--earth-sand)] uppercase tracking-wide mb-3">
-                This Month&apos;s Usage
-              </p>
-              <UsageBanner usage={usage} tier={subscription?.tier || 'free'} />
-            </div>
-          )}
-
-          {/* Account */}
-          <div>
-            <p className="text-sm font-semibold text-[var(--earth-sand)] uppercase tracking-wide mb-3">
-              Account
-            </p>
-            <div className="space-y-2">
-              <Link
-                href="/profile"
-                className="flex items-center justify-between p-3 rounded-lg border border-[var(--blueprint-grid-major)] hover:bg-white/5 transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <CreditCard className="w-4 h-4 text-[var(--earth-sand)]" />
-                  <span className="text-sm font-medium text-white">Edit Profile</span>
+              {/* Usage */}
+              {usage && (
+                <div>
+                  <p className="text-sm font-semibold text-[var(--earth-sand)] uppercase tracking-wide mb-3">
+                    This Month&apos;s Usage
+                  </p>
+                  <UsageBanner usage={usage} tier={subscription?.tier || 'free'} />
                 </div>
-                <ArrowLeft className="w-4 h-4 text-[var(--earth-sand)] rotate-180 group-hover:text-white transition-colors" />
-              </Link>
-            </div>
-          </div>
+              )}
+
+              {/* Account */}
+              <div>
+                <p className="text-sm font-semibold text-[var(--earth-sand)] uppercase tracking-wide mb-3">
+                  Account
+                </p>
+                <div className="space-y-2">
+                  <Link
+                    href="/profile"
+                    className="flex items-center justify-between p-3 rounded-lg border border-[var(--blueprint-grid-major)] hover:bg-white/5 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <CreditCard className="w-4 h-4 text-[var(--earth-sand)]" />
+                      <span className="text-sm font-medium text-white">Edit Profile</span>
+                    </div>
+                    <ArrowLeft className="w-4 h-4 text-[var(--earth-sand)] rotate-180 group-hover:text-white transition-colors" />
+                  </Link>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
