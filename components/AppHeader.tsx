@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { FolderOpen, Package, HelpCircle, Users, X, ChevronLeft, ShoppingCart, Plus } from 'lucide-react';
+import { FolderOpen, Package, HelpCircle, Users, X, ChevronLeft, ShoppingCart, MessageSquarePlus } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useExpertStatus } from '@/hooks/useExpertStatus';
 import AppLogo from './AppLogo';
@@ -270,9 +270,9 @@ export default function AppHeader({
               {showBack && (
                 <button
                   onClick={onBack}
-                  className="flex items-center gap-1 text-[var(--earth-sand)] hover:text-white hover:bg-white/10 transition-colors text-xs font-medium mt-0.5 px-1.5 py-0.5 rounded-md -ml-1.5"
+                  className="flex items-center gap-1 text-[var(--earth-sand)] hover:text-white hover:bg-white/10 transition-colors text-sm font-medium mt-0.5 px-2 py-1 rounded-md -ml-1.5"
                 >
-                  <Plus size={12} />
+                  <MessageSquarePlus size={14} />
                   New Chat
                 </button>
               )}
