@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Users } from 'lucide-react';
+import { Users, MessageSquare } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
@@ -60,9 +60,21 @@ export default function ExpertsBrowsePage() {
       <AppHeader />
 
       <main className="max-w-5xl mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-2">
           <Users size={24} className="text-white/50" />
           <h1 className="text-2xl font-bold text-earth-cream">Find an Expert</h1>
+        </div>
+
+        <div className="mb-6 flex items-center gap-4">
+          <p className="text-sm text-white/70">Browse experts or ask a question directly.</p>
+          <Button
+            variant="primary"
+            size="sm"
+            leftIcon={MessageSquare}
+            href="/marketplace/qa"
+          >
+            Ask a Question
+          </Button>
         </div>
 
         <div className="mb-6">

@@ -42,6 +42,12 @@ export default function ExpertProfilePage() {
   const [qaRate, setQaRate] = useState('');
   const [isAvailable, setIsAvailable] = useState(true);
   const [specialties, setSpecialties] = useState<ExpertSpecialty[]>([]);
+  const [licenseNumber, setLicenseNumber] = useState('');
+  const [licenseType, setLicenseType] = useState('');
+  const [licenseState, setLicenseState] = useState('');
+  const [insuranceStatus, setInsuranceStatus] = useState<string>('');
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -67,6 +73,11 @@ export default function ExpertProfilePage() {
         setQaRate(p.qaRateCents != null ? (p.qaRateCents / 100).toFixed(2) : '');
         setIsAvailable(p.isAvailable);
         setSpecialties(p.specialties.length > 0 ? p.specialties : [{ specialty: 'electrical', yearsExperience: null, isPrimary: true }]);
+        setLicenseNumber(p.licenseNumber || '');
+        setLicenseType(p.licenseType || '');
+        setLicenseState(p.licenseState || '');
+        setInsuranceStatus(p.insuranceStatus || '');
+        setProfilePhotoUrl(p.profilePhotoUrl || null);
       } catch {
         // ignore
       }
@@ -74,6 +85,36 @@ export default function ExpertProfilePage() {
     }
     fetchProfile();
   }, []);
+
+  const handlePhotoUpload = async (file: File) => {
+    setUploadingPhoto(true);
+    try {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/experts/profile/photo', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setProfilePhotoUrl(data.url);
+        setToast({ type: 'success', message: 'Photo uploaded' });
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setToast({ type: 'error', message: data.error || 'Failed to upload photo' });
+      }
+    } catch {
+      setToast({ type: 'error', message: 'Failed to upload photo' });
+    }
+    setUploadingPhoto(false);
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -97,6 +138,16 @@ export default function ExpertProfilePage() {
           isPrimary: s.isPrimary,
         })),
       };
+
+      if (licenseNumber) body.licenseNumber = licenseNumber;
+      else body.licenseNumber = null;
+      if (licenseType) body.licenseType = licenseType;
+      else body.licenseType = null;
+      if (licenseState) body.licenseState = licenseState;
+      else body.licenseState = null;
+      if (insuranceStatus) body.insuranceStatus = insuranceStatus;
+      else body.insuranceStatus = null;
+      if (profilePhotoUrl) body.profilePhotoUrl = profilePhotoUrl;
 
       if (hourlyRate) body.hourlyRateCents = Math.round(parseFloat(hourlyRate) * 100);
       else body.hourlyRateCents = null;
@@ -179,6 +230,36 @@ export default function ExpertProfilePage() {
       <SectionHeader size="lg" title="Expert Profile" subtitle="Manage your expert profile and settings" className="mb-6" />
 
       <div className="space-y-5">
+        {/* Profile Photo */}
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            {profilePhotoUrl ? (
+              <img src={profilePhotoUrl} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-earth-sand" />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-earth-tan flex items-center justify-center text-xl font-bold text-earth-brown">
+                {displayName.charAt(0).toUpperCase() || '?'}
+              </div>
+            )}
+          </div>
+          <div>
+            <label className="cursor-pointer">
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handlePhotoUpload(file);
+                }}
+              />
+              <span className="text-sm font-medium text-terracotta hover:text-terracotta/80 transition-colors">
+                {uploadingPhoto ? 'Uploading...' : profilePhotoUrl ? 'Change photo' : 'Upload photo'}
+              </span>
+            </label>
+            <p className="text-xs text-earth-brown mt-0.5">JPG, PNG, or WebP. Max 5 MB.</p>
+          </div>
+        </div>
+
         {/* Display Name */}
         <TextInput
           id="profile-display-name"
@@ -277,6 +358,61 @@ export default function ExpertProfilePage() {
             fullWidth
           />
         </div>
+
+        {/* Credentials */}
+        <Card padding="sm">
+          <h3 className="text-sm font-semibold text-foreground mb-3">Credentials</h3>
+          <p className="text-xs text-earth-brown mb-3">Optional — helps build trust with DIYers</p>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <TextInput
+                id="profile-license-type"
+                label="License Type"
+                type="text"
+                value={licenseType}
+                onChange={(e) => setLicenseType(e.target.value)}
+                placeholder="e.g., Master Electrician"
+                fullWidth
+                maxLength={100}
+              />
+              <TextInput
+                id="profile-license-number"
+                label="License Number"
+                type="text"
+                value={licenseNumber}
+                onChange={(e) => setLicenseNumber(e.target.value)}
+                placeholder="e.g., EL-12345"
+                fullWidth
+                maxLength={50}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Select
+                id="profile-license-state"
+                label="License State"
+                value={licenseState}
+                onChange={(e) => setLicenseState(e.target.value)}
+                fullWidth
+              >
+                <option value="">Select...</option>
+                {US_STATES.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </Select>
+              <Select
+                id="profile-insurance"
+                label="Insurance Status"
+                value={insuranceStatus}
+                onChange={(e) => setInsuranceStatus(e.target.value)}
+                fullWidth
+              >
+                <option value="">Not specified</option>
+                <option value="insured">Insured</option>
+                <option value="bonded_insured">Bonded & Insured</option>
+              </Select>
+            </div>
+          </div>
+        </Card>
 
         {/* Availability */}
         <Toggle

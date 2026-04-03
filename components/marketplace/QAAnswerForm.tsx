@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Send, AlertTriangle, Wrench } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Send, AlertTriangle, Wrench, Eye, Edit3, Plus } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { Button, Textarea, Spinner, Modal } from '@/components/ui';
 import ExpertCoPilot from './ExpertCoPilot';
@@ -19,9 +21,10 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isToolsOpen, setIsToolsOpen] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const charCount = answerText.length;
-  const isValid = charCount >= 50 && charCount <= 2000;
+  const isValid = charCount >= 50 && charCount <= 5000;
 
   const handleSubmit = async () => {
     if (!isValid) return;
@@ -81,7 +84,23 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
 
       <div className="space-y-4">
         <div>
-          <div className="flex justify-end mb-2">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex gap-1">
+              <button
+                type="button"
+                onClick={() => setShowPreview(false)}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${!showPreview ? 'bg-earth-tan text-foreground' : 'text-earth-brown hover:text-foreground'}`}
+              >
+                <Edit3 size={12} className="inline mr-1" />Write
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowPreview(true)}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${showPreview ? 'bg-earth-tan text-foreground' : 'text-earth-brown hover:text-foreground'}`}
+              >
+                <Eye size={12} className="inline mr-1" />Preview
+              </button>
+            </div>
             <Button
               variant="tertiary"
               size="sm"
@@ -91,30 +110,79 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
               Expert Tools
             </Button>
           </div>
-          <Textarea
-            value={answerText}
-            onChange={e => setAnswerText(e.target.value)}
-            rows={6}
-            fullWidth
-            resize="none"
-            placeholder="Provide a detailed answer..."
-          />
+          {showPreview ? (
+            <div className="border border-earth-sand rounded-lg p-4 min-h-[150px] prose prose-sm max-w-none">
+              {answerText ? (
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{answerText}</ReactMarkdown>
+              ) : (
+                <p className="text-earth-brown italic">Nothing to preview yet...</p>
+              )}
+            </div>
+          ) : (
+            <Textarea
+              value={answerText}
+              onChange={e => setAnswerText(e.target.value)}
+              rows={8}
+              fullWidth
+              resize="none"
+              placeholder="Provide a detailed answer. You can use **bold**, *italic*, - lists, and ## headings."
+            />
+          )}
           <p className={`text-xs mt-1 ${
-            charCount < 50 ? 'text-terracotta' : charCount > 2000 ? 'text-red-600' : 'text-muted'
+            charCount < 50 ? 'text-terracotta' : charCount > 5000 ? 'text-red-600' : 'text-muted'
           }`}>
-            {charCount}/2000 characters (minimum 50)
+            {charCount}/5,000 characters (minimum 50)
           </p>
         </div>
 
-        <Textarea
-          label="Photo URLs (optional)"
-          value={photoUrls}
-          onChange={e => setPhotoUrls(e.target.value)}
-          rows={2}
-          fullWidth
-          resize="none"
-          placeholder="One URL per line"
-        />
+        {/* Answer Photos */}
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Photos (optional, max 3)</label>
+          <div className="flex flex-wrap gap-2">
+            {photoUrls.split('\n').filter(Boolean).map((url, i) => (
+              <div key={i} className="relative w-16 h-16">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt={`Photo ${i + 1}`} className="w-16 h-16 rounded object-cover border border-earth-sand" />
+                <button
+                  type="button"
+                  onClick={() => setPhotoUrls(photoUrls.split('\n').filter((_, j) => j !== i).join('\n'))}
+                  className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-[10px] flex items-center justify-center"
+                >
+                  x
+                </button>
+              </div>
+            ))}
+            {photoUrls.split('\n').filter(Boolean).length < 3 && (
+              <label className="w-16 h-16 border-2 border-dashed border-earth-sand rounded flex items-center justify-center cursor-pointer hover:border-terracotta transition-colors">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const token = (await supabase.auth.getSession()).data.session?.access_token;
+                    if (!token) return;
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const res = await fetch('/api/messages/upload', {
+                      method: 'POST',
+                      headers: { Authorization: `Bearer ${token}` },
+                      body: formData,
+                    });
+                    if (res.ok) {
+                      const data = await res.json();
+                      const existing = photoUrls.split('\n').filter(Boolean);
+                      setPhotoUrls([...existing, data.url].join('\n'));
+                    }
+                  }}
+                />
+                <Plus size={16} className="text-earth-brown" />
+              </label>
+            )}
+          </div>
+          <p className="text-xs text-earth-brown mt-1">JPG, PNG, or WebP. Max 5 MB each.</p>
+        </div>
 
         <div className="border border-earth-sand rounded-lg p-3">
           <label className="flex items-center gap-3 cursor-pointer">

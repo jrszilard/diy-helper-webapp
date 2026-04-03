@@ -30,7 +30,7 @@ export async function GET(
 
   const { data: expert } = await adminClient
     .from('expert_profiles')
-    .select('display_name, avg_rating, total_reviews, expert_level, is_active, verification_level, total_questions_answered')
+    .select('display_name, avg_rating, total_reviews, expert_level, is_active, verification_level')
     .eq('id', id)
     .eq('is_active', true)
     .single();
@@ -39,10 +39,17 @@ export async function GET(
     return new Response('Expert not found', { status: 404 });
   }
 
+  // Live count of answered questions (not cached profile field)
+  const { count: answeredCount } = await adminClient
+    .from('qa_questions')
+    .select('id', { count: 'exact', head: true })
+    .eq('expert_id', id)
+    .in('status', ['answered', 'in_conversation', 'resolve_proposed', 'accepted', 'resolved']);
+
   const level = (expert.expert_level || 'bronze') as string;
   const rating = (expert.avg_rating || 0).toFixed(1);
   const reviews = expert.total_reviews || 0;
-  const answered = expert.total_questions_answered || 0;
+  const answered = answeredCount || 0;
   const verified = (expert.verification_level || 0) >= 2;
   const name = expert.display_name || 'Expert';
 

@@ -33,6 +33,10 @@ export interface ExpertProfile {
   stripeOnboardingComplete: boolean;
   isActive: boolean;
   isAvailable: boolean;
+  licenseNumber: string | null;
+  licenseType: string | null;
+  licenseState: string | null;
+  insuranceStatus: 'insured' | 'bonded_insured' | null;
   specialties: ExpertSpecialty[];
   createdAt: string;
   updatedAt: string;
@@ -405,6 +409,10 @@ export interface ExpertProfileRow {
   stripe_onboarding_complete: boolean;
   is_active: boolean;
   is_available: boolean;
+  license_number: string | null;
+  license_type: string | null;
+  license_state: string | null;
+  insurance_status: string | null;
   created_at: string;
   updated_at: string;
   expert_specialties?: Array<{
@@ -440,6 +448,10 @@ export function toExpertProfile(row: ExpertProfileRow): ExpertProfile {
     stripeOnboardingComplete: row.stripe_onboarding_complete,
     isActive: row.is_active,
     isAvailable: row.is_available,
+    licenseNumber: row.license_number ?? null,
+    licenseType: row.license_type ?? null,
+    licenseState: row.license_state ?? null,
+    insuranceStatus: row.insurance_status as 'insured' | 'bonded_insured' | null ?? null,
     specialties: (row.expert_specialties || []).map(s => ({
       id: s.id,
       specialty: s.specialty as Specialty,

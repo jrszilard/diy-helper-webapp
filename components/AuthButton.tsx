@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { LogOut, ChevronDown, Mail, Settings, User } from 'lucide-react';
+import { LogOut, ChevronDown, Mail, Settings, User, LayoutDashboard } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import TextInput from '@/components/ui/TextInput';
 import Modal from '@/components/ui/Modal';
 import Dropdown from '@/components/ui/Dropdown';
 import Avatar from '@/components/ui/Avatar';
+import { CHAT_STORAGE_KEY, CONVERSATION_ID_KEY, CHAT_USER_KEY } from '@/hooks/useChat';
+import { guestStorage } from '@/lib/guestStorage';
 
 export default function AuthButton({
   user,
@@ -90,6 +92,13 @@ export default function AuthButton({
   };
 
   const handleSignOut = async () => {
+    // Clear chat-related localStorage to prevent stale conversations
+    // from leaking across sessions / accounts
+    localStorage.removeItem(CHAT_STORAGE_KEY);
+    localStorage.removeItem(CONVERSATION_ID_KEY);
+    localStorage.removeItem(CHAT_USER_KEY);
+    guestStorage.clearAll();
+
     await supabase.auth.signOut();
     window.location.reload();
   };
@@ -99,6 +108,7 @@ export default function AuthButton({
 
     const items = isExpert
       ? [
+          { label: 'Dashboard', icon: LayoutDashboard, href: '/experts/dashboard' },
           { label: 'My Profile', icon: User, href: '/experts/dashboard/profile' },
           { label: 'Settings', icon: Settings, href: '/settings' },
           { label: 'Sign Out', icon: LogOut, onClick: handleSignOut, danger: true, dividerBefore: true },

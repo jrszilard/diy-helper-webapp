@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, DollarSign, Image, Target, Users, Gavel } from 'lucide-react';
+import { Clock, DollarSign, Image, Target, Gavel } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Card from '@/components/ui/Card';
@@ -85,24 +85,33 @@ export default function QAQuestionCard({ question, onClaim, onBid, showClaim = f
 
           <div className="flex flex-wrap items-center gap-2 mt-3">
             <Badge>{question.category}</Badge>
-            {tierLabel && (
-              <Badge variant={
-                question.priceTier === 'specialist' ? 'primary'
-                : question.priceTier === 'complex' ? 'warning'
-                : 'neutral'
-              }>
-                {tierLabel}
-              </Badge>
-            )}
-            {isBidding && (
-              <Badge variant="primary" icon={Gavel}>
-                Bidding{question.bidCount ? ` · ${question.bidCount} bid${question.bidCount !== 1 ? 's' : ''}` : ''}
-              </Badge>
-            )}
-            {isDirect ? (
-              <Badge variant="purple" icon={Target}>Direct</Badge>
+            {isFree ? (
+              <Badge variant="neutral">Free — First Question</Badge>
             ) : (
-              <Badge variant="neutral" icon={Users}>Pool</Badge>
+              <>
+                {tierLabel && question.priceTier !== 'standard' && (
+                  <Badge variant={
+                    question.priceTier === 'specialist' ? 'primary'
+                    : question.priceTier === 'complex' ? 'warning'
+                    : 'neutral'
+                  }>
+                    {tierLabel}
+                  </Badge>
+                )}
+                {isBidding && (
+                  <Badge variant="primary" icon={Gavel}>
+                    Bidding{question.bidCount ? ` · ${question.bidCount} bid${question.bidCount !== 1 ? 's' : ''}` : ''}
+                  </Badge>
+                )}
+                {isDirect && (
+                  <Badge variant="purple" icon={Target}>Direct</Badge>
+                )}
+                {!isBidding && expertEarnings && (
+                  <Badge variant="success" icon={DollarSign}>
+                    ${expertEarnings} payout
+                  </Badge>
+                )}
+              </>
             )}
             <span className="flex items-center gap-1 text-xs text-[var(--muted)]">
               <Clock size={12} />

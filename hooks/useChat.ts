@@ -30,14 +30,22 @@ interface ExtractedMaterials {
   total_estimate?: number;
 }
 
-const CHAT_STORAGE_KEY = 'diy-helper-chat-messages';
-const CONVERSATION_ID_KEY = 'diy-helper-conversation-id';
+export const CHAT_STORAGE_KEY = 'diy-helper-chat-messages';
+export const CONVERSATION_ID_KEY = 'diy-helper-conversation-id';
+export const CHAT_USER_KEY = 'diy-helper-chat-user';
 const INITIAL_MESSAGE_KEY = 'initialChatMessage';
 
 // Helper to load messages from localStorage
-const loadMessagesFromStorage = (): Message[] => {
+const loadMessagesFromStorage = (currentUserId?: string | null): Message[] => {
   if (typeof window === 'undefined') return [];
   try {
+    const storedUser = localStorage.getItem(CHAT_USER_KEY);
+    if (currentUserId && storedUser && storedUser !== currentUserId) {
+      localStorage.removeItem(CHAT_STORAGE_KEY);
+      localStorage.removeItem(CONVERSATION_ID_KEY);
+      localStorage.removeItem(CHAT_USER_KEY);
+      return [];
+    }
     const saved = localStorage.getItem(CHAT_STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
@@ -81,9 +89,11 @@ const hasMaterialsContent = (content: string): boolean => {
 interface UseChatOptions {
   projectId?: string;
   conversationId?: string;
+  userId?: string | null;
 }
 
 export function useChat(options: UseChatOptions = {}) {
+  const { userId } = options;
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -115,14 +125,21 @@ export function useChat(options: UseChatOptions = {}) {
 
   // Load messages from localStorage on mount
   useEffect(() => {
-    const saved = loadMessagesFromStorage();
+    const saved = loadMessagesFromStorage(userId);
     if (saved.length > 0) setMessages(saved);
     const savedConvId = localStorage.getItem(CONVERSATION_ID_KEY);
     if (savedConvId) setConversationId(savedConvId);
-  }, []);
+  }, [userId]);
 
   // Debounced save messages to localStorage
   const isInitialMount = useRef(true);
+
+  // Reset initial-mount guard when userId changes, so we don't
+  // eagerly overwrite storage before the load effect runs
+  useEffect(() => {
+    isInitialMount.current = true;
+  }, [userId]);
+
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -133,13 +150,16 @@ export function useChat(options: UseChatOptions = {}) {
         try {
           const toStore = messages.length > 50 ? messages.slice(-50) : messages;
           localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(toStore));
+          if (userId) {
+            localStorage.setItem(CHAT_USER_KEY, userId);
+          }
         } catch (e) {
           console.error('Error saving chat history:', e);
         }
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [messages]);
+  }, [messages, userId]);
 
   // Check for initial message from homepage
   useEffect(() => {
@@ -280,6 +300,13 @@ export function useChat(options: UseChatOptions = {}) {
                   if (event.toolName === 'inventory_auth_required') {
                     setInventoryNotification({ added: [], existing: [], authRequired: true });
                     setTimeout(() => setInventoryNotification(null), 5000);
+                  }
+                  // Inject video results into the message content using delimiters so
+                  // parseVideoResults() in ChatMessages can extract and render them
+                  if (event.toolName === 'video_results' && event.result) {
+                    const videoJson = JSON.stringify(event.result);
+                    accumulatedContent = `---VIDEO_DATA---\n${videoJson}\n---END_VIDEO_DATA---\n` + accumulatedContent;
+                    setStreamingContent(accumulatedContent);
                   }
                   break;
                 case 'warning':

@@ -399,20 +399,22 @@ export default function QADetailPage() {
           </Alert>
         )}
 
-        {/* Question text card (shown for all roles) */}
-        <Card padding="sm">
-          <h3 className="text-sm font-semibold text-[var(--earth-brown-dark)] mb-2">Question</h3>
-          <p className="text-sm text-foreground">{question.questionText}</p>
-          <div className="flex items-center gap-3 mt-3">
-            <Badge variant="default">{question.category}</Badge>
-            {isExpert && question.status === 'claimed' && !isThreaded && (
-              <span className="flex items-center gap-1 text-xs text-earth-brown">
-                <Clock size={12} />
-                You have 2 hours to answer
-              </span>
-            )}
-          </div>
-        </Card>
+        {/* Question text card — hidden in threaded mode (ConversationView shows question) */}
+        {!isThreaded && (
+          <Card padding="sm">
+            <h3 className="text-sm font-semibold text-[var(--earth-brown-dark)] mb-2">Question</h3>
+            <p className="text-sm text-foreground">{question.questionText}</p>
+            <div className="flex items-center gap-3 mt-3">
+              <Badge variant="default">{question.category}</Badge>
+              {isExpert && question.status === 'claimed' && (
+                <span className="flex items-center gap-1 text-xs text-earth-brown">
+                  <Clock size={12} />
+                  You have 2 hours to answer
+                </span>
+              )}
+            </div>
+          </Card>
+        )}
 
         {/* Bids section (bidding mode, DIYer view — before expert is selected) */}
         {isBiddingMode && isDIYer && question.status === 'open' && (

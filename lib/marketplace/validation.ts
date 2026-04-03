@@ -30,6 +30,10 @@ export const UpdateExpertProfileSchema = z.object({
   qaRateCents: z.number().int().min(0).max(5000).nullable().optional(),
   isAvailable: z.boolean().optional(),
   profilePhotoUrl: z.string().url().max(500).optional(),
+  licenseNumber: z.string().max(50).nullable().optional(),
+  licenseType: z.string().max(100).nullable().optional(),
+  licenseState: z.string().max(2).nullable().optional(),
+  insuranceStatus: z.enum(['insured', 'bonded_insured']).nullable().optional(),
   specialties: z.array(z.object({
     specialty: z.enum(SPECIALTIES as unknown as [string, ...string[]]),
     yearsExperience: z.number().int().min(0).max(60).optional(),
@@ -40,7 +44,7 @@ export const UpdateExpertProfileSchema = z.object({
 // ── Q&A ─────────────────────────────────────────────────────────────────────
 
 export const SubmitQuestionSchema = z.object({
-  questionText: z.string().min(20, 'Please provide more detail').max(500),
+  questionText: z.string().min(20, 'Please provide more detail').max(1500, 'Please keep your question under 1,500 characters'),
   category: z.enum(SPECIALTIES as unknown as [string, ...string[]]),
   reportId: z.string().uuid().optional(),
   projectId: z.string().uuid().optional(),
@@ -53,7 +57,7 @@ export const SubmitQuestionSchema = z.object({
 });
 
 export const AnswerQuestionSchema = z.object({
-  answerText: z.string().min(50, 'Please provide a more detailed answer').max(2000),
+  answerText: z.string().min(50, 'Please provide a more detailed answer').max(5000),
   answerPhotos: z.array(z.string().url()).max(3).default([]),
   recommendsProfessional: z.boolean().default(false),
   proRecommendationReason: z.string().max(500).optional(),

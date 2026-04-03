@@ -46,15 +46,6 @@ export default function QAAnswerView({ question, onAccept, onReview, onNotHelpfu
 
   return (
     <div className="space-y-4">
-      {/* Question */}
-      <div className="bg-white border border-earth-sand rounded-lg p-4">
-        <h3 className="text-sm font-semibold text-earth-brown mb-2">Your Question</h3>
-        <p className="text-sm text-foreground">{question.questionText}</p>
-        <span className="inline-block mt-2 text-xs px-2 py-0.5 bg-slate-blue/10 text-slate-blue rounded-full font-medium">
-          {question.category}
-        </span>
-      </div>
-
       {/* Answer */}
       {hasAnswer ? (
         <div className="bg-white border border-earth-sand rounded-lg p-4">

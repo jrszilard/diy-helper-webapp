@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState, ReactNode } from 'react';
+import { useEffect, useState, useCallback, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { FolderOpen, Package, HelpCircle, Users, X, ChevronLeft, ShoppingCart } from 'lucide-react';
+import { FolderOpen, Package, HelpCircle, Users, X, ChevronLeft, ShoppingCart, MessageSquarePlus } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useExpertStatus } from '@/hooks/useExpertStatus';
 import AppLogo from './AppLogo';
@@ -77,6 +77,22 @@ export default function AppHeader({
     if (params.get('signIn') === 'true' && !user) setShowAuth(true);
   }, [user]);
 
+  // Close any open drawer on Escape key
+  const closeAllDrawers = useCallback(() => {
+    setShowProjects(false);
+    setShowInventory(false);
+    setShowQuestions(false);
+    setShowShoppingList(false);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeAllDrawers();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [closeAllDrawers]);
+
   // Load projects when shopping drawer opens without a selection
   useEffect(() => {
     if (showShoppingList && !selectedProject && user) {
@@ -87,6 +103,7 @@ export default function AppHeader({
   }, [showShoppingList, selectedProject, user]);
 
   const openQuestionsDrawer = async () => {
+    if (showQuestions) { setShowQuestions(false); return; }
     setShowQuestions(true);
     if (questionsLoaded) return;
     try {
@@ -173,13 +190,50 @@ export default function AppHeader({
             <div className="flex-1 overflow-y-auto">
               {selectedProject ? (
                 <ShoppingListView project={selectedProject} isMobile={true} />
+              ) : !user ? (
+                <div className="p-4">
+                  <div className="text-center py-8">
+                    <ShoppingCart className="w-10 h-10 mx-auto mb-3 text-white/30" />
+                    <p className="text-sm text-white/60 mb-2">Sign in to save and track your shopping lists</p>
+                    <p className="text-sm text-white/40 leading-relaxed mb-4">
+                      Get materials lists from your chats, track purchases, and compare local store prices.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setShowShoppingList(false);
+                        setShowAuth(true);
+                      }}
+                      className="px-4 py-2 bg-terracotta text-white text-sm font-medium rounded-lg hover:bg-terracotta/90 transition-colors"
+                    >
+                      Sign in to get started
+                    </button>
+                  </div>
+                </div>
               ) : (
                 <div className="p-4">
                   <p className="text-sm text-white/60 mb-3">Select a project to view its shopping list:</p>
                   {shoppingProjects.length === 0 ? (
                     <div className="text-center py-8 text-white/40">
                       <ShoppingCart className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                      <p className="text-sm">No projects yet</p>
+                      <p className="text-sm text-white/60 mb-2">No shopping lists yet</p>
+                      <p className="text-sm text-white/40 leading-relaxed">
+                        Start a chat and ask for a materials list. When the AI suggests items, click &lsquo;Save Materials&rsquo; to add them here.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setShowShoppingList(false);
+                          const chatInput = document.querySelector<HTMLTextAreaElement>('textarea[placeholder]');
+                          if (chatInput) {
+                            chatInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            chatInput.focus();
+                          } else {
+                            router.push('/');
+                          }
+                        }}
+                        className="mt-4 text-sm text-[var(--earth-sand)] hover:text-white transition-colors underline underline-offset-2"
+                      >
+                        Go to chat
+                      </button>
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -216,22 +270,22 @@ export default function AppHeader({
               {showBack && (
                 <button
                   onClick={onBack}
-                  className="flex items-center gap-0.5 text-[var(--earth-sand)] hover:text-white transition-colors text-xs font-medium mt-0.5"
+                  className="flex items-center gap-1 text-[var(--earth-sand)] hover:text-white hover:bg-white/10 transition-colors text-sm font-medium mt-0.5 px-2 py-1 rounded-md -ml-1.5"
                 >
-                  <ChevronLeft size={12} />
-                  {backLabel}
+                  <MessageSquarePlus size={14} />
+                  New Chat
                 </button>
               )}
             </div>
 
             <div className="flex items-center gap-1 sm:gap-3">
               {user && (
-                <Button variant="ghost" size="sm" leftIcon={FolderOpen} iconSize={18} onClick={() => setShowProjects(true)} className={btnClass}>
+                <Button variant="ghost" size="sm" leftIcon={FolderOpen} iconSize={18} onClick={() => setShowProjects(prev => !prev)} className={btnClass}>
                   <span className="text-xs sm:text-sm">Projects</span>
                 </Button>
               )}
               {user && (
-                <Button variant="ghost" size="sm" leftIcon={Package} iconSize={18} onClick={() => setShowInventory(true)} className={btnClass}>
+                <Button variant="ghost" size="sm" leftIcon={Package} iconSize={18} onClick={() => setShowInventory(prev => !prev)} className={btnClass}>
                   <span className="text-xs sm:text-sm">My Tools</span>
                 </Button>
               )}
@@ -240,20 +294,23 @@ export default function AppHeader({
                   <span className="text-xs sm:text-sm">My Questions</span>
                 </Button>
               )}
-              {user && (
-                <button onClick={() => setShowShoppingList(true)} className={`${btnClass} relative flex items-center gap-1 px-2 py-1 text-sm rounded-lg hover:bg-white/10 transition-colors`}>
-                  <ShoppingCart size={18} />
-                  {materialsCount && materialsCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-terracotta text-white text-[10px] rounded-full flex items-center justify-center font-bold">
-                      {materialsCount}
-                    </span>
-                  )}
-                  <span className="text-xs sm:text-sm ml-1">Shopping</span>
-                </button>
-              )}
+              <button onClick={() => setShowShoppingList(prev => !prev)} className={`${btnClass} relative flex items-center gap-1 px-2 py-1 text-sm rounded-lg hover:bg-white/10 transition-colors`}>
+                <ShoppingCart size={18} />
+                {materialsCount && materialsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-terracotta text-white text-[10px] rounded-full flex items-center justify-center font-bold">
+                    {materialsCount}
+                  </span>
+                )}
+                <span className="text-xs sm:text-sm ml-1">Shopping</span>
+              </button>
               <Button variant="ghost" size="sm" leftIcon={Users} iconSize={18} href="/experts" className={`${btnClass} hidden sm:inline-flex`}>
                 Find an Expert
               </Button>
+              {!isExpert && (
+                <Button variant="ghost" size="sm" href="/experts/register" className={`${btnClass} hidden sm:inline-flex`}>
+                  For Pros
+                </Button>
+              )}
               {extraRight}
               <NotificationBell userId={user?.id} />
               <AuthButton user={user} variant="dark" isExpert={isExpert} externalShowAuth={showAuth} onAuthToggle={setShowAuth} />
