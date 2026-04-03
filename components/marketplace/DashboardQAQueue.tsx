@@ -12,6 +12,7 @@ interface QueueQuestion {
   questionText: string;
   category: string;
   priceCents: number;
+  expertPayoutCents?: number;
   createdAt: string;
 }
 
@@ -54,14 +55,18 @@ export default function DashboardQAQueue({ questions }: DashboardQAQueueProps) {
         />
       ) : (
         <div className="divide-y divide-earth-sand/50">
-          {questions.slice(0, 5).map(q => (
+          {questions.map(q => (
             <div key={q.id} className="px-4 py-3 hover:bg-earth-tan/30 transition-colors">
               <p className="text-sm text-foreground line-clamp-2">{q.questionText}</p>
               <div className="flex items-center gap-3 mt-1.5">
                 <Badge variant="default" size="sm">{q.category}</Badge>
-                <span className="text-xs font-medium text-forest-green">
-                  ${(q.priceCents / 100).toFixed(2)}
-                </span>
+                {q.priceCents === 0 ? (
+                  <span className="text-xs font-medium text-[var(--muted)]">Free</span>
+                ) : (
+                  <span className="text-xs font-medium text-forest-green">
+                    ${((q.expertPayoutCents ?? q.priceCents) / 100).toFixed(2)}
+                  </span>
+                )}
                 <span className="flex items-center gap-1 text-xs text-[var(--muted)]">
                   <Clock size={12} />
                   {formatTimeAgo(q.createdAt)}
