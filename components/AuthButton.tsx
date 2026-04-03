@@ -9,7 +9,7 @@ import TextInput from '@/components/ui/TextInput';
 import Modal from '@/components/ui/Modal';
 import Dropdown from '@/components/ui/Dropdown';
 import Avatar from '@/components/ui/Avatar';
-import { CHAT_STORAGE_KEY, CONVERSATION_ID_KEY } from '@/hooks/useChat';
+import { CHAT_STORAGE_KEY, CONVERSATION_ID_KEY, CHAT_USER_KEY } from '@/hooks/useChat';
 import { guestStorage } from '@/lib/guestStorage';
 
 export default function AuthButton({
@@ -96,6 +96,7 @@ export default function AuthButton({
     // from leaking across sessions / accounts
     localStorage.removeItem(CHAT_STORAGE_KEY);
     localStorage.removeItem(CONVERSATION_ID_KEY);
+    localStorage.removeItem(CHAT_USER_KEY);
     guestStorage.clearAll();
 
     await supabase.auth.signOut();

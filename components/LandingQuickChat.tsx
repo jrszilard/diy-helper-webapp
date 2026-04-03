@@ -86,6 +86,7 @@ export default function LandingQuickChat({
   const chat = useChat({
     projectId: undefined,
     conversationId: initialConversationId,
+    userId,
   });
 
   const agentRun = useAgentRun();
