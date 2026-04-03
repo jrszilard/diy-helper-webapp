@@ -140,10 +140,16 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
           )}
 
           <div className="flex items-center gap-3 mt-3">
-            <span className="flex items-center gap-1 text-xs font-medium text-forest-green">
-              <DollarSign size={12} />
-              Your payout: ${(question.expertPayoutCents / 100).toFixed(2)}
-            </span>
+            {question.expertPayoutCents > 0 ? (
+              <span className="flex items-center gap-1 text-xs font-medium text-forest-green">
+                <DollarSign size={12} />
+                Your payout: ${(question.expertPayoutCents / 100).toFixed(2)}
+              </span>
+            ) : (
+              <span className="text-xs font-medium text-earth-brown">
+                Free question — builds your reputation
+              </span>
+            )}
             {question.diyerCity && question.diyerState && (
               <span className="text-xs text-earth-brown">
                 {question.diyerCity}, {question.diyerState}

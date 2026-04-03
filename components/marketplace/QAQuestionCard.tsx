@@ -85,24 +85,30 @@ export default function QAQuestionCard({ question, onClaim, onBid, showClaim = f
 
           <div className="flex flex-wrap items-center gap-2 mt-3">
             <Badge>{question.category}</Badge>
-            {tierLabel && (
-              <Badge variant={
-                question.priceTier === 'specialist' ? 'primary'
-                : question.priceTier === 'complex' ? 'warning'
-                : 'neutral'
-              }>
-                {tierLabel}
-              </Badge>
-            )}
-            {isBidding && (
-              <Badge variant="primary" icon={Gavel}>
-                Bidding{question.bidCount ? ` · ${question.bidCount} bid${question.bidCount !== 1 ? 's' : ''}` : ''}
-              </Badge>
-            )}
-            {isDirect ? (
-              <Badge variant="purple" icon={Target}>Direct</Badge>
+            {isFree ? (
+              <Badge variant="neutral">Free — First Question</Badge>
             ) : (
-              <Badge variant="neutral" icon={Users}>Pool</Badge>
+              <>
+                {tierLabel && (
+                  <Badge variant={
+                    question.priceTier === 'specialist' ? 'primary'
+                    : question.priceTier === 'complex' ? 'warning'
+                    : 'neutral'
+                  }>
+                    {tierLabel}
+                  </Badge>
+                )}
+                {isBidding && (
+                  <Badge variant="primary" icon={Gavel}>
+                    Bidding{question.bidCount ? ` · ${question.bidCount} bid${question.bidCount !== 1 ? 's' : ''}` : ''}
+                  </Badge>
+                )}
+                {isDirect ? (
+                  <Badge variant="purple" icon={Target}>Direct</Badge>
+                ) : (
+                  <Badge variant="neutral" icon={Users}>Pool</Badge>
+                )}
+              </>
             )}
             <span className="flex items-center gap-1 text-xs text-[var(--muted)]">
               <Clock size={12} />
