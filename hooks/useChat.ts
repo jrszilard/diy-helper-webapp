@@ -133,6 +133,13 @@ export function useChat(options: UseChatOptions = {}) {
 
   // Debounced save messages to localStorage
   const isInitialMount = useRef(true);
+
+  // Reset initial-mount guard when userId changes, so we don't
+  // eagerly overwrite storage before the load effect runs
+  useEffect(() => {
+    isInitialMount.current = true;
+  }, [userId]);
+
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;

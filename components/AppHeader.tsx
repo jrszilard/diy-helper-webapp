@@ -306,6 +306,11 @@ export default function AppHeader({
               <Button variant="ghost" size="sm" leftIcon={Users} iconSize={18} href="/experts" className={`${btnClass} hidden sm:inline-flex`}>
                 Find an Expert
               </Button>
+              {!isExpert && (
+                <Button variant="ghost" size="sm" href="/experts/register" className={`${btnClass} hidden sm:inline-flex`}>
+                  For Pros
+                </Button>
+              )}
               {extraRight}
               <NotificationBell userId={user?.id} />
               <AuthButton user={user} variant="dark" isExpert={isExpert} externalShowAuth={showAuth} onAuthToggle={setShowAuth} />
