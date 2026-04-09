@@ -471,9 +471,13 @@ async function handleNonStreamingRequest(
   history: Array<{ role: string; content: string | Array<Record<string, unknown>> }>,
   multiModalContent?: Anthropic.ContentBlockParam[],
   intentType?: IntentType,
-  calibratedSystemPrompt?: string
+  calibratedSystemPrompt?: string,
+  executorModelOverride?: string,
+  activeToolsOverride?: Anthropic.Tool[],
 ) {
   const effectivePrompt = calibratedSystemPrompt || systemPrompt;
+  const effectiveModel = executorModelOverride || config.anthropic.model;
+  const effectiveTools = activeToolsOverride || tools as Anthropic.Tool[];
   const messages: Anthropic.MessageParam[] = [
     ...(history as Anthropic.MessageParam[]),
     { role: 'user' as const, content: multiModalContent || message }
@@ -481,10 +485,10 @@ async function handleNonStreamingRequest(
 
   let response = await withRetry(
     () => anthropic.messages.create({
-      model: config.anthropic.model,
+      model: effectiveModel,
       max_tokens: config.anthropic.maxTokens,
       system: effectivePrompt,
-      tools: tools as Anthropic.Tool[],
+      tools: effectiveTools,
       messages
     }),
     { maxRetries: 2, baseDelayMs: 1000, shouldRetry: shouldRetryAnthropic }
@@ -538,10 +542,10 @@ async function handleNonStreamingRequest(
 
     response = await withRetry(
       () => anthropic.messages.create({
-        model: config.anthropic.model,
+        model: effectiveModel,
         max_tokens: config.anthropic.maxTokens,
         system: effectivePrompt,
-        tools: tools as Anthropic.Tool[],
+        tools: effectiveTools,
         messages
       }),
       { maxRetries: 2, baseDelayMs: 1000, shouldRetry: shouldRetryAnthropic }
