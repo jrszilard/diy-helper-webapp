@@ -18,6 +18,12 @@ import { StreamEvent } from '@/lib/tools/types';
 import { withRetry } from '@/lib/api-retry';
 import { logger } from '@/lib/logger';
 import { checkUsageLimit, incrementUsage } from '@/lib/usage';
+import { resolveAdvisorConfig } from '@/lib/advisor-resolver';
+import {
+  createAdvisorMetrics,
+  recordApiCall,
+  logAdvisorMetrics,
+} from '@/lib/advisor-metrics';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
@@ -187,8 +193,20 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // ── Advisor Strategy ──────────────────────────────────────────
+    const advisorResolution = resolveAdvisorConfig(intentType, message);
+    const executorModel = advisorResolution.executorModel;
+    if (advisorResolution.systemPromptSuffix) {
+      calibratedPrompt += advisorResolution.systemPromptSuffix;
+    }
+
+    const activeTools = [
+      ...tools,
+      ...(advisorResolution.advisorTool ? [advisorResolution.advisorTool] : []),
+    ] as Anthropic.Tool[];
+
     if (!streaming) {
-      return handleNonStreamingRequest(auth, message, prunedHistory, image ? userContent : undefined, intentType, calibratedPrompt);
+      return handleNonStreamingRequest(auth, message, prunedHistory, image ? userContent : undefined, intentType, calibratedPrompt, executorModel, activeTools);
     }
 
     const stream = new ReadableStream({
@@ -200,6 +218,16 @@ export async function POST(req: NextRequest) {
             logger.error('Error sending SSE event', e, { requestId });
           }
         };
+
+        const advisorMetrics = createAdvisorMetrics({
+            requestId,
+            intentType: intentType || 'unknown',
+            executorModel,
+            advisorModel: advisorResolution.advisorTool?.model || null,
+            advisorMaxUses: advisorResolution.advisorTool?.max_uses || 0,
+            safetyKeywordsDetected: advisorResolution.safetyKeywordsDetected,
+            safetyKeywordsMatched: advisorResolution.safetyKeywordsMatched,
+          });
 
         try {
           sendEvent({
@@ -222,15 +250,20 @@ export async function POST(req: NextRequest) {
           const apiStart = Date.now();
           let response = await withRetry(
             () => anthropic.messages.create({
-              model: config.anthropic.model,
+              model: executorModel,
               max_tokens: config.anthropic.maxTokens,
               system: calibratedPrompt,
-              tools: tools as Anthropic.Tool[],
+              tools: activeTools,
               messages
             }),
             { maxRetries: 2, baseDelayMs: 1000, shouldRetry: shouldRetryAnthropic }
           );
           logger.info('Anthropic API call', { requestId, duration: Date.now() - apiStart, stopReason: response.stop_reason });
+          recordApiCall(advisorMetrics, {
+            inputTokens: response.usage?.input_tokens || 0,
+            outputTokens: response.usage?.output_tokens || 0,
+            latencyMs: Date.now() - apiStart,
+          });
 
           let loopCount = 0;
           const maxLoops = 10;
@@ -315,15 +348,20 @@ export async function POST(req: NextRequest) {
             const followUpStart = Date.now();
             response = await withRetry(
               () => anthropic.messages.create({
-                model: config.anthropic.model,
+                model: executorModel,
                 max_tokens: config.anthropic.maxTokens,
                 system: calibratedPrompt,
-                tools: tools as Anthropic.Tool[],
+                tools: activeTools,
                 messages
               }),
               { maxRetries: 2, baseDelayMs: 1000, shouldRetry: shouldRetryAnthropic }
             );
             logger.info('Anthropic follow-up call', { requestId, duration: Date.now() - followUpStart, loop: loopCount, stopReason: response.stop_reason });
+            recordApiCall(advisorMetrics, {
+              inputTokens: response.usage?.input_tokens || 0,
+              outputTokens: response.usage?.output_tokens || 0,
+              latencyMs: Date.now() - followUpStart,
+            });
           }
 
           // Warn user if tool loop hit the limit
@@ -375,6 +413,7 @@ export async function POST(req: NextRequest) {
             }
           }
 
+          logAdvisorMetrics(advisorMetrics);
           logger.info('Chat stream complete', { requestId, duration: Date.now() - startTime, toolLoops: loopCount });
           sendEvent({ type: 'done', conversationId: responseConversationId });
           controller.close();
