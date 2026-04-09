@@ -202,6 +202,42 @@ export const intelligence = {
   classificationTimeoutMs: envInt('INTENT_CLASSIFICATION_TIMEOUT_MS', 500),
 } as const;
 
+// ── Advisor Strategy ────────────────────────────────────────────────────────
+export const advisor = {
+  enabled: envString('ADVISOR_ENABLED', 'false') === 'true',
+
+  tiers: {
+    quick_question: {
+      executor: envString('ADVISOR_EXECUTOR_QUICK', 'claude-haiku-4-5-20251001'),
+      advisor: null as string | null,
+      maxUses: 0,
+    },
+    troubleshooting: {
+      executor: envString('ADVISOR_EXECUTOR_TROUBLESHOOT', 'claude-sonnet-4-6'),
+      advisor: envString('ADVISOR_MODEL_TROUBLESHOOT', 'claude-opus-4-6') as string | null,
+      maxUses: envInt('ADVISOR_MAX_USES_TROUBLESHOOT', 2),
+    },
+    mid_project: {
+      executor: envString('ADVISOR_EXECUTOR_MID', 'claude-sonnet-4-6'),
+      advisor: envString('ADVISOR_MODEL_MID', 'claude-opus-4-6') as string | null,
+      maxUses: envInt('ADVISOR_MAX_USES_MID', 1),
+    },
+    full_project: {
+      executor: envString('ADVISOR_EXECUTOR_FULL', 'claude-sonnet-4-6'),
+      advisor: envString('ADVISOR_MODEL_FULL', 'claude-opus-4-6') as string | null,
+      maxUses: envInt('ADVISOR_MAX_USES_FULL', 3),
+    },
+  },
+
+  safetyCriticalKeywords: envList('ADVISOR_SAFETY_KEYWORDS', [
+    'electrical panel', 'breaker box', 'subpanel', 'gas line',
+    'gas pipe', 'load-bearing', 'structural', 'asbestos',
+    'lead paint', 'roof work', 'main disconnect', 'service entrance',
+  ]),
+
+  safetyBoostUses: envInt('ADVISOR_SAFETY_BOOST_USES', 1),
+} as const;
+
 // Re-export everything as a single default for convenience
-const config = { beta, anthropic, rateLimits, cors, storeSearch, streaming, pruning, freemium, stripe, marketplace, expertSubscriptions, intelligence } as const;
+const config = { beta, anthropic, rateLimits, cors, storeSearch, streaming, pruning, freemium, stripe, marketplace, expertSubscriptions, intelligence, advisor } as const;
 export default config;
