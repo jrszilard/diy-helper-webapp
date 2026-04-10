@@ -1,5 +1,5 @@
 import config from '@/lib/config';
-import { ADVISOR_TOOL_DESCRIPTION } from '@/lib/tools/definitions';
+import { ADVISOR_TOOL_DESCRIPTION, ADVISOR_TOOL_TYPE } from '@/lib/tools/definitions';
 import type { IntentType } from '@/lib/intelligence/types';
 
 export interface AdvisorToolConfig {
@@ -60,7 +60,7 @@ export function resolveAdvisorConfig(
   }
 
   result.advisorTool = {
-    type: 'advisor_20260301',
+    type: ADVISOR_TOOL_TYPE,
     name: 'advisor',
     model: tier.advisor,
     max_uses: effectiveMaxUses,

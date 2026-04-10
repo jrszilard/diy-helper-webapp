@@ -220,14 +220,14 @@ export async function POST(req: NextRequest) {
         };
 
         const advisorMetrics = createAdvisorMetrics({
-            requestId,
-            intentType: intentType || 'unknown',
-            executorModel,
-            advisorModel: advisorResolution.advisorTool?.model || null,
-            advisorMaxUses: advisorResolution.advisorTool?.max_uses || 0,
-            safetyKeywordsDetected: advisorResolution.safetyKeywordsDetected,
-            safetyKeywordsMatched: advisorResolution.safetyKeywordsMatched,
-          });
+          requestId,
+          intentType: intentType || 'unknown',
+          executorModel,
+          advisorModel: advisorResolution.advisorTool?.model || null,
+          advisorMaxUses: advisorResolution.advisorTool?.max_uses || 0,
+          safetyKeywordsDetected: advisorResolution.safetyKeywordsDetected,
+          safetyKeywordsMatched: advisorResolution.safetyKeywordsMatched,
+        });
 
         try {
           sendEvent({
@@ -273,6 +273,11 @@ export async function POST(req: NextRequest) {
 
             const assistantContent: Anthropic.ContentBlock[] = [];
             const toolResults: Array<{ type: 'tool_result'; tool_use_id: string; content: string }> = [];
+
+            // TODO: Wire recordAdvisorUsage() here once we observe the API response shape
+            // for advisor_20260301 consultations. The advisor tool returns its token usage
+            // in a response block we haven't seen yet — inspect response.content for
+            // advisor-specific blocks and call recordAdvisorUsage(advisorMetrics, inputTokens, outputTokens).
 
             for (const block of response.content) {
               if (block.type === 'tool_use') {

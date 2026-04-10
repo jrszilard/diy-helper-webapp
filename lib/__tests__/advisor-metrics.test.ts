@@ -24,7 +24,7 @@ describe('createAdvisorMetrics', () => {
     expect(metrics.executorOutputTokens).toBe(0);
     expect(metrics.advisorInputTokens).toBe(0);
     expect(metrics.advisorOutputTokens).toBe(0);
-    expect(metrics.advisorLatencyMs).toEqual([]);
+    expect(metrics.apiCallLatencyMs).toEqual([]);
     expect(metrics.totalLatencyMs).toBe(0);
   });
 });
@@ -62,7 +62,7 @@ describe('recordApiCall', () => {
     recordApiCall(metrics, { inputTokens: 100, outputTokens: 50, latencyMs: 500 });
     recordApiCall(metrics, { inputTokens: 200, outputTokens: 100, latencyMs: 700 });
 
-    expect(metrics.advisorLatencyMs).toEqual([500, 700]);
+    expect(metrics.apiCallLatencyMs).toEqual([500, 700]);
   });
 });
 
@@ -98,7 +98,7 @@ describe('calculateEstimatedCost', () => {
       advisorActualUses: 0,
       safetyKeywordsDetected: false,
       safetyKeywordsMatched: [],
-      advisorLatencyMs: [],
+      apiCallLatencyMs: [],
       totalLatencyMs: 500,
       executorInputTokens: 1000,
       executorOutputTokens: 500,
@@ -121,7 +121,7 @@ describe('calculateEstimatedCost', () => {
       advisorActualUses: 0,
       safetyKeywordsDetected: false,
       safetyKeywordsMatched: [],
-      advisorLatencyMs: [],
+      apiCallLatencyMs: [],
       totalLatencyMs: 2000,
       executorInputTokens: 2000,
       executorOutputTokens: 1000,

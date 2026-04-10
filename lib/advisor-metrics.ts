@@ -9,7 +9,7 @@ export interface AdvisorMetrics {
   advisorActualUses: number;
   safetyKeywordsDetected: boolean;
   safetyKeywordsMatched: string[];
-  advisorLatencyMs: number[];
+  apiCallLatencyMs: number[];
   totalLatencyMs: number;
   executorInputTokens: number;
   executorOutputTokens: number;
@@ -46,7 +46,7 @@ export function createAdvisorMetrics(params: CreateMetricsParams): AdvisorMetric
   return {
     ...params,
     advisorActualUses: 0,
-    advisorLatencyMs: [],
+    apiCallLatencyMs: [],
     totalLatencyMs: 0,
     executorInputTokens: 0,
     executorOutputTokens: 0,
@@ -58,7 +58,7 @@ export function createAdvisorMetrics(params: CreateMetricsParams): AdvisorMetric
 export function recordApiCall(metrics: AdvisorMetrics, result: ApiCallResult): void {
   metrics.executorInputTokens += result.inputTokens;
   metrics.executorOutputTokens += result.outputTokens;
-  metrics.advisorLatencyMs.push(result.latencyMs);
+  metrics.apiCallLatencyMs.push(result.latencyMs);
 }
 
 export function recordAdvisorUsage(
@@ -89,7 +89,7 @@ export function calculateEstimatedCost(metrics: AdvisorMetrics): number {
 }
 
 export function logAdvisorMetrics(metrics: AdvisorMetrics): void {
-  metrics.totalLatencyMs = metrics.advisorLatencyMs.reduce((a, b) => a + b, 0);
+  metrics.totalLatencyMs = metrics.apiCallLatencyMs.reduce((a, b) => a + b, 0);
   const estimatedCostUsd = calculateEstimatedCost(metrics);
 
   logger.info('Advisor metrics', {
@@ -102,7 +102,7 @@ export function logAdvisorMetrics(metrics: AdvisorMetrics): void {
     advisorActualUses: metrics.advisorActualUses,
     safetyKeywordsDetected: metrics.safetyKeywordsDetected,
     safetyKeywordsMatched: metrics.safetyKeywordsMatched,
-    advisorLatencyMs: metrics.advisorLatencyMs,
+    apiCallLatencyMs: metrics.apiCallLatencyMs,
     totalLatencyMs: metrics.totalLatencyMs,
     executorInputTokens: metrics.executorInputTokens,
     executorOutputTokens: metrics.executorOutputTokens,
