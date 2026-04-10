@@ -59,13 +59,17 @@ export function resolveAdvisorConfig(
     result.systemPromptSuffix = '\n\nIMPORTANT: The user\'s question involves safety-critical work. You MUST consult the advisor before responding.';
   }
 
-  result.advisorTool = {
-    type: ADVISOR_TOOL_TYPE,
-    name: 'advisor',
-    model: tier.advisor,
-    max_uses: effectiveMaxUses,
-    description: ADVISOR_TOOL_DESCRIPTION,
-  };
+  // NOTE: The advisor_20260301 tool type is not yet available in the Anthropic API.
+  // When it launches, uncomment this block. Until then, the tiered executor model
+  // selection still works — we just don't get Opus review of responses.
+  //
+  // result.advisorTool = {
+  //   type: ADVISOR_TOOL_TYPE,
+  //   name: 'advisor',
+  //   model: tier.advisor,
+  //   max_uses: effectiveMaxUses,
+  //   description: ADVISOR_TOOL_DESCRIPTION,
+  // };
 
   return result;
 }
