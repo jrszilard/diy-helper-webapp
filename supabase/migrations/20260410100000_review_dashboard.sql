@@ -7,7 +7,7 @@ CREATE TABLE advisor_expert_reviews (
   UNIQUE(expert_id, review_log_id)
 );
 
-CREATE INDEX idx_expert_reviews_expert ON advisor_expert_reviews(expert_id);
+CREATE INDEX idx_advisor_expert_reviews_expert ON advisor_expert_reviews(expert_id);
 
 ALTER TABLE advisor_expert_reviews ENABLE ROW LEVEL SECURITY;
 
