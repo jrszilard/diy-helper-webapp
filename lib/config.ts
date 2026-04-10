@@ -247,7 +247,8 @@ export const advisor = {
 
   safetyCriticalKeywords: envList('ADVISOR_SAFETY_KEYWORDS', [
     'electrical panel', 'breaker box', 'subpanel', 'gas line',
-    'gas pipe', 'load-bearing', 'structural', 'asbestos',
+    'gas pipe', 'gas leak', 'smell gas', 'carbon monoxide',
+    'load-bearing', 'structural', 'asbestos',
     'lead paint', 'roof work', 'main disconnect', 'service entrance',
     'circuit breaker', 'wiring', 'rewire', '200 amp', '100 amp',
     'outlet install', 'junction box', 'ground wire', 'knob and tube',
