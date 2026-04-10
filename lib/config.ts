@@ -203,8 +203,15 @@ export const intelligence = {
 } as const;
 
 // ── Advisor Strategy ────────────────────────────────────────────────────────
+// Research basis: Asawa et al. (2025) "How to Train Your Advisor" arXiv:2510.02453
+// Mode A (off): no review. Mode B (beta): Anthropic advisor API. Mode C (custom): our own loop.
+function parseAdvisorMode(val: string): 'off' | 'beta' | 'custom' {
+  if (val === 'beta' || val === 'custom') return val;
+  return 'off';
+}
+
 export const advisor = {
-  enabled: envString('ADVISOR_ENABLED', 'false') === 'true',
+  mode: parseAdvisorMode(envString('ADVISOR_MODE', 'off')),
 
   tiers: {
     quick_question: {
@@ -227,6 +234,14 @@ export const advisor = {
       advisor: envString('ADVISOR_MODEL_FULL', 'claude-opus-4-6') as string | null,
       maxUses: envInt('ADVISOR_MAX_USES_FULL', 3),
     },
+  },
+
+  // Custom review loop config (used when mode === 'custom')
+  customReviewer: {
+    model: envString('ADVISOR_CUSTOM_MODEL', 'claude-haiku-4-5-20251001'),
+    provider: envString('ADVISOR_CUSTOM_PROVIDER', 'anthropic'),
+    maxIterations: envInt('ADVISOR_CUSTOM_MAX_ITERATIONS', 2),
+    earlyStopOnApproval: envString('ADVISOR_CUSTOM_EARLY_STOP', 'true') === 'true',
   },
 
   safetyCriticalKeywords: envList('ADVISOR_SAFETY_KEYWORDS', [

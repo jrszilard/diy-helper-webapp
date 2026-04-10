@@ -31,7 +31,7 @@ export function resolveAdvisorConfig(
     systemPromptSuffix: '',
   };
 
-  if (!config.advisor.enabled || !intentType) {
+  if (config.advisor.mode === 'off' || !intentType) {
     return result;
   }
 
