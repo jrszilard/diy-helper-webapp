@@ -3,6 +3,7 @@ import {
   createAdvisorMetrics,
   recordApiCall,
   recordAdvisorUsage,
+  recordCustomLoopResult,
   calculateEstimatedCost,
   type AdvisorMetrics,
 } from '@/lib/advisor-metrics';
@@ -13,6 +14,8 @@ describe('createAdvisorMetrics', () => {
       requestId: 'req-123',
       intentType: 'full_project',
       executorModel: 'claude-sonnet-4-6',
+      advisorMode: 'beta',
+      customReviewerModel: null,
       advisorModel: 'claude-opus-4-6',
       advisorMaxUses: 3,
       safetyKeywordsDetected: false,
@@ -35,6 +38,8 @@ describe('recordApiCall', () => {
       requestId: 'req-123',
       intentType: 'full_project',
       executorModel: 'claude-sonnet-4-6',
+      advisorMode: 'beta',
+      customReviewerModel: null,
       advisorModel: 'claude-opus-4-6',
       advisorMaxUses: 3,
       safetyKeywordsDetected: false,
@@ -53,6 +58,8 @@ describe('recordApiCall', () => {
       requestId: 'req-123',
       intentType: 'troubleshooting',
       executorModel: 'claude-sonnet-4-6',
+      advisorMode: 'beta',
+      customReviewerModel: null,
       advisorModel: 'claude-opus-4-6',
       advisorMaxUses: 2,
       safetyKeywordsDetected: true,
@@ -72,6 +79,8 @@ describe('recordAdvisorUsage', () => {
       requestId: 'req-123',
       intentType: 'full_project',
       executorModel: 'claude-sonnet-4-6',
+      advisorMode: 'beta',
+      customReviewerModel: null,
       advisorModel: 'claude-opus-4-6',
       advisorMaxUses: 3,
       safetyKeywordsDetected: false,
@@ -93,6 +102,8 @@ describe('calculateEstimatedCost', () => {
       requestId: 'req-123',
       intentType: 'quick_question',
       executorModel: 'claude-haiku-4-5-20251001',
+      advisorMode: 'beta',
+      customReviewerModel: null,
       advisorModel: null,
       advisorMaxUses: 0,
       advisorActualUses: 0,
@@ -104,6 +115,9 @@ describe('calculateEstimatedCost', () => {
       executorOutputTokens: 500,
       advisorInputTokens: 0,
       advisorOutputTokens: 0,
+      customLoopIterations: 0,
+      customLoopWasRevised: false,
+      customLoopLatencyMs: 0,
     };
 
     const cost = calculateEstimatedCost(metrics);
@@ -116,6 +130,8 @@ describe('calculateEstimatedCost', () => {
       requestId: 'req-1',
       intentType: 'full_project',
       executorModel: 'claude-sonnet-4-6',
+      advisorMode: 'beta',
+      customReviewerModel: null,
       advisorModel: 'claude-opus-4-6',
       advisorMaxUses: 3,
       advisorActualUses: 0,
@@ -127,6 +143,9 @@ describe('calculateEstimatedCost', () => {
       executorOutputTokens: 1000,
       advisorInputTokens: 0,
       advisorOutputTokens: 0,
+      customLoopIterations: 0,
+      customLoopWasRevised: false,
+      customLoopLatencyMs: 0,
     };
 
     const withAdvisor: AdvisorMetrics = {
@@ -140,5 +159,80 @@ describe('calculateEstimatedCost', () => {
     const costWithout = calculateEstimatedCost(withoutAdvisor);
     const costWith = calculateEstimatedCost(withAdvisor);
     expect(costWith).toBeGreaterThan(costWithout);
+  });
+});
+
+describe('custom loop metrics', () => {
+  it('tracks advisorMode field', () => {
+    const metrics = createAdvisorMetrics({
+      requestId: 'test-1',
+      intentType: 'full_project',
+      executorModel: 'claude-sonnet-4-6',
+      advisorMode: 'custom',
+      advisorModel: null,
+      customReviewerModel: 'claude-haiku-4-5-20251001',
+      advisorMaxUses: 0,
+      safetyKeywordsDetected: false,
+      safetyKeywordsMatched: [],
+    });
+    expect(metrics.advisorMode).toBe('custom');
+    expect(metrics.customReviewerModel).toBe('claude-haiku-4-5-20251001');
+    expect(metrics.customLoopIterations).toBe(0);
+    expect(metrics.customLoopWasRevised).toBe(false);
+  });
+
+  it('records custom loop results', () => {
+    const metrics = createAdvisorMetrics({
+      requestId: 'test-2',
+      intentType: 'troubleshooting',
+      executorModel: 'claude-sonnet-4-6',
+      advisorMode: 'custom',
+      advisorModel: null,
+      customReviewerModel: 'claude-haiku-4-5-20251001',
+      advisorMaxUses: 0,
+      safetyKeywordsDetected: true,
+      safetyKeywordsMatched: ['electrical panel'],
+    });
+    recordCustomLoopResult(metrics, {
+      iterationsUsed: 2,
+      wasRevised: true,
+      reviewerInputTokens: 1000,
+      reviewerOutputTokens: 400,
+      latencyMs: 850,
+    });
+    expect(metrics.customLoopIterations).toBe(2);
+    expect(metrics.customLoopWasRevised).toBe(true);
+    expect(metrics.advisorInputTokens).toBe(1000);
+    expect(metrics.advisorOutputTokens).toBe(400);
+    expect(metrics.customLoopLatencyMs).toBe(850);
+  });
+
+  it('calculates cost correctly for custom mode using Haiku rates', () => {
+    const metrics: AdvisorMetrics = {
+      requestId: 'test-3',
+      intentType: 'full_project',
+      executorModel: 'claude-sonnet-4-6',
+      advisorMode: 'custom',
+      advisorModel: null,
+      customReviewerModel: 'claude-haiku-4-5-20251001',
+      advisorMaxUses: 0,
+      advisorActualUses: 0,
+      safetyKeywordsDetected: false,
+      safetyKeywordsMatched: [],
+      apiCallLatencyMs: [],
+      totalLatencyMs: 0,
+      executorInputTokens: 1000,
+      executorOutputTokens: 500,
+      advisorInputTokens: 2000,
+      advisorOutputTokens: 800,
+      customLoopIterations: 2,
+      customLoopWasRevised: true,
+      customLoopLatencyMs: 850,
+    };
+    const cost = calculateEstimatedCost(metrics);
+    // Sonnet: (1000/1M * 3.0) + (500/1M * 15.0) = 0.003 + 0.0075 = 0.0105
+    // Haiku:  (2000/1M * 0.8) + (800/1M * 4.0)  = 0.0016 + 0.0032 = 0.0048
+    // Total: 0.0153
+    expect(cost).toBeCloseTo(0.0153, 4);
   });
 });

@@ -4,7 +4,9 @@ export interface AdvisorMetrics {
   requestId: string;
   intentType: string;
   executorModel: string;
+  advisorMode: 'off' | 'beta' | 'custom';
   advisorModel: string | null;
+  customReviewerModel: string | null;
   advisorMaxUses: number;
   advisorActualUses: number;
   safetyKeywordsDetected: boolean;
@@ -15,13 +17,18 @@ export interface AdvisorMetrics {
   executorOutputTokens: number;
   advisorInputTokens: number;
   advisorOutputTokens: number;
+  customLoopIterations: number;
+  customLoopWasRevised: boolean;
+  customLoopLatencyMs: number;
 }
 
 interface CreateMetricsParams {
   requestId: string;
   intentType: string;
   executorModel: string;
+  advisorMode: 'off' | 'beta' | 'custom';
   advisorModel: string | null;
+  customReviewerModel: string | null;
   advisorMaxUses: number;
   safetyKeywordsDetected: boolean;
   safetyKeywordsMatched: string[];
@@ -33,7 +40,6 @@ interface ApiCallResult {
   latencyMs: number;
 }
 
-// Per-million-token pricing (USD). Update when Anthropic changes pricing.
 const TOKEN_RATES: Record<string, { input: number; output: number }> = {
   'claude-opus-4-6':            { input: 15.0,  output: 75.0  },
   'claude-sonnet-4-6':          { input: 3.0,   output: 15.0  },
@@ -52,6 +58,9 @@ export function createAdvisorMetrics(params: CreateMetricsParams): AdvisorMetric
     executorOutputTokens: 0,
     advisorInputTokens: 0,
     advisorOutputTokens: 0,
+    customLoopIterations: 0,
+    customLoopWasRevised: false,
+    customLoopLatencyMs: 0,
   };
 }
 
@@ -71,21 +80,41 @@ export function recordAdvisorUsage(
   metrics.advisorOutputTokens += advisorOutputTokens;
 }
 
+interface CustomLoopResultParams {
+  iterationsUsed: number;
+  wasRevised: boolean;
+  reviewerInputTokens: number;
+  reviewerOutputTokens: number;
+  latencyMs: number;
+}
+
+export function recordCustomLoopResult(
+  metrics: AdvisorMetrics,
+  result: CustomLoopResultParams,
+): void {
+  metrics.customLoopIterations = result.iterationsUsed;
+  metrics.customLoopWasRevised = result.wasRevised;
+  metrics.customLoopLatencyMs = result.latencyMs;
+  metrics.advisorInputTokens += result.reviewerInputTokens;
+  metrics.advisorOutputTokens += result.reviewerOutputTokens;
+}
+
 export function calculateEstimatedCost(metrics: AdvisorMetrics): number {
   const executorRate = TOKEN_RATES[metrics.executorModel] || DEFAULT_RATE;
   const executorCost =
     (metrics.executorInputTokens / 1_000_000) * executorRate.input +
     (metrics.executorOutputTokens / 1_000_000) * executorRate.output;
 
-  let advisorCost = 0;
-  if (metrics.advisorModel) {
-    const advisorRate = TOKEN_RATES[metrics.advisorModel] || DEFAULT_RATE;
-    advisorCost =
-      (metrics.advisorInputTokens / 1_000_000) * advisorRate.input +
-      (metrics.advisorOutputTokens / 1_000_000) * advisorRate.output;
+  let reviewerCost = 0;
+  const reviewerModelId = metrics.advisorModel || metrics.customReviewerModel;
+  if (reviewerModelId) {
+    const reviewerRate = TOKEN_RATES[reviewerModelId] || DEFAULT_RATE;
+    reviewerCost =
+      (metrics.advisorInputTokens / 1_000_000) * reviewerRate.input +
+      (metrics.advisorOutputTokens / 1_000_000) * reviewerRate.output;
   }
 
-  return executorCost + advisorCost;
+  return executorCost + reviewerCost;
 }
 
 export function logAdvisorMetrics(metrics: AdvisorMetrics): void {
@@ -96,10 +125,15 @@ export function logAdvisorMetrics(metrics: AdvisorMetrics): void {
     requestId: metrics.requestId,
     intentType: metrics.intentType,
     executorModel: metrics.executorModel,
+    advisorMode: metrics.advisorMode,
     advisorModel: metrics.advisorModel,
-    advisorEnabled: metrics.advisorMaxUses > 0,
+    customReviewerModel: metrics.customReviewerModel,
+    advisorEnabled: metrics.advisorMaxUses > 0 || metrics.advisorMode === 'custom',
     advisorMaxUses: metrics.advisorMaxUses,
     advisorActualUses: metrics.advisorActualUses,
+    customLoopIterations: metrics.customLoopIterations,
+    customLoopWasRevised: metrics.customLoopWasRevised,
+    customLoopLatencyMs: metrics.customLoopLatencyMs,
     safetyKeywordsDetected: metrics.safetyKeywordsDetected,
     safetyKeywordsMatched: metrics.safetyKeywordsMatched,
     apiCallLatencyMs: metrics.apiCallLatencyMs,
