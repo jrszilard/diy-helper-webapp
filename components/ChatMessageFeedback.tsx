@@ -8,6 +8,7 @@ interface ChatMessageFeedbackProps {
   conversationId: string | null;
   userMessage: string;
   aiResponse: string;
+  variant?: 'light' | 'dark';
 }
 
 const FLAG_TYPES = [
@@ -24,7 +25,9 @@ export default function ChatMessageFeedback({
   conversationId,
   userMessage,
   aiResponse,
+  variant = 'light',
 }: ChatMessageFeedbackProps) {
+  const isDark = variant === 'dark';
   const [thumbsUpDone, setThumbsUpDone] = useState(false);
   const [showFlagForm, setShowFlagForm] = useState(false);
   const [flagType, setFlagType] = useState<FlagType | null>(null);
@@ -74,7 +77,7 @@ export default function ChatMessageFeedback({
 
   if (flagDone) {
     return (
-      <span className="text-xs text-forest-green flex items-center gap-1 mt-1">
+      <span className={`text-xs flex items-center gap-1 mt-1 ${isDark ? 'text-green-400' : 'text-forest-green'}`}>
         <Flag className="w-3.5 h-3.5" /> Thanks for the feedback
       </span>
     );
@@ -85,13 +88,15 @@ export default function ChatMessageFeedback({
       {!showFlagForm && (
         <div className="flex items-center gap-2">
           {thumbsUpDone ? (
-            <span className="text-xs text-forest-green flex items-center gap-1">
+            <span className={`text-xs flex items-center gap-1 ${isDark ? 'text-green-400' : 'text-forest-green'}`}>
               <ThumbsUp className="w-3.5 h-3.5" /> Helpful
             </span>
           ) : (
             <button
               onClick={handleThumbsUp}
-              className="text-xs text-earth-brown-light hover:text-forest-green transition-colors flex items-center gap-1"
+              className={`text-xs transition-colors flex items-center gap-1 ${
+                isDark ? 'text-white/50 hover:text-green-400' : 'text-earth-brown-light hover:text-forest-green'
+              }`}
               title="This response was helpful"
             >
               <ThumbsUp className="w-3.5 h-3.5" />
@@ -99,7 +104,9 @@ export default function ChatMessageFeedback({
           )}
           <button
             onClick={() => setShowFlagForm(true)}
-            className="text-xs text-earth-brown-light hover:text-rust transition-colors flex items-center gap-1"
+            className={`text-xs transition-colors flex items-center gap-1 ${
+              isDark ? 'text-white/50 hover:text-red-400' : 'text-earth-brown-light hover:text-rust'
+            }`}
             title="Flag an issue with this response"
           >
             <Flag className="w-3.5 h-3.5" />
@@ -108,10 +115,12 @@ export default function ChatMessageFeedback({
       )}
 
       {showFlagForm && (
-        <div className="mt-2 bg-earth-tan/20 border border-earth-sand rounded-lg p-3 max-w-md">
+        <div className={`mt-2 rounded-lg p-3 max-w-md border ${
+          isDark ? 'bg-white/10 border-white/20' : 'bg-earth-tan/20 border-earth-sand'
+        }`}>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-foreground">What&apos;s wrong?</span>
-            <button onClick={() => setShowFlagForm(false)} className="text-earth-brown-light hover:text-foreground">
+            <span className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-foreground'}`}>What&apos;s wrong?</span>
+            <button onClick={() => setShowFlagForm(false)} className={isDark ? 'text-white/50 hover:text-white' : 'text-earth-brown-light hover:text-foreground'}>
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -124,7 +133,9 @@ export default function ChatMessageFeedback({
                 className={`text-xs px-2 py-1 rounded-full border transition-colors ${
                   flagType === ft.value
                     ? 'bg-rust text-white border-rust'
-                    : 'bg-white border-earth-sand text-earth-brown hover:border-rust'
+                    : isDark
+                      ? 'bg-white/10 border-white/20 text-white/80 hover:border-rust'
+                      : 'bg-white border-earth-sand text-earth-brown hover:border-rust'
                 }`}
               >
                 {ft.label}
@@ -138,7 +149,11 @@ export default function ChatMessageFeedback({
             placeholder="Tell us more (optional)..."
             rows={2}
             maxLength={500}
-            className="w-full text-xs border border-earth-sand rounded-lg p-2 resize-none focus:outline-none focus:ring-1 focus:ring-rust"
+            className={`w-full text-xs rounded-lg p-2 resize-none focus:outline-none focus:ring-1 focus:ring-rust border ${
+              isDark
+                ? 'bg-white/5 border-white/20 text-white placeholder:text-white/40'
+                : 'border-earth-sand'
+            }`}
           />
 
           <button

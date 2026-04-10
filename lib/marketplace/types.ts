@@ -310,6 +310,7 @@ export interface ExpertContext {
   fullReportShareUrl?: string;
   materialsCount?: number;
   toolsCount?: number;
+  aiChatResponse?: string;
 }
 
 // ── Messaging ───────────────────────────────────────────────────────────────

@@ -54,6 +54,26 @@ export async function POST(req: NextRequest) {
       aiContext = await buildExpertContext(auth.supabaseClient, parsed.data.reportId);
     }
 
+    // Attach the AI's chat response if question originated from a conversation
+    if (parsed.data.conversationId) {
+      const { data: lastAiMsg } = await auth.supabaseClient
+        .from('conversation_messages')
+        .select('content')
+        .eq('conversation_id', parsed.data.conversationId)
+        .eq('role', 'assistant')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (lastAiMsg?.content) {
+        if (aiContext) {
+          aiContext.aiChatResponse = lastAiMsg.content;
+        } else {
+          aiContext = { aiChatResponse: lastAiMsg.content } as import('@/lib/marketplace/types').ExpertContext;
+        }
+      }
+    }
+
     // Score difficulty and check for bidding mode
     const difficulty = scoreDifficulty({
       context: aiContext as import('@/lib/marketplace/types').ExpertContext | null,

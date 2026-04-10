@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { sanitizeHref } from '@/lib/security';
 import { cleanMessageContent } from '@/components/ChatMessages';
+import ChatMessageFeedback from '@/components/ChatMessageFeedback';
 import { supabase } from '@/lib/supabase';
 import { useChat } from '@/hooks/useChat';
 import { useAgentRun } from '@/hooks/useAgentRun';
@@ -287,9 +288,20 @@ export default function LandingQuickChat({
                 }`}
               >
                 {msg.role === 'assistant' ? (
-                  <div className="prose prose-sm prose-invert max-w-none">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{cleanMessageContent(msg.content).replace(/---PLANNING_READY---/g, '')}</ReactMarkdown>
-                  </div>
+                  <>
+                    <div className="prose prose-sm prose-invert max-w-none">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{cleanMessageContent(msg.content).replace(/---PLANNING_READY---/g, '')}</ReactMarkdown>
+                    </div>
+                    {!chat.isLoading && (
+                      <ChatMessageFeedback
+                        messageIndex={idx}
+                        conversationId={chat.conversationId ?? null}
+                        userMessage={idx > 0 ? chat.messages[idx - 1]?.content || '' : ''}
+                        aiResponse={msg.content}
+                        variant="dark"
+                      />
+                    )}
+                  </>
                 ) : (
                   <p>{msg.content}</p>
                 )}

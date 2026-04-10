@@ -197,9 +197,10 @@ export const intelligence = {
   /** Confidence threshold — below this, ask user to clarify */
   confidenceThreshold: envFloat('INTENT_CONFIDENCE_THRESHOLD', 0.7),
   /** Max ms to wait for classification before falling back.
-   *  Spec target is <300ms, but 500ms gives headroom for cold starts.
-   *  Haiku typically responds in 100-200ms; this timeout is a safety net. */
-  classificationTimeoutMs: envInt('INTENT_CLASSIFICATION_TIMEOUT_MS', 500),
+   *  Haiku typically responds in 100-200ms in production. The timeout must
+   *  accommodate cold-start overhead (TLS, DNS, SDK init) which can reach
+   *  800-1500ms on the first call. 2000ms is safe without blocking the user. */
+  classificationTimeoutMs: envInt('INTENT_CLASSIFICATION_TIMEOUT_MS', 2000),
 } as const;
 
 // ── Advisor Strategy ────────────────────────────────────────────────────────

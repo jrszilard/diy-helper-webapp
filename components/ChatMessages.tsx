@@ -23,6 +23,7 @@ interface ChatMessagesProps {
   failedMessage: string | null;
   onRetry: () => void;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  conversationId?: string;
   conversationDomain?: string;
   user?: { id: string } | null;
 }
@@ -178,6 +179,7 @@ const ChatMessages = React.memo(function ChatMessages({
   failedMessage,
   onRetry,
   messagesEndRef,
+  conversationId,
   conversationDomain,
   user,
 }: ChatMessagesProps) {
@@ -235,7 +237,7 @@ const ChatMessages = React.memo(function ChatMessages({
                 {msg.role === 'assistant' && (
                   <ChatMessageFeedback
                     messageIndex={idx}
-                    conversationId={null}
+                    conversationId={conversationId ?? null}
                     userMessage={idx > 0 ? messages[idx - 1]?.content || '' : ''}
                     aiResponse={msg.content}
                   />
