@@ -25,6 +25,11 @@ import {
   recordAdvisorUsage,
   logAdvisorMetrics,
 } from '@/lib/advisor-metrics';
+import { runCustomReviewLoop } from '@/lib/advisor-custom-loop';
+import { recordCustomLoopResult } from '@/lib/advisor-metrics';
+import { AnthropicReviewProvider } from '@/lib/advisor-providers/anthropic';
+import { getWeightedExamples } from '@/lib/advisor-rubric-db';
+import { logReviewVerdict } from '@/lib/advisor-audit';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
@@ -269,7 +274,9 @@ export async function POST(req: NextRequest) {
           requestId,
           intentType: intentType || 'unknown',
           executorModel,
+          advisorMode: advisorResolution.advisorMode,
           advisorModel: advisorResolution.advisorTool?.model || null,
+          customReviewerModel: advisorResolution.customReviewerModel,
           advisorMaxUses: advisorResolution.advisorTool?.max_uses || 0,
           safetyKeywordsDetected: advisorResolution.safetyKeywordsDetected,
           safetyKeywordsMatched: advisorResolution.safetyKeywordsMatched,
@@ -418,6 +425,88 @@ export async function POST(req: NextRequest) {
               type: 'warning',
               content: 'This response required more tool calls than allowed in a single turn. The answer below may be incomplete — try asking a follow-up to continue.'
             });
+          }
+
+          // ── Custom Review Loop (Mode C) ───────────────────────────
+          if (advisorResolution.advisorMode === 'custom' && response.stop_reason === 'end_turn') {
+            const draftText = response.content
+              .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+              .map(b => b.text)
+              .join('');
+
+            if (draftText.trim()) {
+              sendEvent({
+                type: 'progress',
+                step: 'reviewing',
+                message: 'Running safety review...',
+                icon: '🔍',
+              });
+
+              const fewShotExamples = await getWeightedExamples('general', 5);
+
+              const reviewProvider = new AnthropicReviewProvider(
+                advisorResolution.customReviewerModel!,
+                anthropic,
+              );
+
+              const loopResult = await runCustomReviewLoop({
+                userMessage: message,
+                draftResponse: draftText,
+                provider: reviewProvider,
+                maxIterations: config.advisor.customReviewer.maxIterations,
+                earlyStopOnApproval: config.advisor.customReviewer.earlyStopOnApproval,
+                safetyKeywordsDetected: advisorResolution.safetyKeywordsDetected,
+                safetyKeywordsMatched: advisorResolution.safetyKeywordsMatched,
+                fewShotExamples,
+              });
+
+              recordCustomLoopResult(advisorMetrics, {
+                iterationsUsed: loopResult.iterationsUsed,
+                wasRevised: loopResult.wasRevised,
+                reviewerInputTokens: loopResult.reviewerTokens.inputTokens,
+                reviewerOutputTokens: loopResult.reviewerTokens.outputTokens,
+                latencyMs: loopResult.latencyMs,
+              });
+
+              // Audit trail (fire-and-forget)
+              logReviewVerdict({
+                requestId,
+                intentType: intentType || 'unknown',
+                advisorMode: 'custom',
+                reviewerModel: advisorResolution.customReviewerModel!,
+                userQuestion: message,
+                draftResponse: draftText,
+                verdict: loopResult.wasRevised ? 'REVISE' : 'APPROVE',
+                confidence: null,
+                issues: loopResult.issues,
+                revisedResponse: loopResult.wasRevised ? loopResult.finalResponse : null,
+                iterationsUsed: loopResult.iterationsUsed,
+                safetyKeywords: advisorResolution.safetyKeywordsMatched,
+                rubricVersion: loopResult.rubricVersion,
+                reviewerTokensIn: loopResult.reviewerTokens.inputTokens,
+                reviewerTokensOut: loopResult.reviewerTokens.outputTokens,
+                latencyMs: loopResult.latencyMs,
+              }).catch(() => {});
+
+              if (loopResult.wasRevised) {
+                logger.info('Custom review loop revised response', {
+                  requestId,
+                  iterationsUsed: loopResult.iterationsUsed,
+                  issueCount: loopResult.issues.length,
+                });
+                let replaced = false;
+                response = {
+                  ...response,
+                  content: response.content.map(block => {
+                    if (block.type === 'text' && !replaced) {
+                      replaced = true;
+                      return { ...block, text: loopResult.finalResponse };
+                    }
+                    return block;
+                  }),
+                };
+              }
+            }
           }
 
           // Stream final response in chunks
