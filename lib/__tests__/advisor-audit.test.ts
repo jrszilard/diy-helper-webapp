@@ -36,7 +36,8 @@ describe('logReviewVerdict', () => {
     });
 
     expect(mockInsert).toHaveBeenCalledTimes(1);
-    const row = mockInsert.mock.calls[0][0];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const row = (mockInsert.mock.calls[0] as any[])[0] as Record<string, unknown>;
     expect(row.request_id).toBe('req-123');
     expect(row.advisor_mode).toBe('custom');
     expect(row.verdict).toBe('APPROVE');

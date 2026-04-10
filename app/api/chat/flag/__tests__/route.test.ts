@@ -9,7 +9,7 @@ vi.mock('@/lib/supabase-admin', () => ({
   }),
 }));
 vi.mock('@/lib/rate-limit', () => ({
-  checkRateLimit: vi.fn(() => ({ allowed: true })),
+  checkRateLimit: vi.fn(async () => ({ allowed: true, remaining: 10, retryAfter: null })),
 }));
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() },
@@ -36,7 +36,8 @@ describe('POST /api/chat/flag', () => {
     const res = await POST(req as never);
     expect(res.status).toBe(201);
     expect(mockInsert).toHaveBeenCalledTimes(1);
-    const row = mockInsert.mock.calls[0][0];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const row = (mockInsert.mock.calls[0] as any[])[0] as Record<string, unknown>;
     expect(row.source).toBe('user_flag');
     expect(row.flag_type).toBe('safety');
     expect(row.user_question).toBe('How do I replace a breaker?');

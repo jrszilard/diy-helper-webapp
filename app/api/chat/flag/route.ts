@@ -6,10 +6,7 @@ import { logger } from '@/lib/logger';
 const VALID_FLAG_TYPES = ['safety', 'incorrect', 'missing_steps', 'wrong_for_situation'];
 
 export async function POST(req: NextRequest) {
-  const rateLimitResult = checkRateLimit(
-    req.headers.get('x-forwarded-for') || 'unknown',
-    'marketplace',
-  );
+  const rateLimitResult = await checkRateLimit(req, null, 'marketplace');
   if (!rateLimitResult.allowed) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
