@@ -10,10 +10,11 @@ import GlobalHeader from '@/components/GlobalHeader';
 import NavLink from '@/components/ui/NavLink';
 import Dropdown from '@/components/ui/Dropdown';
 import Spinner from '@/components/ui/Spinner';
-import { MessageSquare, Mail, Menu, Users, Home } from 'lucide-react';
+import { MessageSquare, Mail, Menu, Users, Home, ClipboardCheck } from 'lucide-react';
 
 const NAV_ITEMS = [
   { href: '/experts/dashboard/qa', label: 'Q&A Queue', icon: MessageSquare },
+  { href: '/experts/dashboard/reviews', label: 'Reviews', icon: ClipboardCheck },
   { href: '/experts/dashboard/messages', label: 'Messages', icon: Mail },
 ];
 
