@@ -1,18 +1,18 @@
 import config from '@/lib/config';
-import { ADVISOR_TOOL_DESCRIPTION, ADVISOR_TOOL_TYPE } from '@/lib/tools/definitions';
+import { ADVISOR_TOOL_TYPE } from '@/lib/tools/definitions';
 import type { IntentType } from '@/lib/intelligence/types';
 
 export interface AdvisorToolConfig {
   type: string;
-  name: string;
+  name: 'advisor';
   model: string;
   max_uses: number;
-  description: string;
 }
 
 export interface AdvisorResolution {
   executorModel: string;
   advisorTool: AdvisorToolConfig | null;
+  useBetaApi: boolean;
   safetyKeywordsDetected: boolean;
   safetyKeywordsMatched: string[];
   systemPromptSuffix: string;
@@ -25,6 +25,7 @@ export function resolveAdvisorConfig(
   const result: AdvisorResolution = {
     executorModel: config.anthropic.model,
     advisorTool: null,
+    useBetaApi: false,
     safetyKeywordsDetected: false,
     safetyKeywordsMatched: [],
     systemPromptSuffix: '',
@@ -59,17 +60,13 @@ export function resolveAdvisorConfig(
     result.systemPromptSuffix = '\n\nIMPORTANT: The user\'s question involves safety-critical work. You MUST consult the advisor before responding.';
   }
 
-  // NOTE: The advisor_20260301 tool type is not yet available in the Anthropic API.
-  // When it launches, uncomment this block. Until then, the tiered executor model
-  // selection still works — we just don't get Opus review of responses.
-  //
-  // result.advisorTool = {
-  //   type: ADVISOR_TOOL_TYPE,
-  //   name: 'advisor',
-  //   model: tier.advisor,
-  //   max_uses: effectiveMaxUses,
-  //   description: ADVISOR_TOOL_DESCRIPTION,
-  // };
+  result.advisorTool = {
+    type: ADVISOR_TOOL_TYPE,
+    name: 'advisor',
+    model: tier.advisor,
+    max_uses: effectiveMaxUses,
+  };
+  result.useBetaApi = true;
 
   return result;
 }

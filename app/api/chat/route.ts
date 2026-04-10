@@ -204,10 +204,33 @@ export async function POST(req: NextRequest) {
     const activeTools = [
       ...tools,
       ...(advisorResolution.advisorTool ? [advisorResolution.advisorTool] : []),
-    ] as Anthropic.Tool[];
+    ];
+    const useBetaApi = advisorResolution.useBetaApi;
+
+    // Helper: call standard or beta messages API depending on advisor config.
+    // Both return the same runtime shape; the cast unifies the TS types.
+    const createMessage = (params: {
+      model: string;
+      max_tokens: number;
+      system: string;
+      tools: unknown[];
+      messages: Anthropic.MessageParam[];
+    }): Promise<Anthropic.Message> => {
+      if (useBetaApi) {
+        return anthropic.beta.messages.create({
+          ...params,
+          tools: params.tools as Anthropic.Beta.Messages.BetaToolUnion[],
+          betas: ['advisor-tool-2026-03-01'],
+        }) as unknown as Promise<Anthropic.Message>;
+      }
+      return anthropic.messages.create({
+        ...params,
+        tools: params.tools as Anthropic.Tool[],
+      });
+    };
 
     if (!streaming) {
-      return handleNonStreamingRequest(auth, message, prunedHistory, image ? userContent : undefined, intentType, calibratedPrompt, executorModel, activeTools);
+      return handleNonStreamingRequest(auth, message, prunedHistory, image ? userContent : undefined, intentType, calibratedPrompt, executorModel, activeTools, useBetaApi);
     }
 
     const stream = new ReadableStream({
@@ -250,7 +273,7 @@ export async function POST(req: NextRequest) {
 
           const apiStart = Date.now();
           let response = await withRetry(
-            () => anthropic.messages.create({
+            () => createMessage({
               model: executorModel,
               max_tokens: config.anthropic.maxTokens,
               system: calibratedPrompt,
@@ -353,7 +376,7 @@ export async function POST(req: NextRequest) {
 
             const followUpStart = Date.now();
             response = await withRetry(
-              () => anthropic.messages.create({
+              () => createMessage({
                 model: executorModel,
                 max_tokens: config.anthropic.maxTokens,
                 system: calibratedPrompt,
@@ -479,18 +502,39 @@ async function handleNonStreamingRequest(
   intentType?: IntentType,
   calibratedSystemPrompt?: string,
   executorModelOverride?: string,
-  activeToolsOverride?: Anthropic.Tool[],
+  activeToolsOverride?: unknown[],
+  useBetaApi?: boolean,
 ) {
   const effectivePrompt = calibratedSystemPrompt || systemPrompt;
   const effectiveModel = executorModelOverride || config.anthropic.model;
-  const effectiveTools = activeToolsOverride || tools as Anthropic.Tool[];
+  const effectiveTools = activeToolsOverride || tools;
   const messages: Anthropic.MessageParam[] = [
     ...(history as Anthropic.MessageParam[]),
     { role: 'user' as const, content: multiModalContent || message }
   ];
 
+  const createMsg = (params: {
+    model: string;
+    max_tokens: number;
+    system: string;
+    tools: unknown[];
+    messages: Anthropic.MessageParam[];
+  }): Promise<Anthropic.Message> => {
+    if (useBetaApi) {
+      return anthropic.beta.messages.create({
+        ...params,
+        tools: params.tools as Anthropic.Beta.Messages.BetaToolUnion[],
+        betas: ['advisor-tool-2026-03-01'],
+      }) as unknown as Promise<Anthropic.Message>;
+    }
+    return anthropic.messages.create({
+      ...params,
+      tools: params.tools as Anthropic.Tool[],
+    });
+  };
+
   let response = await withRetry(
-    () => anthropic.messages.create({
+    () => createMsg({
       model: effectiveModel,
       max_tokens: config.anthropic.maxTokens,
       system: effectivePrompt,
@@ -547,7 +591,7 @@ async function handleNonStreamingRequest(
     });
 
     response = await withRetry(
-      () => anthropic.messages.create({
+      () => createMsg({
         model: effectiveModel,
         max_tokens: config.anthropic.maxTokens,
         system: effectivePrompt,
