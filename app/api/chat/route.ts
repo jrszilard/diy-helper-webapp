@@ -194,7 +194,8 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Advisor Strategy ──────────────────────────────────────────
-    const advisorResolution = resolveAdvisorConfig(intentType, message);
+    // Default to full_project when intent is unknown so the advisor is still active
+    const advisorResolution = resolveAdvisorConfig(intentType || 'full_project', message);
     const executorModel = advisorResolution.executorModel;
     if (advisorResolution.systemPromptSuffix) {
       calibratedPrompt += advisorResolution.systemPromptSuffix;
