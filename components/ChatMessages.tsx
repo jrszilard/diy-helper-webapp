@@ -5,7 +5,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import VideoResults from './VideoResults';
 import ProgressIndicator, { ProgressStep } from './ProgressIndicator';
-import { RefreshCw, CheckCircle } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
+import ChatMessageFeedback from './ChatMessageFeedback';
 import { ExtractedMaterials, Video } from '@/types';
 import { sanitizeHref } from '@/lib/security';
 
@@ -180,8 +181,6 @@ const ChatMessages = React.memo(function ChatMessages({
   conversationDomain,
   user,
 }: ChatMessagesProps) {
-  const [acknowledged, setAcknowledged] = useState<Set<number>>(new Set());
-
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       {messages.length === 0 && !isStreaming && (
@@ -233,30 +232,13 @@ const ChatMessages = React.memo(function ChatMessages({
                     Retry
                   </button>
                 )}
-                {msg.role === 'assistant' && user && conversationDomain && (
-                  <div className="mt-1">
-                    {acknowledged.has(idx) ? (
-                      <span className="text-xs text-forest-green flex items-center gap-1">
-                        <CheckCircle className="w-3.5 h-3.5" /> Got it, noted for next time
-                      </span>
-                    ) : (
-                      <button
-                        onClick={async () => {
-                          try {
-                            await fetch('/api/skill-profile/feedback', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ domain: conversationDomain }),
-                            });
-                            setAcknowledged((prev) => new Set(prev).add(idx));
-                          } catch { /* silent */ }
-                        }}
-                        className="text-xs text-earth-brown-light hover:text-terracotta transition-colors flex items-center gap-1"
-                      >
-                        <CheckCircle className="w-3.5 h-3.5" /> I already knew this
-                      </button>
-                    )}
-                  </div>
+                {msg.role === 'assistant' && (
+                  <ChatMessageFeedback
+                    messageIndex={idx}
+                    conversationId={null}
+                    userMessage={idx > 0 ? messages[idx - 1]?.content || '' : ''}
+                    aiResponse={msg.content}
+                  />
                 )}
               </div>
             </div>
