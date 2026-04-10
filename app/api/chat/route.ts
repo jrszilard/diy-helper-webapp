@@ -22,12 +22,34 @@ import { resolveAdvisorConfig } from '@/lib/advisor-resolver';
 import {
   createAdvisorMetrics,
   recordApiCall,
+  recordAdvisorUsage,
   logAdvisorMetrics,
 } from '@/lib/advisor-metrics';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
+
+// Extract advisor usage from the beta API's iterations array in response.usage.
+// Each advisor consultation appears as an entry with type: 'advisor_message'.
+function extractAdvisorUsage(
+  response: Anthropic.Message,
+  metrics: import('@/lib/advisor-metrics').AdvisorMetrics
+): void {
+  const usage = response.usage as unknown as Record<string, unknown>;
+  const iterations = usage?.iterations;
+  if (!Array.isArray(iterations)) return;
+
+  for (const iter of iterations) {
+    if (iter && typeof iter === 'object' && iter.type === 'advisor_message') {
+      recordAdvisorUsage(
+        metrics,
+        (iter as { input_tokens?: number }).input_tokens || 0,
+        (iter as { output_tokens?: number }).output_tokens || 0,
+      );
+    }
+  }
+}
 
 const shouldRetryAnthropic = (error: unknown): boolean => {
   if (error && typeof error === 'object' && 'status' in error) {
@@ -288,6 +310,7 @@ export async function POST(req: NextRequest) {
             outputTokens: response.usage?.output_tokens || 0,
             latencyMs: Date.now() - apiStart,
           });
+          extractAdvisorUsage(response, advisorMetrics);
 
           let loopCount = 0;
           const maxLoops = 10;
@@ -297,11 +320,6 @@ export async function POST(req: NextRequest) {
 
             const assistantContent: Anthropic.ContentBlock[] = [];
             const toolResults: Array<{ type: 'tool_result'; tool_use_id: string; content: string }> = [];
-
-            // TODO: Wire recordAdvisorUsage() here once we observe the API response shape
-            // for advisor_20260301 consultations. The advisor tool returns its token usage
-            // in a response block we haven't seen yet — inspect response.content for
-            // advisor-specific blocks and call recordAdvisorUsage(advisorMetrics, inputTokens, outputTokens).
 
             for (const block of response.content) {
               if (block.type === 'tool_use') {
@@ -391,6 +409,7 @@ export async function POST(req: NextRequest) {
               outputTokens: response.usage?.output_tokens || 0,
               latencyMs: Date.now() - followUpStart,
             });
+            extractAdvisorUsage(response, advisorMetrics);
           }
 
           // Warn user if tool loop hit the limit
