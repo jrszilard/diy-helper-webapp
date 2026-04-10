@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Clock, DollarSign, Image, CheckCircle, Send, Loader2, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
+import { Clock, DollarSign, Image, CheckCircle, Send, Loader2, ChevronDown, ChevronUp, AlertTriangle, Flag, CheckCircle2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Card from '@/components/ui/Card';
@@ -21,7 +21,7 @@ interface ActiveQuestion {
   answeredAt: string | null;
   answerText: string | null;
   photoUrls?: string[];
-  aiContext?: { projectSummary?: string } | null;
+  aiContext?: { projectSummary?: string; aiChatResponse?: string } | null;
   diyerCity?: string | null;
   diyerState?: string | null;
   createdAt: string;
@@ -37,6 +37,10 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
   const [answerText, setAnswerText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [showAiCorrection, setShowAiCorrection] = useState(false);
+  const [aiCorrectionDone, setAiCorrectionDone] = useState(false);
+  const [correctionText, setCorrectionText] = useState('');
+  const [correctionSubmitting, setCorrectionSubmitting] = useState(false);
 
   const isClaimed = question.status === 'claimed';
   const isAnswered = question.status === 'answered';
@@ -61,6 +65,26 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return `${hours}h ${mins}m left`;
+  };
+
+  const handleAiCorrectionSubmit = async () => {
+    if (correctionText.length < 10) return;
+    setCorrectionSubmitting(true);
+    try {
+      const res = await fetch(`/api/qa/${question.id}/ai-correction`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          correctionText,
+          aiResponse: question.aiContext?.aiChatResponse,
+        }),
+      });
+      if (res.ok) {
+        setAiCorrectionDone(true);
+        setShowAiCorrection(false);
+      }
+    } catch { /* silent */ }
+    setCorrectionSubmitting(false);
   };
 
   const handleSubmit = async () => {
@@ -122,11 +146,67 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
             <p className="text-sm text-foreground whitespace-pre-wrap">{question.questionText}</p>
           </div>
 
-          {question.aiContext?.projectSummary && (
-            <div className="mt-2 bg-earth-tan/30 rounded px-3 py-2">
-              <p className="text-xs text-earth-brown">
-                <span className="font-medium">AI Context:</span> {question.aiContext.projectSummary}
-              </p>
+          {question.aiContext && (
+            <div className="mt-2">
+              {question.aiContext.projectSummary && (
+                <div className="bg-earth-tan/30 rounded px-3 py-2">
+                  <p className="text-xs text-earth-brown">
+                    <span className="font-medium">AI Context:</span> {question.aiContext.projectSummary}
+                  </p>
+                </div>
+              )}
+              {question.aiContext.aiChatResponse && (
+                <details className="mt-2 border border-earth-sand rounded-lg">
+                  <summary className="px-3 py-2 text-xs font-medium text-earth-brown cursor-pointer hover:bg-earth-tan/20">
+                    View AI&apos;s Original Response
+                  </summary>
+                  <div className="px-3 py-2 border-t border-earth-sand">
+                    <p className="text-xs text-foreground whitespace-pre-wrap">{question.aiContext.aiChatResponse}</p>
+                    {!aiCorrectionDone && isClaimed && (
+                      <button
+                        onClick={() => setShowAiCorrection(true)}
+                        className="mt-2 text-xs text-rust hover:underline flex items-center gap-1"
+                      >
+                        <Flag size={12} /> Spot an error? Flag &amp; correct
+                      </button>
+                    )}
+                    {aiCorrectionDone && (
+                      <p className="mt-2 text-xs text-forest-green flex items-center gap-1">
+                        <CheckCircle2 size={12} /> Correction submitted
+                      </p>
+                    )}
+                  </div>
+                </details>
+              )}
+              {showAiCorrection && (
+                <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <p className="text-xs font-semibold text-amber-800 mb-2">What&apos;s wrong with the AI&apos;s response?</p>
+                  <textarea
+                    value={correctionText}
+                    onChange={e => setCorrectionText(e.target.value)}
+                    placeholder="Describe the error and the correct information..."
+                    rows={3}
+                    maxLength={1000}
+                    className="w-full text-xs border border-amber-300 rounded-lg p-2 resize-none focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  />
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <button
+                      onClick={handleAiCorrectionSubmit}
+                      disabled={correctionText.length < 10 || correctionSubmitting}
+                      className="flex items-center gap-1 px-3 py-1 text-xs bg-amber-600 text-white rounded-lg disabled:opacity-50 hover:bg-amber-700 transition-colors"
+                    >
+                      {correctionSubmitting ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
+                      Submit Correction
+                    </button>
+                    <button
+                      onClick={() => { setShowAiCorrection(false); setCorrectionText(''); }}
+                      className="text-xs text-earth-brown hover:text-foreground"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
