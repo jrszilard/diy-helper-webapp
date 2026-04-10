@@ -233,6 +233,8 @@ export const advisor = {
     'electrical panel', 'breaker box', 'subpanel', 'gas line',
     'gas pipe', 'load-bearing', 'structural', 'asbestos',
     'lead paint', 'roof work', 'main disconnect', 'service entrance',
+    'circuit breaker', 'wiring', 'rewire', '200 amp', '100 amp',
+    'outlet install', 'junction box', 'ground wire', 'knob and tube',
   ]),
 
   safetyBoostUses: envInt('ADVISOR_SAFETY_BOOST_USES', 1),

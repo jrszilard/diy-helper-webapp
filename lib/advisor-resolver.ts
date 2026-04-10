@@ -57,8 +57,27 @@ export function resolveAdvisorConfig(
     result.safetyKeywordsDetected = true;
     result.safetyKeywordsMatched = matched;
     effectiveMaxUses += config.advisor.safetyBoostUses;
-    result.systemPromptSuffix = '\n\nIMPORTANT: The user\'s question involves safety-critical work. You MUST consult the advisor before responding.';
   }
+
+  // The beta API doesn't accept a description field on the advisor tool,
+  // so we inject advisor usage instructions into the system prompt instead.
+  result.systemPromptSuffix = `\n\n**ADVISOR TOOL — YOU HAVE ACCESS TO A MORE CAPABLE MODEL FOR REVIEW:**
+You have an "advisor" tool available. It connects you to a more capable model that can review your reasoning.
+You MUST call the advisor tool before providing guidance on:
+- Electrical work: panels, wiring, circuits, breakers, outlets, switches
+- Gas line work or appliance hookups
+- Structural or load-bearing assessments
+- Asbestos, lead paint, or hazardous material concerns
+- Roof work at height
+- Any situation where you would include a ⚠️ Safety-critical callout
+- Building code interpretation where you're not fully certain
+- Complex multi-step projects where getting the sequence wrong could cause damage
+
+When calling the advisor, describe what the user asked and your draft reasoning. The advisor will confirm, correct, or flag issues.${
+    matched.length > 0
+      ? '\n\nCRITICAL: The user\'s question involves safety-critical work. You MUST consult the advisor before responding.'
+      : ''
+  }`;
 
   result.advisorTool = {
     type: ADVISOR_TOOL_TYPE,
