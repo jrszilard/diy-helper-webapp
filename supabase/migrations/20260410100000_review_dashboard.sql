@@ -26,7 +26,7 @@ CREATE POLICY "Experts can read their own reviews"
   );
 
 -- Add category to review log for specialty-based filtering
-ALTER TABLE advisor_review_log ADD COLUMN category text;
+ALTER TABLE advisor_review_log ADD COLUMN IF NOT EXISTS category text;
 
 -- Service role can read all review data (needed for admin + API routes)
 CREATE POLICY "Service role full access to expert reviews"
