@@ -32,21 +32,33 @@ export async function POST(
 
   const supabase = getAdminClient();
 
+  // Look up expert profile — qa_questions.expert_id stores expert_profiles.id, not auth uid
+  const { data: expertProfile } = await supabase
+    .from('expert_profiles')
+    .select('id')
+    .eq('user_id', auth.userId)
+    .single();
+
+  if (!expertProfile) {
+    return NextResponse.json({ error: 'Expert profile not found' }, { status: 403 });
+  }
+
   const { data: question } = await supabase
     .from('qa_questions')
-    .select('question_text, claimed_by, ai_context')
+    .select('question_text, expert_id, ai_context')
     .eq('id', questionId)
     .single();
 
-  if (!question || question.claimed_by !== auth.userId) {
+  if (!question || question.expert_id !== expertProfile.id) {
     return NextResponse.json({ error: 'Not authorized for this question' }, { status: 403 });
   }
 
-  const { data: expert } = await supabase
-    .from('expert_profiles')
-    .select('specialties')
-    .eq('user_id', auth.userId)
-    .single();
+  const { data: specialtyRows } = await supabase
+    .from('expert_specialties')
+    .select('specialty')
+    .eq('expert_id', expertProfile.id);
+
+  const specialties = (specialtyRows || []).map((s: { specialty: string }) => s.specialty);
 
   const { error } = await supabase
     .from('advisor_correction_queue')
@@ -58,7 +70,7 @@ export async function POST(
       correction_text: correctionText.slice(0, 1000),
       reporter_id: auth.userId,
       reporter_role: 'expert',
-      expert_specialties: expert?.specialties || [],
+      expert_specialties: specialties,
     });
 
   if (error) {
