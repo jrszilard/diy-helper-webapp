@@ -482,6 +482,7 @@ export async function POST(req: NextRequest) {
                 revisedResponse: loopResult.wasRevised ? loopResult.finalResponse : null,
                 iterationsUsed: loopResult.iterationsUsed,
                 safetyKeywords: advisorResolution.safetyKeywordsMatched,
+                category: null,
                 rubricVersion: loopResult.rubricVersion,
                 reviewerTokensIn: loopResult.reviewerTokens.inputTokens,
                 reviewerTokensOut: loopResult.reviewerTokens.outputTokens,

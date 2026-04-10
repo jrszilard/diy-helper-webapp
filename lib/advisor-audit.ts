@@ -17,6 +17,7 @@ interface ReviewVerdictLog {
   revisedResponse: string | null;
   iterationsUsed: number;
   safetyKeywords: string[];
+  category: string | null;
   rubricVersion: number;
   reviewerTokensIn: number;
   reviewerTokensOut: number;
@@ -41,6 +42,7 @@ export async function logReviewVerdict(params: ReviewVerdictLog): Promise<void> 
         revised_response: params.revisedResponse,
         iterations_used: params.iterationsUsed,
         safety_keywords: params.safetyKeywords,
+        category: params.category,
         rubric_version: params.rubricVersion,
         reviewer_tokens_in: params.reviewerTokensIn,
         reviewer_tokens_out: params.reviewerTokensOut,

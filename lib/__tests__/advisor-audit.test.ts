@@ -29,6 +29,7 @@ describe('logReviewVerdict', () => {
       revisedResponse: null,
       iterationsUsed: 1,
       safetyKeywords: ['outlet install'],
+      category: 'electrical',
       rubricVersion: 1,
       reviewerTokensIn: 500,
       reviewerTokensOut: 200,
