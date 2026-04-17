@@ -39,43 +39,40 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({
       {label && (
         <label
           htmlFor={id}
-          className={cn('text-sm font-medium text-[var(--earth-brown-dark)]', labelClassName)}
+          className={cn('text-sm font-medium text-white/60', labelClassName)}
         >
           {label}
         </label>
       )}
       <div className="relative">
-      {LeftIcon && (
-        <LeftIcon
-          size={iconSize}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--earth-brown-light)] pointer-events-none"
-        />
-      )}
-      <input
-        ref={ref}
-        id={id}
-        className={cn(
-          'border rounded-lg bg-white text-[#3E2723] transition-colors',
-          'placeholder-[var(--earth-brown-light)]',
-          'focus:outline-none focus:ring-2 focus:ring-[var(--terracotta)] focus:border-[var(--terracotta)]',
-          'disabled:opacity-50 disabled:cursor-not-allowed',
-          error
-            ? 'border-[var(--rust)] focus:ring-[var(--rust)] focus:border-[var(--rust)]'
-            : 'border-[var(--earth-sand)]',
-          sizeClasses[inputSize],
-          paddingLeft,
-          paddingRight,
-          fullWidth && 'w-full',
-          className,
+        {LeftIcon && (
+          <LeftIcon
+            size={iconSize}
+            className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30"
+          />
         )}
-        {...props}
-      />
-      {RightIcon && (
-        <RightIcon
-          size={iconSize}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--earth-brown-light)] pointer-events-none"
+        <input
+          ref={ref}
+          id={id}
+          className={cn(
+            'bg-white/10 text-white placeholder:text-white/50 border border-white/20 rounded-lg transition-colors',
+            'focus:outline-none focus:ring-2 focus:ring-[var(--rust)] focus:border-[var(--rust)]',
+            'disabled:opacity-50 disabled:cursor-not-allowed',
+            error && 'border-[var(--rust)] focus:ring-[var(--rust)] focus:border-[var(--rust)]',
+            sizeClasses[inputSize],
+            paddingLeft,
+            paddingRight,
+            fullWidth && 'w-full',
+            className,
+          )}
+          {...props}
         />
-      )}
+        {RightIcon && (
+          <RightIcon
+            size={iconSize}
+            className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30"
+          />
+        )}
       </div>
       {error && (
         <p className="text-xs text-[var(--rust)]">{error}</p>

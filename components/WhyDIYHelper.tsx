@@ -143,8 +143,8 @@ export default function WhyDIYHelper() {
                 onClick={() => setActiveScenario(idx)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   idx === activeScenario
-                    ? 'bg-terracotta text-white shadow-lg'
-                    : 'bg-white text-warm-brown hover:bg-earth-cream border border-earth-tan'
+                    ? 'bg-rust text-white shadow-lg'
+                    : 'bg-white/6 text-warm-brown hover:bg-white/5 border border-earth-tan'
                 }`}
               >
                 {s.id === 'electrical' && 'Electrical'}
@@ -163,10 +163,10 @@ export default function WhyDIYHelper() {
           {/* Comparison Grid */}
           <div className="grid md:grid-cols-3 gap-6">
             {/* ChatGPT */}
-            <div className="bg-white rounded-xl p-6 border border-earth-tan">
+            <div className="bg-white/6 rounded-xl p-6 border border-earth-tan">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-earth-cream rounded-lg">
-                  <Bot className="w-5 h-5 text-earth-brown" />
+                <div className="p-2 bg-white/5 rounded-lg">
+                  <Bot className="w-5 h-5 text-white/60" />
                 </div>
                 <h3 className="font-bold text-foreground">Generic AI</h3>
               </div>
@@ -182,10 +182,10 @@ export default function WhyDIYHelper() {
             </div>
 
             {/* Google Search */}
-            <div className="bg-white rounded-xl p-6 border border-earth-tan">
+            <div className="bg-white/6 rounded-xl p-6 border border-earth-tan">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-earth-cream rounded-lg">
-                  <Search className="w-5 h-5 text-earth-brown" />
+                <div className="p-2 bg-white/5 rounded-lg">
+                  <Search className="w-5 h-5 text-white/60" />
                 </div>
                 <h3 className="font-bold text-foreground">Google Search</h3>
               </div>
@@ -201,15 +201,15 @@ export default function WhyDIYHelper() {
             </div>
 
             {/* DIY Helper */}
-            <div className="bg-gradient-to-br from-[#FDF8F3] to-[var(--status-progress-bg)] rounded-xl p-6 border-2 border-terracotta relative">
+            <div className="bg-gradient-to-br from-[#FDF8F3] to-[var(--status-progress-bg)] rounded-xl p-6 border-2 border-rust relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="bg-terracotta text-white text-xs font-bold px-3 py-1 rounded-full">
+                <span className="bg-rust text-white text-xs font-bold px-3 py-1 rounded-full">
                   BEST OPTION
                 </span>
               </div>
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-[var(--status-progress-bg)] rounded-lg">
-                  <Zap className="w-5 h-5 text-terracotta" />
+                  <Zap className="w-5 h-5 text-rust" />
                 </div>
                 <h3 className="font-bold text-foreground">DIY Helper</h3>
               </div>
@@ -229,7 +229,7 @@ export default function WhyDIYHelper() {
           <div className="text-center mt-10">
             <button
               onClick={handleTryIt}
-              className="inline-flex items-center gap-2 bg-terracotta text-white px-6 py-3 rounded-xl font-semibold hover:bg-terracotta-dark transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 bg-rust text-white px-6 py-3 rounded-xl font-semibold hover:bg-copper transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
             >
               <MessageSquare className="w-5 h-5" />
               Try This Question

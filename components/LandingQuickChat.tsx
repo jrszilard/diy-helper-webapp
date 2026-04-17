@@ -8,7 +8,7 @@ import { sanitizeHref } from '@/lib/security';
 import { cleanMessageContent } from '@/components/ChatMessages';
 import ChatMessageFeedback from '@/components/ChatMessageFeedback';
 import { supabase } from '@/lib/supabase';
-import { useChat } from '@/hooks/useChat';
+import { useChat, CHAT_STORAGE_KEY } from '@/hooks/useChat';
 import { useAgentRun } from '@/hooks/useAgentRun';
 import Spinner from '@/components/ui/Spinner';
 import Button from '@/components/ui/Button';
@@ -57,7 +57,7 @@ export default function LandingQuickChat({
       <a href={sanitizeHref(href)} className="underline text-sky-300 hover:text-sky-200" target="_blank" rel="noopener noreferrer">{children}</a>
     ),
     blockquote: ({ children }: { children?: React.ReactNode }) => (
-      <blockquote className="border-l-4 border-terracotta pl-4 italic text-earth-sand">{children}</blockquote>
+      <blockquote className="border-l-4 border-rust pl-4 italic text-earth-sand">{children}</blockquote>
     ),
     table: ({ children }: { children?: React.ReactNode }) => (
       <table className="w-full border-collapse my-3 text-sm">{children}</table>
@@ -82,13 +82,16 @@ export default function LandingQuickChat({
   const [detectedIntent, setDetectedIntent] = useState<IntentType | null>(null);
   const [isPlanning, setIsPlanning] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const hasSentFirstMessage = useRef(false);
 
   const chat = useChat({
     projectId: undefined,
     conversationId: initialConversationId,
     userId,
   });
+
+  const hasSentFirstMessage = useRef(
+    typeof window !== 'undefined' && !!localStorage.getItem(CHAT_STORAGE_KEY)
+  );
 
   const agentRun = useAgentRun();
   const projectActions = useProjectActions({ userId: userId ?? undefined });
@@ -104,18 +107,31 @@ export default function LandingQuickChat({
     return () => subscription.unsubscribe();
   }, []);
 
-  // On mount: let useChat handle resume from localStorage.
-  // Only clear state if no explicit conversation and no stored conversation.
+  // When initialConversationId changes:
+  // - undefined  → fresh chat (new chat or initial landing)
+  // - a real ID  → load that conversation's messages from Supabase
   useEffect(() => {
-    if (initialConversationId) return;
-    const storedConvId = localStorage.getItem('diy-helper-conversation-id');
-    if (!storedConvId) {
+    if (!initialConversationId) {
       chat.handleNewChat();
+      agentRun.reset();
+      return;
     }
-    // useChat already loads stored messages + conversationId on mount
-    agentRun.reset();
+    supabase
+      .from('conversation_messages')
+      .select('role, content')
+      .eq('conversation_id', initialConversationId)
+      .order('created_at', { ascending: true })
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          chat.handleSelectConversation(
+            initialConversationId,
+            data as { role: 'user' | 'assistant'; content: string }[]
+          );
+          onFirstMessage?.();
+        }
+      });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initialConversationId]);
 
   // Auto-scroll
   useEffect(() => {
@@ -283,7 +299,7 @@ export default function LandingQuickChat({
               <div
                 className={`max-w-[85%] ${
                   msg.role === 'user'
-                    ? 'bg-terracotta text-white rounded-2xl rounded-br-md px-4 py-2.5'
+                    ? 'bg-rust text-white rounded-2xl rounded-br-md px-4 py-2.5'
                     : 'bg-white/10 text-earth-cream rounded-2xl rounded-bl-md px-4 py-3'
                 }`}
               >
@@ -418,7 +434,7 @@ export default function LandingQuickChat({
             aria-label="Send message"
             className={`p-2 rounded-xl transition-all ${
               chat.input.trim() && !chat.isLoading
-                ? 'bg-terracotta text-white hover:bg-terracotta-dark'
+                ? 'bg-rust text-white hover:bg-copper'
                 : 'text-white/30 cursor-not-allowed'
             }`}
           >

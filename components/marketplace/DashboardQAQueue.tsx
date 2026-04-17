@@ -1,8 +1,6 @@
 'use client';
 
 import { MessageSquare, Clock, ArrowRight } from 'lucide-react';
-import Card from '@/components/ui/Card';
-import SectionHeader from '@/components/ui/SectionHeader';
 import EmptyState from '@/components/ui/EmptyState';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
@@ -33,17 +31,13 @@ export default function DashboardQAQueue({ questions }: DashboardQAQueueProps) {
   };
 
   return (
-    <Card padding="none">
-      <div className="px-4 py-3 border-b border-earth-sand">
-        <SectionHeader
-          size="sm"
-          title="Recent Questions"
-          action={
-            <Button variant="ghost" size="xs" rightIcon={ArrowRight} href="/experts/dashboard/qa">
-              View Queue
-            </Button>
-          }
-        />
+    <div className="bg-white/5 border border-white/[0.08] rounded-lg overflow-hidden">
+      <div className="px-4 py-3 border-b border-white/[0.08] flex items-center justify-between">
+        <span className="text-sm font-semibold text-white">Recent Questions</span>
+        <Button variant="ghost" size="xs" rightIcon={ArrowRight} href="/experts/dashboard/qa"
+          className="text-white/50 hover:text-white hover:bg-white/10">
+          View Queue
+        </Button>
       </div>
 
       {questions.length === 0 ? (
@@ -51,23 +45,23 @@ export default function DashboardQAQueue({ questions }: DashboardQAQueueProps) {
           icon={MessageSquare}
           size="sm"
           description="No open questions in your specialties"
-          className="py-8"
+          className="py-8 text-white/40"
         />
       ) : (
-        <div className="divide-y divide-earth-sand/50">
+        <div className="divide-y divide-white/[0.06]">
           {questions.map(q => (
-            <div key={q.id} className="px-4 py-3 hover:bg-earth-tan/30 transition-colors">
-              <p className="text-sm text-foreground line-clamp-2">{q.questionText}</p>
+            <div key={q.id} className="px-4 py-3 hover:bg-white/5 transition-colors">
+              <p className="text-sm text-white/80 line-clamp-2">{q.questionText}</p>
               <div className="flex items-center gap-3 mt-1.5">
                 <Badge variant="default" size="sm">{q.category}</Badge>
                 {q.priceCents === 0 ? (
-                  <span className="text-xs font-medium text-[var(--muted)]">Free</span>
+                  <span className="text-xs font-medium text-white/30">Free</span>
                 ) : (
                   <span className="text-xs font-medium text-forest-green">
                     ${((q.expertPayoutCents ?? q.priceCents) / 100).toFixed(2)}
                   </span>
                 )}
-                <span className="flex items-center gap-1 text-xs text-[var(--muted)]">
+                <span className="flex items-center gap-1 text-xs text-white/30">
                   <Clock size={12} />
                   {formatTimeAgo(q.createdAt)}
                 </span>
@@ -76,6 +70,6 @@ export default function DashboardQAQueue({ questions }: DashboardQAQueueProps) {
           ))}
         </div>
       )}
-    </Card>
+    </div>
   );
 }

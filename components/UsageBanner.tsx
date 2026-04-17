@@ -34,28 +34,28 @@ export default function UsageBanner({ usage, tier }: UsageBannerProps) {
       <div className="space-y-2">
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-earth-brown">Reports</span>
-            <span className={`text-xs font-medium ${isReportsWarning ? 'text-terracotta' : 'text-earth-brown'}`}>
+            <span className="text-xs text-white/60">Reports</span>
+            <span className={`text-xs font-medium ${isReportsWarning ? 'text-rust' : 'text-white/60'}`}>
               {usage.reports.used} of {usage.reports.limit} used
             </span>
           </div>
-          <div className="w-full bg-earth-tan rounded-full h-1.5">
+          <div className="w-full bg-white/8 rounded-full h-1.5">
             <div
-              className={`h-1.5 rounded-full transition-all ${isReportsWarning ? 'bg-terracotta' : 'bg-forest-green'}`}
+              className={`h-1.5 rounded-full transition-all ${isReportsWarning ? 'bg-rust' : 'bg-forest-green'}`}
               style={{ width: `${Math.min(reportsPercent, 100)}%` }}
             />
           </div>
         </div>
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-earth-brown">Chat Messages</span>
-            <span className={`text-xs font-medium ${isMessagesWarning ? 'text-terracotta' : 'text-earth-brown'}`}>
+            <span className="text-xs text-white/60">Chat Messages</span>
+            <span className={`text-xs font-medium ${isMessagesWarning ? 'text-rust' : 'text-white/60'}`}>
               {usage.chatMessages.used} of {usage.chatMessages.limit} used
             </span>
           </div>
-          <div className="w-full bg-earth-tan rounded-full h-1.5">
+          <div className="w-full bg-white/8 rounded-full h-1.5">
             <div
-              className={`h-1.5 rounded-full transition-all ${isMessagesWarning ? 'bg-terracotta' : 'bg-forest-green'}`}
+              className={`h-1.5 rounded-full transition-all ${isMessagesWarning ? 'bg-rust' : 'bg-forest-green'}`}
               style={{ width: `${Math.min(messagesPercent, 100)}%` }}
             />
           </div>

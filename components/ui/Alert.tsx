@@ -12,32 +12,32 @@ const variantConfig: Record<AlertVariant, {
   bodyClass: string;
 }> = {
   info: {
-    container: 'bg-[var(--slate-blue)]/8 border border-[var(--slate-blue)]/20',
+    container: 'bg-[var(--slate-blue)]/15 border border-[var(--slate-blue)]/30',
     icon: Info,
     iconClass: 'text-[var(--slate-blue)]',
     titleClass: 'text-[var(--slate-blue)]',
-    bodyClass:  'text-[var(--earth-brown)]',
+    bodyClass:  'text-white/60',
   },
   success: {
-    container: 'bg-[var(--forest-green)]/8 border border-[var(--forest-green)]/20',
+    container: 'bg-[var(--forest-green)]/15 border border-[var(--forest-green)]/30',
     icon: CheckCircle,
     iconClass: 'text-[var(--forest-green)]',
     titleClass: 'text-[var(--forest-green)]',
-    bodyClass:  'text-[var(--earth-brown)]',
+    bodyClass:  'text-white/60',
   },
   warning: {
-    container: 'bg-[var(--warning-bg)] border border-[var(--warning-border)]',
+    container: 'bg-[var(--warning)]/15 border border-[var(--warning)]/30',
     icon: AlertTriangle,
-    iconClass: 'text-[var(--warning)]',
-    titleClass: 'text-[var(--warning-dark)]',
-    bodyClass:  'text-[var(--warning)]',
+    iconClass: 'text-[var(--warning-light)]',
+    titleClass: 'text-[var(--warning-light)]',
+    bodyClass:  'text-white/60',
   },
   error: {
-    container: 'bg-[var(--rust)]/8 border border-[var(--rust)]/20',
+    container: 'bg-[var(--rust)]/15 border border-[var(--rust)]/30',
     icon: XCircle,
     iconClass: 'text-[var(--rust)]',
     titleClass: 'text-[var(--rust)]',
-    bodyClass:  'text-[var(--earth-brown)]',
+    bodyClass:  'text-white/60',
   },
 };
 

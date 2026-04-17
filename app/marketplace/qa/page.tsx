@@ -105,8 +105,8 @@ function QAPageContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
-        <Spinner size="lg" className="text-terracotta" />
+      <div className="min-h-screen bg-earth-night flex items-center justify-center">
+        <Spinner size="lg" className="text-rust" />
       </div>
     );
   }
@@ -120,7 +120,7 @@ function QAPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-earth-brown-dark">
+    <div className="min-h-screen bg-earth-night">
       <DIYerHeader />
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
         {showSubmitForm && (
@@ -144,7 +144,7 @@ function QAPageContent() {
             </h1>
             <Link
               href="/?tab=expert"
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-terracotta hover:bg-terracotta/80 text-white rounded-lg transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-rust hover:bg-rust/80 text-white rounded-lg transition-colors"
             >
               <MessageSquare className="w-4 h-4" />
               Ask a Question
@@ -158,7 +158,7 @@ function QAPageContent() {
               <p className="text-sm mb-4">No questions yet. Connect with a verified expert to get started.</p>
               <Link
                 href="/?tab=expert"
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium bg-terracotta hover:bg-terracotta/80 text-white rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium bg-rust hover:bg-rust/80 text-white rounded-lg transition-colors"
               >
                 <MessageSquare className="w-4 h-4" />
                 Talk to a Pro
@@ -174,8 +174,8 @@ function QAPageContent() {
 export default function QAPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
-        <Spinner size="lg" className="text-terracotta" />
+      <div className="min-h-screen bg-earth-night flex items-center justify-center">
+        <Spinner size="lg" className="text-rust" />
       </div>
     }>
       <QAPageContent />

@@ -97,7 +97,7 @@ export default function ExpertReviewQueuePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="w-6 h-6 border-2 border-terracotta border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-rust border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -106,16 +106,16 @@ export default function ExpertReviewQueuePage() {
     <div className="space-y-6 max-w-4xl">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Review AI Responses</h1>
-        <p className="text-sm text-earth-brown mt-1">
+        <p className="text-sm text-white/60 mt-1">
           Borderline AI responses in your specialty areas. Submit corrections or confirm they look good.
         </p>
       </div>
 
       {items.length === 0 ? (
-        <div className="text-center py-12 text-earth-brown">
-          <ClipboardCheck className="w-10 h-10 mx-auto mb-3 text-earth-brown-light" />
+        <div className="text-center py-12 text-white/60">
+          <ClipboardCheck className="w-10 h-10 mx-auto mb-3 text-white/40" />
           <p className="text-lg font-medium">All caught up</p>
-          <p className="text-sm text-earth-brown-light mt-1">
+          <p className="text-sm text-white/40 mt-1">
             No responses need review in your specialties right now.
           </p>
         </div>
@@ -133,7 +133,7 @@ export default function ExpertReviewQueuePage() {
           {nextCursor && (
             <button
               onClick={() => fetchItems(nextCursor)}
-              className="w-full py-3 text-sm text-slate-blue hover:text-slate-blue-dark border border-earth-sand rounded-lg hover:bg-earth-tan/30 transition-colors"
+              className="w-full py-3 text-sm text-slate-blue hover:text-slate-blue-dark border border-white/10 rounded-lg hover:bg-white/30 transition-colors"
             >
               Load more
             </button>

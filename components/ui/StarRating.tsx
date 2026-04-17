@@ -55,8 +55,8 @@ export default function StarRating({
               className={cn(
                 'transition-colors',
                 filled
-                  ? 'fill-terracotta text-terracotta'
-                  : 'text-earth-tan fill-earth-tan',
+                  ? 'fill-rust text-rust'
+                  : 'text-white/20 fill-white/20',
               )}
             />
           </button>

@@ -45,6 +45,7 @@ export default function ExpertSearchFilters({ filters, onChange }: ExpertSearchF
             value={filters.specialty}
             onChange={e => onChange({ ...filters, specialty: e.target.value })}
             fullWidth
+            variant="dark"
           >
             {SPECIALTY_OPTIONS.map(o => (
               <option key={o.value} value={o.value}>{o.label}</option>
@@ -60,6 +61,7 @@ export default function ExpertSearchFilters({ filters, onChange }: ExpertSearchF
             placeholder="e.g. CA"
             maxLength={2}
             fullWidth
+            variant="dark"
           />
         </div>
         <div>
@@ -68,6 +70,7 @@ export default function ExpertSearchFilters({ filters, onChange }: ExpertSearchF
             value={filters.minRating}
             onChange={e => onChange({ ...filters, minRating: parseInt(e.target.value) })}
             fullWidth
+            variant="dark"
           >
             <option value={0}>Any Rating</option>
             <option value={3}>3+ Stars</option>

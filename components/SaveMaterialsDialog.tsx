@@ -81,7 +81,7 @@ export default function SaveMaterialsDialog({
               </p>
             )}
             {extractedMaterials.total_estimate && (
-              <p className="text-earth-brown text-sm mb-4">
+              <p className="text-white/60 text-sm mb-4">
                 Estimated total: ${extractedMaterials.total_estimate.toFixed(2)}
               </p>
             )}
@@ -104,7 +104,7 @@ export default function SaveMaterialsDialog({
                     </option>
                   ))}
                 </Select>
-                <div className="text-center text-earth-brown-light text-sm my-3">or</div>
+                <div className="text-center text-white/40 text-sm my-3">or</div>
               </div>
             )}
 
@@ -126,7 +126,7 @@ export default function SaveMaterialsDialog({
                     </option>
                   ))}
                 </Select>
-                <div className="text-center text-earth-brown-light text-sm my-3">or</div>
+                <div className="text-center text-white/40 text-sm my-3">or</div>
               </div>
             )}
 
@@ -141,7 +141,7 @@ export default function SaveMaterialsDialog({
 
             {/* Guest mode notice */}
             {isGuestMode && (
-              <p className="text-xs text-earth-brown mt-4 text-center">
+              <p className="text-xs text-white/60 mt-4 text-center">
                 Projects are saved locally. Sign in to sync across devices.
               </p>
             )}

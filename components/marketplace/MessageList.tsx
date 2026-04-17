@@ -44,13 +44,14 @@ export default function MessageList({ threads, basePath }: MessageListProps) {
         size="sm"
         description="No messages yet"
         subtext="Your conversations will appear here"
+        variant="dark"
         className="py-12"
       />
     );
   }
 
   return (
-    <div className="divide-y divide-earth-sand">
+    <div className="divide-y divide-white/[0.06]">
       {threads.map(thread => {
         const hasAttachments = thread.lastMessage.attachments && thread.lastMessage.attachments.length > 0;
         const preview = thread.lastMessage.content
@@ -63,15 +64,15 @@ export default function MessageList({ threads, basePath }: MessageListProps) {
           <Link
             key={thread.id}
             href={`${basePath}/${thread.id}`}
-            className="flex items-center gap-3 px-4 py-3 hover:bg-earth-tan/50 transition-colors"
+            className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors"
           >
             <Avatar name={thread.otherUserName} size="sm" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-foreground">{thread.otherUserName}</span>
-                <span className="text-xs text-[var(--muted)]">{formatTimeAgo(thread.lastMessage.createdAt)}</span>
+                <span className="text-sm font-semibold text-white/80">{thread.otherUserName}</span>
+                <span className="text-xs text-white/30">{formatTimeAgo(thread.lastMessage.createdAt)}</span>
               </div>
-              <p className="text-xs text-earth-brown truncate mt-0.5 flex items-center gap-1">
+              <p className="text-xs text-white/50 truncate mt-0.5 flex items-center gap-1">
                 {hasAttachments && <Paperclip size={10} className="flex-shrink-0" />}
                 {preview}
               </p>

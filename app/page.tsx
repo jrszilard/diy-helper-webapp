@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import LandingHero from '@/components/LandingHero';
 import AppHeader from '@/components/AppHeader';
-import AppLogo from '@/components/AppLogo';
 import Button from '@/components/ui/Button';
 import { MessageSquare } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -71,7 +70,6 @@ export default function LandingPage() {
 
   const handleProjectSelect = useCallback(async (project: { id: string } | null) => {
     if (!project) return;
-    // Find the most recent conversation for this project
     const { data } = await supabase
       .from('conversations')
       .select('id')
@@ -81,19 +79,30 @@ export default function LandingPage() {
     if (data && data.length > 0) {
       openConversation(data[0].id);
     } else {
-      // No conversation yet — just activate chat
       setChatActive(true);
     }
   }, []);
 
+  // Broadcast materials count to the global sidebar
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('diy:materialsCount', { detail: materialsCount }));
+  }, [materialsCount]);
+
+  // Listen for project selection from the global sidebar
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const project = (e as CustomEvent<{ id: string }>).detail;
+      handleProjectSelect(project);
+    };
+    window.addEventListener('diy:projectSelect', handler);
+    return () => window.removeEventListener('diy:projectSelect', handler);
+  }, [handleProjectSelect]);
+
   return (
-    <div className="min-h-screen bg-earth-brown-dark">
+    <div className="min-h-screen bg-earth-night">
       <AppHeader
         showBack={chatActive}
-        backLabel="New Chat"
         onBack={handleNewChat}
-        onProjectSelect={handleProjectSelect}
-        materialsCount={materialsCount > 0 ? materialsCount : undefined}
       />
 
       <section className="pt-[var(--space-3xl)] pb-[var(--space-2xl)]">
@@ -138,25 +147,6 @@ export default function LandingPage() {
         </section>
       )}
 
-      {/* Footer — only in hero state */}
-      {!chatActive && (
-        <footer className="py-[var(--space-l)]">
-          <div className="u-container">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <AppLogo variant="dark" />
-              <div className="flex items-center gap-1">
-                <Button variant="ghost" href="/about" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10 text-sm">
-                  About
-                </Button>
-                <Button variant="ghost" href="/experts/register" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10 text-sm">
-                  Become an Expert
-                </Button>
-                <span className="text-white/30 text-sm pl-2">Powered by Claude AI</span>
-              </div>
-            </div>
-          </div>
-        </footer>
-      )}
     </div>
   );
 }

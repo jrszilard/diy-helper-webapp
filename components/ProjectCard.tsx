@@ -53,7 +53,7 @@ export default function ProjectCard({
         className={cn(
           'cursor-pointer transition active:scale-[0.98]',
           isSelected
-            ? 'bg-terracotta/15 border-terracotta'
+            ? 'bg-rust/15 border-rust'
             : 'bg-white/5 border-transparent active:bg-white/10',
         )}
       >
@@ -122,7 +122,7 @@ export default function ProjectCard({
       className={cn(
         'group cursor-pointer transition',
         isSelected
-          ? 'bg-terracotta/15 border-terracotta'
+          ? 'bg-rust/15 border-rust'
           : 'bg-white/5 border-transparent hover:bg-white/10',
       )}
     >

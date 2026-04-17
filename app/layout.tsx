@@ -4,6 +4,7 @@ import "./globals.css";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import BetaBanner from "@/components/BetaBanner";
 import BetaFeedbackWidget from "@/components/BetaFeedbackWidget";
+import AppShell from "@/components/AppShell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,7 +56,9 @@ export default function RootLayout({
       >
         <BetaBanner />
         <ErrorBoundary>
-          {children}
+          <AppShell>
+            {children}
+          </AppShell>
         </ErrorBoundary>
         <BetaFeedbackWidget />
       </body>

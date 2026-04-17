@@ -32,8 +32,8 @@ interface UsageData {
 export default function SettingsPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
-        <Spinner size="lg" className="text-terracotta" />
+      <div className="min-h-screen bg-earth-night flex items-center justify-center">
+        <Spinner size="lg" className="text-rust" />
       </div>
     }>
       <SettingsContent />
@@ -103,14 +103,14 @@ function SettingsContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
-        <Spinner size="lg" className="text-terracotta" />
+      <div className="min-h-screen bg-earth-night flex items-center justify-center">
+        <Spinner size="lg" className="text-rust" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-earth-brown-dark">
+    <div className="min-h-screen bg-earth-night">
       <DIYerHeader />
 
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -169,16 +169,16 @@ function SettingsContent() {
                 <p className="text-sm font-semibold text-[var(--earth-sand)] uppercase tracking-wide mb-3">
                   Payouts
                 </p>
-                <div className="rounded-xl p-5 border bg-earth-cream border-earth-sand">
+                <div className="rounded-xl p-5 border bg-white/5 border-white/[0.08]">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-forest-green/10 rounded-lg flex items-center justify-center">
                       <Banknote className="w-5 h-5 text-forest-green" />
                     </div>
                     <div>
-                      <span className="text-lg font-bold text-foreground">
+                      <span className="text-lg font-bold text-white">
                         {expert.stripeOnboardingComplete ? 'Stripe Connected' : 'Stripe Not Connected'}
                       </span>
-                      <p className="text-sm text-earth-brown">
+                      <p className="text-sm text-white/50">
                         {expert.stripeOnboardingComplete
                           ? 'Payouts are active. Earnings are deposited to your connected account.'
                           : 'Complete Stripe onboarding to receive payouts for Q&A answers and consultations.'
@@ -194,14 +194,14 @@ function SettingsContent() {
                 <p className="text-sm font-semibold text-[var(--earth-sand)] uppercase tracking-wide mb-3">
                   Expert Subscription
                 </p>
-                <div className="rounded-xl p-5 border bg-earth-cream border-earth-sand">
+                <div className="rounded-xl p-5 border bg-white/5 border-white/[0.08]">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-earth-tan rounded-lg flex items-center justify-center">
-                      <Shield className="w-5 h-5 text-earth-brown" />
+                    <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-white/50" />
                     </div>
                     <div>
-                      <span className="text-lg font-bold text-foreground">Free Tier</span>
-                      <p className="text-sm text-earth-brown">
+                      <span className="text-lg font-bold text-white">Free Tier</span>
+                      <p className="text-sm text-white/50">
                         Expert subscription tiers (Pro &amp; Premium) with queue priority and reduced fees are coming soon.
                       </p>
                     </div>
@@ -220,8 +220,8 @@ function SettingsContent() {
                 </p>
                 <div className={`rounded-xl p-5 border ${
                   isPro
-                    ? 'bg-gradient-to-br from-slate-blue/5 to-slate-blue/10 border-slate-blue/30'
-                    : 'bg-earth-cream border-earth-sand'
+                    ? 'bg-gradient-to-br from-slate-blue/10 to-slate-blue/20 border-slate-blue/30'
+                    : 'bg-white/5 border-white/[0.08]'
                 }`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -230,18 +230,18 @@ function SettingsContent() {
                           <Crown className="w-5 h-5 text-white" />
                         </div>
                       ) : (
-                        <div className="w-10 h-10 bg-earth-tan rounded-lg flex items-center justify-center">
-                          <Zap className="w-5 h-5 text-earth-brown" />
+                        <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+                          <Zap className="w-5 h-5 text-white/50" />
                         </div>
                       )}
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-lg font-bold text-foreground">
+                          <span className="text-lg font-bold text-white">
                             {isPro ? 'Pro' : 'Free'}
                           </span>
                           {isPro && <Badge variant="solid">Active</Badge>}
                         </div>
-                        <p className="text-sm text-earth-brown">
+                        <p className="text-sm text-white/50">
                           {isPro
                             ? 'Unlimited reports, messages, and priority expert matching'
                             : `${usage?.reports.limit ?? 5} reports & ${usage?.chatMessages.limit ?? 30} messages per month`
@@ -250,8 +250,8 @@ function SettingsContent() {
                       </div>
                     </div>
                     {isPro ? (
-                      <span className="text-lg font-bold text-foreground">
-                        $9.99<span className="text-sm font-normal text-earth-brown">/mo</span>
+                      <span className="text-lg font-bold text-white">
+                        $9.99<span className="text-sm font-normal text-white/50">/mo</span>
                       </span>
                     ) : (
                       <span className="text-lg font-bold text-forest-green">Free</span>
@@ -259,7 +259,7 @@ function SettingsContent() {
                   </div>
 
                   {isPro && subscription?.currentPeriodEnd && (
-                    <p className="text-xs text-earth-brown mt-3 pt-3 border-t border-slate-blue/20">
+                    <p className="text-xs text-white/30 mt-3 pt-3 border-t border-slate-blue/20">
                       Next billing date: {new Date(subscription.currentPeriodEnd).toLocaleDateString('en-US', {
                         year: 'numeric', month: 'long', day: 'numeric'
                       })}

@@ -25,7 +25,6 @@ export default function ExpertsBrowsePage() {
     state: '',
     minRating: 0,
   });
-
   const fetchExperts = useCallback(async () => {
     setLoading(true);
     try {
@@ -56,7 +55,7 @@ export default function ExpertsBrowsePage() {
   }, [fetchExperts]);
 
   return (
-    <div className="min-h-screen bg-earth-brown-dark">
+    <div className="min-h-screen bg-earth-night">
       <AppHeader />
 
       <main className="max-w-5xl mx-auto px-4 py-8">
@@ -76,6 +75,7 @@ export default function ExpertsBrowsePage() {
             Ask a Question
           </Button>
         </div>
+
 
         <div className="mb-6">
           <ExpertSearchFilters filters={filters} onChange={setFilters} />

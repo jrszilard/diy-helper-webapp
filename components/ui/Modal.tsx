@@ -91,16 +91,16 @@ export default function Modal({
           aria-modal={true}
           aria-label={title}
           className={cn(
-            'relative w-full max-w-md bg-surface h-full overflow-hidden flex flex-col shadow-xl animate-slide-in-right',
+            'relative w-full max-w-md bg-[var(--earth-brown-dark)] h-full overflow-hidden flex flex-col shadow-xl animate-slide-in-right',
             className,
           )}
         >
           {title && (
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--earth-sand)]">
-              <h2 className="text-base font-semibold text-[var(--earth-brown-dark)]">{title}</h2>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+              <h2 className="text-base font-semibold text-white">{title}</h2>
               <button
                 onClick={onClose}
-                className="p-1 text-[var(--earth-brown)] hover:text-[var(--foreground)] transition-colors"
+                className="p-1 text-white/40 hover:text-white transition-colors"
                 aria-label="Close"
               >
                 <X size={20} />
@@ -123,13 +123,13 @@ export default function Modal({
         aria-modal={true}
         aria-label={title}
         className={cn(
-          'relative bg-surface rounded-xl shadow-2xl w-full border border-[var(--earth-sand)]',
+          'relative bg-[var(--earth-brown-dark)] rounded-xl shadow-2xl w-full border border-white/10',
           sizeClasses[size],
           className,
         )}
       >
         {title && (
-          <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-[var(--earth-sand)]">
+          <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-white/10">
             <h2 className="text-lg font-bold text-[var(--earth-brown-dark)]">{title}</h2>
             <button
               onClick={onClose}

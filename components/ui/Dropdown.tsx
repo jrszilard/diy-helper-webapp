@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, ElementType, ReactNode } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { buttonVariants } from '@/components/ui/Button';
 
 export interface DropdownItem {
   label: string;
@@ -21,10 +20,11 @@ interface DropdownProps {
   trigger: ReactNode;
   items: DropdownItem[];
   align?: 'left' | 'right';
+  placement?: 'bottom' | 'top';
   className?: string;
 }
 
-export default function Dropdown({ trigger, items, align = 'right', className }: DropdownProps) {
+export default function Dropdown({ trigger, items, align = 'right', placement = 'bottom', className }: DropdownProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -44,11 +44,8 @@ export default function Dropdown({ trigger, items, align = 'right', className }:
     };
   }, [open]);
 
-  const ghostClass = buttonVariants({ variant: 'ghost', size: 'sm', fullWidth: true });
-  const dangerGhostClass = cn(
-    buttonVariants({ variant: 'ghost', size: 'sm', fullWidth: true }),
-    'text-rust hover:bg-[var(--status-progress-bg)] hover:text-rust',
-  );
+  const ghostClass = 'w-full flex items-center gap-2 px-4 py-1.5 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors';
+  const dangerGhostClass = 'w-full flex items-center gap-2 px-4 py-1.5 text-sm text-[var(--rust)] hover:bg-white/10 transition-colors';
 
   return (
     <div className="relative" ref={ref}>
@@ -58,20 +55,18 @@ export default function Dropdown({ trigger, items, align = 'right', className }:
         <div
           role="menu"
           className={cn(
-            'absolute mt-2 w-52 bg-surface rounded-lg shadow-xl border border-earth-sand py-1 z-50',
+            'absolute w-52 bg-[var(--earth-brown-dark)] rounded-lg shadow-xl border border-white/10 py-1 z-50',
+            placement === 'top' ? 'bottom-full mb-2' : 'mt-2',
             align === 'right' ? 'right-0' : 'left-0',
             className,
           )}
         >
           {items.map((item, i) => {
-            const itemClass = cn(
-              item.danger ? dangerGhostClass : ghostClass,
-              'justify-start rounded-none px-4',
-            );
+            const itemClass = item.danger ? dangerGhostClass : ghostClass;
 
             return (
               <div key={i}>
-                {item.dividerBefore && <div className="border-t border-earth-tan my-1" />}
+                {item.dividerBefore && <div className="border-t border-white/10 my-1" />}
                 {item.href ? (
                   <Link
                     href={item.href}

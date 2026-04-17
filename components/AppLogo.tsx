@@ -1,23 +1,20 @@
 import Link from 'next/link';
-import { Wrench } from 'lucide-react';
+import Image from 'next/image';
 
 interface AppLogoProps {
-  showLabel?: boolean;
-  variant?: 'light' | 'dark';
   href?: string;
 }
 
-export default function AppLogo({ showLabel = true, variant = 'light', href = '/' }: AppLogoProps) {
+export default function AppLogo({ href = '/' }: AppLogoProps) {
   return (
-    <Link href={href} className="flex items-center gap-2 hover:opacity-80 transition">
-      <div className="bg-gradient-to-br from-terracotta to-terracotta-dark p-1.5 rounded-lg">
-        <Wrench className="w-5 h-5 text-white" />
-      </div>
-      {showLabel && (
-        <span className={`text-lg font-bold hidden xs:inline ${variant === 'dark' ? 'text-white' : 'text-foreground'}`}>
-          DIY Helper
-        </span>
-      )}
+    <Link href={href} className="flex items-center hover:opacity-80 transition">
+      <Image
+        src="/crafted-logo.png"
+        alt="Logo"
+        width={140}
+        height={32}
+        className="h-8 w-auto object-contain"
+      />
     </Link>
   );
 }

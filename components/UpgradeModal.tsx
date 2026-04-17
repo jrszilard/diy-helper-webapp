@@ -59,12 +59,12 @@ export default function UpgradeModal({ isOpen, onClose, feature }: UpgradeModalP
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-12 h-12 bg-terracotta/10 rounded-full mb-3">
-          <Zap size={24} className="text-terracotta" />
+        <div className="inline-flex items-center justify-center w-12 h-12 bg-rust/10 rounded-full mb-3">
+          <Zap size={24} className="text-rust" />
         </div>
         <h2 className="text-xl font-bold text-foreground">Upgrade to Pro</h2>
         {feature && (
-          <p className="text-sm text-earth-brown mt-1">
+          <p className="text-sm text-white/60 mt-1">
             Unlock {feature} and more with Pro
           </p>
         )}
@@ -83,7 +83,7 @@ export default function UpgradeModal({ isOpen, onClose, feature }: UpgradeModalP
 
       <div className="text-center mb-4">
         <span className="text-3xl font-bold text-foreground">$9.99</span>
-        <span className="text-sm text-earth-brown">/month</span>
+        <span className="text-sm text-white/60">/month</span>
       </div>
 
       {error && (
@@ -94,7 +94,7 @@ export default function UpgradeModal({ isOpen, onClose, feature }: UpgradeModalP
         {loading ? 'Redirecting...' : 'Upgrade Now'}
       </Button>
 
-      <p className="text-xs text-center text-earth-brown mt-3">
+      <p className="text-xs text-center text-white/60 mt-3">
         Cancel anytime. Secure checkout via Stripe.
       </p>
     </Modal>

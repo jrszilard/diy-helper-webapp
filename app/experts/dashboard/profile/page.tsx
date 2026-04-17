@@ -10,7 +10,6 @@ import TextInput from '@/components/ui/TextInput';
 import Textarea from '@/components/ui/Textarea';
 import Select from '@/components/ui/Select';
 import SectionHeader from '@/components/ui/SectionHeader';
-import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import IconButton from '@/components/ui/IconButton';
 import Alert from '@/components/ui/Alert';
@@ -191,7 +190,6 @@ export default function ExpertProfilePage() {
   const removeSpecialty = (index: number) => {
     if (specialties.length <= 1) return;
     const updated = specialties.filter((_, i) => i !== index);
-    // Ensure at least one primary
     if (!updated.some(s => s.isPrimary) && updated.length > 0) {
       updated[0].isPrimary = true;
     }
@@ -211,7 +209,7 @@ export default function ExpertProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Spinner size="lg" className="text-terracotta" />
+        <Spinner size="lg" className="text-rust" />
       </div>
     );
   }
@@ -220,6 +218,7 @@ export default function ExpertProfilePage() {
     return (
       <EmptyState
         description="Unable to load profile."
+        variant="dark"
         className="py-20"
       />
     );
@@ -227,16 +226,17 @@ export default function ExpertProfilePage() {
 
   return (
     <div className="max-w-2xl">
-      <SectionHeader size="lg" title="Expert Profile" subtitle="Manage your expert profile and settings" className="mb-6" />
+      <SectionHeader size="lg" title="Expert Profile" subtitle="Manage your expert profile and settings" className="mb-6 text-white" />
 
       <div className="space-y-5">
         {/* Profile Photo */}
         <div className="flex items-center gap-4">
           <div className="relative">
             {profilePhotoUrl ? (
-              <img src={profilePhotoUrl} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-earth-sand" />
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={profilePhotoUrl} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-white/20" />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-earth-tan flex items-center justify-center text-xl font-bold text-earth-brown">
+              <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center text-xl font-bold text-white/70">
                 {displayName.charAt(0).toUpperCase() || '?'}
               </div>
             )}
@@ -252,11 +252,11 @@ export default function ExpertProfilePage() {
                   if (file) handlePhotoUpload(file);
                 }}
               />
-              <span className="text-sm font-medium text-terracotta hover:text-terracotta/80 transition-colors">
+              <span className="text-sm font-medium text-rust hover:text-rust/80 transition-colors">
                 {uploadingPhoto ? 'Uploading...' : profilePhotoUrl ? 'Change photo' : 'Upload photo'}
               </span>
             </label>
-            <p className="text-xs text-earth-brown mt-0.5">JPG, PNG, or WebP. Max 5 MB.</p>
+            <p className="text-xs text-white/40 mt-0.5">JPG, PNG, or WebP. Max 5 MB.</p>
           </div>
         </div>
 
@@ -269,6 +269,7 @@ export default function ExpertProfilePage() {
           onChange={(e) => setDisplayName(e.target.value)}
           fullWidth
           maxLength={100}
+          variant="dark"
         />
 
         {/* Bio */}
@@ -282,8 +283,9 @@ export default function ExpertProfilePage() {
             placeholder="Tell DIYers about your experience..."
             resize="none"
             fullWidth
+            variant="dark"
           />
-          <p className="text-xs text-earth-brown-light mt-1">{bio.length}/500</p>
+          <p className="text-xs text-white/30 mt-1">{bio.length}/500</p>
         </div>
 
         {/* Location */}
@@ -296,6 +298,7 @@ export default function ExpertProfilePage() {
             onChange={(e) => setCity(e.target.value)}
             fullWidth
             maxLength={100}
+            variant="dark"
           />
           <Select
             id="profile-state"
@@ -303,6 +306,7 @@ export default function ExpertProfilePage() {
             value={state}
             onChange={(e) => setState(e.target.value)}
             fullWidth
+            variant="dark"
           >
             <option value="">Select...</option>
             {US_STATES.map(s => (
@@ -320,6 +324,7 @@ export default function ExpertProfilePage() {
             onChange={(e) => setZipCode(e.target.value)}
             fullWidth
             maxLength={10}
+            variant="dark"
           />
           <TextInput
             id="profile-radius"
@@ -330,6 +335,7 @@ export default function ExpertProfilePage() {
             min={1}
             max={500}
             fullWidth
+            variant="dark"
           />
         </div>
 
@@ -345,6 +351,7 @@ export default function ExpertProfilePage() {
             min="0"
             placeholder="75.00"
             fullWidth
+            variant="dark"
           />
           <TextInput
             id="profile-qa-rate"
@@ -356,63 +363,68 @@ export default function ExpertProfilePage() {
             min="0"
             placeholder="10.00"
             fullWidth
+            variant="dark"
           />
         </div>
 
         {/* Credentials */}
-        <Card padding="sm">
-          <h3 className="text-sm font-semibold text-foreground mb-3">Credentials</h3>
-          <p className="text-xs text-earth-brown mb-3">Optional — helps build trust with DIYers</p>
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <TextInput
-                id="profile-license-type"
-                label="License Type"
-                type="text"
-                value={licenseType}
-                onChange={(e) => setLicenseType(e.target.value)}
-                placeholder="e.g., Master Electrician"
-                fullWidth
-                maxLength={100}
-              />
-              <TextInput
-                id="profile-license-number"
-                label="License Number"
-                type="text"
-                value={licenseNumber}
-                onChange={(e) => setLicenseNumber(e.target.value)}
-                placeholder="e.g., EL-12345"
-                fullWidth
-                maxLength={50}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Select
-                id="profile-license-state"
-                label="License State"
-                value={licenseState}
-                onChange={(e) => setLicenseState(e.target.value)}
-                fullWidth
-              >
-                <option value="">Select...</option>
-                {US_STATES.map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </Select>
-              <Select
-                id="profile-insurance"
-                label="Insurance Status"
-                value={insuranceStatus}
-                onChange={(e) => setInsuranceStatus(e.target.value)}
-                fullWidth
-              >
-                <option value="">Not specified</option>
-                <option value="insured">Insured</option>
-                <option value="bonded_insured">Bonded & Insured</option>
-              </Select>
-            </div>
+        <div className="bg-white/5 border border-white/[0.08] rounded-lg p-4 space-y-3">
+          <div>
+            <h3 className="text-sm font-semibold text-white/80">Credentials</h3>
+            <p className="text-xs text-white/40 mt-0.5">Optional — helps build trust with DIYers</p>
           </div>
-        </Card>
+          <div className="grid grid-cols-2 gap-3">
+            <TextInput
+              id="profile-license-type"
+              label="License Type"
+              type="text"
+              value={licenseType}
+              onChange={(e) => setLicenseType(e.target.value)}
+              placeholder="e.g., Master Electrician"
+              fullWidth
+              maxLength={100}
+              variant="dark"
+            />
+            <TextInput
+              id="profile-license-number"
+              label="License Number"
+              type="text"
+              value={licenseNumber}
+              onChange={(e) => setLicenseNumber(e.target.value)}
+              placeholder="e.g., EL-12345"
+              fullWidth
+              maxLength={50}
+              variant="dark"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              id="profile-license-state"
+              label="License State"
+              value={licenseState}
+              onChange={(e) => setLicenseState(e.target.value)}
+              fullWidth
+              variant="dark"
+            >
+              <option value="">Select...</option>
+              {US_STATES.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </Select>
+            <Select
+              id="profile-insurance"
+              label="Insurance Status"
+              value={insuranceStatus}
+              onChange={(e) => setInsuranceStatus(e.target.value)}
+              fullWidth
+              variant="dark"
+            >
+              <option value="">Not specified</option>
+              <option value="insured">Insured</option>
+              <option value="bonded_insured">Bonded & Insured</option>
+            </Select>
+          </div>
+        </div>
 
         {/* Availability */}
         <Toggle
@@ -421,11 +433,12 @@ export default function ExpertProfilePage() {
           description="Toggle off to pause receiving new questions"
           checked={isAvailable}
           onChange={setIsAvailable}
+          variant="dark"
         />
 
         {/* Specialties */}
         <div>
-          <p className="text-sm font-semibold text-[var(--earth-brown-dark)] mb-2">Specialties</p>
+          <p className="text-sm font-semibold text-white/80 mb-2">Specialties</p>
           <div className="space-y-3">
             {specialties.map((spec, index) => (
               <div key={index} className="flex items-center gap-2">
@@ -433,6 +446,7 @@ export default function ExpertProfilePage() {
                   value={spec.specialty}
                   onChange={(e) => updateSpecialty(index, 'specialty', e.target.value)}
                   className="flex-1"
+                  variant="dark"
                 >
                   {SPECIALTIES.map(s => (
                     <option key={s} value={s}>{SPECIALTY_LABELS[s]}</option>
@@ -446,6 +460,7 @@ export default function ExpertProfilePage() {
                   min={0}
                   max={60}
                   className="w-16 text-center"
+                  variant="dark"
                 />
                 <Button
                   type="button"
@@ -461,7 +476,7 @@ export default function ExpertProfilePage() {
                     iconSize={16}
                     label="Remove specialty"
                     onClick={() => removeSpecialty(index)}
-                    className="!p-1.5"
+                    className="!p-1.5 text-white/40 hover:text-white hover:bg-white/10"
                   />
                 )}
               </div>
@@ -474,7 +489,7 @@ export default function ExpertProfilePage() {
               size="sm"
               leftIcon={Plus}
               onClick={addSpecialty}
-              className="mt-2 !text-slate-blue hover:!text-slate-blue-dark"
+              className="mt-2 text-white/50 hover:text-white hover:bg-white/10"
             >
               Add Specialty
             </Button>
@@ -502,15 +517,16 @@ export default function ExpertProfilePage() {
 
       {/* Embeddable Badge */}
       {profile && (
-        <Card surface rounded="2xl" shadow="sm" padding="lg" className="mt-6 space-y-4">
+        <div className="bg-white/5 border border-white/[0.08] rounded-2xl p-6 mt-6 space-y-4">
           <SectionHeader
             size="sm"
             title="Embeddable Badge"
             subtitle="Add your verified expert badge to your website, portfolio, or social profiles."
+            className="text-white"
           />
 
           {/* Badge preview */}
-          <div className="bg-white border border-earth-sand rounded-lg p-4 flex items-center justify-center">
+          <div className="bg-white/5 border border-white/[0.08] rounded-lg p-4 flex items-center justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`/api/experts/${profile.id}/badge`}
@@ -522,8 +538,8 @@ export default function ExpertProfilePage() {
 
           {/* Embed code */}
           <div className="relative">
-            <p className="text-xs font-semibold text-earth-brown mb-1">HTML Embed Code</p>
-            <div className="bg-[#3E2723] text-earth-tan rounded-lg p-3 pr-12 text-xs font-mono overflow-x-auto">
+            <p className="text-xs font-semibold text-white/50 mb-1">HTML Embed Code</p>
+            <div className="bg-black/30 text-white/70 rounded-lg p-3 pr-12 text-xs font-mono overflow-x-auto border border-white/[0.08]">
               {`<a href="${typeof window !== 'undefined' ? window.location.origin : ''}/experts/${profile.id}" target="_blank" rel="noopener"><img src="${typeof window !== 'undefined' ? window.location.origin : ''}/api/experts/${profile.id}/badge" alt="Verified Expert on DIY Helper" width="280" height="90" /></a>`}
             </div>
             <IconButton
@@ -537,14 +553,14 @@ export default function ExpertProfilePage() {
                 setBadgeCopied(true);
                 setTimeout(() => setBadgeCopied(false), 2000);
               }}
-              className="absolute top-7 right-2 !p-1.5 hover:bg-earth-tan"
+              className="absolute top-7 right-2 !p-1.5 text-white/40 hover:text-white hover:bg-white/10"
             />
           </div>
 
-          <p className="text-xs text-muted">
+          <p className="text-xs text-white/30">
             Your badge updates automatically as you answer questions and earn reviews.
           </p>
-        </Card>
+        </div>
       )}
     </div>
   );

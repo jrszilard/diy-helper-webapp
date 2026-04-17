@@ -98,6 +98,13 @@ export function useChat(options: UseChatOptions = {}) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | undefined>(options.conversationId);
+
+  // Sync conversationId when the caller passes a new one (e.g. project selection)
+  useEffect(() => {
+    if (options.conversationId !== undefined) {
+      setConversationId(options.conversationId);
+    }
+  }, [options.conversationId]);
   const [failedMessage, setFailedMessage] = useState<string | null>(null);
   const [hasProcessedInitialMessage, setHasProcessedInitialMessage] = useState(false);
 

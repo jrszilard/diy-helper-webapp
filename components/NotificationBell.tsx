@@ -9,9 +9,10 @@ import { useNotifications } from '@/hooks/useNotifications';
 
 interface NotificationBellProps {
   userId?: string;
+  placement?: 'bottom' | 'top';
 }
 
-export default function NotificationBell({ userId }: NotificationBellProps) {
+export default function NotificationBell({ userId, placement = 'bottom' }: NotificationBellProps) {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(userId);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -57,16 +58,16 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
       >
         <Bell size={20} />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-terracotta text-white text-xs font-bold rounded-full flex items-center justify-center px-1">
+          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-rust text-white text-xs font-bold rounded-full flex items-center justify-center px-1">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-earth-sand rounded-lg shadow-xl z-50 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-earth-sand">
-            <h3 className="text-sm font-semibold text-[#3E2723]">Notifications</h3>
+        <div className={`absolute right-0 w-80 bg-[var(--earth-brown-dark)] border border-white/10 rounded-lg shadow-xl z-50 overflow-hidden ${placement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'}`}>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+            <h3 className="text-sm font-semibold text-white/80">Notifications</h3>
             {unreadCount > 0 && (
               <Button variant="ghost" size="xs" onClick={() => markAllAsRead()}>
                 Mark all as read
@@ -82,20 +83,20 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
                 <button
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification.id, notification.link)}
-                  className={`w-full text-left px-4 py-3 border-b border-earth-sand/50 hover:bg-earth-tan/50 transition-colors ${
-                    !notification.isRead ? 'bg-earth-tan/30' : ''
+                  className={`w-full text-left px-4 py-3 border-b border-white/10 hover:bg-white/10 transition-colors ${
+                    !notification.isRead ? 'bg-white/8' : ''
                   }`}
                 >
                   <div className="flex items-start gap-2">
                     {!notification.isRead && (
-                      <span className="w-2 h-2 bg-terracotta rounded-full mt-1.5 flex-shrink-0" />
+                      <span className="w-2 h-2 bg-rust rounded-full mt-1.5 flex-shrink-0" />
                     )}
                     <div className={`flex-1 ${notification.isRead ? 'ml-4' : ''}`}>
-                      <p className="text-sm font-medium text-[#3E2723] line-clamp-1">
+                      <p className="text-sm font-medium text-white/80 line-clamp-1">
                         {notification.title}
                       </p>
                       {notification.body && (
-                        <p className="text-xs text-earth-brown mt-0.5 line-clamp-2">
+                        <p className="text-xs text-white/50 mt-0.5 line-clamp-2">
                           {notification.body}
                         </p>
                       )}

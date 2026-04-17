@@ -36,10 +36,10 @@ export default function SharedReportPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-earth-cream">
+      <div className="min-h-screen flex items-center justify-center bg-white/5">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-slate-blue border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-sm text-earth-brown">Loading shared report...</p>
+          <p className="text-sm text-white/60">Loading shared report...</p>
         </div>
       </div>
     );
@@ -47,15 +47,15 @@ export default function SharedReportPage() {
 
   if (error || !report) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-earth-cream">
+      <div className="min-h-screen flex items-center justify-center bg-white/5">
         <div className="text-center max-w-md px-6">
           <h1 className="text-xl font-bold text-foreground mb-2">Report Not Found</h1>
-          <p className="text-sm text-earth-brown mb-6">
+          <p className="text-sm text-white/60 mb-6">
             {error || 'This shared report link may have expired or been disabled.'}
           </p>
           <a
             href="/"
-            className="inline-block px-5 py-2.5 bg-terracotta text-white font-semibold rounded-lg hover:bg-terracotta-dark transition-colors"
+            className="inline-block px-5 py-2.5 bg-rust text-white font-semibold rounded-lg hover:bg-copper transition-colors"
           >
             Create Your Own Project Plan
           </a>
@@ -65,7 +65,7 @@ export default function SharedReportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-earth-cream">
+    <div className="min-h-screen bg-white/5">
       <ReportView
         report={report}
         onApplyToProject={() => {}}

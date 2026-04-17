@@ -106,7 +106,7 @@ export default function ShoppingTripList({ projectId, projectName, onOpenCheckli
               <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${
                 isCompleted
                   ? 'bg-[var(--status-complete-bg)] text-forest-green'
-                  : 'bg-[var(--status-progress-bg)] text-terracotta'
+                  : 'bg-[var(--status-progress-bg)] text-rust'
               }`}>
                 {isCompleted ? 'COMPLETED' : 'IN PROGRESS'}
               </span>
@@ -118,7 +118,7 @@ export default function ShoppingTripList({ projectId, projectName, onOpenCheckli
                 <span className="text-xs text-white/40">
                   {trip.purchased_items} of {trip.total_items} items purchased
                 </span>
-                <span className={`text-xs font-semibold ${isCompleted ? 'text-forest-green' : 'text-terracotta'}`}>
+                <span className={`text-xs font-semibold ${isCompleted ? 'text-forest-green' : 'text-rust'}`}>
                   {progress}%
                 </span>
               </div>

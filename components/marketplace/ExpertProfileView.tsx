@@ -172,7 +172,7 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
                   key={s.specialty}
                   className={`px-3 py-1 text-xs rounded-full font-medium ${
                     s.isPrimary
-                      ? 'bg-terracotta/20 text-terracotta border border-terracotta/30'
+                      ? 'bg-rust/20 text-rust border border-rust/30'
                       : 'bg-slate-blue/20 text-slate-blue'
                   }`}
                 >
@@ -257,7 +257,7 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
                   onChange={e => setMessageText(e.target.value)}
                   placeholder={`Describe what you need help with...`}
                   rows={4}
-                  className="w-full px-3 py-2 border border-white/10 rounded-lg bg-white/5 text-earth-cream text-sm placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-terracotta/50 resize-none"
+                  className="w-full px-3 py-2 border border-white/10 rounded-lg bg-white/5 text-earth-cream text-sm placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-rust/50 resize-none"
                   maxLength={2000}
                 />
                 {messageError && (

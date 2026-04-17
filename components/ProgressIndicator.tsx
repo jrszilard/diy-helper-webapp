@@ -19,7 +19,7 @@ export default function ProgressIndicator({ steps, className = '' }: ProgressInd
   if (steps.length === 0) return null;
 
   return (
-    <div className={`bg-earth-cream border border-earth-sand rounded-lg p-4 mb-4 ${className}`}>
+    <div className={`bg-white/5 border border-white/10 rounded-lg p-4 mb-4 ${className}`}>
       <div className="space-y-2">
         {steps.map((step, idx) => (
           <div
@@ -35,13 +35,13 @@ export default function ProgressIndicator({ steps, className = '' }: ProgressInd
             )}
             <span
               className={`text-sm ${
-                step.completed ? 'text-earth-brown' : 'text-foreground font-medium'
+                step.completed ? 'text-white/60' : 'text-foreground font-medium'
               }`}
             >
               {step.message}
             </span>
             {!step.completed && idx === steps.length - 1 && (
-              <Spinner size="sm" className="text-terracotta ml-auto" />
+              <Spinner size="sm" className="text-rust ml-auto" />
             )}
           </div>
         ))}

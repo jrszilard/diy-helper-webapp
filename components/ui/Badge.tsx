@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 export type BadgeVariant =
   | 'default'    // slate-blue tint  — categories, specialties
-  | 'primary'    // terracotta tint  — specialist tier, featured
+  | 'primary'    // rust tint  — specialist tier, featured
   | 'success'    // forest-green tint — selected, answered
   | 'neutral'    // earth-tan         — pool, standard
   | 'warning'    // amber             — complex tier
@@ -12,7 +12,7 @@ export type BadgeVariant =
 
 const variantClasses: Record<BadgeVariant, string> = {
   default:  'bg-[var(--slate-blue)]/10 text-[var(--slate-blue)]',
-  primary:  'bg-[var(--terracotta)]/10 text-[var(--terracotta)]',
+  primary:  'bg-[var(--rust)]/10 text-[var(--rust)]',
   success:  'bg-[var(--forest-green)]/10 text-[var(--forest-green)]',
   neutral:  'bg-[var(--earth-tan)] text-[var(--earth-brown)]',
   warning:  'bg-amber-100 text-amber-700',

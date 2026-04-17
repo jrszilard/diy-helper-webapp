@@ -73,7 +73,7 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
   };
 
   return (
-    <div className="bg-white border border-earth-sand rounded-lg p-6">
+    <div className="bg-white border border-white/10 rounded-lg p-6">
       <h3 className="text-lg font-bold text-foreground mb-4">Your Answer</h3>
 
       {error && (
@@ -89,14 +89,14 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
               <button
                 type="button"
                 onClick={() => setShowPreview(false)}
-                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${!showPreview ? 'bg-earth-tan text-foreground' : 'text-earth-brown hover:text-foreground'}`}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${!showPreview ? 'bg-white/8 text-foreground' : 'text-white/60 hover:text-foreground'}`}
               >
                 <Edit3 size={12} className="inline mr-1" />Write
               </button>
               <button
                 type="button"
                 onClick={() => setShowPreview(true)}
-                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${showPreview ? 'bg-earth-tan text-foreground' : 'text-earth-brown hover:text-foreground'}`}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${showPreview ? 'bg-white/8 text-foreground' : 'text-white/60 hover:text-foreground'}`}
               >
                 <Eye size={12} className="inline mr-1" />Preview
               </button>
@@ -111,11 +111,11 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
             </Button>
           </div>
           {showPreview ? (
-            <div className="border border-earth-sand rounded-lg p-4 min-h-[150px] prose prose-sm max-w-none">
+            <div className="border border-white/10 rounded-lg p-4 min-h-[150px] prose prose-sm max-w-none">
               {answerText ? (
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{answerText}</ReactMarkdown>
               ) : (
-                <p className="text-earth-brown italic">Nothing to preview yet...</p>
+                <p className="text-white/60 italic">Nothing to preview yet...</p>
               )}
             </div>
           ) : (
@@ -129,7 +129,7 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
             />
           )}
           <p className={`text-xs mt-1 ${
-            charCount < 50 ? 'text-terracotta' : charCount > 5000 ? 'text-red-600' : 'text-muted'
+            charCount < 50 ? 'text-rust' : charCount > 5000 ? 'text-red-600' : 'text-muted'
           }`}>
             {charCount}/5,000 characters (minimum 50)
           </p>
@@ -142,7 +142,7 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
             {photoUrls.split('\n').filter(Boolean).map((url, i) => (
               <div key={i} className="relative w-16 h-16">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={url} alt={`Photo ${i + 1}`} className="w-16 h-16 rounded object-cover border border-earth-sand" />
+                <img src={url} alt={`Photo ${i + 1}`} className="w-16 h-16 rounded object-cover border border-white/10" />
                 <button
                   type="button"
                   onClick={() => setPhotoUrls(photoUrls.split('\n').filter((_, j) => j !== i).join('\n'))}
@@ -153,7 +153,7 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
               </div>
             ))}
             {photoUrls.split('\n').filter(Boolean).length < 3 && (
-              <label className="w-16 h-16 border-2 border-dashed border-earth-sand rounded flex items-center justify-center cursor-pointer hover:border-terracotta transition-colors">
+              <label className="w-16 h-16 border-2 border-dashed border-white/10 rounded flex items-center justify-center cursor-pointer hover:border-rust transition-colors">
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
@@ -177,20 +177,20 @@ export default function QAAnswerForm({ questionId, onSuccess }: QAAnswerFormProp
                     }
                   }}
                 />
-                <Plus size={16} className="text-earth-brown" />
+                <Plus size={16} className="text-white/60" />
               </label>
             )}
           </div>
-          <p className="text-xs text-earth-brown mt-1">JPG, PNG, or WebP. Max 5 MB each.</p>
+          <p className="text-xs text-white/60 mt-1">JPG, PNG, or WebP. Max 5 MB each.</p>
         </div>
 
-        <div className="border border-earth-sand rounded-lg p-3">
+        <div className="border border-white/10 rounded-lg p-3">
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={recommendsPro}
               onChange={e => setRecommendsPro(e.target.checked)}
-              className="w-4 h-4 accent-terracotta"
+              className="w-4 h-4 accent-rust"
             />
             <div className="flex items-center gap-2">
               <AlertTriangle size={16} className="text-[var(--warning)]" />

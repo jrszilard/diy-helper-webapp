@@ -116,13 +116,13 @@ export default function AdminReviewPage() {
   };
 
   return (
-    <div className="min-h-screen bg-earth-cream">
+    <div className="min-h-screen bg-white/5">
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
         <div className="flex items-center gap-3">
-          <ShieldCheck className="w-7 h-7 text-terracotta" />
+          <ShieldCheck className="w-7 h-7 text-rust" />
           <div>
             <h1 className="text-2xl font-bold text-foreground">Admin Review Queue</h1>
-            <p className="text-sm text-earth-brown">
+            <p className="text-sm text-white/60">
               {counts.total} pending &middot; {counts.userFlags} flags &middot; {counts.expertCorrections + counts.expertReviews} expert corrections
             </p>
           </div>
@@ -132,7 +132,7 @@ export default function AdminReviewPage() {
           <select
             value={sourceFilter}
             onChange={e => setSourceFilter(e.target.value)}
-            className="text-sm border border-earth-sand rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-terracotta"
+            className="text-sm border border-white/10 rounded-lg px-3 py-2 bg-white/6 focus:outline-none focus:ring-1 focus:ring-rust"
           >
             <option value="">All sources</option>
             <option value="user_flag">User flags</option>
@@ -143,7 +143,7 @@ export default function AdminReviewPage() {
           <select
             value={categoryFilter}
             onChange={e => setCategoryFilter(e.target.value)}
-            className="text-sm border border-earth-sand rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-1 focus:ring-terracotta"
+            className="text-sm border border-white/10 rounded-lg px-3 py-2 bg-white/6 focus:outline-none focus:ring-1 focus:ring-rust"
           >
             <option value="">All categories</option>
             <option value="electrical">Electrical</option>
@@ -161,13 +161,13 @@ export default function AdminReviewPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="w-6 h-6 border-2 border-terracotta border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-rust border-t-transparent rounded-full animate-spin" />
           </div>
         ) : items.length === 0 ? (
-          <div className="text-center py-12 text-earth-brown">
-            <ShieldCheck className="w-10 h-10 mx-auto mb-3 text-earth-brown-light" />
+          <div className="text-center py-12 text-white/60">
+            <ShieldCheck className="w-10 h-10 mx-auto mb-3 text-white/40" />
             <p className="text-lg font-medium">Queue is clear</p>
-            <p className="text-sm text-earth-brown-light mt-1">No pending corrections to review.</p>
+            <p className="text-sm text-white/40 mt-1">No pending corrections to review.</p>
           </div>
         ) : (
           <div className="space-y-4">

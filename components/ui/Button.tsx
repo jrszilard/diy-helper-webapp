@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          'bg-[var(--terracotta)] text-white hover:bg-[var(--terracotta-dark)] shadow-sm hover:shadow-md focus-visible:ring-[var(--terracotta)]',
+          'bg-[var(--rust)] text-white hover:bg-[var(--copper)] shadow-sm hover:shadow-md focus-visible:ring-[var(--rust)]',
         secondary:
           'bg-[var(--forest-green)] text-white hover:bg-[var(--forest-green-dark)] shadow-sm hover:shadow-md focus-visible:ring-[var(--forest-green)]',
         tertiary:
@@ -18,9 +18,9 @@ const buttonVariants = cva(
         ghost:
           'bg-transparent text-[var(--earth-brown)] hover:bg-[var(--earth-sand)] hover:text-[var(--earth-brown-dark)] focus-visible:ring-[var(--earth-brown)]',
         danger:
-          'bg-[var(--rust)] text-white hover:bg-[var(--terracotta-dark)] shadow-sm hover:shadow-md focus-visible:ring-[var(--rust)]',
+          'bg-[var(--rust)] text-white hover:bg-[var(--copper)] shadow-sm hover:shadow-md focus-visible:ring-[var(--rust)]',
         outline:
-          'border border-[var(--earth-brown-light)] bg-transparent text-[var(--earth-brown-dark)] hover:bg-[var(--earth-sand)] hover:border-[var(--earth-brown)] hover:text-[var(--earth-brown-dark)] focus-visible:ring-[var(--earth-brown)]',
+          'border border-[var(--earth-brown)] bg-transparent text-[var(--earth-brown-light)] hover:bg-[var(--earth-sand)]/20 hover:border-[var(--earth-brown-light)] hover:text-[var(--earth-cream)] focus-visible:ring-[var(--earth-brown)]',
       },
       size: {
         xs: 'px-2 py-0.5 text-xs rounded-md',

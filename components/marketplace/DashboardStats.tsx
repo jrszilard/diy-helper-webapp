@@ -1,7 +1,6 @@
 'use client';
 
 import { DollarSign, TrendingUp, Star, MessageSquare, Clock, CreditCard } from 'lucide-react';
-import Card from '@/components/ui/Card';
 
 interface DashboardStatsProps {
   stats: {
@@ -21,21 +20,21 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
       value: `$${(stats.totalEarnings / 100).toFixed(2)}`,
       icon: DollarSign,
       color: 'text-forest-green',
-      bgColor: 'bg-forest-green/10',
+      bgColor: 'bg-forest-green/20',
     },
     {
       label: 'This Month',
       value: `$${(stats.monthEarnings / 100).toFixed(2)}`,
       icon: TrendingUp,
       color: 'text-slate-blue',
-      bgColor: 'bg-slate-blue/10',
+      bgColor: 'bg-slate-blue/20',
     },
     {
       label: 'Avg Rating',
       value: stats.totalReviews > 0 ? stats.avgRating.toFixed(1) : 'N/A',
       icon: Star,
-      color: 'text-terracotta',
-      bgColor: 'bg-terracotta/10',
+      color: 'text-rust',
+      bgColor: 'bg-rust/20',
       subtitle: `${stats.totalReviews} review${stats.totalReviews !== 1 ? 's' : ''}`,
     },
     {
@@ -43,40 +42,39 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
       value: stats.activeQuestions.toString(),
       icon: MessageSquare,
       color: 'text-slate-blue',
-      bgColor: 'bg-slate-blue/10',
+      bgColor: 'bg-slate-blue/20',
     },
     {
       label: 'Pending Payouts',
       value: `$${(stats.pendingPayouts / 100).toFixed(2)}`,
       icon: Clock,
-      color: 'text-earth-brown',
-      bgColor: 'bg-earth-brown/10',
+      color: 'text-gold',
+      bgColor: 'bg-gold/20',
     },
     {
       label: 'Total Reviews',
       value: stats.totalReviews.toString(),
       icon: CreditCard,
       color: 'text-forest-green',
-      bgColor: 'bg-forest-green/10',
+      bgColor: 'bg-forest-green/20',
     },
   ];
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
       {cards.map(({ label, value, icon: Icon, color, bgColor, subtitle }) => (
-        <Card key={label} padding="md">
-
+        <div key={label} className="bg-white/5 border border-white/[0.08] rounded-lg p-4">
           <div className="flex items-center gap-3 mb-2">
             <div className={`w-9 h-9 rounded-lg ${bgColor} flex items-center justify-center`}>
               <Icon size={18} className={color} />
             </div>
-            <span className="text-xs text-earth-brown font-medium">{label}</span>
+            <span className="text-xs text-white/50 font-medium">{label}</span>
           </div>
           <p className={`text-xl font-bold ${color}`}>{value}</p>
           {subtitle && (
-            <p className="text-xs text-[var(--muted)] mt-0.5">{subtitle}</p>
+            <p className="text-xs text-white/30 mt-0.5">{subtitle}</p>
           )}
-        </Card>
+        </div>
       ))}
     </div>
   );

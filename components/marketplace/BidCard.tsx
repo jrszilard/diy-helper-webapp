@@ -60,7 +60,7 @@ export default function BidCard({ bid, expert, canSelect, onSelect, isAccepted }
         'overflow-hidden transition-colors',
         isAccepted && 'border-forest-green bg-forest-green/5',
         bid.status === 'rejected' && 'bg-gray-50 opacity-60',
-        !isAccepted && bid.status !== 'rejected' && 'hover:border-terracotta/30',
+        !isAccepted && bid.status !== 'rejected' && 'hover:border-rust/30',
       )}
     >
       <div className="p-4">
@@ -76,7 +76,7 @@ export default function BidCard({ bid, expert, canSelect, onSelect, isAccepted }
                 {expert && expert.avgRating > 0 && (
                   <div className="flex items-center gap-1">
                     <Star size={10} className="text-amber-500 fill-amber-500" />
-                    <span className="text-[10px] text-earth-brown">
+                    <span className="text-[10px] text-white/40">
                       {expert.avgRating.toFixed(1)} ({expert.totalReviews})
                     </span>
                   </div>
@@ -96,7 +96,7 @@ export default function BidCard({ bid, expert, canSelect, onSelect, isAccepted }
                 </Badge>
               )}
               {bid.estimatedMinutes && (
-                <span className="flex items-center gap-1 text-xs text-earth-brown">
+                <span className="flex items-center gap-1 text-xs text-white/40">
                   <Clock size={10} />
                   ~{bid.estimatedMinutes} min
                 </span>
@@ -120,8 +120,8 @@ export default function BidCard({ bid, expert, canSelect, onSelect, isAccepted }
 
             {/* Relevant experience (shown when expanded) */}
             {expanded && bid.relevantExperience && (
-              <div className="mt-2 bg-earth-tan/30 rounded px-2 py-1.5">
-                <p className="text-xs text-earth-brown">
+              <div className="mt-2 bg-white/8 rounded px-2 py-1.5">
+                <p className="text-xs text-white/50">
                   <span className="font-medium">Experience:</span> {bid.relevantExperience}
                 </p>
               </div>

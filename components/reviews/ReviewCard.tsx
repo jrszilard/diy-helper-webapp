@@ -36,7 +36,7 @@ export default function ReviewCard({ item, onCorrection, onDismiss }: ReviewCard
 
   if (dismissed || submitted) {
     return (
-      <div className="bg-surface border border-earth-sand rounded-lg p-4 text-sm text-forest-green flex items-center gap-2">
+      <div className="bg-white/6 border border-white/10 rounded-lg p-4 text-sm text-forest-green flex items-center gap-2">
         <CheckCircle className="w-4 h-4" />
         {submitted ? 'Correction submitted — thanks!' : 'Dismissed'}
       </div>
@@ -54,7 +54,7 @@ export default function ReviewCard({ item, onCorrection, onDismiss }: ReviewCard
   };
 
   return (
-    <div className="bg-surface border border-earth-sand rounded-lg p-4 space-y-3">
+    <div className="bg-white/6 border border-white/10 rounded-lg p-4 space-y-3">
       <div className="flex items-center gap-2 flex-wrap">
         {item.category && (
           <span className="text-xs px-2 py-0.5 rounded-full bg-slate-blue text-white font-medium">
@@ -62,12 +62,12 @@ export default function ReviewCard({ item, onCorrection, onDismiss }: ReviewCard
           </span>
         )}
         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-          item.verdict === 'REVISE' ? 'bg-rust text-white' : 'bg-earth-sand text-earth-brown'
+          item.verdict === 'REVISE' ? 'bg-rust text-white' : 'bg-white/10 text-white/70'
         }`}>
           {item.verdict}
         </span>
         {item.confidence != null && (
-          <span className="text-xs text-earth-brown-light">
+          <span className="text-xs text-white/40">
             confidence: {(item.confidence * 100).toFixed(0)}%
           </span>
         )}
@@ -84,7 +84,7 @@ export default function ReviewCard({ item, onCorrection, onDismiss }: ReviewCard
           {expanded ? 'Hide' : 'Show'} AI response
         </button>
         {expanded && (
-          <div className="mt-2 text-sm text-earth-brown bg-earth-tan/30 rounded-lg p-3 max-h-60 overflow-y-auto whitespace-pre-wrap">
+          <div className="mt-2 text-sm text-white/60 bg-white/8 rounded-lg p-3 max-h-60 overflow-y-auto whitespace-pre-wrap">
             {item.draftResponse}
           </div>
         )}
@@ -96,7 +96,7 @@ export default function ReviewCard({ item, onCorrection, onDismiss }: ReviewCard
             <span
               key={idx}
               className={`text-xs px-2 py-0.5 rounded-full ${
-                issue.severity === 'critical' ? 'bg-rust text-white' : 'bg-earth-sand text-earth-brown'
+                issue.severity === 'critical' ? 'bg-rust text-white' : 'bg-white/10 text-white/70'
               }`}
             >
               {issue.detail || `Rubric item ${issue.item}`}
@@ -119,13 +119,13 @@ export default function ReviewCard({ item, onCorrection, onDismiss }: ReviewCard
         <div className="flex items-center gap-2 pt-1">
           <button
             onClick={() => setShowForm(true)}
-            className="px-3 py-1.5 text-sm bg-terracotta text-white rounded-lg hover:bg-terracotta/90 transition-colors"
+            className="px-3 py-1.5 text-sm bg-rust text-white rounded-lg hover:bg-rust/90 transition-colors"
           >
             Submit Correction
           </button>
           <button
             onClick={handleDismiss}
-            className="px-3 py-1.5 text-sm text-earth-brown hover:text-foreground border border-earth-sand rounded-lg hover:bg-earth-tan/30 transition-colors"
+            className="px-3 py-1.5 text-sm text-white/60 hover:text-white border border-white/10 rounded-lg hover:bg-white/10 transition-colors"
           >
             Looks Good
           </button>

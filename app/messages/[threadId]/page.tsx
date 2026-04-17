@@ -118,17 +118,17 @@ export default function DIYerThreadPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col h-screen bg-earth-brown-dark">
+      <div className="flex flex-col h-screen bg-earth-night">
         <DIYerHeader />
         <div className="flex-1 flex items-center justify-center">
-          <Spinner size="lg" className="text-terracotta" />
+          <Spinner size="lg" className="text-rust" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen bg-earth-brown-dark">
+    <div className="flex flex-col h-screen bg-earth-night">
       <DIYerHeader />
       <div className="flex-1 overflow-hidden max-w-4xl mx-auto w-full px-4 py-6 flex flex-col">
         {/* Header */}

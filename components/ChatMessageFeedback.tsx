@@ -95,7 +95,7 @@ export default function ChatMessageFeedback({
             <button
               onClick={handleThumbsUp}
               className={`text-xs transition-colors flex items-center gap-1 ${
-                isDark ? 'text-white/50 hover:text-green-400' : 'text-earth-brown-light hover:text-forest-green'
+                isDark ? 'text-white/50 hover:text-green-400' : 'text-white/40 hover:text-forest-green'
               }`}
               title="This response was helpful"
             >
@@ -105,7 +105,7 @@ export default function ChatMessageFeedback({
           <button
             onClick={() => setShowFlagForm(true)}
             className={`text-xs transition-colors flex items-center gap-1 ${
-              isDark ? 'text-white/50 hover:text-red-400' : 'text-earth-brown-light hover:text-rust'
+              isDark ? 'text-white/50 hover:text-red-400' : 'text-white/40 hover:text-rust'
             }`}
             title="Flag an issue with this response"
           >
@@ -116,11 +116,11 @@ export default function ChatMessageFeedback({
 
       {showFlagForm && (
         <div className={`mt-2 rounded-lg p-3 max-w-md border ${
-          isDark ? 'bg-white/10 border-white/20' : 'bg-earth-tan/20 border-earth-sand'
+          isDark ? 'bg-white/10 border-white/20' : 'bg-white/20 border-white/10'
         }`}>
           <div className="flex items-center justify-between mb-2">
             <span className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-foreground'}`}>What&apos;s wrong?</span>
-            <button onClick={() => setShowFlagForm(false)} className={isDark ? 'text-white/50 hover:text-white' : 'text-earth-brown-light hover:text-foreground'}>
+            <button onClick={() => setShowFlagForm(false)} className={isDark ? 'text-white/50 hover:text-white' : 'text-white/40 hover:text-foreground'}>
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -135,7 +135,7 @@ export default function ChatMessageFeedback({
                     ? 'bg-rust text-white border-rust'
                     : isDark
                       ? 'bg-white/10 border-white/20 text-white/80 hover:border-rust'
-                      : 'bg-white border-earth-sand text-earth-brown hover:border-rust'
+                      : 'bg-white/6 border-white/10 text-white/60 hover:border-rust'
                 }`}
               >
                 {ft.label}
@@ -152,7 +152,7 @@ export default function ChatMessageFeedback({
             className={`w-full text-xs rounded-lg p-2 resize-none focus:outline-none focus:ring-1 focus:ring-rust border ${
               isDark
                 ? 'bg-white/5 border-white/20 text-white placeholder:text-white/40'
-                : 'border-earth-sand'
+                : 'border-white/10'
             }`}
           />
 

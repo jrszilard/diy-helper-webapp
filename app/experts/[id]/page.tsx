@@ -56,7 +56,7 @@ export default function ExpertDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
+      <div className="min-h-screen bg-earth-night flex items-center justify-center">
         <Spinner size="lg" color="primary" />
       </div>
     );
@@ -64,7 +64,7 @@ export default function ExpertDetailPage() {
 
   if (error || !expert) {
     return (
-      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
+      <div className="min-h-screen bg-earth-night flex items-center justify-center">
         <div className="text-center">
           <p className="text-sm text-white/50 mb-4">Expert not found</p>
           <Button variant="ghost" href="/experts" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10">
@@ -76,7 +76,7 @@ export default function ExpertDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-earth-brown-dark">
+    <div className="min-h-screen bg-earth-night">
       <AppHeader />
 
       <main className="max-w-3xl mx-auto px-4 py-8">

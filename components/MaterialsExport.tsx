@@ -431,7 +431,7 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white/6 rounded-2xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold text-foreground">Export Shopping List</h3>
           <button
@@ -442,9 +442,9 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
           </button>
         </div>
 
-        <div className="mb-4 p-3 bg-earth-cream rounded-xl">
+        <div className="mb-4 p-3 bg-white/5 rounded-xl">
           <p className="font-medium text-foreground">{projectName}</p>
-          <p className="text-sm text-earth-brown">
+          <p className="text-sm text-white/60">
             {materials.length} items • ${total.toFixed(2)} estimated
           </p>
         </div>
@@ -477,9 +477,9 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
           <button
             onClick={downloadText}
             className="flex flex-col items-center gap-2 p-4 border-2 border-gray-200 rounded-xl
-                       hover:border-terracotta hover:bg-[var(--status-progress-bg)] transition-all group"
+                       hover:border-rust hover:bg-[var(--status-progress-bg)] transition-all group"
           >
-            <FileText className="w-8 h-8 text-gray-500 group-hover:text-terracotta" />
+            <FileText className="w-8 h-8 text-gray-500 group-hover:text-rust" />
             <span className="font-medium text-foreground">Text</span>
             <span className="text-xs text-gray-500">Download .txt</span>
           </button>
@@ -524,7 +524,7 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
                 type="text"
                 value={shareUrl}
                 readOnly
-                className="flex-1 px-3 py-1.5 text-xs bg-white border border-earth-sand rounded-lg text-foreground truncate"
+                className="flex-1 px-3 py-1.5 text-xs bg-white/6 border border-white/10 rounded-lg text-foreground truncate"
               />
               <button
                 onClick={copyShareLink}

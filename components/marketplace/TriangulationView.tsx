@@ -96,12 +96,12 @@ export default function TriangulationView({
     if (!canRequest) return null;
 
     return (
-      <div className="bg-white border border-slate-blue/20 rounded-lg p-4">
+      <div className="bg-white/6 border border-[var(--slate-blue)]/20 rounded-lg p-4">
         <div className="flex items-start gap-3">
           <Users size={20} className="text-slate-blue flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <h3 className="text-sm font-semibold text-foreground">Get a Second Opinion</h3>
-            <p className="text-xs text-earth-brown mt-1">
+            <h3 className="text-sm font-semibold text-white/80">Get a Second Opinion</h3>
+            <p className="text-xs text-white/50 mt-1">
               Want another expert&apos;s perspective? A second expert will see your question, project context,
               and the first expert&apos;s answer — then provide their own independent assessment.
             </p>
@@ -136,31 +136,31 @@ export default function TriangulationView({
 
   // Show side-by-side comparison
   return (
-    <div className="bg-white border border-earth-sand rounded-lg p-4">
-      <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+    <div className="bg-white/6 border border-white/10 rounded-lg p-4">
+      <h3 className="text-sm font-semibold text-white/80 mb-4 flex items-center gap-2">
         <Users size={16} className="text-slate-blue" />
         Expert Opinions ({secondAnswer?.answerText ? '2' : '1 of 2'})
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Original expert */}
-        <div className="border border-earth-sand rounded-lg p-3">
+        <div className="border border-white/10 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs font-medium text-earth-brown bg-earth-tan px-2 py-0.5 rounded-full">
+            <span className="text-xs font-medium text-white/60 bg-white/10 px-2 py-0.5 rounded-full">
               Expert 1
             </span>
-            <span className="text-sm font-semibold text-foreground">{originalExpertName}</span>
+            <span className="text-sm font-semibold text-white/80">{originalExpertName}</span>
             {originalExpertRating > 0 && (
-              <span className="flex items-center gap-0.5 text-[10px] text-earth-brown">
+              <span className="flex items-center gap-0.5 text-[10px] text-white/40">
                 <Star size={10} className="fill-amber-500 text-amber-500" />
                 {originalExpertRating.toFixed(1)}
               </span>
             )}
           </div>
           {originalAnswerText ? (
-            <p className="text-sm text-foreground whitespace-pre-wrap">{originalAnswerText}</p>
+            <p className="text-sm text-white/70 whitespace-pre-wrap">{originalAnswerText}</p>
           ) : (
-            <p className="text-sm text-earth-brown italic">
+            <p className="text-sm text-white/40 italic">
               {['in_conversation', 'resolve_proposed'].includes(originalStatus)
                 ? 'Conversation in progress...'
                 : 'Answer pending...'}
@@ -172,30 +172,30 @@ export default function TriangulationView({
         <div className={`border rounded-lg p-3 ${
           secondAnswer?.answerText
             ? 'border-slate-blue/30 bg-slate-blue/5'
-            : 'border-dashed border-earth-sand'
+            : 'border-dashed border-white/10'
         }`}>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs font-medium text-slate-blue bg-slate-blue/10 px-2 py-0.5 rounded-full">
+            <span className="text-xs font-medium text-[var(--slate-blue)] bg-[var(--slate-blue)]/10 px-2 py-0.5 rounded-full">
               Expert 2
             </span>
             {secondAnswer?.expertId ? (
               <>
-                <span className="text-sm font-semibold text-foreground">{secondAnswer.expertName}</span>
+                <span className="text-sm font-semibold text-white/80">{secondAnswer.expertName}</span>
                 {secondAnswer.expertRating > 0 && (
-                  <span className="flex items-center gap-0.5 text-[10px] text-earth-brown">
+                  <span className="flex items-center gap-0.5 text-[10px] text-white/40">
                     <Star size={10} className="fill-amber-500 text-amber-500" />
                     {secondAnswer.expertRating.toFixed(1)}
                   </span>
                 )}
               </>
             ) : (
-              <span className="text-sm text-earth-brown">Awaiting expert...</span>
+              <span className="text-sm text-white/40">Awaiting expert...</span>
             )}
           </div>
           {secondAnswer?.answerText ? (
-            <p className="text-sm text-foreground whitespace-pre-wrap">{secondAnswer.answerText}</p>
+            <p className="text-sm text-white/70 whitespace-pre-wrap">{secondAnswer.answerText}</p>
           ) : secondAnswer?.status === 'claimed' || secondAnswer?.status === 'in_conversation' ? (
-            <p className="text-sm text-earth-brown italic">Expert is working on their response...</p>
+            <p className="text-sm text-white/40 italic">Expert is working on their response...</p>
           ) : (
             <p className="text-sm text-[var(--muted)] italic">Waiting for a second expert to claim this question.</p>
           )}

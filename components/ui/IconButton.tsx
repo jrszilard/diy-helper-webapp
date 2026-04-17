@@ -18,9 +18,9 @@ export default function IconButton({
 }: IconButtonProps) {
   const variantClass =
     variant === 'primary'
-      ? 'text-white bg-[var(--terracotta)] hover:bg-[var(--terracotta-dark)]'
+      ? 'text-white bg-[var(--rust)] hover:bg-[var(--copper)]'
       : variant === 'danger'
-      ? 'text-white bg-[var(--rust)] hover:bg-[var(--terracotta-dark)]'
+      ? 'text-white bg-[var(--rust)] hover:bg-[var(--copper)]'
       : 'text-[var(--earth-brown)] hover:text-[var(--foreground)] hover:bg-[var(--earth-tan)]';
 
   return (

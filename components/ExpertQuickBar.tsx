@@ -10,7 +10,7 @@ interface ExpertQuickBarProps {
 
 export default function ExpertQuickBar({ displayName, openQueueCount }: ExpertQuickBarProps) {
   return (
-    <div className="bg-gradient-to-r from-gold to-gold-dark text-foreground">
+    <div className="bg-gradient-to-r from-gold to-copper text-foreground">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-2.5 sm:py-3 gap-3">
           {/* Left: Welcome */}

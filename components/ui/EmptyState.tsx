@@ -31,15 +31,15 @@ export default function EmptyState({
       {Icon && (
         <Icon
           size={resolvedIconSize}
-          className={cn('mx-auto text-earth-sand', size === 'sm' ? 'mb-3' : 'mb-4', iconClassName)}
+          className={cn('mx-auto text-white/20', size === 'sm' ? 'mb-3' : 'mb-4', iconClassName)}
         />
       )}
       {title && (
-        <p className="font-medium text-[var(--earth-brown-dark)] mb-1">{title}</p>
+        <p className="font-medium mb-1 text-white/70">{title}</p>
       )}
-      <p className="text-sm text-earth-brown">{description}</p>
+      <p className="text-sm text-white/50">{description}</p>
       {subtext && (
-        <p className="text-xs text-earth-brown-light mt-1">{subtext}</p>
+        <p className="text-xs mt-1 text-white/30">{subtext}</p>
       )}
       {action && (
         <div className="mt-4">{action}</div>

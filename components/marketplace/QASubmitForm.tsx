@@ -479,7 +479,7 @@ export default function QASubmitForm({
           <div className="p-3 bg-white/5 border border-white/10 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <TrendingUp size={14} className="text-terracotta" />
+                <TrendingUp size={14} className="text-rust" />
                 <span className="text-sm font-semibold text-earth-cream">
                   {dynamicPricing.tierLabel} Question — {formatPrice(dynamicPricing.priceCents)}
                 </span>

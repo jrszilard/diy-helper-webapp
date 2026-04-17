@@ -42,7 +42,7 @@ export default function GuestExpertCallout({ messageCount, onRequestAuth }: Gues
           <p className="text-sm font-medium text-foreground">
             Stuck on something? Get a verified expert&apos;s opinion
           </p>
-          <p className="text-xs text-earth-brown mt-0.5">
+          <p className="text-xs text-white/50 mt-0.5">
             Create a free account and your first question to a real trade pro is on us.
           </p>
           <Button
@@ -58,10 +58,10 @@ export default function GuestExpertCallout({ messageCount, onRequestAuth }: Gues
         </div>
         <button
           onClick={handleDismiss}
-          className="p-1 hover:bg-[#D4E2ED] rounded transition-colors flex-shrink-0"
+          className="p-1 hover:bg-white/10 rounded transition-colors flex-shrink-0"
           aria-label="Dismiss expert callout"
         >
-          <X size={14} className="text-earth-brown" />
+          <X size={14} className="text-white/40" />
         </button>
       </div>
     </div>

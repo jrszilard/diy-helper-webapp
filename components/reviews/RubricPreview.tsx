@@ -27,12 +27,12 @@ export default function RubricPreview({
   goodResponse,
 }: RubricPreviewProps) {
   return (
-    <div className="border border-dashed border-earth-sand rounded-lg p-3 bg-earth-tan/10 space-y-2 text-sm">
-      <p className="text-xs font-semibold text-earth-brown-light uppercase tracking-wide">Rubric Example Preview</p>
+    <div className="border border-dashed border-white/10 rounded-lg p-3 bg-white/10 space-y-2 text-sm">
+      <p className="text-xs font-semibold text-white/40 uppercase tracking-wide">Rubric Example Preview</p>
       <div className="flex items-center gap-2">
         <span className="text-xs px-2 py-0.5 rounded-full bg-slate-blue text-white">{category}</span>
         <span className={`text-xs px-2 py-0.5 rounded-full ${
-          severity === 'critical' ? 'bg-rust text-white' : 'bg-earth-sand text-earth-brown'
+          severity === 'critical' ? 'bg-rust text-white' : 'bg-white/10 text-white/60'
         }`}>{severity}</span>
       </div>
       <div className="flex flex-wrap gap-1">
@@ -42,17 +42,17 @@ export default function RubricPreview({
           </span>
         ))}
       </div>
-      <div className="text-xs text-earth-brown">
+      <div className="text-xs text-white/60">
         <p className="font-medium">Q: {userQuestion.slice(0, 120)}{userQuestion.length > 120 ? '...' : ''}</p>
       </div>
       <div className="grid grid-cols-2 gap-2 text-xs">
         <div className="bg-rust/5 rounded p-2">
           <p className="font-medium text-rust mb-1">Bad response</p>
-          <p className="text-earth-brown line-clamp-3">{badResponse}</p>
+          <p className="text-white/60 line-clamp-3">{badResponse}</p>
         </div>
         <div className="bg-forest-green/5 rounded p-2">
           <p className="font-medium text-forest-green mb-1">Good response</p>
-          <p className="text-earth-brown line-clamp-3">{goodResponse}</p>
+          <p className="text-white/60 line-clamp-3">{goodResponse}</p>
         </div>
       </div>
     </div>

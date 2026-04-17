@@ -23,7 +23,7 @@ export default function NavLink({ href, label, icon: Icon, iconSize = 16, onClic
       onClick={onClick}
       className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
         isActive
-          ? 'bg-[var(--terracotta)]/10 text-[var(--terracotta)]'
+          ? 'bg-[var(--rust)]/10 text-[var(--rust)]'
           : 'text-[var(--earth-brown)] hover:bg-[var(--earth-tan)] hover:text-[var(--foreground)]'
       }`}
     >

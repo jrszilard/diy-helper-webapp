@@ -9,7 +9,7 @@ const sizeMap = {
 
 const colorMap = {
   default: 'text-[var(--earth-brown)]',
-  primary: 'text-[var(--terracotta)]',
+  primary: 'text-[var(--rust)]',
   blue:    'text-[var(--slate-blue)]',
   green:   'text-[var(--forest-green)]',
 };

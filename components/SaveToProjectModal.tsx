@@ -96,7 +96,7 @@ export default function SaveToProjectModal({
           </div>
           <div>
             <p className="font-bold text-lg text-foreground">Saved!</p>
-            <p className="text-sm text-earth-brown mt-1">Your project has been saved.</p>
+            <p className="text-sm text-white/60 mt-1">Your project has been saved.</p>
             <ContextualHint hintKey="tools">
               Your tools in <strong>My Tools</strong> ↑ are auto-excluded from future shopping lists
             </ContextualHint>
@@ -112,7 +112,7 @@ export default function SaveToProjectModal({
         <div className="space-y-5">
           <div>
             <h3 className="font-bold text-lg text-foreground">Save to Project</h3>
-            <p className="text-sm text-earth-brown mt-0.5">Keep track of this plan and add materials later.</p>
+            <p className="text-sm text-white/60 mt-0.5">Keep track of this plan and add materials later.</p>
           </div>
 
           <div className="space-y-2">
@@ -140,7 +140,7 @@ export default function SaveToProjectModal({
                   <button
                     key={project.id}
                     onClick={() => saveToExistingProject(project.id)}
-                    className="w-full text-left px-3 py-2.5 rounded-lg border border-earth-sand bg-earth-cream hover:bg-earth-tan transition-colors text-sm font-medium text-foreground"
+                    className="w-full text-left px-3 py-2.5 rounded-lg border border-white/10 bg-white/6 hover:bg-white/10 transition-colors text-sm font-medium text-white/80"
                   >
                     {project.name}
                   </button>

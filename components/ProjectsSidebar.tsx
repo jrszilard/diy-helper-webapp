@@ -210,14 +210,14 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
         aria-expanded={showFilters}
         className={cn(
           isMobile
-            ? hasActiveFilters ? 'text-terracotta' : 'text-earth-brown'
-            : hasActiveFilters ? 'text-terracotta hover:text-terracotta hover:bg-white/10' : 'text-[var(--earth-sand)]/70 hover:text-white hover:bg-white/10',
+            ? hasActiveFilters ? 'text-rust' : 'text-white/60'
+            : hasActiveFilters ? 'text-rust hover:text-rust hover:bg-white/10' : 'text-[var(--earth-sand)]/70 hover:text-white hover:bg-white/10',
         )}
       >
         <Filter className={`w-${isMobile ? '4' : '3'} h-${isMobile ? '4' : '3'}`} />
         Filters
         {hasActiveFilters && (
-          <span className="bg-terracotta text-white text-xs px-1.5 py-0.5 rounded-full">
+          <span className="bg-rust text-white text-xs px-1.5 py-0.5 rounded-full">
             {(statusFilter !== 'all' ? 1 : 0) + (categoryFilter !== 'all' ? 1 : 0)}
           </span>
         )}
@@ -300,12 +300,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
 
   // Desktop view
   return (
-    <div className="w-64 bg-[#1A1612] border-r border-[var(--blueprint-grid-major)] flex flex-col h-full">
-      <div className="p-4 border-b border-[var(--blueprint-grid-major)]">
-        <h2 className="font-bold text-lg text-white">My Projects</h2>
-        <p className="text-xs text-[var(--earth-sand)]/60 mt-1">Saved conversations</p>
-      </div>
-
+    <div className="flex flex-col flex-1 overflow-hidden">
       <div className="p-3 border-b border-[var(--blueprint-grid-major)]">
         {searchAndFilters}
       </div>

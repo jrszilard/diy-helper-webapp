@@ -103,7 +103,7 @@ export default function ExpertDashboardPage() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <SectionHeader size="lg" title="Dashboard" />
+      <SectionHeader size="lg" title="Dashboard" className="text-white" />
 
       <StripeOnboardBanner stripeOnboardingComplete={d.stripeOnboardingComplete} />
       <DashboardStats stats={stats} />
