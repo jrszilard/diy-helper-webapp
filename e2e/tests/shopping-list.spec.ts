@@ -41,7 +41,7 @@ function makeGuestProject() {
 
 async function setupShoppingList(page: import('@playwright/test').Page) {
   // Pre-seed project and navigate
-  await page.goto('/chat');
+  await page.goto('/');
   await page.evaluate((project) => {
     localStorage.setItem('diy-helper-guest-projects', JSON.stringify([project]));
   }, makeGuestProject());

@@ -1,87 +1,152 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import LandingHero from '@/components/LandingHero';
-import AuthButton from '@/components/AuthButton';
-import ExpertQuickBar from '@/components/ExpertQuickBar';
-import { useExpertStatus } from '@/hooks/useExpertStatus';
-import { supabase } from '@/lib/supabase';
-import AppLogo from '@/components/AppLogo';
+import AppHeader from '@/components/AppHeader';
 import Button from '@/components/ui/Button';
+import { MessageSquare } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+
+interface Conversation {
+  id: string;
+  title: string;
+  updated_at: string;
+}
+
+function formatRelativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return mins <= 1 ? 'just now' : `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
 
 export default function LandingPage() {
-  const [user, setUser] = useState<{ id: string; email?: string; name?: string } | null>(null);
-  const [showAuth, setShowAuth] = useState(false);
-  const { isExpert, expert, openQueueCount } = useExpertStatus();
+  const [user, setUser] = useState<{ id: string } | null>(null);
+  const [chatActive, setChatActive] = useState(false);
+  const [activeChatConversationId, setActiveChatConversationId] = useState<string | undefined>(undefined);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [materialsCount, setMaterialsCount] = useState(0);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ? { id: session.user.id, email: session.user.email ?? undefined, name: session.user.user_metadata?.display_name ?? undefined } : null);
+      const u = session?.user ? { id: session.user.id } : null;
+      setUser(u);
+      if (u) fetchConversations(u.id);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ? { id: session.user.id, email: session.user.email ?? undefined, name: session.user.user_metadata?.display_name ?? undefined } : null);
+      const u = session?.user ? { id: session.user.id } : null;
+      setUser(u);
+      if (u) fetchConversations(u.id);
+      else setConversations([]);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('signIn') === 'true' && !user) {
-      setShowAuth(true);
+  const fetchConversations = async (userId: string) => {
+    const { data } = await supabase
+      .from('conversations')
+      .select('id, title, updated_at')
+      .eq('user_id', userId)
+      .order('updated_at', { ascending: false })
+      .limit(6);
+    setConversations(data ?? []);
+  };
+
+  const openConversation = (id: string) => {
+    setActiveChatConversationId(id);
+    setChatActive(true);
+  };
+
+  const handleNewChat = () => {
+    setActiveChatConversationId(undefined);
+    setChatActive(false);
+  };
+
+  const handleProjectSelect = useCallback(async (project: { id: string } | null) => {
+    if (!project) return;
+    const { data } = await supabase
+      .from('conversations')
+      .select('id')
+      .eq('project_id', project.id)
+      .order('updated_at', { ascending: false })
+      .limit(1);
+    if (data && data.length > 0) {
+      openConversation(data[0].id);
+    } else {
+      setChatActive(true);
     }
-  }, [user]);
+  }, []);
+
+  // Broadcast materials count to the global sidebar
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('diy:materialsCount', { detail: materialsCount }));
+  }, [materialsCount]);
+
+  // Listen for project selection from the global sidebar
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const project = (e as CustomEvent<{ id: string }>).detail;
+      handleProjectSelect(project);
+    };
+    window.addEventListener('diy:projectSelect', handler);
+    return () => window.removeEventListener('diy:projectSelect', handler);
+  }, [handleProjectSelect]);
 
   return (
-    <div className="min-h-screen bg-earth-brown-dark">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 backdrop-blur-xl bg-[var(--earth-brown-dark)]/95 border-b border-[var(--blueprint-grid-major)]">
-        <div className="u-container">
-          <div className="flex justify-between items-center h-16">
-            <AppLogo variant="dark" />
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" href="/about" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10 hidden sm:inline-flex">
-                About
-              </Button>
-              <Button variant="ghost" href="/experts/register" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10">
-                Become an Expert
-              </Button>
-              <AuthButton user={user} variant="dark" isExpert={isExpert} externalShowAuth={showAuth} onAuthToggle={setShowAuth} />
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-earth-night">
+      <AppHeader
+        showBack={chatActive}
+        onBack={handleNewChat}
+      />
 
-      {/* Expert Quick Bar - only shown to verified experts */}
-      {isExpert && expert && (
-        <ExpertQuickBar displayName={expert.displayName} openQueueCount={openQueueCount} />
-      )}
-
-      {/* Hero */}
       <section className="pt-[var(--space-3xl)] pb-[var(--space-2xl)]">
         <div className="u-container">
-          <LandingHero />
+          <LandingHero
+            chatActive={chatActive}
+            onFirstMessage={() => setChatActive(true)}
+            initialConversationId={activeChatConversationId}
+            onMaterialsDetected={setMaterialsCount}
+          />
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-[var(--space-l)]">
-        <div className="u-container">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <AppLogo variant="dark" />
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" href="/about" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10 text-sm">
-                About
-              </Button>
-              <Button variant="ghost" href="/experts/register" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10 text-sm">
-                Become an Expert
-              </Button>
-              <span className="text-white/30 text-sm pl-2">Powered by Claude AI</span>
+      {/* Recent Conversations — only in hero state */}
+      {!chatActive && user && conversations.length > 0 && (
+        <section className="pb-[var(--space-2xl)]">
+          <div className="u-container max-w-xl mx-auto">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-white/40 font-semibold text-xs uppercase tracking-wider flex items-center gap-2">
+                <MessageSquare className="w-3.5 h-3.5" />
+                Recent conversations
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {conversations.map((conv) => (
+                <button
+                  key={conv.id}
+                  onClick={() => openConversation(conv.id)}
+                  className="flex items-start gap-3 text-left rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 hover:border-white/15 px-4 py-3 transition-all group"
+                >
+                  <MessageSquare className="w-4 h-4 text-white/20 group-hover:text-white/40 flex-shrink-0 mt-0.5 transition-colors" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-white/70 text-sm font-medium truncate group-hover:text-white transition-colors">
+                      {conv.title}
+                    </p>
+                    <p className="text-white/25 text-xs mt-0.5">{formatRelativeTime(conv.updated_at)}</p>
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
-        </div>
-      </footer>
+        </section>
+      )}
+
     </div>
   );
 }

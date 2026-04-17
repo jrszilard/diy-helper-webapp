@@ -70,7 +70,7 @@ export default function ReviewForm({ expertId, questionId, onSuccess }: ReviewFo
   };
 
   return (
-    <div className="bg-white border border-earth-sand rounded-lg p-6">
+    <div className="bg-white border border-white/10 rounded-lg p-6">
       <h3 className="text-lg font-bold text-foreground mb-4">Leave a Review</h3>
 
       {error && (
@@ -96,7 +96,7 @@ export default function ReviewForm({ expertId, questionId, onSuccess }: ReviewFo
                   size={28}
                   className={`transition-colors ${
                     star <= (hoverRating || rating)
-                      ? 'fill-terracotta text-terracotta'
+                      ? 'fill-rust text-rust'
                       : 'text-earth-sand'
                   }`}
                 />
@@ -131,7 +131,7 @@ export default function ReviewForm({ expertId, questionId, onSuccess }: ReviewFo
             className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-white transition-colors ${
               submitting || rating === 0
                 ? 'bg-[var(--muted)] cursor-not-allowed'
-                : 'bg-terracotta hover:bg-terracotta-dark'
+                : 'bg-rust hover:bg-copper'
             }`}
           >
             {submitting && <Spinner size="sm" />}

@@ -23,22 +23,48 @@ interface DashboardApiResponse {
   };
 }
 
+interface QueueQuestion {
+  id: string;
+  questionText: string;
+  category: string;
+  priceCents: number;
+  expertPayoutCents?: number;
+  createdAt: string;
+}
+
+interface QueueApiResponse {
+  questions: QueueQuestion[];
+}
+
 export default function ExpertDashboardPage() {
   const [data, setData] = useState<DashboardApiResponse | null>(null);
+  const [queueQuestions, setQueueQuestions] = useState<QueueQuestion[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetch_data() {
+    async function fetchData() {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       try {
-        const token = (await supabase.auth.getSession()).data.session?.access_token;
-        if (!token) return;
+        const [dashRes, queueRes] = await Promise.all([
+          fetch('/api/experts/dashboard', {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch('/api/qa/queue', {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
 
-        const res = await fetch('/api/experts/dashboard', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const json = await res.json();
+        if (dashRes.ok) {
+          const json = await dashRes.json();
           setData(json);
+        }
+        if (queueRes.ok) {
+          const queueJson: QueueApiResponse = await queueRes.json();
+          setQueueQuestions(queueJson.questions.slice(0, 5));
         }
       } catch {
         // ignore
@@ -46,7 +72,7 @@ export default function ExpertDashboardPage() {
         setLoading(false);
       }
     }
-    fetch_data();
+    fetchData();
   }, []);
 
   if (loading) {
@@ -77,11 +103,11 @@ export default function ExpertDashboardPage() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <SectionHeader size="lg" title="Dashboard" />
+      <SectionHeader size="lg" title="Dashboard" className="text-white" />
 
       <StripeOnboardBanner stripeOnboardingComplete={d.stripeOnboardingComplete} />
       <DashboardStats stats={stats} />
-      <DashboardQAQueue questions={[]} />
+      <DashboardQAQueue questions={queueQuestions} />
     </div>
   );
 }

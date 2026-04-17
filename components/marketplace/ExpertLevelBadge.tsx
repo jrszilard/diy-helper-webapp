@@ -5,10 +5,10 @@ import { Award } from 'lucide-react';
 export type ExpertLevel = 'bronze' | 'silver' | 'gold' | 'platinum';
 
 const LEVEL_STYLES: Record<ExpertLevel, { bg: string; text: string; icon: string }> = {
-  bronze: { bg: 'bg-amber-100', text: 'text-amber-800', icon: 'text-amber-600' },
-  silver: { bg: 'bg-gray-200', text: 'text-gray-700', icon: 'text-gray-500' },
-  gold: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: 'text-yellow-600' },
-  platinum: { bg: 'bg-purple-100', text: 'text-purple-800', icon: 'text-purple-600' },
+  bronze: { bg: 'bg-copper/20', text: 'text-copper', icon: 'text-copper' },
+  silver: { bg: 'bg-white/10', text: 'text-white/70', icon: 'text-white/50' },
+  gold: { bg: 'bg-gold/20', text: 'text-gold', icon: 'text-gold' },
+  platinum: { bg: 'bg-[var(--status-waiting)]/20', text: 'text-[var(--status-waiting)]', icon: 'text-[var(--status-waiting)]' },
 };
 
 const LEVEL_LABELS: Record<ExpertLevel, string> = {

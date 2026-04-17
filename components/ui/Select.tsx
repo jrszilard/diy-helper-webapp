@@ -34,46 +34,44 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(({
   return (
     <div className={cn('flex flex-col gap-1', fullWidth && 'w-full')}>
       {label && (
-        <label htmlFor={id} className="text-sm font-medium text-[var(--earth-brown-dark)]">
+        <label htmlFor={id} className="text-sm font-medium text-white/60">
           {label}
         </label>
       )}
-    <div className={cn('relative', fullWidth && 'w-full')}>
-      {LeftIcon && (
-        <LeftIcon
-          size={iconSize}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--earth-brown-light)] pointer-events-none"
-        />
-      )}
-      <select
-        ref={ref}
-        id={id}
-        className={cn(
-          'text-[#3E2723]',
-          'appearance-none border rounded-lg bg-white transition-colors',
-          'focus:outline-none focus:ring-2 focus:ring-[var(--terracotta)] focus:border-[var(--terracotta)]',
-          'disabled:opacity-50 disabled:cursor-not-allowed',
-          error
-            ? 'border-[var(--rust)] focus:ring-[var(--rust)] focus:border-[var(--rust)]'
-            : 'border-[var(--earth-sand)]',
-          sizeClasses[inputSize],
-          paddingLeft,
-          'pr-9',
-          fullWidth && 'w-full',
-          className,
+      <div className={cn('relative', fullWidth && 'w-full')}>
+        {LeftIcon && (
+          <LeftIcon
+            size={iconSize}
+            className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30"
+          />
         )}
-        {...props}
-      >
-        {children}
-      </select>
-      <ChevronDown
-        size={iconSize}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--earth-brown-light)] pointer-events-none"
-      />
-      {error && (
-        <p className="mt-1 text-xs text-[var(--rust)]">{error}</p>
-      )}
-    </div>
+        <select
+          ref={ref}
+          id={id}
+          className={cn(
+            'appearance-none bg-white/10 text-white border border-white/20 rounded-lg transition-colors',
+            '[&>option]:bg-[#2a2420] [&>option]:text-white',
+            'focus:outline-none focus:ring-2 focus:ring-[var(--rust)] focus:border-[var(--rust)]',
+            'disabled:opacity-50 disabled:cursor-not-allowed',
+            error && 'border-[var(--rust)] focus:ring-[var(--rust)] focus:border-[var(--rust)]',
+            sizeClasses[inputSize],
+            paddingLeft,
+            'pr-9',
+            fullWidth && 'w-full',
+            className,
+          )}
+          {...props}
+        >
+          {children}
+        </select>
+        <ChevronDown
+          size={iconSize}
+          className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30"
+        />
+        {error && (
+          <p className="mt-1 text-xs text-[var(--rust)]">{error}</p>
+        )}
+      </div>
     </div>
   );
 });

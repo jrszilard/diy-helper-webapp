@@ -12,7 +12,7 @@ const variantTrack: Record<ProgressBarVariant, string> = {
 
 const variantFill: Record<ProgressBarVariant, string> = {
   default: 'bg-[var(--earth-brown)]',
-  primary: 'bg-[var(--terracotta)]',
+  primary: 'bg-[var(--rust)]',
   success: 'bg-[var(--forest-green)]',
   warning: 'bg-amber-500',
 };

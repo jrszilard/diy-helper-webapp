@@ -197,11 +197,66 @@ export const intelligence = {
   /** Confidence threshold — below this, ask user to clarify */
   confidenceThreshold: envFloat('INTENT_CONFIDENCE_THRESHOLD', 0.7),
   /** Max ms to wait for classification before falling back.
-   *  Spec target is <300ms, but 500ms gives headroom for cold starts.
-   *  Haiku typically responds in 100-200ms; this timeout is a safety net. */
-  classificationTimeoutMs: envInt('INTENT_CLASSIFICATION_TIMEOUT_MS', 500),
+   *  Haiku typically responds in 100-200ms in production. The timeout must
+   *  accommodate cold-start overhead (TLS, DNS, SDK init) which can reach
+   *  800-1500ms on the first call. 2000ms is safe without blocking the user. */
+  classificationTimeoutMs: envInt('INTENT_CLASSIFICATION_TIMEOUT_MS', 2000),
+} as const;
+
+// ── Advisor Strategy ────────────────────────────────────────────────────────
+// Research basis: Asawa et al. (2025) "How to Train Your Advisor" arXiv:2510.02453
+// Mode A (off): no review. Mode B (beta): Anthropic advisor API. Mode C (custom): our own loop.
+function parseAdvisorMode(val: string): 'off' | 'beta' | 'custom' {
+  if (val === 'beta' || val === 'custom') return val;
+  return 'off';
+}
+
+export const advisor = {
+  mode: parseAdvisorMode(envString('ADVISOR_MODE', 'off')),
+
+  tiers: {
+    quick_question: {
+      executor: envString('ADVISOR_EXECUTOR_QUICK', 'claude-haiku-4-5-20251001'),
+      advisor: null as string | null,
+      maxUses: 0,
+    },
+    troubleshooting: {
+      executor: envString('ADVISOR_EXECUTOR_TROUBLESHOOT', 'claude-sonnet-4-6'),
+      advisor: envString('ADVISOR_MODEL_TROUBLESHOOT', 'claude-opus-4-6') as string | null,
+      maxUses: envInt('ADVISOR_MAX_USES_TROUBLESHOOT', 2),
+    },
+    mid_project: {
+      executor: envString('ADVISOR_EXECUTOR_MID', 'claude-sonnet-4-6'),
+      advisor: envString('ADVISOR_MODEL_MID', 'claude-opus-4-6') as string | null,
+      maxUses: envInt('ADVISOR_MAX_USES_MID', 1),
+    },
+    full_project: {
+      executor: envString('ADVISOR_EXECUTOR_FULL', 'claude-sonnet-4-6'),
+      advisor: envString('ADVISOR_MODEL_FULL', 'claude-opus-4-6') as string | null,
+      maxUses: envInt('ADVISOR_MAX_USES_FULL', 3),
+    },
+  },
+
+  // Custom review loop config (used when mode === 'custom')
+  customReviewer: {
+    model: envString('ADVISOR_CUSTOM_MODEL', 'claude-haiku-4-5-20251001'),
+    provider: envString('ADVISOR_CUSTOM_PROVIDER', 'anthropic'),
+    maxIterations: envInt('ADVISOR_CUSTOM_MAX_ITERATIONS', 2),
+    earlyStopOnApproval: envString('ADVISOR_CUSTOM_EARLY_STOP', 'true') === 'true',
+  },
+
+  safetyCriticalKeywords: envList('ADVISOR_SAFETY_KEYWORDS', [
+    'electrical panel', 'breaker box', 'subpanel', 'gas line',
+    'gas pipe', 'gas leak', 'smell gas', 'carbon monoxide',
+    'load-bearing', 'structural', 'asbestos',
+    'lead paint', 'roof work', 'main disconnect', 'service entrance',
+    'circuit breaker', 'wiring', 'rewire', '200 amp', '100 amp',
+    'outlet install', 'junction box', 'ground wire', 'knob and tube',
+  ]),
+
+  safetyBoostUses: envInt('ADVISOR_SAFETY_BOOST_USES', 1),
 } as const;
 
 // Re-export everything as a single default for convenience
-const config = { beta, anthropic, rateLimits, cors, storeSearch, streaming, pruning, freemium, stripe, marketplace, expertSubscriptions, intelligence } as const;
+const config = { beta, anthropic, rateLimits, cors, storeSearch, streaming, pruning, freemium, stripe, marketplace, expertSubscriptions, intelligence, advisor } as const;
 export default config;

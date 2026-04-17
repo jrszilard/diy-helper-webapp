@@ -169,7 +169,7 @@ export default function QADetailPage() {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.push('/chat');
+        router.push('/');
         return;
       }
       setCurrentUserId(user.id);
@@ -202,15 +202,15 @@ export default function QADetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
-        <Spinner size="lg" className="text-terracotta" />
+      <div className="min-h-screen bg-earth-night flex items-center justify-center">
+        <Spinner size="lg" className="text-rust" />
       </div>
     );
   }
 
   if (!question) {
     return (
-      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
+      <div className="min-h-screen bg-earth-night flex items-center justify-center">
         <div className="text-center">
           <p className="text-sm text-[var(--earth-sand)] mb-4">Question not found</p>
           <Button variant="ghost" href="/marketplace/qa" leftIcon={ArrowLeft} size="sm" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10">
@@ -345,7 +345,7 @@ export default function QADetailPage() {
     : { label: 'Pending', color: 'gray', detail: 'Payment pending' };
 
   return (
-    <div className="min-h-screen bg-earth-brown-dark">
+    <div className="min-h-screen bg-earth-night">
       <DIYerHeader />
 
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-4">
@@ -399,30 +399,32 @@ export default function QADetailPage() {
           </Alert>
         )}
 
-        {/* Question text card (shown for all roles) */}
-        <Card padding="sm">
-          <h3 className="text-sm font-semibold text-[var(--earth-brown-dark)] mb-2">Question</h3>
-          <p className="text-sm text-foreground">{question.questionText}</p>
-          <div className="flex items-center gap-3 mt-3">
-            <Badge variant="default">{question.category}</Badge>
-            {isExpert && question.status === 'claimed' && !isThreaded && (
-              <span className="flex items-center gap-1 text-xs text-earth-brown">
-                <Clock size={12} />
-                You have 2 hours to answer
-              </span>
-            )}
-          </div>
-        </Card>
+        {/* Question text card — hidden in threaded mode (ConversationView shows question) */}
+        {!isThreaded && (
+          <Card padding="sm">
+            <h3 className="text-sm font-semibold text-[var(--earth-brown-dark)] mb-2">Question</h3>
+            <p className="text-sm text-foreground">{question.questionText}</p>
+            <div className="flex items-center gap-3 mt-3">
+              <Badge variant="default">{question.category}</Badge>
+              {isExpert && question.status === 'claimed' && (
+                <span className="flex items-center gap-1 text-xs text-white/60">
+                  <Clock size={12} />
+                  You have 2 hours to answer
+                </span>
+              )}
+            </div>
+          </Card>
+        )}
 
         {/* Bids section (bidding mode, DIYer view — before expert is selected) */}
         {isBiddingMode && isDIYer && question.status === 'open' && (
           <Card padding="sm">
             <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-              <Gavel size={16} className="text-terracotta" />
+              <Gavel size={16} className="text-rust" />
               Expert Proposals ({bids.length})
             </h3>
             {bids.length === 0 ? (
-              <p className="text-sm text-earth-brown">
+              <p className="text-sm text-white/60">
                 Waiting for expert proposals. You&apos;ll be notified when experts submit their bids.
               </p>
             ) : (
@@ -503,7 +505,7 @@ export default function QADetailPage() {
               <ArrowUpRight size={16} className="text-slate-blue" />
               Need Hands-On Help?
             </h3>
-            <p className="text-xs text-earth-brown mb-3">
+            <p className="text-xs text-white/60 mb-3">
               If this project needs professional work beyond Q&A advice, graduate it to a project.
               {question.expertId && ' Your current expert gets priority positioning.'}
             </p>

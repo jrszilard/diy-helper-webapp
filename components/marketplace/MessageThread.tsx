@@ -172,7 +172,7 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
                 className={`max-w-[75%] rounded-lg px-3 py-2 ${
                   isCurrentUser
                     ? 'bg-forest-green text-white'
-                    : 'bg-earth-tan text-foreground'
+                    : 'bg-white/10 text-white/80'
                 }`}
               >
                 {!isCurrentUser && msg.senderName && (
@@ -188,11 +188,11 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
                         }`}>
                           <FolderOpen size={14} className={isCurrentUser ? 'text-white/80' : 'text-slate-blue'} />
                           <div className="flex-1 min-w-0">
-                            <p className={`text-xs font-semibold truncate ${isCurrentUser ? 'text-white' : 'text-foreground'}`}>
+                            <p className={`text-xs font-semibold truncate ${isCurrentUser ? 'text-white' : 'text-white/80'}`}>
                               {project.projectName}
                             </p>
                             {project.description && (
-                              <p className={`text-xs truncate mt-0.5 ${isCurrentUser ? 'text-white/70' : 'text-earth-brown'}`}>
+                              <p className={`text-xs truncate mt-0.5 ${isCurrentUser ? 'text-white/70' : 'text-white/50'}`}>
                                 {project.description}
                               </p>
                             )}
@@ -245,14 +245,14 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
 
       {/* Pending image previews */}
       {pendingImages.length > 0 && (
-        <div className="border-t border-earth-sand bg-earth-cream px-3 py-2">
+        <div className="border-t border-white/10 bg-white/6 px-3 py-2">
           <div className="flex gap-2 flex-wrap">
             {pendingImages.map((img, idx) => (
               <div key={idx} className="relative group">
                 <img
                   src={img.previewUrl}
                   alt={`Pending ${idx + 1}`}
-                  className="w-16 h-16 object-cover rounded-lg border border-earth-sand"
+                  className="w-16 h-16 object-cover rounded-lg border border-white/10"
                 />
                 <IconButton
                   icon={X}
@@ -269,7 +269,7 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
       )}
 
       {/* Input area */}
-      <div className="border-t border-earth-sand p-3 bg-surface">
+      <div className="border-t border-white/10 p-3 bg-white/6">
         <div className="flex items-end gap-2">
           <IconButton
             icon={Image}
@@ -294,7 +294,7 @@ export default function MessageThread({ messages, currentUserId, onSend, sending
             placeholder="Type a message..."
             rows={1}
             disabled={isBusy}
-            className="flex-1 px-3 py-2 border border-earth-sand rounded-lg bg-white text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-slate-blue/50 resize-none disabled:opacity-50"
+            className="flex-1 px-3 py-2 border border-white/20 rounded-lg bg-white/10 text-white placeholder:text-white/50 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--slate-blue)]/50 resize-none disabled:opacity-50"
           />
           {isBusy ? (
             <div className="p-2 flex-shrink-0">

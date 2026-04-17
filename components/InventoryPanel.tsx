@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import EmptyState from '@/components/ui/EmptyState';
-import Modal from '@/components/ui/Modal';
 import {
   Wrench,
   Zap,
@@ -27,7 +26,6 @@ import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
 import Badge, { type BadgeVariant } from '@/components/ui/Badge';
 import IconButton from '@/components/ui/IconButton';
-import Card from '@/components/ui/Card';
 
 interface InventoryItem {
   id: string;
@@ -75,6 +73,8 @@ function conditionVariant(condition: string): BadgeVariant {
   }
 }
 
+const darkInput = 'bg-white/10 text-white border-white/20 placeholder-white/40';
+
 export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPanelProps) {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,8 +82,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
-  
-  // Form state
+
   const [formData, setFormData] = useState({
     item_name: '',
     category: 'general',
@@ -94,13 +93,8 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
 
   useEffect(() => {
     if (isOpen) {
-      if (userId) {
-        loadInventory();
-      } else {
-        // No user logged in - stop loading immediately
-        setLoading(false);
-        setInventory([]);
-      }
+      if (userId) loadInventory();
+      else { setLoading(false); setInventory([]); }
     }
   }, [isOpen, userId]);
 
@@ -113,7 +107,6 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
         .eq('user_id', userId)
         .order('category')
         .order('item_name');
-
       if (error) throw error;
       setInventory(data || []);
     } catch (err) {
@@ -123,50 +116,35 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
     }
   };
 
+  const resetForm = () => setFormData({ item_name: '', category: 'general', quantity: 1, condition: 'good', notes: '' });
+
   const handleAddItem = async () => {
     if (!formData.item_name.trim()) return;
-
     try {
-      const { error } = await supabase
-        .from('user_inventory')
-        .insert({
-          user_id: userId,
-          item_name: formData.item_name.trim(),
-          category: formData.category,
-          quantity: formData.quantity,
-          condition: formData.condition,
-          notes: formData.notes || null,
-          auto_added: false
-        });
-
-      if (error) throw error;
-
-      setFormData({
-        item_name: '',
-        category: 'general',
-        quantity: 1,
-        condition: 'good',
-        notes: ''
+      const { error } = await supabase.from('user_inventory').insert({
+        user_id: userId,
+        item_name: formData.item_name.trim(),
+        category: formData.category,
+        quantity: formData.quantity,
+        condition: formData.condition,
+        notes: formData.notes || null,
+        auto_added: false
       });
+      if (error) throw error;
+      resetForm();
       setShowAddForm(false);
       loadInventory();
     } catch (err: unknown) {
       const pgError = err as { code?: string };
-      if (pgError.code === '23505') {
-        alert('This item is already in your inventory!');
-      } else {
-        console.error('Error adding item:', err);
-        alert('Failed to add item');
-      }
+      if (pgError.code === '23505') alert('This item is already in your inventory!');
+      else { console.error('Error adding item:', err); alert('Failed to add item'); }
     }
   };
 
   const handleUpdateItem = async () => {
     if (!editingItem || !formData.item_name.trim()) return;
-
     try {
-      const { error } = await supabase
-        .from('user_inventory')
+      const { error } = await supabase.from('user_inventory')
         .update({
           item_name: formData.item_name.trim(),
           category: formData.category,
@@ -175,17 +153,9 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
           notes: formData.notes || null
         })
         .eq('id', editingItem.id);
-
       if (error) throw error;
-
       setEditingItem(null);
-      setFormData({
-        item_name: '',
-        category: 'general',
-        quantity: 1,
-        condition: 'good',
-        notes: ''
-      });
+      resetForm();
       loadInventory();
     } catch (err) {
       console.error('Error updating item:', err);
@@ -195,13 +165,8 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
 
   const handleDeleteItem = async (id: string) => {
     if (!confirm('Remove this item from your inventory?')) return;
-
     try {
-      const { error } = await supabase
-        .from('user_inventory')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabase.from('user_inventory').delete().eq('id', id);
       if (error) throw error;
       loadInventory();
     } catch (err) {
@@ -212,291 +177,208 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
 
   const startEdit = (item: InventoryItem) => {
     setEditingItem(item);
-    setFormData({
-      item_name: item.item_name,
-      category: item.category,
-      quantity: item.quantity,
-      condition: item.condition,
-      notes: item.notes || ''
-    });
+    setFormData({ item_name: item.item_name, category: item.category, quantity: item.quantity, condition: item.condition, notes: item.notes || '' });
     setShowAddForm(false);
   };
 
-  const cancelEdit = () => {
-    setEditingItem(null);
-    setFormData({
-      item_name: '',
-      category: 'general',
-      quantity: 1,
-      condition: 'good',
-      notes: ''
-    });
-  };
+  const cancelEdit = () => { setEditingItem(null); resetForm(); };
 
-  // Filter inventory based on search and category
   const filteredInventory = inventory.filter(item => {
-    const matchesSearch = !searchQuery || 
-      item.item_name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = !selectedCategory || 
-      item.category === selectedCategory;
+    const matchesSearch = !searchQuery || item.item_name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = !selectedCategory || item.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  // Group by category
   const groupedInventory = filteredInventory.reduce((acc, item) => {
     if (!acc[item.category]) acc[item.category] = [];
     acc[item.category].push(item);
     return acc;
   }, {} as Record<string, InventoryItem[]>);
 
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} position="right">
-        {/* Header */}
-        <div className="bg-terracotta text-white p-4 flex items-center justify-between safe-area-top">
-          <div>
-            <h2 className="text-lg sm:text-xl font-bold">My Tool Inventory</h2>
-            <p className="text-[var(--status-progress-bg)] text-sm">{inventory.length} items</p>
-          </div>
-          <IconButton
-            icon={X}
-            iconSize={24}
-            label="Close inventory panel"
-            onClick={onClose}
-            className="text-white hover:bg-[var(--terracotta-dark)] active:bg-[#8B4D33]"
-          />
-        </div>
+  if (!isOpen) return null;
 
-        {/* Search and Filter */}
-        <div className="p-4 border-b border-earth-sand space-y-3">
+  return (
+    <div className="fixed left-0 md:left-64 top-16 bottom-0 w-[85vw] md:w-80 bg-[#1A1612] border-r border-[var(--blueprint-grid-major)] z-30 flex flex-col shadow-xl animate-slide-in-left">
+
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-[var(--blueprint-grid-major)]">
+        <div>
+          <h2 className="font-bold text-lg text-white">My Tools</h2>
+          <p className="text-xs text-[var(--earth-sand)]/60 mt-0.5">{inventory.length} items</p>
+        </div>
+        <IconButton icon={X} iconSize={18} label="Close" onClick={onClose} className="text-[var(--earth-sand)] hover:bg-white/10 hover:text-white" />
+      </div>
+
+      {/* Search — only when there are items */}
+      {!loading && inventory.length > 0 && <div className="p-3 border-b border-[var(--blueprint-grid-major)]">
+        <TextInput
+          type="text"
+          placeholder="Search inventory..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          leftIcon={Search}
+          iconSize={16}
+          inputSize="sm"
+          fullWidth
+          aria-label="Search inventory"
+          className={darkInput}
+        />
+
+        {/* Category filter chips */}
+        <div className="flex gap-1.5 flex-wrap mt-2.5">
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className={`text-xs px-2.5 py-1 rounded-full transition-colors ${!selectedCategory ? 'bg-rust text-white' : 'bg-white/10 text-[var(--earth-sand)] hover:bg-white/15'}`}
+          >
+            All
+          </button>
+          {CATEGORIES.slice(0, 5).map(cat => (
+            <button
+              key={cat.value}
+              onClick={() => setSelectedCategory(selectedCategory === cat.value ? null : cat.value)}
+              className={`text-xs px-2.5 py-1 rounded-full transition-colors ${selectedCategory === cat.value ? 'bg-rust text-white' : 'bg-white/10 text-[var(--earth-sand)] hover:bg-white/15'}`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      </div>}
+
+      {/* Add / Edit form */}
+      {(showAddForm || editingItem) && (
+        <div className="p-3 border-b border-[var(--blueprint-grid-major)] bg-white/5 space-y-2">
+          <h3 className="text-sm font-semibold text-white">
+            {editingItem ? 'Edit Item' : 'Add New Item'}
+          </h3>
           <TextInput
             type="text"
-            placeholder="Search inventory..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            leftIcon={Search}
-            iconSize={18}
+            placeholder="Item name (e.g., Cordless Drill)"
+            value={formData.item_name}
+            onChange={(e) => setFormData({ ...formData, item_name: e.target.value })}
+            inputSize="sm"
             fullWidth
-            aria-label="Search inventory"
+            className={darkInput}
           />
-
-          <div className="flex gap-2 flex-wrap">
-            <Button
-              size="sm"
-              variant={!selectedCategory ? 'primary' : 'ghost'}
-              className="rounded-full"
-              aria-label="Show all categories"
-              onClick={() => setSelectedCategory(null)}
+          <div className="flex gap-2">
+            <Select
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              inputSize="sm"
+              className={`flex-1 ${darkInput}`}
             >
-              All
-            </Button>
-            {CATEGORIES.slice(0, 5).map(cat => (
-              <Button
-                key={cat.value}
-                size="sm"
-                variant={selectedCategory === cat.value ? 'primary' : 'ghost'}
-                leftIcon={cat.icon}
-                iconSize={14}
-                className="rounded-full"
-                aria-label={`Filter by ${cat.label}`}
-                onClick={() => setSelectedCategory(
-                  selectedCategory === cat.value ? null : cat.value
-                )}
-              >
-                {cat.label}
-              </Button>
+              {CATEGORIES.map(cat => (
+                <option key={cat.value} value={cat.value}>{cat.label}</option>
+              ))}
+            </Select>
+            <TextInput
+              type="number"
+              min="1"
+              value={formData.quantity}
+              onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
+              inputSize="sm"
+              className={`w-16 ${darkInput}`}
+              placeholder="Qty"
+            />
+          </div>
+          <Select
+            value={formData.condition}
+            onChange={(e) => setFormData({ ...formData, condition: e.target.value })}
+            inputSize="sm"
+            fullWidth
+            className={darkInput}
+          >
+            {CONDITIONS.map(cond => (
+              <option key={cond.value} value={cond.value}>{cond.label}</option>
             ))}
+          </Select>
+          <Textarea
+            placeholder="Notes (optional)"
+            value={formData.notes}
+            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            resize="none"
+            fullWidth
+            rows={2}
+            className={darkInput}
+          />
+          <div className="flex gap-2">
+            <Button variant="primary" size="sm" fullWidth leftIcon={Check} iconSize={14} onClick={editingItem ? handleUpdateItem : handleAddItem}>
+              {editingItem ? 'Update' : 'Add Item'}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => editingItem ? cancelEdit() : setShowAddForm(false)} className="text-[var(--earth-sand)] hover:bg-white/10 hover:text-white">
+              Cancel
+            </Button>
           </div>
         </div>
+      )}
 
-        {/* Add/Edit Form */}
-        {(showAddForm || editingItem) && (
-          <div className="p-4 bg-earth-cream border-b border-earth-sand">
-            <h3 className="font-semibold text-foreground mb-3">
-              {editingItem ? 'Edit Item' : 'Add New Item'}
-            </h3>
-            <div className="space-y-3">
-              <label htmlFor="inventory-item-name" className="sr-only">Item name</label>
-              <TextInput
-                id="inventory-item-name"
-                type="text"
-                placeholder="Item name (e.g., Cordless Drill)"
-                value={formData.item_name}
-                onChange={(e) => setFormData({ ...formData, item_name: e.target.value })}
-                fullWidth
-              />
-
-              <div className="flex gap-2">
-                <label htmlFor="inventory-category" className="sr-only">Category</label>
-                <Select
-                  id="inventory-category"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="flex-1"
-                >
-                  {CATEGORIES.map(cat => (
-                    <option key={cat.value} value={cat.value}>{cat.label}</option>
-                  ))}
-                </Select>
-
-                <label htmlFor="inventory-quantity" className="sr-only">Quantity</label>
-                <TextInput
-                  id="inventory-quantity"
-                  type="number"
-                  min="1"
-                  value={formData.quantity}
-                  onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
-                  className="w-20"
-                  placeholder="Qty"
-                />
-              </div>
-
-              <label htmlFor="inventory-condition" className="sr-only">Condition</label>
-              <Select
-                id="inventory-condition"
-                value={formData.condition}
-                onChange={(e) => setFormData({ ...formData, condition: e.target.value })}
-                fullWidth
-              >
-                {CONDITIONS.map(cond => (
-                  <option key={cond.value} value={cond.value}>{cond.label}</option>
-                ))}
-              </Select>
-
-              <Textarea
-                id="inventory-notes"
-                placeholder="Notes (optional)"
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                resize="none"
-                fullWidth
-                rows={2}
-              />
-
-              <div className="flex gap-2">
-                <Button
-                  variant="primary"
-                  fullWidth
-                  leftIcon={Check}
-                  iconSize={18}
-                  onClick={editingItem ? handleUpdateItem : handleAddItem}
-                >
-                  {editingItem ? 'Update' : 'Add Item'}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    editingItem ? cancelEdit() : setShowAddForm(false);
-                  }}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Inventory List */}
-        <div className="flex-1 overflow-y-auto">
-          {loading ? (
-            <InventorySkeleton />
-          ) : !userId ? (
-            <EmptyState
-              icon={Package}
-              title="Sign in to access your tool inventory"
-              description="Your tools will be saved and remembered across sessions"
-              className="p-8"
-            />
-          ) : filteredInventory.length === 0 ? (
-            <EmptyState
-              icon={Package}
-              title={searchQuery || selectedCategory ? 'No items match your search' : 'Your inventory is empty'}
-              description="Add items manually or mention tools you own in chat"
-              className="p-8"
-            />
-          ) : (
-            <div className="p-4 space-y-4">
-              {Object.entries(groupedInventory).map(([category, items]) => {
-                const catInfo = CATEGORIES.find(c => c.value === category);
-                const Icon = catInfo?.icon || Package;
-
-                return (
-                  <div key={category}>
-                    <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-                      <Icon size={16} className="text-terracotta" />
-                      {catInfo?.label || category}
-                      <span className="text-earth-brown font-normal">({items.length})</span>
-                    </h4>
-                    <div className="space-y-2">
-                      {items.map(item => (
-                        <Card
-                          key={item.id}
-                          padding="sm"
-                          className="flex items-center justify-between group hover:shadow-sm transition-shadow"
-                        >
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-foreground text-sm sm:text-base">
-                              {item.item_name}
-                              {item.quantity > 1 && (
-                                <span className="text-earth-brown font-normal ml-1">
-                                  x{item.quantity}
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 flex-wrap mt-1">
-                              <Badge variant={conditionVariant(item.condition)}>
-                                {item.condition}
-                              </Badge>
-                              {item.auto_added && (
-                                <Badge variant="neutral">auto-added</Badge>
-                              )}
-                            </div>
-                            {item.notes && (
-                              <p className="text-xs text-earth-brown mt-1 line-clamp-2">{item.notes}</p>
+      {/* Inventory list */}
+      <div className="flex-1 overflow-y-auto">
+        {loading ? (
+          <InventorySkeleton />
+        ) : !userId ? (
+          <EmptyState icon={Package} title="Sign in to access your tool inventory" description="Your tools will be saved across sessions" className="p-8" />
+        ) : filteredInventory.length === 0 ? (
+          <EmptyState
+            icon={Package}
+            title={searchQuery || selectedCategory ? 'No items match your search' : 'Your inventory is empty'}
+            description="Add items manually or mention tools you own in chat"
+            className="p-8"
+          />
+        ) : (
+          <div className="p-3 space-y-4">
+            {Object.entries(groupedInventory).map(([category, items]) => {
+              const catInfo = CATEGORIES.find(c => c.value === category);
+              const Icon = catInfo?.icon || Package;
+              return (
+                <div key={category}>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-[var(--earth-sand)]/60 uppercase tracking-wide mb-2">
+                    <Icon size={12} />
+                    <span>{catInfo?.label || category}</span>
+                    <span className="text-white/30">({items.length})</span>
+                  </div>
+                  <div className="space-y-1">
+                    {items.map(item => (
+                      <div
+                        key={item.id}
+                        className="group flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg bg-white/5 border border-transparent hover:bg-white/10 transition-colors"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-white truncate">
+                            {item.item_name}
+                            {item.quantity > 1 && (
+                              <span className="text-[var(--earth-sand)]/60 font-normal ml-1">×{item.quantity}</span>
                             )}
                           </div>
-
-                          {/* Always visible on mobile, hover on desktop */}
-                          <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
-                            <IconButton
-                              icon={Edit2}
-                              iconSize={18}
-                              label="Edit item"
-                              onClick={() => startEdit(item)}
-                              className="hover:text-[var(--slate-blue)] hover:bg-[var(--status-research-bg)]"
-                            />
-                            <IconButton
-                              icon={Trash2}
-                              iconSize={18}
-                              label="Delete item"
-                              onClick={() => handleDeleteItem(item.id)}
-                              className="hover:text-[var(--rust)] hover:bg-[#FADDD0]"
-                            />
+                          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                            <Badge variant={conditionVariant(item.condition)} size="sm">{item.condition}</Badge>
+                            {item.auto_added && <Badge variant="neutral" size="sm">auto-added</Badge>}
                           </div>
-                        </Card>
-                      ))}
-                    </div>
+                          {item.notes && (
+                            <p className="text-xs text-[var(--earth-sand)]/50 mt-1 line-clamp-1">{item.notes}</p>
+                          )}
+                        </div>
+                        <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                          <IconButton icon={Edit2} iconSize={14} label="Edit item" onClick={() => startEdit(item)} className="text-[var(--earth-sand)] hover:bg-white/10 hover:text-white" />
+                          <IconButton icon={Trash2} iconSize={14} label="Delete item" onClick={() => handleDeleteItem(item.id)} className="text-[var(--earth-sand)] hover:bg-white/10 hover:text-rust" />
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Add Button - only show when logged in */}
-        {!showAddForm && !editingItem && userId && (
-          <div className="p-4 border-t border-earth-sand safe-area-bottom bg-surface">
-            <Button
-              variant="primary"
-              size="lg"
-              fullWidth
-              leftIcon={Plus}
-              iconSize={20}
-              onClick={() => setShowAddForm(true)}
-            >
-              Add Item to Inventory
-            </Button>
+                </div>
+              );
+            })}
           </div>
         )}
-    </Modal>
+      </div>
+
+      {/* Add button */}
+      {!showAddForm && !editingItem && userId && (
+        <div className="p-3 border-t border-[var(--blueprint-grid-major)]">
+          <Button variant="primary" size="sm" fullWidth leftIcon={Plus} iconSize={16} onClick={() => setShowAddForm(true)}>
+            Add Item
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }

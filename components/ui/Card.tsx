@@ -46,12 +46,12 @@ export default function Card({
     <Tag
       onClick={onClick}
       className={cn(
-        'border border-[var(--earth-sand)]',
-        surface ? 'bg-surface' : 'bg-white',
+        'border border-white/10',
+        surface ? 'bg-white/10' : 'bg-white/6',
         roundedClasses[rounded],
         paddingClasses[padding],
         shadowClass,
-        hover && 'transition-all hover:shadow-md hover:border-[var(--terracotta)]/30',
+        hover && 'transition-all hover:shadow-md hover:border-[var(--rust)]/30',
         onClick && 'cursor-pointer',
         className,
       )}

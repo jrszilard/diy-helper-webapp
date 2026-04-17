@@ -72,15 +72,15 @@ export default function DIYerMessagesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
-        <Spinner size="lg" className="text-terracotta" />
+      <div className="min-h-screen bg-earth-night flex items-center justify-center">
+        <Spinner size="lg" className="text-rust" />
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-earth-brown-dark">
+      <div className="min-h-screen bg-earth-night">
         <DIYerHeader />
         <div className="max-w-4xl mx-auto px-4 py-16">
           <EmptyState
@@ -95,11 +95,11 @@ export default function DIYerMessagesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-earth-brown-dark">
+    <div className="min-h-screen bg-earth-night">
       <DIYerHeader />
       <div className="max-w-4xl mx-auto px-4 py-6">
         <div className="flex items-center gap-3 mb-6">
-          <Button variant="ghost" href="/chat" leftIcon={ArrowLeft} size="sm" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10" />
+          <Button variant="ghost" href="/" leftIcon={ArrowLeft} size="sm" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10" />
           <h2 className="text-2xl font-bold text-white">My Messages</h2>
         </div>
 

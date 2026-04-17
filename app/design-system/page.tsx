@@ -19,22 +19,14 @@ import ProgressBar from '@/components/ui/ProgressBar';
 import StarRating from '@/components/ui/StarRating';
 import Divider from '@/components/ui/Divider';
 import AppLogo from '@/components/AppLogo';
-import GlobalHeader from '@/components/GlobalHeader';
 import Dropdown from '@/components/ui/Dropdown';
 import Toggle from '@/components/ui/Toggle';
-import BotMessage, { TypingIndicator } from '@/components/guided-bot/BotMessage';
-import UserMessage from '@/components/guided-bot/UserMessage';
-import BotInput from '@/components/guided-bot/BotInput';
-import ProjectCards from '@/components/guided-bot/ProjectCards';
-import ScopeInput from '@/components/guided-bot/ScopeInput';
-import LocationInput from '@/components/guided-bot/LocationInput';
-import ToolsInput from '@/components/guided-bot/ToolsInput';
-import PreferenceCards from '@/components/guided-bot/PreferenceCards';
-import ProjectBrief from '@/components/guided-bot/ProjectBrief';
+
 import {
   Wrench, ArrowRight, Plus, Trash2, Check, X, Home, Settings,
   Bell, Menu, MessageSquare, Users, Package, ShoppingCart, Search, MapPin,
-  Gavel, Target, CheckCircle, Star,
+  Gavel, Target, CheckCircle, Star, FolderOpen, HelpCircle, LayoutDashboard,
+  ClipboardCheck, Mail,
 } from 'lucide-react';
 
 // ─── Dark section wrapper ─────────────────────────────────────────────────────
@@ -97,11 +89,7 @@ export default function DesignSystemPage() {
   const [starValue, setStarValue] = useState(3);
 
   return (
-    <div className="min-h-screen bg-earth-cream">
-
-      {/* Header preview */}
-      <GlobalHeader />
-
+    <div className="min-h-screen bg-[#2A2520]">
       <div className="max-w-4xl mx-auto px-6 py-12">
 
         <div className="mb-10">
@@ -112,46 +100,43 @@ export default function DesignSystemPage() {
         {/* ── Colors ─────────────────────────────────────────────────────── */}
         <Section title="Color Tokens">
           <Row label="Primary">
-            <Swatch color="#C67B5C" label="terracotta" />
-            <Swatch color="#A65D3F" label="terracotta-dark" />
             <Swatch color="#B8593B" label="rust" />
             <Swatch color="#B87333" label="copper" />
           </Row>
           <Row label="Secondary">
-            <Swatch color="#4A7C59" label="forest-green" />
-            <Swatch color="#2D5A3B" label="forest-green-dark" />
-            <Swatch color="#7D9A6F" label="sage" />
+            <Swatch color="#5C7A40" label="forest-green" />
+            <Swatch color="#3E5428" label="forest-green-dark" />
           </Row>
           <Row label="Tertiary">
-            <Swatch color="#5D7B93" label="slate-blue" />
-            <Swatch color="#4A6578" label="slate-blue-dark" />
+            <Swatch color="#5C7882" label="slate-blue" />
+            <Swatch color="#3E5560" label="slate-blue-dark" />
           </Row>
           <Row label="Neutrals">
-            <Swatch color="#3E2723" label="foreground" />
-            <Swatch color="#4A3F35" label="earth-brown-dark" />
-            <Swatch color="#5C4D42" label="warm-brown" />
-            <Swatch color="#7D6B5D" label="earth-brown" />
-            <Swatch color="#A89880" label="earth-brown-light" />
-            <Swatch color="#B0A696" label="muted" textDark />
-            <Swatch color="#D4C8B8" label="earth-sand" textDark />
-            <Swatch color="#E8DFD0" label="earth-tan" textDark />
-            <Swatch color="#F5F0E6" label="earth-cream" textDark />
-            <Swatch color="#FDFBF7" label="surface" textDark />
+            <Swatch color="#2A2520" label="background" />
+            <Swatch color="#3F3831" label="earth-brown-dark" />
+            <Swatch color="#544D45" label="warm-brown" />
+            <Swatch color="#756B62" label="earth-brown" />
+            <Swatch color="#958C83" label="earth-brown-light" />
+            <Swatch color="#AEA8A3" label="muted" textDark />
+            <Swatch color="#CAC7C4" label="earth-sand" textDark />
+            <Swatch color="#DFDEDD" label="earth-tan" textDark />
+            <Swatch color="#EEEDED" label="earth-cream" textDark />
+            <Swatch color="#F8F7F7" label="surface" textDark />
           </Row>
           <Row label="Accent">
             <Swatch color="#D4A574" label="gold" textDark />
-            <Swatch color="#C6943E" label="gold-dark" />
+            <Swatch color="#B87333" label="copper" />
           </Row>
           <Row label="Status — foreground">
-            <Swatch color="#5D7B93" label="status-research" />
-            <Swatch color="#C67B5C" label="status-progress" />
-            <Swatch color="#9B7BA6" label="status-waiting" />
-            <Swatch color="#4A7C59" label="status-complete" />
+            <Swatch color="#5C7882" label="status-research" />
+            <Swatch color="#B8593B" label="status-progress" />
+            <Swatch color="#B87333" label="status-waiting" />
+            <Swatch color="#5C7A40" label="status-complete" />
           </Row>
           <Row label="Status — backgrounds">
             <Swatch color="#E8F0F5" label="status-research-bg" textDark />
             <Swatch color="#FDF3ED" label="status-progress-bg" textDark />
-            <Swatch color="#F5EEF8" label="status-waiting-bg" textDark />
+            <Swatch color="#FDF4E7" label="status-waiting-bg" textDark />
             <Swatch color="#E8F3EC" label="status-complete-bg" textDark />
           </Row>
         </Section>
@@ -159,45 +144,112 @@ export default function DesignSystemPage() {
         {/* ── Typography ──────────────────────────────────────────────────── */}
         <Section title="Typography Scale">
           <div className="space-y-2">
-            <div className="flex items-baseline gap-4"><span className="text-2xl font-bold text-[var(--earth-brown-dark)]">text-2xl bold</span><span className="text-xs text-muted">page headings (size="lg")</span></div>
-            <div className="flex items-baseline gap-4"><span className="text-lg font-semibold text-[var(--earth-brown-dark)]">text-lg semibold</span><span className="text-xs text-muted">section headings (size="md")</span></div>
-            <div className="flex items-baseline gap-4"><span className="text-base font-semibold text-[var(--earth-brown-dark)]">text-base semibold</span><span className="text-xs text-muted">sub-headings (size="sm")</span></div>
-            <div className="flex items-baseline gap-4"><span className="text-sm text-[var(--earth-brown)]">text-sm</span><span className="text-xs text-muted">body text</span></div>
-            <div className="flex items-baseline gap-4"><span className="text-xs text-[var(--earth-brown-light)]">text-xs</span><span className="text-xs text-muted">captions, labels</span></div>
-            <div className="flex items-baseline gap-4"><span className="text-2xs text-[var(--muted)]">text-2xs</span><span className="text-xs text-muted">micro labels (10px)</span></div>
+            <div className="flex items-baseline gap-4"><span className="text-4xl font-bold text-foreground">text-4xl bold</span><span className="text-xs text-muted">48px</span></div>
+            <div className="flex items-baseline gap-4"><span className="text-3xl font-bold text-foreground">text-3xl bold</span><span className="text-xs text-muted">36px</span></div>
+            <div className="flex items-baseline gap-4"><span className="text-2xl font-bold text-foreground">text-2xl bold</span><span className="text-xs text-muted">30px — page headings</span></div>
+            <div className="flex items-baseline gap-4"><span className="text-xl font-semibold text-foreground">text-xl semibold</span><span className="text-xs text-muted">24px</span></div>
+            <div className="flex items-baseline gap-4"><span className="text-lg font-semibold text-foreground">text-lg semibold</span><span className="text-xs text-muted">20px — section headings</span></div>
+            <div className="flex items-baseline gap-4"><span className="text-base text-foreground">text-base</span><span className="text-xs text-muted">18px — sub-headings</span></div>
+            <div className="flex items-baseline gap-4"><span className="text-sm text-foreground">text-sm</span><span className="text-xs text-muted">16px — body text</span></div>
+            <div className="flex items-baseline gap-4"><span className="text-xs text-foreground">text-xs</span><span className="text-xs text-muted">14px — captions, labels (minimum)</span></div>
+            <div className="flex items-baseline gap-4"><span className="text-2xs text-muted">text-2xs</span><span className="text-xs text-muted">12px — legal, timestamps</span></div>
           </div>
         </Section>
 
         {/* ── AppLogo ─────────────────────────────────────────────────────── */}
         <Section title="AppLogo">
-          <Row label="Light (default)">
-            <div className="bg-surface p-4 rounded-lg border border-earth-sand">
-              <AppLogo />
-            </div>
-          </Row>
           <Row label="Dark variant">
             <div className="bg-[#2A2520] p-4 rounded-lg">
-              <AppLogo variant="dark" />
-            </div>
-          </Row>
-          <Row label="No label">
-            <div className="bg-surface p-4 rounded-lg border border-earth-sand">
-              <AppLogo showLabel={false} />
+              <AppLogo />
             </div>
           </Row>
         </Section>
 
-        {/* ── GlobalHeader ────────────────────────────────────────────────── */}
-        <Section title="GlobalHeader">
-          <div className="border border-earth-sand rounded-lg overflow-hidden">
-            <GlobalHeader
-              right={
-                <>
-                  <Button variant="ghost" size="sm">Cancel</Button>
-                  <Button variant="primary" size="sm">Save</Button>
-                </>
-              }
-            />
+        {/* ── AppSidebar ──────────────────────────────────────────────────── */}
+        <Section title="AppSidebar">
+          <div className="flex gap-6 flex-wrap">
+
+            {/* DIYer variant */}
+            <div>
+              <p className="text-xs text-earth-brown mb-2">DIYer</p>
+              <div className="w-64 bg-[var(--earth-brown-dark)] rounded-xl overflow-hidden flex flex-col" style={{ height: 420 }}>
+                <div className="p-4 pb-3">
+                  <AppLogo />
+                </div>
+                <nav className="px-2 flex-1">
+                  <p className="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-white/30">DIY</p>
+                  {[
+                    { label: 'My Projects', icon: <FolderOpen size={16} /> },
+                    { label: 'My Tools', icon: <Package size={16} />, active: true },
+                    { label: 'Shopping', icon: <ShoppingCart size={16} /> },
+                  ].map(({ label, icon, active }) => (
+                    <div key={label} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${active ? 'bg-white/10 text-white' : 'text-white/50'}`}>
+                      {icon}{label}
+                    </div>
+                  ))}
+                  <p className="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wider text-white/30">Experts</p>
+                  {[
+                    { label: 'Find an Expert', icon: <Users size={16} /> },
+                    { label: 'My Questions', icon: <HelpCircle size={16} /> },
+                  ].map(({ label, icon }) => (
+                    <div key={label} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/50">
+                      {icon}{label}
+                    </div>
+                  ))}
+                </nav>
+                <div className="px-4 py-3 border-t border-white/[0.06] flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center"><Settings size={14} className="text-white/40" /></div>
+                  <div className="flex-1 h-2 rounded bg-white/10" />
+                </div>
+              </div>
+            </div>
+
+            {/* Expert variant */}
+            <div>
+              <p className="text-xs text-earth-brown mb-2">Expert</p>
+              <div className="w-64 bg-[var(--earth-brown-dark)] rounded-xl overflow-hidden flex flex-col" style={{ height: 560 }}>
+                <div className="p-4 pb-3">
+                  <AppLogo />
+                </div>
+                <nav className="px-2 flex-1">
+                  <p className="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-white/30">DIY</p>
+                  {[
+                    { label: 'My Projects', icon: <FolderOpen size={16} /> },
+                    { label: 'My Tools', icon: <Package size={16} /> },
+                    { label: 'Shopping', icon: <ShoppingCart size={16} /> },
+                  ].map(({ label, icon }) => (
+                    <div key={label} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/50">
+                      {icon}{label}
+                    </div>
+                  ))}
+                  <p className="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wider text-white/30">Experts</p>
+                  {[
+                    { label: 'Find an Expert', icon: <Users size={16} /> },
+                    { label: 'My Questions', icon: <HelpCircle size={16} /> },
+                  ].map(({ label, icon }) => (
+                    <div key={label} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/50">
+                      {icon}{label}
+                    </div>
+                  ))}
+                  <p className="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wider text-white/30">Expert</p>
+                  {[
+                    { label: 'Dashboard', icon: <LayoutDashboard size={16} />, active: true },
+                    { label: 'Q&A Queue', icon: <MessageSquare size={16} /> },
+                    { label: 'Reviews', icon: <ClipboardCheck size={16} /> },
+                    { label: 'Messages', icon: <Mail size={16} /> },
+                  ].map(({ label, icon, active }) => (
+                    <div key={label} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${active ? 'bg-white/10 text-white' : 'text-white/50'}`}>
+                      {icon}{label}
+                    </div>
+                  ))}
+                </nav>
+                <div className="px-4 py-3 border-t border-white/[0.06] flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center"><Settings size={14} className="text-white/40" /></div>
+                  <div className="flex-1 h-2 rounded bg-white/10" />
+                </div>
+              </div>
+            </div>
+
           </div>
         </Section>
 
@@ -245,7 +297,7 @@ export default function DesignSystemPage() {
           </Row>
           <Row label="Right icon">
             <Button variant="primary" rightIcon={ArrowRight}>Get Started</Button>
-            <Button variant="tertiary" rightIcon={ArrowRight} href="/chat">Open Chat</Button>
+            <Button variant="tertiary" rightIcon={ArrowRight} href="/">Open Chat</Button>
           </Row>
           <Row label="As link (href)">
             <Button variant="primary" href="/" rightIcon={ArrowRight}>Go Home</Button>
@@ -286,52 +338,44 @@ export default function DesignSystemPage() {
             <TextInput inputSize="lg" placeholder="Large" />
           </Row>
           <Row label="With icons">
-            <TextInput leftIcon={Search} placeholder="Search..." inputSize="md" />
-            <TextInput leftIcon={MapPin} placeholder="Enter location..." inputSize="md" />
-            <TextInput leftIcon={Search} rightIcon={X} placeholder="With both icons" inputSize="md" />
+            <TextInput leftIcon={Search} placeholder="Search..." />
+            <TextInput leftIcon={MapPin} placeholder="Enter location..." />
+            <TextInput leftIcon={Search} rightIcon={X} placeholder="With both icons" />
+          </Row>
+          <Row label="With label">
+            <div className="w-full max-w-sm space-y-3">
+              <TextInput id="name" label="Full name" placeholder="Jane Doe" fullWidth />
+              <TextInput id="email" label="Email address" placeholder="jane@example.com" leftIcon={Search} fullWidth />
+            </div>
           </Row>
           <Row label="States">
             <TextInput placeholder="Default" />
             <TextInput placeholder="Disabled" disabled />
             <TextInput placeholder="Error state" error="This field is required" />
           </Row>
-          <Row label="Full width">
-            <div className="w-full max-w-sm">
-              <TextInput placeholder="Full width input" fullWidth />
-            </div>
-          </Row>
         </Section>
 
         {/* ── Select ──────────────────────────────────────────────────────── */}
         <Section title="Select">
           <Row label="Sizes">
-            <Select inputSize="sm">
-              <option>Small</option>
-              <option>Option 2</option>
-            </Select>
-            <Select inputSize="md">
-              <option>Medium (default)</option>
-              <option>Option 2</option>
-            </Select>
-            <Select inputSize="lg">
-              <option>Large</option>
-              <option>Option 2</option>
-            </Select>
+            <Select inputSize="sm"><option>Small</option><option>Option 2</option></Select>
+            <Select inputSize="md"><option>Medium (default)</option><option>Option 2</option></Select>
+            <Select inputSize="lg"><option>Large</option><option>Option 2</option></Select>
           </Row>
-          <Row label="States">
-            <Select><option>Default</option></Select>
-            <Select disabled><option>Disabled</option></Select>
-            <Select error="Please select an option"><option>Error state</option></Select>
-          </Row>
-          <Row label="Full width">
+          <Row label="With label">
             <div className="w-full max-w-sm">
-              <Select fullWidth>
+              <Select id="cat" label="Category" fullWidth>
                 <option>All categories</option>
                 <option>Electrical</option>
                 <option>Plumbing</option>
                 <option>Carpentry</option>
               </Select>
             </div>
+          </Row>
+          <Row label="States">
+            <Select><option>Default</option></Select>
+            <Select disabled><option>Disabled</option></Select>
+            <Select error="Please select an option"><option>Error state</option></Select>
           </Row>
         </Section>
 
@@ -457,7 +501,7 @@ export default function DesignSystemPage() {
 
         <Section title="Empty State">
           <Row label="With icon + title + description">
-            <div className="w-full max-w-sm bg-surface border border-earth-sand rounded-xl p-6">
+            <div className="w-full max-w-sm bg-white/6 border border-white/10 rounded-xl p-6">
               <EmptyState
                 icon={MessageSquare}
                 title="No conversations yet"
@@ -466,7 +510,7 @@ export default function DesignSystemPage() {
             </div>
           </Row>
           <Row label="Icon + description only (sm)">
-            <div className="w-full max-w-sm bg-surface border border-earth-sand rounded-xl p-6">
+            <div className="w-full max-w-sm bg-white/6 border border-white/10 rounded-xl p-6">
               <EmptyState
                 icon={Bell}
                 iconSize={24}
@@ -476,7 +520,7 @@ export default function DesignSystemPage() {
             </div>
           </Row>
           <Row label="With subtext">
-            <div className="w-full max-w-sm bg-surface border border-earth-sand rounded-xl p-6">
+            <div className="w-full max-w-sm bg-white/6 border border-white/10 rounded-xl p-6">
               <EmptyState
                 icon={Package}
                 size="sm"
@@ -486,12 +530,12 @@ export default function DesignSystemPage() {
             </div>
           </Row>
           <Row label="No icon">
-            <div className="w-full max-w-sm bg-surface border border-earth-sand rounded-xl p-6">
+            <div className="w-full max-w-sm bg-white/6 border border-white/10 rounded-xl p-6">
               <EmptyState description="No questions match your filter" />
             </div>
           </Row>
           <Row label="With action">
-            <div className="w-full max-w-sm bg-surface border border-earth-sand rounded-xl p-6">
+            <div className="w-full max-w-sm bg-white/6 border border-white/10 rounded-xl p-6">
               <EmptyState
                 icon={Users}
                 title="No experts found"
@@ -519,26 +563,12 @@ export default function DesignSystemPage() {
 
         {/* ── Textarea ─────────────────────────────────────────────────────── */}
         <Section title="Textarea">
-          <Row label="Default">
-            <div className="w-full max-w-sm">
-              <Textarea placeholder="Write your message..." rows={3} fullWidth />
-            </div>
-          </Row>
-          <Row label="With label">
-            <div className="w-full max-w-sm">
-              <Textarea label="Project description" placeholder="Describe your project..." rows={4} fullWidth />
-            </div>
-          </Row>
-          <Row label="Error state">
-            <div className="w-full max-w-sm">
-              <Textarea label="Notes" placeholder="Add notes..." error="This field is required" rows={3} fullWidth />
-            </div>
-          </Row>
-          <Row label="Disabled">
-            <div className="w-full max-w-sm">
-              <Textarea placeholder="Disabled" disabled rows={2} fullWidth />
-            </div>
-          </Row>
+          <div className="max-w-sm space-y-3">
+            <Textarea placeholder="Write your message..." rows={3} fullWidth />
+            <Textarea label="Project description" placeholder="Describe your project..." rows={3} fullWidth />
+            <Textarea label="Notes" placeholder="Add notes..." error="This field is required" rows={2} fullWidth />
+            <Textarea placeholder="Disabled" disabled rows={2} fullWidth />
+          </div>
         </Section>
 
         {/* ── Alert ────────────────────────────────────────────────────────── */}
@@ -626,24 +656,14 @@ export default function DesignSystemPage() {
           </div>
         </Section>
 
-        {/* ── TextInput with label ─────────────────────────────────────────── */}
-        <Section title="TextInput — With Label">
-          <Row label="Folded label prop">
-            <div className="w-full max-w-sm space-y-3">
-              <TextInput id="name" label="Full name" placeholder="Jane Doe" fullWidth />
-              <TextInput id="email" label="Email address" placeholder="jane@example.com" leftIcon={Search} fullWidth />
-              <TextInput id="err" label="Zip code" placeholder="00000" error="Invalid zip code" fullWidth />
-            </div>
-          </Row>
-        </Section>
 
         {/* ── Dropdown ─────────────────────────────────────────────────────── */}
         <Section title="Dropdown">
           <Row label="Default (right-aligned)">
             <Dropdown
               trigger={
-                <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-earth-brown-dark border border-earth-sand rounded-lg hover:bg-earth-tan transition-colors">
-                  Account <span className="text-earth-brown">▾</span>
+                <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white/70 border border-white/20 rounded-lg hover:bg-white/10 hover:text-white transition-colors">
+                  Account <span className="text-white/40">▾</span>
                 </button>
               }
               items={[
@@ -657,8 +677,8 @@ export default function DesignSystemPage() {
             <Dropdown
               align="left"
               trigger={
-                <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-earth-brown-dark border border-earth-sand rounded-lg hover:bg-earth-tan transition-colors">
-                  Options <span className="text-earth-brown">▾</span>
+                <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white/70 border border-white/20 rounded-lg hover:bg-white/10 hover:text-white transition-colors">
+                  Options <span className="text-white/40">▾</span>
                 </button>
               }
               items={[
@@ -670,88 +690,7 @@ export default function DesignSystemPage() {
           </Row>
         </Section>
 
-        {/* ── Dark Theme — Bot Messages ────────────────────────────────────── */}
-        <DarkSection title="Dark Theme — Bot Messages" label="BotMessage · UserMessage · TypingIndicator">
-          <BotMessage content="Hi! What are you building today?" animate={false} />
-          <UserMessage content="I want to build a 12x16 deck in my backyard" />
-          <BotMessage content="Great choice! A 12×16 deck is a manageable weekend project. **What city and state** is this in? Local codes affect the build." animate={false} />
-          <TypingIndicator />
-        </DarkSection>
-
-        {/* ── Dark Theme — BotInput ────────────────────────────────────────── */}
-        <DarkSection title="Dark Theme — BotInput" label="Initial state: large textarea with send button">
-          <BotInput phase="project" onSend={() => {}} disabled={false} />
-        </DarkSection>
-
-        {/* ── Dark Theme — ProjectCards ────────────────────────────────────── */}
-        <DarkSection title="Dark Theme — ProjectCards" label="Quick-select project tiles shown before conversation starts">
-          <ProjectCards onSelectProject={() => {}} />
-        </DarkSection>
-
-        {/* ── Dark Theme — ScopeInput ──────────────────────────────────────── */}
-        <DarkSection title="Dark Theme — ScopeInput" label="Context-aware dimension + details form">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <p className="text-xs text-white/40 mb-2">outdoor</p>
-              <ScopeInput projectType="outdoor" onSubmit={() => {}} />
-            </div>
-            <div>
-              <p className="text-xs text-white/40 mb-2">electrical</p>
-              <ScopeInput projectType="electrical" onSubmit={() => {}} />
-            </div>
-          </div>
-        </DarkSection>
-
-        {/* ── Dark Theme — LocationInput ───────────────────────────────────── */}
-        <DarkSection title="Dark Theme — LocationInput" label="City + state selection">
-          <div className="max-w-sm">
-            <LocationInput onSubmit={() => {}} />
-          </div>
-        </DarkSection>
-
-        {/* ── Dark Theme — ToolsInput ──────────────────────────────────────── */}
-        <DarkSection title="Dark Theme — ToolsInput" label="Optional tools & materials textarea with skip">
-          <div className="max-w-sm">
-            <ToolsInput onSubmit={() => {}} onSkip={() => {}} />
-          </div>
-        </DarkSection>
-
-        {/* ── Dark Theme — PreferenceCards ─────────────────────────────────── */}
-        <DarkSection title="Dark Theme — PreferenceCards" label="Experience and budget selection cards">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <p className="text-xs text-white/40 mb-2">experience</p>
-              <PreferenceCards type="experience" onSelect={() => {}} />
-            </div>
-            <div>
-              <p className="text-xs text-white/40 mb-2">budget</p>
-              <PreferenceCards type="budget" onSelect={() => {}} />
-            </div>
-          </div>
-        </DarkSection>
-
-        {/* ── Dark Theme — ProjectBrief ────────────────────────────────────── */}
-        <DarkSection title="Dark Theme — ProjectBrief" label="Summary card before generating the plan">
-          <div className="max-w-sm">
-            <ProjectBrief
-              gathered={{
-                projectType: 'outdoor',
-                projectDescription: 'Build a 12x16 pressure-treated deck',
-                dimensions: '12x16 feet',
-                scopeDetails: 'Flat yard, no existing structure',
-                city: 'Austin',
-                state: 'Texas',
-                experienceLevel: 'intermediate',
-                budgetLevel: 'mid-range',
-                existingTools: 'drill, circular saw, tape measure',
-                timeframe: null,
-              }}
-              onEdit={() => {}}
-              onSubmit={() => {}}
-              isSubmitting={false}
-            />
-          </div>
-        </DarkSection>
+        {/* Guided bot components removed — replaced by unified chat */}
 
       </div>
     </div>

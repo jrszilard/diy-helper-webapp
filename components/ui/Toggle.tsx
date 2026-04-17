@@ -17,13 +17,13 @@ export default function Toggle({ checked, onChange, label, description, disabled
           {label && (
             <label
               htmlFor={id}
-              className="block text-sm font-semibold text-[var(--earth-brown-dark)] cursor-pointer"
+              className="block text-sm font-semibold cursor-pointer text-white/80"
             >
               {label}
             </label>
           )}
           {description && (
-            <p className="text-xs text-[var(--earth-brown)] mt-0.5">{description}</p>
+            <p className="text-xs mt-0.5 text-white/40">{description}</p>
           )}
         </div>
       )}
@@ -35,9 +35,9 @@ export default function Toggle({ checked, onChange, label, description, disabled
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={cn(
-          'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--terracotta)]',
+          'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--rust)]',
           'disabled:opacity-50 disabled:cursor-not-allowed',
-          checked ? 'bg-forest-green' : 'bg-earth-sand',
+          checked ? 'bg-forest-green' : 'bg-white/20',
         )}
       >
         <span

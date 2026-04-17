@@ -33,18 +33,19 @@ const SPECIALTY_OPTIONS = [
 
 export default function ExpertSearchFilters({ filters, onChange }: ExpertSearchFiltersProps) {
   return (
-    <div className="bg-white border border-earth-sand rounded-lg p-4">
+    <div className="bg-white/5 border border-white/10 rounded-lg p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Search size={16} className="text-earth-brown" />
-        <h3 className="text-sm font-semibold text-foreground">Filter Experts</h3>
+        <Search size={16} className="text-white/50" />
+        <h3 className="text-sm font-semibold text-earth-cream">Filter Experts</h3>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label className="block text-xs text-earth-brown mb-1">Specialty</label>
+          <label className="block text-xs text-white/60 mb-1">Specialty</label>
           <Select
             value={filters.specialty}
             onChange={e => onChange({ ...filters, specialty: e.target.value })}
             fullWidth
+            variant="dark"
           >
             {SPECIALTY_OPTIONS.map(o => (
               <option key={o.value} value={o.value}>{o.label}</option>
@@ -52,7 +53,7 @@ export default function ExpertSearchFilters({ filters, onChange }: ExpertSearchF
           </Select>
         </div>
         <div>
-          <label className="block text-xs text-earth-brown mb-1">State</label>
+          <label className="block text-xs text-white/60 mb-1">State</label>
           <TextInput
             type="text"
             value={filters.state}
@@ -60,14 +61,16 @@ export default function ExpertSearchFilters({ filters, onChange }: ExpertSearchF
             placeholder="e.g. CA"
             maxLength={2}
             fullWidth
+            variant="dark"
           />
         </div>
         <div>
-          <label className="block text-xs text-earth-brown mb-1">Min Rating</label>
+          <label className="block text-xs text-white/60 mb-1">Min Rating</label>
           <Select
             value={filters.minRating}
             onChange={e => onChange({ ...filters, minRating: parseInt(e.target.value) })}
             fullWidth
+            variant="dark"
           >
             <option value={0}>Any Rating</option>
             <option value={3}>3+ Stars</option>

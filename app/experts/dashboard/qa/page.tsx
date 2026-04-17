@@ -193,7 +193,7 @@ export default function ExpertQAQueuePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Spinner size="lg" className="text-terracotta" />
+        <Spinner size="lg" className="text-rust" />
       </div>
     );
   }
@@ -203,7 +203,7 @@ export default function ExpertQAQueuePage() {
 
   return (
     <div className="max-w-4xl">
-      <SectionHeader size="lg" title="Q&A Queue" className="mb-6" />
+      <SectionHeader size="lg" title="Q&A Queue" className="mb-6 text-white" />
 
       {/* Active Questions Section */}
       {activeQuestions.length > 0 && (
@@ -211,7 +211,7 @@ export default function ExpertQAQueuePage() {
           <SectionHeader
             title="Your Active Questions"
             subtitle={`${claimedQuestions.length} to answer${answeredQuestions.length > 0 ? `, ${answeredQuestions.length} answered` : ''}`}
-            className="mb-3"
+            className="mb-3 text-white"
           />
 
           <div className="space-y-2">
@@ -231,7 +231,7 @@ export default function ExpertQAQueuePage() {
         <SectionHeader
           title="Open Questions"
           subtitle={`${questions.length} available`}
-          className="mb-3"
+          className="mb-3 text-white"
         />
         <QAQueue questions={questions} onClaim={handleClaim} onBid={handleOpenBidModal} />
       </div>
@@ -246,7 +246,7 @@ export default function ExpertQAQueuePage() {
         {bidModalQuestion && (
           <div className="space-y-4">
             {/* Question preview */}
-            <div className="bg-earth-tan/30 rounded-lg p-3">
+            <div className="bg-white/5 rounded-lg p-3">
               <p className="text-sm text-foreground line-clamp-3">{bidModalQuestion.questionText}</p>
               <Badge variant="neutral" size="sm" className="mt-1">{bidModalQuestion.category}</Badge>
             </div>
@@ -262,11 +262,13 @@ export default function ExpertQAQueuePage() {
               onChange={(e) => setBidPriceDollars(e.target.value)}
               placeholder="45"
               fullWidth
+              variant="dark"
             />
             {bidPriceDollars && (
-              <p className="text-xs text-earth-brown -mt-2">
+              <p className="text-xs text-white/50 -mt-2">
                 DIYer pays ${bidPriceDollars} · You earn ${(parseFloat(bidPriceDollars || '0') * 0.82).toFixed(2)}
               </p>
+
             )}
 
             {/* Pitch */}
@@ -278,6 +280,7 @@ export default function ExpertQAQueuePage() {
               placeholder="I've worked on similar projects for 15 years and can help you..."
               resize="none"
               fullWidth
+              variant="dark"
             />
 
             {/* Estimated time */}
@@ -290,6 +293,7 @@ export default function ExpertQAQueuePage() {
               onChange={(e) => setBidEstMinutes(e.target.value)}
               placeholder="15"
               fullWidth
+              variant="dark"
             />
 
             {/* Relevant experience */}
@@ -301,6 +305,7 @@ export default function ExpertQAQueuePage() {
               placeholder="Licensed electrician with 20 years of residential experience..."
               resize="none"
               fullWidth
+              variant="dark"
             />
 
             {bidError && (

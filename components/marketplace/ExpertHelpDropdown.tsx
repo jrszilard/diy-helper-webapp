@@ -59,26 +59,26 @@ export default function ExpertHelpDropdown({
         className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-white bg-slate-blue hover:bg-slate-blue-dark transition-colors shadow-md"
       >
         {proRequired && (
-          <span className="w-2 h-2 bg-terracotta rounded-full animate-pulse" />
+          <span className="w-2 h-2 bg-rust rounded-full animate-pulse" />
         )}
         Get Expert Help
         <ChevronDown size={16} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-72 bg-surface border border-earth-sand rounded-lg shadow-xl z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-72 bg-[var(--earth-brown-dark)] border border-white/10 rounded-lg shadow-xl z-50 overflow-hidden">
           {options.map(({ label, description, icon: Icon, href, comingSoon }) => {
             if (comingSoon) {
               return (
                 <div
                   key={label}
-                  className="flex items-start gap-3 px-4 py-3 border-b border-earth-sand/50 opacity-60 cursor-default"
+                  className="flex items-start gap-3 px-4 py-3 border-b border-white/10 opacity-60 cursor-default"
                 >
-                  <Icon size={18} className="text-earth-brown mt-0.5 flex-shrink-0" />
+                  <Icon size={18} className="text-white/50 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-foreground">{label}</p>
-                    <p className="text-xs text-earth-brown">{description}</p>
-                    <span className="text-xs text-[var(--muted)] italic">Coming Soon</span>
+                    <p className="text-sm font-medium text-white/70">{label}</p>
+                    <p className="text-xs text-white/50">{description}</p>
+                    <span className="text-xs text-white/30 italic">Coming Soon</span>
                   </div>
                 </div>
               );
@@ -88,15 +88,15 @@ export default function ExpertHelpDropdown({
               return (
                 <div
                   key={label}
-                  className="px-4 py-3 border-b border-earth-sand/50"
+                  className="px-4 py-3 border-b border-white/10"
                 >
                   <div className="flex items-start gap-3">
                     <Icon size={18} className="text-slate-blue mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-sm font-medium text-foreground">{label}</p>
-                      <p className="text-xs text-forest-green font-medium mt-0.5">First question free with a new account</p>
+                      <p className="text-xs text-[var(--forest-green)] font-medium mt-0.5">First question free with a new account</p>
                       <a
-                        href="/chat"
+                        href="/"
                         onClick={() => {
                           localStorage.setItem('expert-callout-referral', 'true');
                           setIsOpen(false);
@@ -116,13 +116,13 @@ export default function ExpertHelpDropdown({
               <a
                 key={label}
                 href={href}
-                className="flex items-start gap-3 px-4 py-3 border-b border-earth-sand/50 hover:bg-earth-tan/50 transition-colors"
+                className="flex items-start gap-3 px-4 py-3 border-b border-white/10 hover:bg-white/10 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 <Icon size={18} className="text-slate-blue mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-foreground">{label}</p>
-                  <p className="text-xs text-earth-brown">{description}</p>
+                  <p className="text-sm font-medium text-white/70">{label}</p>
+                  <p className="text-xs text-white/50">{description}</p>
                 </div>
               </a>
             );

@@ -28,7 +28,6 @@ export default function StripeOnboardBanner({ stripeOnboardingComplete }: Stripe
       if (res.ok) {
         const data = await res.json();
         if (data.testMode) {
-          // Test mode: onboarding auto-completed server-side, reload to reflect
           window.location.reload();
           return;
         }
@@ -44,12 +43,12 @@ export default function StripeOnboardBanner({ stripeOnboardingComplete }: Stripe
   };
 
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex items-center justify-between gap-4">
+    <div className="bg-amber-900/30 border border-amber-500/30 rounded-lg px-4 py-3 flex items-center justify-between gap-4">
       <div className="flex items-center gap-3">
-        <AlertTriangle size={20} className="text-amber-600 flex-shrink-0" />
+        <AlertTriangle size={20} className="text-amber-400 flex-shrink-0" />
         <div>
-          <p className="text-sm font-semibold text-amber-800">Complete Stripe Setup</p>
-          <p className="text-xs text-amber-700">
+          <p className="text-sm font-semibold text-amber-300">Complete Stripe Setup</p>
+          <p className="text-xs text-amber-400/70">
             Set up your Stripe account to receive payments from answered questions.
           </p>
         </div>
@@ -57,13 +56,9 @@ export default function StripeOnboardBanner({ stripeOnboardingComplete }: Stripe
       <button
         onClick={handleOnboard}
         disabled={loading}
-        className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white text-sm font-semibold rounded-lg hover:bg-amber-700 transition-colors whitespace-nowrap"
+        className="flex items-center gap-1.5 px-4 py-2 bg-amber-500/20 border border-amber-500/40 text-amber-300 text-sm font-semibold rounded-lg hover:bg-amber-500/30 transition-colors whitespace-nowrap"
       >
-        {loading ? (
-          <Spinner size="sm" />
-        ) : (
-          <ExternalLink size={14} />
-        )}
+        {loading ? <Spinner size="sm" /> : <ExternalLink size={14} />}
         {loading ? 'Loading...' : 'Complete Setup'}
       </button>
     </div>

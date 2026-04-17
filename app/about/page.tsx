@@ -64,7 +64,7 @@ export default function AboutPage() {
       <nav className="sticky top-0 z-50 backdrop-blur-xl bg-[var(--earth-brown-dark)]/95 border-b border-[var(--blueprint-grid-major)]">
         <div className="u-container">
           <div className="flex justify-between items-center h-16">
-            <AppLogo variant="dark" />
+            <AppLogo />
             <div className="flex items-center gap-3">
               <Link href="/about" className="text-sm font-medium text-white">
                 About
@@ -73,8 +73,8 @@ export default function AboutPage() {
                 Become an Expert
               </Button>
               <Link
-                href="/chat"
-                className="bg-terracotta text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-terracotta-dark transition-colors"
+                href="/"
+                className="bg-rust text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-copper transition-colors"
               >
                 Get Started
               </Link>
@@ -124,7 +124,7 @@ export default function AboutPage() {
 
           <div className="u-grid">
             {/* For Homeowners */}
-            <div className="col-span-12 sm:col-span-6 bg-white rounded-2xl p-6 border border-[#E8DFD0] hover:border-[#C67B5C] transition-all duration-300 hover:shadow-lg">
+            <div className="col-span-12 sm:col-span-6 bg-white/6 rounded-2xl p-6 border border-[#E8DFD0] hover:border-[#C67B5C] transition-all duration-300 hover:shadow-lg">
               <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-[#5D7B93] to-[var(--slate-blue-dark)] mb-4 shadow-lg">
                 <Home className="w-6 h-6 text-white" />
               </div>
@@ -141,14 +141,14 @@ export default function AboutPage() {
                   </li>
                 ))}
               </ul>
-              <Button variant="tertiary" size="lg" href="/chat" rightIcon={ArrowRight}>
+              <Button variant="tertiary" size="lg" href="/" rightIcon={ArrowRight}>
                 Start My Project
               </Button>
             </div>
 
             {/* For Trade Professionals */}
-            <div className="col-span-12 sm:col-span-6 bg-white rounded-2xl p-6 border border-[#E8DFD0] hover:border-[var(--gold)] transition-all duration-300 hover:shadow-lg">
-              <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] mb-4 shadow-lg">
+            <div className="col-span-12 sm:col-span-6 bg-white/6 rounded-2xl p-6 border border-[#E8DFD0] hover:border-[var(--gold)] transition-all duration-300 hover:shadow-lg">
+              <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-[var(--gold)] to-[var(--copper)] mb-4 shadow-lg">
                 <Award className="w-6 h-6 text-white" />
               </div>
               <h3 className="text-xl font-bold text-[#3E2723] mb-4">Turn your expertise into income</h3>
@@ -166,7 +166,7 @@ export default function AboutPage() {
               </ul>
               <Link
                 href="/experts/register"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--gold)] to-[var(--gold-dark)] text-white px-5 py-2.5 rounded-xl hover:from-[var(--gold-dark)] hover:to-[#B8860B] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--gold)] to-[var(--copper)] text-white px-5 py-2.5 rounded-xl hover:from-[var(--copper)] hover:to-[#B8860B] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
               >
                 <span>Start Earning</span>
                 <ArrowRight className="w-4 h-4" />
@@ -199,7 +199,7 @@ export default function AboutPage() {
             {features.map((feature, idx) => (
               <div
                 key={idx}
-                className="col-span-12 sm:col-span-6 lg:col-span-4 group relative bg-white rounded-2xl p-6 border border-[#E8DFD0] hover:border-[#C67B5C] transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                className="col-span-12 sm:col-span-6 lg:col-span-4 group relative bg-white/6 rounded-2xl p-6 border border-[#E8DFD0] hover:border-[#C67B5C] transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
               >
                 <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${feature.color} mb-4 shadow-lg`}>
                   <feature.icon className="w-6 h-6 text-white" />
@@ -217,8 +217,8 @@ export default function AboutPage() {
         <div className="u-container">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 mb-4">
-              <Award className="w-5 h-5 text-[var(--gold-dark)]" />
-              <span className="text-sm font-medium text-[var(--gold-dark)] uppercase tracking-wider">Expert Spotlight</span>
+              <Award className="w-5 h-5 text-[var(--copper)]" />
+              <span className="text-sm font-medium text-[var(--copper)] uppercase tracking-wider">Expert Spotlight</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
               Experts on DIY Helper
@@ -249,9 +249,9 @@ export default function AboutPage() {
                 reviews: '32',
               },
             ].map((expert, idx) => (
-              <div key={idx} className="col-span-12 sm:col-span-6 bg-white rounded-2xl p-6 border border-[#E8DFD0]">
+              <div key={idx} className="col-span-12 sm:col-span-6 bg-white/6 rounded-2xl p-6 border border-[#E8DFD0]">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center text-white font-bold text-lg">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--gold)] to-[var(--copper)] flex items-center justify-center text-white font-bold text-lg">
                     {expert.name[0]}
                   </div>
                   <div>
@@ -268,7 +268,7 @@ export default function AboutPage() {
                     <span className="text-sm text-[#7D6B5D]">{expert.period}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 text-[var(--gold-dark)] fill-[var(--gold-dark)]" />
+                    <Star className="w-4 h-4 text-[var(--copper)] fill-[var(--copper)]" />
                     <span className="font-bold text-[#3E2723]">{expert.rating}</span>
                     <span className="text-sm text-[#7D6B5D]">({expert.reviews} reviews)</span>
                   </div>
@@ -280,7 +280,7 @@ export default function AboutPage() {
           <div className="text-center">
             <Link
               href="/experts/register"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--gold)] to-[var(--gold-dark)] text-white px-6 py-3 rounded-xl hover:from-[var(--gold-dark)] hover:to-[#B8860B] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--gold)] to-[var(--copper)] text-white px-6 py-3 rounded-xl hover:from-[var(--copper)] hover:to-[#B8860B] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
             >
               <span>Become an Expert</span>
               <ArrowRight className="w-4 h-4" />
@@ -319,8 +319,8 @@ export default function AboutPage() {
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-[var(--space-s)]">
                   <Link
-                    href="/chat"
-                    className="inline-flex items-center gap-3 bg-white text-[#3E2723] px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#F5F0E6] transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
+                    href="/"
+                    className="inline-flex items-center gap-3 bg-white/6 text-[#3E2723] px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#F5F0E6] transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
                   >
                     <span>Start My Project</span>
                     <ArrowRight className="w-5 h-5" />
@@ -339,17 +339,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-[var(--space-l)] border-t border-[#E8DFD0]">
-        <div className="u-container">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <AppLogo />
-            <p className="text-sm text-[var(--warm-brown)]">
-              Built for DIYers and the pros who help them. Powered by Claude AI.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

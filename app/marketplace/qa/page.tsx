@@ -1,15 +1,16 @@
 'use client';
 
 import { Suspense, useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { redirectToSignIn } from '@/lib/auth-redirect';
-import { ArrowLeft } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
 import DIYerHeader from '@/components/DIYerHeader';
-import Button from '@/components/ui/Button';
 import QASubmitForm from '@/components/marketplace/QASubmitForm';
 import QAQuestionList from '@/components/marketplace/QAQuestionList';
+import SectionHeader from '@/components/ui/SectionHeader';
 import type { QAQuestion, ExpertContext } from '@/lib/marketplace/types';
 
 function QAPageContent() {
@@ -18,6 +19,7 @@ function QAPageContent() {
   const reportId = searchParams.get('reportId') || undefined;
   const targetExpertId = searchParams.get('targetExpertId') || undefined;
   const targetExpertName = searchParams.get('targetExpertName') || undefined;
+
   // Read prefill from sessionStorage (set by landing page redirect)
   const [initialQuestion, setInitialQuestion] = useState<string | undefined>();
   const [initialCategory, setInitialCategory] = useState<string | undefined>();
@@ -103,43 +105,67 @@ function QAPageContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
-        <Spinner size="lg" className="text-terracotta" />
+      <div className="min-h-screen bg-earth-night flex items-center justify-center">
+        <Spinner size="lg" className="text-rust" />
       </div>
     );
   }
 
   if (!authenticated) return null;
 
+  const showSubmitForm = !!(reportId || targetExpertId || initialQuestion);
+
   const handleSuccess = (questionId: string) => {
     router.push(`/marketplace/qa/${questionId}`);
   };
 
   return (
-    <div className="min-h-screen bg-earth-brown-dark">
+    <div className="min-h-screen bg-earth-night">
       <DIYerHeader />
-
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-        <Button variant="ghost" href="/chat" leftIcon={ArrowLeft} size="sm" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10">
-          Back to Chat
-        </Button>
-        <QASubmitForm
-          reportId={reportId}
-          reportContext={reportContext}
-          expertContext={expertContext}
-          targetExpertId={targetExpertId}
-          targetExpertName={targetExpertName}
-          initialQuestion={initialQuestion}
-          initialCategory={initialCategory}
-          onSuccess={handleSuccess}
-        />
-
-        {myQuestions.length > 0 && (
-          <div>
-            <h2 className="text-xl font-bold text-white mb-4">Your Questions</h2>
-            <QAQuestionList questions={myQuestions} />
-          </div>
+        {showSubmitForm && (
+          <QASubmitForm
+            reportId={reportId}
+            reportContext={reportContext}
+            expertContext={expertContext}
+            targetExpertId={targetExpertId}
+            targetExpertName={targetExpertName}
+            initialQuestion={initialQuestion}
+            initialCategory={initialCategory}
+            onSuccess={handleSuccess}
+          />
         )}
+
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+              <MessageSquare className="w-6 h-6 text-white/50" />
+              My Questions
+            </h1>
+            <Link
+              href="/?tab=expert"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-rust hover:bg-rust/80 text-white rounded-lg transition-colors"
+            >
+              <MessageSquare className="w-4 h-4" />
+              Ask a Question
+            </Link>
+          </div>
+          {myQuestions.length > 0 ? (
+            <QAQuestionList questions={myQuestions} />
+          ) : (
+            <div className="text-center py-16 text-white/40">
+              <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-30" />
+              <p className="text-sm mb-4">No questions yet. Connect with a verified expert to get started.</p>
+              <Link
+                href="/?tab=expert"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium bg-rust hover:bg-rust/80 text-white rounded-lg transition-colors"
+              >
+                <MessageSquare className="w-4 h-4" />
+                Talk to a Pro
+              </Link>
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );
@@ -148,8 +174,8 @@ function QAPageContent() {
 export default function QAPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
-        <Spinner size="lg" className="text-terracotta" />
+      <div className="min-h-screen bg-earth-night flex items-center justify-center">
+        <Spinner size="lg" className="text-rust" />
       </div>
     }>
       <QAPageContent />

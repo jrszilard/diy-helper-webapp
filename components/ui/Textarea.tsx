@@ -29,7 +29,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
       {label && (
         <label
           htmlFor={id}
-          className="text-sm font-medium text-[var(--earth-brown-dark)]"
+          className="text-sm font-medium text-white/60"
         >
           {label}
         </label>
@@ -37,15 +37,11 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
       <textarea
         ref={ref}
         id={id}
-        style={{ color: 'var(--foreground)' }}
         className={cn(
-          'border rounded-lg bg-white px-3 py-2 text-sm transition-colors',
-          'placeholder-[var(--earth-brown-light)]',
-          'focus:outline-none focus:ring-2 focus:ring-[var(--terracotta)] focus:border-[var(--terracotta)]',
+          'bg-white/10 text-white placeholder:text-white/50 border border-white/20 rounded-lg px-3 py-2 text-sm transition-colors',
+          'focus:outline-none focus:ring-2 focus:ring-[var(--rust)] focus:border-[var(--rust)]',
           'disabled:opacity-50 disabled:cursor-not-allowed',
-          error
-            ? 'border-[var(--rust)] focus:ring-[var(--rust)] focus:border-[var(--rust)]'
-            : 'border-[var(--earth-sand)]',
+          error && 'border-[var(--rust)] focus:ring-[var(--rust)] focus:border-[var(--rust)]',
           resizeClass,
           fullWidth && 'w-full',
           className,

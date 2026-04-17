@@ -33,7 +33,13 @@ export interface WarningEvent {
   content: string;
 }
 
-export type StreamEvent = ProgressEvent | TextEvent | ToolResultEvent | DoneEvent | ErrorEvent | WarningEvent;
+export interface IntentEvent {
+  type: 'intent';
+  intent: string;
+  confidence?: number;
+}
+
+export type StreamEvent = ProgressEvent | TextEvent | ToolResultEvent | DoneEvent | ErrorEvent | WarningEvent | IntentEvent;
 
 // Tool name union type
 export type ToolName =

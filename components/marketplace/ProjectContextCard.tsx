@@ -54,7 +54,7 @@ export default function ProjectContextCard({ context, photoCount, compact }: Pro
       {/* Meta tags row */}
       <div className="flex flex-wrap gap-2 mb-3">
         {projectType && projectType !== 'general' && (
-          <span className="px-2 py-0.5 text-xs bg-terracotta/10 text-terracotta rounded-full font-medium border border-terracotta/20">
+          <span className="px-2 py-0.5 text-xs bg-rust/10 text-rust rounded-full font-medium border border-rust/20">
             {projectType.replace('_', ' ')}
           </span>
         )}
@@ -64,25 +64,25 @@ export default function ProjectContextCard({ context, photoCount, compact }: Pro
           </span>
         )}
         {hasLocation && (
-          <span className="flex items-center gap-1 px-2 py-0.5 text-xs text-earth-brown bg-earth-tan/50 rounded-full">
+          <span className="flex items-center gap-1 px-2 py-0.5 text-xs text-white/60 bg-white/50 rounded-full">
             <MapPin size={10} />
             {[location.city, location.state].filter(Boolean).join(', ')}
           </span>
         )}
         {(photoCount ?? 0) > 0 && (
-          <span className="flex items-center gap-1 px-2 py-0.5 text-xs text-earth-brown bg-earth-tan/50 rounded-full">
+          <span className="flex items-center gap-1 px-2 py-0.5 text-xs text-white/60 bg-white/50 rounded-full">
             <Camera size={10} />
             {photoCount} photo{photoCount !== 1 ? 's' : ''}
           </span>
         )}
         {materialsCount != null && (
-          <span className="flex items-center gap-1 px-2 py-0.5 text-xs text-earth-brown bg-earth-tan/50 rounded-full">
+          <span className="flex items-center gap-1 px-2 py-0.5 text-xs text-white/60 bg-white/50 rounded-full">
             <Wrench size={10} />
             {materialsCount} materials
           </span>
         )}
         {toolsCount != null && (
-          <span className="px-2 py-0.5 text-xs text-earth-brown bg-earth-tan/50 rounded-full">
+          <span className="px-2 py-0.5 text-xs text-white/60 bg-white/50 rounded-full">
             {toolsCount} tools
           </span>
         )}
@@ -128,7 +128,7 @@ export default function ProjectContextCard({ context, photoCount, compact }: Pro
       {/* Steps (non-compact only) */}
       {!compact && steps.length > 0 && (
         <div className="mt-3 pt-3 border-t border-slate-blue/10">
-          <p className="text-xs font-semibold text-earth-brown mb-2">
+          <p className="text-xs font-semibold text-white/60 mb-2">
             Project Steps ({steps.length})
           </p>
           <div className="space-y-1">

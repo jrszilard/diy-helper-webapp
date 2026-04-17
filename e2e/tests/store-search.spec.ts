@@ -22,7 +22,7 @@ function makeGuestProject() {
 }
 
 async function setupWithProject(page: import('@playwright/test').Page) {
-  await page.goto('/chat');
+  await page.goto('/');
   await page.evaluate((project) => {
     localStorage.setItem('diy-helper-guest-projects', JSON.stringify([project]));
   }, makeGuestProject());

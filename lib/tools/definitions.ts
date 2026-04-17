@@ -270,3 +270,19 @@ export const tools = [
     }
   }
 ];
+
+// Versioned tool type for the Anthropic advisor API. Update when Anthropic releases a new version.
+export const ADVISOR_TOOL_TYPE = 'advisor_20260301';
+
+export const ADVISOR_TOOL_DESCRIPTION = `Consult this advisor for a second opinion before responding.
+You MUST consult the advisor before providing guidance on:
+- Electrical panel work, wiring, or circuit modifications
+- Gas line work or appliance hookups
+- Structural or load-bearing assessments
+- Asbestos, lead paint, or hazardous material concerns
+- Roof work at height
+- Any situation where you would include a ⚠️ Safety-critical callout
+- Building code interpretation where you're not fully certain
+
+When consulting, provide your draft reasoning and the specific question
+you want reviewed. The advisor will confirm, correct, or flag issues.`;

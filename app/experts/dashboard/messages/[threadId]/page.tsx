@@ -119,7 +119,7 @@ export default function ExpertThreadPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Spinner size="lg" className="text-terracotta" />
+        <Spinner size="lg" className="text-rust" />
       </div>
     );
   }
@@ -127,7 +127,7 @@ export default function ExpertThreadPage() {
   return (
     <div className="max-w-4xl h-[calc(100vh-160px)] flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 pb-4 border-b border-earth-sand">
+      <div className="flex items-center gap-3 pb-4 border-b border-white/10">
         <Button
           variant="ghost"
           size="sm"

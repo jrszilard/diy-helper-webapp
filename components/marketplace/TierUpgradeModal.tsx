@@ -83,9 +83,9 @@ export default function TierUpgradeModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden">
+      <div className="bg-[var(--earth-brown-dark)] rounded-xl shadow-xl max-w-md w-full overflow-hidden border border-white/10">
         {/* Header */}
-        <div className="bg-gradient-to-r from-terracotta to-terracotta-dark px-6 py-4 text-white">
+        <div className="bg-gradient-to-r from-rust to-copper px-6 py-4 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ArrowUpCircle size={20} />
@@ -103,8 +103,8 @@ export default function TierUpgradeModal({
         {/* Body */}
         <div className="px-6 py-5 space-y-4">
           {/* Context */}
-          <div className="bg-earth-cream rounded-lg p-3">
-            <p className="text-sm text-foreground">
+          <div className="bg-white/8 rounded-lg p-3">
+            <p className="text-sm text-white/70">
               Your conversation has grown deeper with <span className="font-semibold">{diyerMessageCount} follow-up messages</span>.
               Upgrade to keep the dialogue going.
             </p>
@@ -112,7 +112,7 @@ export default function TierUpgradeModal({
 
           {/* What you get */}
           <div>
-            <p className="text-xs font-semibold text-earth-brown uppercase tracking-wide mb-2">
+            <p className="text-xs font-semibold text-white/50 uppercase tracking-wide mb-2">
               What you get with {upgradeDescription}
             </p>
             <ul className="space-y-2">
@@ -127,15 +127,15 @@ export default function TierUpgradeModal({
 
           {/* Value comparison */}
           <div className="flex items-center justify-between bg-forest-green/5 rounded-lg px-3 py-2">
-            <span className="text-xs text-earth-brown">A follow-up service call would cost</span>
-            <span className="text-sm font-medium text-earth-brown line-through">$75-150</span>
+            <span className="text-xs text-white/50">A follow-up service call would cost</span>
+            <span className="text-sm font-medium text-white/40 line-through">$75-150</span>
           </div>
 
           {/* Price */}
           <div className="text-center">
             <div className="inline-flex items-baseline gap-1">
               <span className="text-3xl font-bold text-foreground">${(upgradeCostCents / 100).toFixed(0)}</span>
-              <span className="text-sm text-earth-brown">one-time</span>
+              <span className="text-sm text-white/50">one-time</span>
             </div>
             <p className="text-xs text-[var(--muted)] mt-1">
               Tier {currentTier} &rarr; Tier {nextTier} &middot; Same payment method
@@ -152,7 +152,7 @@ export default function TierUpgradeModal({
           <button
             onClick={handleUpgrade}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-terracotta text-white font-semibold rounded-lg hover:bg-terracotta-dark transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-rust text-white font-semibold rounded-lg hover:bg-copper transition-colors disabled:opacity-50"
           >
             {loading ? (
               <Spinner size="sm" />
@@ -164,7 +164,7 @@ export default function TierUpgradeModal({
           <button
             onClick={onDecline}
             disabled={loading}
-            className="w-full px-4 py-2 text-sm text-earth-brown hover:text-foreground transition-colors disabled:opacity-50"
+            className="w-full px-4 py-2 text-sm text-white/50 hover:text-white transition-colors disabled:opacity-50"
           >
             No thanks, I&apos;m satisfied with the current answers
           </button>

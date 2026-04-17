@@ -24,6 +24,7 @@ export const ChatRequestSchema = z.object({
     base64: z.string().max(8_000_000, 'Image too large'),
     mediaType: z.enum(['image/jpeg', 'image/png', 'image/webp', 'image/gif']),
   }).optional(),
+  planningMode: z.boolean().optional(),
 });
 
 export const SearchStoresRequestSchema = z.object({
@@ -81,13 +82,28 @@ export function parseRequestBody<T>(
 
   if (!result.success) {
     const messages = result.error.issues.map(
-      (issue) => `${issue.path.join('.')}: ${issue.message}`
+      (issue) => issue.message
     );
     return { success: false, error: messages.join('; ') };
   }
 
   return { success: true, data: result.data };
 }
+
+export const CreateShoppingTripSchema = z.object({
+  project_id: z.string().uuid(),
+  name: z.string().min(1, 'Trip name is required').max(100),
+});
+
+export const UpdateShoppingTripSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  status: z.enum(['active', 'completed']).optional(),
+});
+
+export const UpdateTripItemSchema = z.object({
+  purchased: z.boolean().optional(),
+  notes: z.string().max(500).optional(),
+});
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 

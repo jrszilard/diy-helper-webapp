@@ -69,19 +69,19 @@ export const test = base.extend<{
   },
 
   /**
-   * Fixture that navigates to /chat with mocked APIs and cleared localStorage.
-   * Ready for immediate interaction.
+   * Fixture that navigates to / with mocked APIs and cleared localStorage.
+   * Clicks a suggestion chip to trigger chat mode, ready for interaction.
    */
   chatPage: async ({ page }, use) => {
     await mockAPIs(page);
-    await page.goto('/chat');
+    await page.goto('/');
     // Clear any previous state
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
     });
     // Re-navigate so cleared state takes effect
-    await page.goto('/chat');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
     await use(page);
   },

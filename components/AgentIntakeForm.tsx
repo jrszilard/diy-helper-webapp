@@ -46,24 +46,24 @@ export default function AgentIntakeForm({
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-surface rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-[var(--earth-brown-dark)] rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-white/10">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-earth-sand">
+        <div className="flex items-center justify-between p-5 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-slate-blue flex items-center justify-center">
               <Sparkles size={20} className="text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-foreground">Plan My Project</h2>
-              <p className="text-sm text-earth-brown">AI agents will research, design, and price your project</p>
+              <h2 className="text-lg font-bold text-white">Plan My Project</h2>
+              <p className="text-sm text-white/60">AI agents will research, design, and price your project</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-[#E8E0D4] rounded-lg transition-colors"
+            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
             aria-label="Close"
           >
-            <X size={20} className="text-earth-brown" />
+            <X size={20} className="text-white/60" />
           </button>
         </div>
 
@@ -78,7 +78,7 @@ export default function AgentIntakeForm({
               value={description}
               onChange={e => setDescription(e.target.value)}
               placeholder="e.g., Build a 12x16 composite deck attached to my house with stairs and railing"
-              className="w-full px-4 py-3 rounded-lg border border-earth-sand bg-white text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-slate-blue resize-none"
+              className="w-full px-4 py-3 rounded-lg border border-white/20 bg-white/10 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[var(--slate-blue)] resize-none"
               rows={3}
               maxLength={2000}
             />
@@ -99,7 +99,7 @@ export default function AgentIntakeForm({
                 value={city}
                 onChange={e => setCity(e.target.value)}
                 placeholder="City"
-                className="flex-1 px-4 py-2.5 rounded-lg border border-earth-sand bg-white text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-slate-blue"
+                className="flex-1 px-4 py-2.5 rounded-lg border border-white/20 bg-white/10 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[var(--slate-blue)]"
                 maxLength={100}
               />
               <input
@@ -107,7 +107,7 @@ export default function AgentIntakeForm({
                 value={state}
                 onChange={e => setState(e.target.value)}
                 placeholder="State"
-                className="w-24 px-4 py-2.5 rounded-lg border border-earth-sand bg-white text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-slate-blue"
+                className="w-24 px-4 py-2.5 rounded-lg border border-white/20 bg-white/10 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[var(--slate-blue)]"
                 maxLength={50}
               />
             </div>
@@ -131,7 +131,7 @@ export default function AgentIntakeForm({
                   className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-medium transition-colors border ${
                     experienceLevel === level
                       ? 'bg-slate-blue text-white border-slate-blue'
-                      : 'bg-white text-earth-brown border-earth-sand hover:border-slate-blue'
+                      : 'bg-white/10 text-white/60 border-white/20 hover:border-[var(--slate-blue)]'
                   }`}
                 >
                   {level.charAt(0).toUpperCase() + level.slice(1)}
@@ -155,7 +155,7 @@ export default function AgentIntakeForm({
                   className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-medium transition-colors border ${
                     budgetLevel === level
                       ? 'bg-slate-blue text-white border-slate-blue'
-                      : 'bg-white text-earth-brown border-earth-sand hover:border-slate-blue'
+                      : 'bg-white/10 text-white/60 border-white/20 hover:border-[var(--slate-blue)]'
                   }`}
                 >
                   {level.charAt(0).toUpperCase() + level.slice(1).replace('-', ' ')}
@@ -176,7 +176,7 @@ export default function AgentIntakeForm({
               value={timeframe}
               onChange={e => setTimeframe(e.target.value)}
               placeholder="e.g., 2 weekends, 1 week, before summer"
-              className="w-full px-4 py-2.5 rounded-lg border border-earth-sand bg-white text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-slate-blue"
+              className="w-full px-4 py-2.5 rounded-lg border border-white/20 bg-white/10 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[var(--slate-blue)]"
               maxLength={100}
             />
           </div>
@@ -202,7 +202,7 @@ export default function AgentIntakeForm({
                 <span>Generate a comprehensive project report you can follow</span>
               </li>
             </ol>
-            <p className="text-xs text-earth-brown mt-3">This typically takes 2-4 minutes.</p>
+            <p className="text-xs text-white/50 mt-3">This typically takes 2-4 minutes.</p>
           </div>
 
           {/* Submit */}

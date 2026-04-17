@@ -1,184 +1,398 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { ArrowUp, ArrowRight } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { ArrowUp, FolderPlus, ShoppingCart, Package, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { sanitizeHref } from '@/lib/security';
+import { cleanMessageContent } from '@/components/ChatMessages';
+import ChatMessageFeedback from '@/components/ChatMessageFeedback';
 import { supabase } from '@/lib/supabase';
+import { useChat, CHAT_STORAGE_KEY } from '@/hooks/useChat';
+import { useAgentRun } from '@/hooks/useAgentRun';
 import Spinner from '@/components/ui/Spinner';
+import Button from '@/components/ui/Button';
+import SaveToProjectModal from '@/components/SaveToProjectModal';
+import IntentSignal from '@/components/IntentSignal';
+import PlanningCTA from '@/components/PlanningCTA';
+import AgentProgress from '@/components/AgentProgress';
+import ReportView from '@/components/ReportView';
+import ContextualHint from '@/components/ui/ContextualHint';
+import GuestExpertCallout from '@/components/GuestExpertCallout';
+import SaveMaterialsDialog from '@/components/SaveMaterialsDialog';
+import { useProjectActions } from '@/hooks/useProjectActions';
+import type { IntentType } from '@/lib/intelligence/types';
+import type { StartAgentRunRequest } from '@/lib/agents/types';
 
-const POPULAR_QUESTIONS = [
-  'Do I need a permit to finish my basement?',
-  'Can I mix PEX and copper pipe?',
-  'What size wire for a 20-amp circuit?',
-  'How to fix a leaky faucet',
-];
-
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
+interface SuggestionChip {
+  emoji: string;
+  text: string;
 }
 
-export default function LandingQuickChat() {
-  const router = useRouter();
-  const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [streamingContent, setStreamingContent] = useState('');
-  const [conversationId, setConversationId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
+interface LandingQuickChatProps {
+  initialConversationId?: string;
+  onFirstMessage?: () => void;
+  onMaterialsDetected?: (count: number) => void;
+  suggestionChips?: SuggestionChip[];
+}
+
+export default function LandingQuickChat({
+  initialConversationId,
+  onFirstMessage,
+  onMaterialsDetected,
+  suggestionChips,
+}: LandingQuickChatProps) {
+  const mdComponents = {
+    p: ({ children }: { children?: React.ReactNode }) => <p className="mb-2 text-earth-cream">{children}</p>,
+    ul: ({ children }: { children?: React.ReactNode }) => <ul className="list-disc ml-4 mb-2 text-earth-cream">{children}</ul>,
+    ol: ({ children }: { children?: React.ReactNode }) => <ol className="list-decimal ml-4 mb-2 text-earth-cream">{children}</ol>,
+    li: ({ children }: { children?: React.ReactNode }) => <li className="text-earth-cream">{children}</li>,
+    h1: ({ children }: { children?: React.ReactNode }) => <h1 className="text-xl font-bold mb-2 text-earth-cream">{children}</h1>,
+    h2: ({ children }: { children?: React.ReactNode }) => <h2 className="text-lg font-bold mb-2 text-earth-cream">{children}</h2>,
+    h3: ({ children }: { children?: React.ReactNode }) => <h3 className="text-md font-bold mb-2 text-earth-cream">{children}</h3>,
+    strong: ({ children }: { children?: React.ReactNode }) => <strong className="font-bold text-earth-cream">{children}</strong>,
+    em: ({ children }: { children?: React.ReactNode }) => <em className="italic text-earth-sand">{children}</em>,
+    code: ({ children }: { children?: React.ReactNode }) => <code className="px-1 py-0.5 rounded text-sm bg-white/10 text-earth-cream">{children}</code>,
+    a: ({ children, href }: { children?: React.ReactNode; href?: string }) => (
+      <a href={sanitizeHref(href)} className="underline text-sky-300 hover:text-sky-200" target="_blank" rel="noopener noreferrer">{children}</a>
+    ),
+    blockquote: ({ children }: { children?: React.ReactNode }) => (
+      <blockquote className="border-l-4 border-rust pl-4 italic text-earth-sand">{children}</blockquote>
+    ),
+    table: ({ children }: { children?: React.ReactNode }) => (
+      <table className="w-full border-collapse my-3 text-sm">{children}</table>
+    ),
+    thead: ({ children }: { children?: React.ReactNode }) => (
+      <thead>{children}</thead>
+    ),
+    th: ({ children }: { children?: React.ReactNode }) => (
+      <th className="text-left font-bold px-3 py-2 border-b-2 text-white/60 border-white/20">{children}</th>
+    ),
+    td: ({ children }: { children?: React.ReactNode }) => (
+      <td className="px-3 py-2 border-b text-white/80 border-white/10">{children}</td>
+    ),
+    tr: ({ children }: { children?: React.ReactNode }) => (
+      <tr>{children}</tr>
+    ),
+  };
+
+  const [userId, setUserId] = useState<string | null>(null);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
+  const [detectedIntent, setDetectedIntent] = useState<IntentType | null>(null);
+  const [isPlanning, setIsPlanning] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const chat = useChat({
+    projectId: undefined,
+    conversationId: initialConversationId,
+    userId,
+  });
+
+  const hasSentFirstMessage = useRef(
+    typeof window !== 'undefined' && !!localStorage.getItem(CHAT_STORAGE_KEY)
+  );
+
+  const agentRun = useAgentRun();
+  const projectActions = useProjectActions({ userId: userId ?? undefined });
+
+  // Auth state
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user?.id ?? null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUserId(session?.user?.id ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // When initialConversationId changes:
+  // - undefined  → fresh chat (new chat or initial landing)
+  // - a real ID  → load that conversation's messages from Supabase
+  useEffect(() => {
+    if (!initialConversationId) {
+      chat.handleNewChat();
+      agentRun.reset();
+      return;
+    }
+    supabase
+      .from('conversation_messages')
+      .select('role, content')
+      .eq('conversation_id', initialConversationId)
+      .order('created_at', { ascending: true })
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          chat.handleSelectConversation(
+            initialConversationId,
+            data as { role: 'user' | 'assistant'; content: string }[]
+          );
+          onFirstMessage?.();
+        }
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialConversationId]);
+
+  // Auto-scroll
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, streamingContent]);
+  }, [chat.messages, chat.streamingContent, agentRun.phases]);
 
-  const handleSend = useCallback(async (text?: string) => {
-    const message = (text || input).trim();
-    if (!message || isStreaming) return;
+  // Detect first message for hero morph
+  useEffect(() => {
+    if (chat.messages.length > 0 && !hasSentFirstMessage.current) {
+      hasSentFirstMessage.current = true;
+      onFirstMessage?.();
+    }
+  }, [chat.messages.length, onFirstMessage]);
 
-    setInput('');
-    setError(null);
-    setMessages(prev => [...prev, { role: 'user', content: message }]);
-    setIsStreaming(true);
-    setStreamingContent('');
+  // Notify parent about extracted materials
+  useEffect(() => {
+    if (chat.extractedMaterials?.materials?.length) {
+      onMaterialsDetected?.(chat.extractedMaterials.materials.length);
+    }
+  }, [chat.extractedMaterials, onMaterialsDetected]);
 
+  // Detect planning ready marker in assistant messages
+  useEffect(() => {
+    if (!isPlanning) return;
+    const lastAssistant = [...chat.messages].reverse().find(m => m.role === 'assistant');
+    if (lastAssistant?.content.includes('---PLANNING_READY---')) {
+      triggerAgentPipeline();
+    }
+  }, [chat.messages, isPlanning]);
+
+  const triggerAgentPipeline = useCallback(async () => {
+    if (agentRun.isRunning) return;
+
+    const allContent = chat.messages.map(m => m.content).join('\n');
+    const cityMatch = allContent.match(/(?:in|near|from)\s+([A-Z][a-z]+(?:\s[A-Z][a-z]+)?),?\s*([A-Z]{2})/);
+    const projectDesc = chat.messages.find(m => m.role === 'user')?.content || 'DIY Project';
+    const budgetMatch = allContent.toLowerCase().match(/\b(budget|mid-range|premium)\b/);
+    const expMatch = allContent.toLowerCase().match(/\b(beginner|intermediate|advanced)\b/);
+
+    const request: StartAgentRunRequest = {
+      projectDescription: projectDesc.slice(0, 500),
+      city: cityMatch?.[1] || '',
+      state: cityMatch?.[2] || '',
+      budgetLevel: (budgetMatch?.[1] as 'budget' | 'mid-range' | 'premium') || 'mid-range',
+      experienceLevel: (expMatch?.[1] as 'beginner' | 'intermediate' | 'advanced') || 'intermediate',
+    };
+
+    await agentRun.startRun(request);
+  }, [chat.messages, agentRun]);
+
+  const handleStartPlanning = useCallback(() => {
+    setIsPlanning(true);
+    chat.sendMessageWithContent("Yes, let's create a full project plan!");
+  }, [chat]);
+
+  const handleSend = useCallback(() => {
+    chat.sendMessage();
+  }, [chat]);
+
+  const handleChipClick = useCallback((text: string) => {
+    chat.sendMessageWithContent(text);
+  }, [chat]);
+
+  const [newProjectName, setNewProjectName] = useState('');
+
+  const saveToProject = useCallback(async (targetProjectId: string, isGuestProject: boolean = false) => {
+    if (!chat.extractedMaterials) return;
     try {
-      let authHeaders: Record<string, string> = {};
-      try {
-        const session = (await supabase.auth.getSession()).data.session;
-        if (session?.access_token) {
-          authHeaders = { Authorization: `Bearer ${session.access_token}` };
+      const count = await projectActions.saveMaterials(
+        targetProjectId,
+        chat.extractedMaterials.materials,
+        isGuestProject || projectActions.isGuestMode
+      );
+      if (count > 0) {
+        setSavedProjectId(targetProjectId);
+        chat.setShowSaveDialog(false);
+        chat.setExtractedMaterials(null);
+        let successMsg = `Saved ${count} items to your project!`;
+        if (chat.extractedMaterials.owned_items?.length) {
+          successMsg += ` (${chat.extractedMaterials.owned_items.length} items you already own were excluded)`;
         }
-      } catch {
-        // Unauthenticated is fine
+        chat.setMessages(prev => [...prev, { role: 'assistant', content: successMsg }]);
       }
-
-      abortRef.current = new AbortController();
-
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...authHeaders },
-        body: JSON.stringify({
-          message,
-          history: messages.map(m => ({ role: m.role, content: m.content })),
-          streaming: true,
-        }),
-        signal: abortRef.current.signal,
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error || 'Something went wrong. Please try again.');
-        setIsStreaming(false);
-        return;
-      }
-
-      const reader = res.body?.getReader();
-      if (!reader) {
-        setError('Unable to read response.');
-        setIsStreaming(false);
-        return;
-      }
-
-      const decoder = new TextDecoder();
-      let accumulated = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          try {
-            const event = JSON.parse(line.slice(6));
-            switch (event.type) {
-              case 'text':
-                accumulated += event.content;
-                setStreamingContent(accumulated);
-                break;
-              case 'error':
-                setError(event.content || 'An error occurred.');
-                break;
-              case 'done':
-                if (event.conversationId) {
-                  setConversationId(event.conversationId);
-                }
-                break;
-            }
-          } catch {
-            // Ignore parse errors
-          }
-        }
-      }
-
-      if (accumulated) {
-        setMessages(prev => [...prev, { role: 'assistant', content: accumulated }]);
-      }
-    } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') return;
-      setError('Something went wrong. Please try again.');
-    } finally {
-      setIsStreaming(false);
-      setStreamingContent('');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      console.error('Error saving materials:', message);
+      chat.setMessages(prev => [...prev, { role: 'assistant', content: `Failed to save materials: ${message}. Please try again.` }]);
+      chat.setShowSaveDialog(false);
     }
-  }, [input, isStreaming, messages]);
+  }, [chat, projectActions]);
 
-  const handleContinue = () => {
-    if (conversationId) {
-      sessionStorage.setItem('diy-helper-conversation-id', conversationId);
+  const createNewProjectAndSave = useCallback(async () => {
+    if (!chat.extractedMaterials) return;
+    const project = await projectActions.createProject(
+      chat.extractedMaterials.project_description || 'My DIY Project',
+      `Created ${new Date().toLocaleDateString()}`
+    );
+    if (project) {
+      await saveToProject(project.id, projectActions.isGuestMode);
     }
-    if (messages.length > 0) {
-      sessionStorage.setItem('diy-helper-chat-messages', JSON.stringify(messages));
-    }
-    router.push('/chat');
-  };
+  }, [chat.extractedMaterials, projectActions, saveToProject]);
 
-  const hasConversation = messages.length > 0;
+  const defaultProjectName = chat.messages.find(m => m.role === 'user')?.content.slice(0, 60) ?? '';
+  const hasConversation = chat.messages.length > 0;
+  const showMaterialsButton = chat.showMaterialsBanner && !savedProjectId;
+
+  // Agent pipeline: show report when complete (only if we have a conversation)
+  if (agentRun.report && hasConversation) {
+    return (
+      <div className="space-y-4">
+        <ReportView
+          report={agentRun.report}
+          onBack={() => agentRun.reset()}
+          reportId={agentRun.reportId || undefined}
+          isAuthenticated={!!userId}
+        />
+      </div>
+    );
+  }
+
+  // Agent pipeline: show progress when actively running
+  if (agentRun.isRunning) {
+    return (
+      <div className="space-y-4">
+        <AgentProgress
+          phases={agentRun.phases}
+          overallProgress={agentRun.overallProgress}
+          projectDescription={chat.messages.find(m => m.role === 'user')?.content || ''}
+          location=""
+          error={agentRun.error}
+          onCancel={() => agentRun.cancel()}
+          onRetry={agentRun.runId ? () => agentRun.retryRun(agentRun.runId!) : undefined}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
+      {/* Inventory detection toast */}
+      {chat.inventoryNotification && (
+        <div className="flex items-start gap-2 bg-forest-green/20 border border-forest-green/30 text-earth-cream rounded-lg px-3 py-2.5 text-sm">
+          <Package className="w-4 h-4 flex-shrink-0 mt-0.5 text-forest-green" />
+          <span className="flex-1">
+            {chat.inventoryNotification.added.length > 0 && (
+              <>Added to inventory: {chat.inventoryNotification.added.join(', ')}. </>
+            )}
+            {chat.inventoryNotification.existing.length > 0 && (
+              <>Already tracked: {chat.inventoryNotification.existing.join(', ')}.</>
+            )}
+          </span>
+          <button onClick={() => chat.setInventoryNotification(null)} className="flex-shrink-0 p-0.5 rounded hover:bg-white/10" aria-label="Dismiss">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* Messages */}
-      <div ref={scrollRef} className="max-h-80 overflow-y-auto space-y-3">
-        {messages.map((msg, idx) => (
-          <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div
-              className={`max-w-[85%] ${
-                msg.role === 'user'
-                  ? 'bg-terracotta text-white rounded-2xl rounded-br-md px-4 py-2.5'
-                  : 'bg-white/10 text-white rounded-2xl rounded-bl-md px-4 py-3'
-              }`}
-            >
-              {msg.role === 'assistant' ? (
-                <div className="prose prose-sm prose-invert max-w-none">
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
-                </div>
-              ) : (
-                <p>{msg.content}</p>
-              )}
+      <div ref={scrollRef} className="max-h-[60vh] overflow-y-auto space-y-3">
+        {chat.messages.map((msg, idx) => (
+          <div key={idx}>
+            <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div
+                className={`max-w-[85%] ${
+                  msg.role === 'user'
+                    ? 'bg-rust text-white rounded-2xl rounded-br-md px-4 py-2.5'
+                    : 'bg-white/10 text-earth-cream rounded-2xl rounded-bl-md px-4 py-3'
+                }`}
+              >
+                {msg.role === 'assistant' ? (
+                  <>
+                    <div className="prose prose-sm prose-invert max-w-none">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{cleanMessageContent(msg.content).replace(/---PLANNING_READY---/g, '')}</ReactMarkdown>
+                    </div>
+                    {!chat.isLoading && (
+                      <ChatMessageFeedback
+                        messageIndex={idx}
+                        conversationId={chat.conversationId ?? null}
+                        userMessage={idx > 0 ? chat.messages[idx - 1]?.content || '' : ''}
+                        aiResponse={msg.content}
+                        variant="dark"
+                      />
+                    )}
+                  </>
+                ) : (
+                  <p>{msg.content}</p>
+                )}
+              </div>
             </div>
+
+            {/* Intent micro-signal after first assistant message */}
+            {msg.role === 'assistant' && idx === 1 && detectedIntent && (
+              <IntentSignal intent={detectedIntent} />
+            )}
+
+            {/* Action buttons after last assistant message */}
+            {msg.role === 'assistant' && idx === chat.messages.length - 1 && !chat.isLoading && (
+              <div className="flex items-center gap-2 mt-2 ml-1 flex-wrap">
+                {showMaterialsButton && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    leftIcon={ShoppingCart}
+                    iconSize={16}
+                    onClick={chat.handleAutoExtractMaterials}
+                    disabled={chat.isAutoExtracting}
+                  >
+                    {chat.isAutoExtracting ? (
+                      <span className="flex items-center gap-2"><Spinner size="sm" /> Extracting...</span>
+                    ) : (
+                      'Save Materials'
+                    )}
+                  </Button>
+                )}
+                {showMaterialsButton && (
+                  <ContextualHint hintKey="materials">
+                    Save these to a project to track purchases and search local store prices
+                  </ContextualHint>
+                )}
+                {userId && !savedProjectId && !showMaterialsButton && hasConversation && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    leftIcon={FolderPlus}
+                    iconSize={16}
+                    onClick={() => setShowSaveModal(true)}
+                    className="bg-white/8 text-white/70 hover:text-white hover:bg-white/15 border border-white/10"
+                  >
+                    Save to Project
+                  </Button>
+                )}
+                {detectedIntent === 'full_project' && !isPlanning && (
+                  <PlanningCTA onStartPlanning={handleStartPlanning} isPlanning={isPlanning} />
+                )}
+              </div>
+            )}
           </div>
         ))}
 
+        {/* Expert upsell for guests after 3+ messages */}
+        {!userId && (
+          <GuestExpertCallout
+            messageCount={chat.messages.filter(m => m.role === 'assistant').length}
+          />
+        )}
+
         {/* Streaming content */}
-        {isStreaming && streamingContent && (
+        {chat.isStreaming && chat.streamingContent && (
           <div className="flex justify-start">
-            <div className="max-w-[85%] bg-white/10 text-white rounded-2xl rounded-bl-md px-4 py-3">
+            <div className="max-w-[85%] bg-white/10 text-earth-cream rounded-2xl rounded-bl-md px-4 py-3">
               <div className="prose prose-sm prose-invert max-w-none">
-                <ReactMarkdown>{streamingContent}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{cleanMessageContent(chat.streamingContent)}</ReactMarkdown>
               </div>
             </div>
           </div>
         )}
 
         {/* Loading spinner */}
-        {isStreaming && !streamingContent && (
+        {chat.isLoading && !chat.streamingContent && (
           <div className="flex justify-start">
             <div className="bg-white/10 rounded-2xl rounded-bl-md px-4 py-3">
               <Spinner size="sm" />
@@ -188,49 +402,39 @@ export default function LandingQuickChat() {
       </div>
 
       {/* Error */}
-      {error && (
+      {chat.failedMessage && (
         <div className="bg-red-900/30 border border-red-500/30 text-red-200 rounded-lg p-3 text-sm">
-          {error}
-          <button onClick={() => setError(null)} className="ml-2 underline">
-            Dismiss
+          Failed to send message.
+          <button onClick={chat.handleRetry} className="ml-2 underline">
+            Retry
           </button>
         </div>
       )}
 
-      {/* Continue in full chat */}
-      {hasConversation && !isStreaming && (
-        <button
-          onClick={handleContinue}
-          className="flex items-center gap-2 text-sm font-semibold text-terracotta hover:text-terracotta-dark transition-colors"
-        >
-          Continue in full chat <ArrowRight className="w-4 h-4" />
-        </button>
-      )}
-
-      {/* Input area — matches GuidedBot BotInput dark style */}
+      {/* Input area */}
       <div className="bg-white/10 rounded-2xl p-4">
         <textarea
-          value={input}
-          onChange={e => setInput(e.target.value)}
+          value={chat.input}
+          onChange={e => chat.setInput(e.target.value)}
           onKeyDown={e => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
               handleSend();
             }
           }}
-          placeholder={hasConversation ? 'Ask a follow-up...' : 'Ask a quick DIY question...'}
-          className="w-full bg-transparent text-white placeholder-white/40 text-base resize-none focus:outline-none disabled:opacity-50"
-          disabled={isStreaming}
+          placeholder={hasConversation ? 'Ask a follow-up...' : 'Describe your project or ask a question...'}
+          className="w-full bg-transparent text-earth-cream placeholder-earth-cream/40 text-base resize-none focus:outline-none disabled:opacity-50"
+          disabled={chat.isLoading}
           rows={2}
         />
         <div className="flex justify-end mt-2">
           <button
-            onClick={() => handleSend()}
-            disabled={isStreaming || !input.trim()}
+            onClick={handleSend}
+            disabled={chat.isLoading || !chat.input.trim()}
             aria-label="Send message"
             className={`p-2 rounded-xl transition-all ${
-              input.trim() && !isStreaming
-                ? 'bg-terracotta text-white hover:bg-terracotta-dark'
+              chat.input.trim() && !chat.isLoading
+                ? 'bg-rust text-white hover:bg-copper'
                 : 'text-white/30 cursor-not-allowed'
             }`}
           >
@@ -239,22 +443,53 @@ export default function LandingQuickChat() {
         </div>
       </div>
 
-      {/* Popular question chips — match ProjectCards dark style */}
-      {!hasConversation && (
+      {/* Suggestion chips */}
+      {!hasConversation && suggestionChips && (
         <div className="grid grid-cols-2 gap-2">
-          {POPULAR_QUESTIONS.map((q, idx) => (
+          {suggestionChips.map((chip, idx) => (
             <button
               key={idx}
-              onClick={() => {
-                setInput(q);
-                handleSend(q);
-              }}
-              className="rounded-2xl bg-white/10 hover:bg-white/15 text-left transition-all p-4 text-white font-semibold text-sm leading-tight"
+              onClick={() => handleChipClick(chip.text)}
+              className="rounded-2xl bg-white/5 hover:bg-white/10 border border-white/8 text-left transition-all p-4 text-earth-cream font-semibold text-sm leading-tight"
             >
-              {q}
+              <span className="mr-1.5">{chip.emoji}</span>
+              {chip.text}
             </button>
           ))}
         </div>
+      )}
+
+      {/* Materials save dialog */}
+      <SaveMaterialsDialog
+        showSaveDialog={chat.showSaveDialog}
+        showCreateProjectDialog={false}
+        showAuthPrompt={!userId && chat.showSaveDialog}
+        extractedMaterials={chat.extractedMaterials}
+        projects={projectActions.projects}
+        guestProjects={projectActions.guestProjects}
+        isGuestMode={projectActions.isGuestMode}
+        newProjectName={newProjectName}
+        onNewProjectNameChange={setNewProjectName}
+        onSaveToProject={saveToProject}
+        onCreateNewProjectAndSave={createNewProjectAndSave}
+        onConfirmCreateProject={createNewProjectAndSave}
+        onCloseSaveDialog={() => chat.setShowSaveDialog(false)}
+        onCloseCreateDialog={() => chat.setShowSaveDialog(false)}
+        onCloseAuthPrompt={() => chat.setShowSaveDialog(false)}
+      />
+
+      {/* Save to Project modal */}
+      {userId && (
+        <SaveToProjectModal
+          isOpen={showSaveModal}
+          onClose={() => setShowSaveModal(false)}
+          userId={userId}
+          defaultName={defaultProjectName}
+          onSaved={(projectId) => {
+            setSavedProjectId(projectId);
+            setShowSaveModal(false);
+          }}
+        />
       )}
     </div>
   );

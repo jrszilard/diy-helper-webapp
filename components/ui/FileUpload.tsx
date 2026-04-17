@@ -99,7 +99,7 @@ export default function FileUpload({
       {label && (
         <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-white/70' : 'text-foreground'}`}>
           {label}{' '}
-          <span className={`font-normal ${isDark ? 'text-white/40' : 'text-earth-brown-light'}`}>
+          <span className="font-normal text-white/40">
             (optional, max {maxFiles})
           </span>
         </label>
@@ -120,15 +120,15 @@ export default function FileUpload({
         onDrop={handleDrop}
         className={`
           border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors
-          ${dragOver ? 'border-terracotta bg-terracotta/5' : isDark ? 'border-white/20 bg-white/5' : 'border-earth-sand bg-white'}
-          ${atLimit ? 'opacity-50 cursor-not-allowed' : 'hover:border-terracotta/50'}
+          ${dragOver ? 'border-rust bg-rust/5' : 'border-white/20 bg-white/5'}
+          ${atLimit ? 'opacity-50 cursor-not-allowed' : 'hover:border-rust/50'}
         `}
       >
-        <Camera className={`w-7 h-7 mx-auto mb-1 ${isDark ? 'text-white/40' : 'text-earth-brown-light'}`} />
+        <Camera className="w-7 h-7 mx-auto mb-1 text-white/40" />
         <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-foreground'}`}>
           {atLimit ? `${maxFiles} files uploaded` : 'Click to upload or drag photos here'}
         </p>
-        <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-earth-brown-light'}`}>
+        <p className="text-xs mt-1 text-white/40">
           JPG, PNG up to {maxSizeMB}MB each
         </p>
       </div>
@@ -150,7 +150,7 @@ export default function FileUpload({
           {files.map((file, i) => (
             <div
               key={`${file.name}-${i}`}
-              className="relative w-20 h-20 rounded-lg border border-earth-sand overflow-hidden"
+              className="relative w-20 h-20 rounded-lg border border-white/10 overflow-hidden"
             >
               <img
                 src={getPreviewUrl(file)}

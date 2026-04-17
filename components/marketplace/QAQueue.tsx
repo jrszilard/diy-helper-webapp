@@ -52,7 +52,7 @@ export default function QAQueue({ questions, onClaim, onBid }: QAQueueProps) {
       </Alert>
 
       <div className="flex items-center gap-2 mb-4">
-        <Filter size={14} className="text-earth-brown flex-shrink-0" />
+        <Filter size={14} className="text-white/40 flex-shrink-0" />
         <div className="flex gap-1 overflow-x-auto pb-1">
           {FILTER_OPTIONS.map(opt => (
             <Button

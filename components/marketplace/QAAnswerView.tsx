@@ -46,28 +46,19 @@ export default function QAAnswerView({ question, onAccept, onReview, onNotHelpfu
 
   return (
     <div className="space-y-4">
-      {/* Question */}
-      <div className="bg-white border border-earth-sand rounded-lg p-4">
-        <h3 className="text-sm font-semibold text-earth-brown mb-2">Your Question</h3>
-        <p className="text-sm text-foreground">{question.questionText}</p>
-        <span className="inline-block mt-2 text-xs px-2 py-0.5 bg-slate-blue/10 text-slate-blue rounded-full font-medium">
-          {question.category}
-        </span>
-      </div>
-
       {/* Answer */}
       {hasAnswer ? (
-        <div className="bg-white border border-earth-sand rounded-lg p-4">
+        <div className="bg-white/6 border border-white/10 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle2 size={16} className="text-forest-green" />
-            <h3 className="text-sm font-semibold text-foreground">Expert Answer</h3>
+            <h3 className="text-sm font-semibold text-white/80">Expert Answer</h3>
           </div>
-          <p className="text-sm text-foreground whitespace-pre-wrap">{question.answerText}</p>
+          <p className="text-sm text-white/70 whitespace-pre-wrap">{question.answerText}</p>
 
           {question.answerPhotos && question.answerPhotos.length > 0 && (
             <div className="flex items-center gap-1 mt-3">
-              <Image size={14} className="text-earth-brown" />
-              <span className="text-xs text-earth-brown">
+              <Image size={14} className="text-white/40" />
+              <span className="text-xs text-white/40">
                 {question.answerPhotos.length} photo{question.answerPhotos.length !== 1 ? 's' : ''} attached
               </span>
             </div>
@@ -108,12 +99,12 @@ export default function QAAnswerView({ question, onAccept, onReview, onNotHelpfu
                     </Button>
                     <button
                       onClick={() => setConfirmNotHelpful(false)}
-                      className="text-sm text-earth-brown hover:text-foreground"
+                      className="text-sm text-white/60 hover:text-white"
                     >
                       Cancel
                     </button>
                     {creditAmount > 0 && (
-                      <span className="text-xs text-earth-brown">
+                      <span className="text-xs text-white/50">
                         You&apos;ll receive ${(creditAmount / 100).toFixed(2)} in platform credit
                       </span>
                     )}
@@ -148,8 +139,8 @@ export default function QAAnswerView({ question, onAccept, onReview, onNotHelpfu
           )}
         </div>
       ) : (
-        <div className="bg-earth-tan/50 border border-earth-sand rounded-lg p-6 text-center">
-          <p className="text-sm text-earth-brown">Waiting for an expert to answer...</p>
+        <div className="bg-white/6 border border-white/10 rounded-lg p-6 text-center">
+          <p className="text-sm text-white/50">Waiting for an expert to answer...</p>
         </div>
       )}
     </div>

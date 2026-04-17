@@ -89,20 +89,20 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-earth-brown-dark flex items-center justify-center">
-        <Spinner size="lg" className="text-terracotta" />
+      <div className="min-h-screen bg-earth-night flex items-center justify-center">
+        <Spinner size="lg" className="text-rust" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-earth-brown-dark">
+    <div className="min-h-screen bg-earth-night">
       <DIYerHeader />
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Back link */}
         <Link
-          href="/chat"
+          href="/"
           className="inline-flex items-center gap-1.5 text-sm text-[var(--earth-sand)] hover:text-white mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />

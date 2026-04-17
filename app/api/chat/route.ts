@@ -18,10 +18,43 @@ import { StreamEvent } from '@/lib/tools/types';
 import { withRetry } from '@/lib/api-retry';
 import { logger } from '@/lib/logger';
 import { checkUsageLimit, incrementUsage } from '@/lib/usage';
+import { resolveAdvisorConfig } from '@/lib/advisor-resolver';
+import {
+  createAdvisorMetrics,
+  recordApiCall,
+  recordAdvisorUsage,
+  logAdvisorMetrics,
+} from '@/lib/advisor-metrics';
+import { runCustomReviewLoop } from '@/lib/advisor-custom-loop';
+import { recordCustomLoopResult } from '@/lib/advisor-metrics';
+import { AnthropicReviewProvider } from '@/lib/advisor-providers/anthropic';
+import { getWeightedExamples } from '@/lib/advisor-rubric-db';
+import { logReviewVerdict } from '@/lib/advisor-audit';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
+
+// Extract advisor usage from the beta API's iterations array in response.usage.
+// Each advisor consultation appears as an entry with type: 'advisor_message'.
+function extractAdvisorUsage(
+  response: Anthropic.Message,
+  metrics: import('@/lib/advisor-metrics').AdvisorMetrics
+): void {
+  const usage = response.usage as unknown as Record<string, unknown>;
+  const iterations = usage?.iterations;
+  if (!Array.isArray(iterations)) return;
+
+  for (const iter of iterations) {
+    if (iter && typeof iter === 'object' && iter.type === 'advisor_message') {
+      recordAdvisorUsage(
+        metrics,
+        (iter as { input_tokens?: number }).input_tokens || 0,
+        (iter as { output_tokens?: number }).output_tokens || 0,
+      );
+    }
+  }
+}
 
 const shouldRetryAnthropic = (error: unknown): boolean => {
   if (error && typeof error === 'object' && 'status' in error) {
@@ -97,7 +130,7 @@ export async function POST(req: NextRequest) {
       ));
     }
 
-    const { message, history, streaming, conversationId: existingConversationId, image } = parsed.data;
+    const { message, history, streaming, conversationId: existingConversationId, image, planningMode } = parsed.data;
 
     logger.info('Chat request', { requestId, streaming, historyLength: history.length, hasConversationId: !!existingConversationId, hasImage: !!image });
 
@@ -130,12 +163,14 @@ export async function POST(req: NextRequest) {
 
     // ── Intent Classification ─────────────────────────────────────
     let intentType: IntentType | undefined;
+    let intentConfidence: number | undefined;
     if (!existingConversationId && prunedHistory.length === 0) {
       const classification = await classifyIntent(message, {
         hasActiveProjects: false,
       });
       if (classification.confidence >= config.intelligence.confidenceThreshold) {
         intentType = classification.intent;
+        intentConfidence = classification.confidence;
       }
       logger.info('Intent classified', {
         requestId,
@@ -158,7 +193,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const activeSystemPrompt = intentType ? getSystemPrompt(intentType) : systemPrompt;
+    const activeSystemPrompt = getSystemPrompt(intentType, planningMode);
 
     // ── Skill Calibration ─────────────────────────────────────────
     let calibratedPrompt = activeSystemPrompt;
@@ -185,8 +220,44 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // ── Advisor Strategy ──────────────────────────────────────────
+    // Default to full_project when intent is unknown so the advisor is still active
+    const advisorResolution = resolveAdvisorConfig(intentType || 'full_project', message);
+    const executorModel = advisorResolution.executorModel;
+    if (advisorResolution.systemPromptSuffix) {
+      calibratedPrompt += advisorResolution.systemPromptSuffix;
+    }
+
+    const activeTools = [
+      ...tools,
+      ...(advisorResolution.advisorTool ? [advisorResolution.advisorTool] : []),
+    ];
+    const useBetaApi = advisorResolution.useBetaApi;
+
+    // Helper: call standard or beta messages API depending on advisor config.
+    // Both return the same runtime shape; the cast unifies the TS types.
+    const createMessage = (params: {
+      model: string;
+      max_tokens: number;
+      system: string;
+      tools: unknown[];
+      messages: Anthropic.MessageParam[];
+    }): Promise<Anthropic.Message> => {
+      if (useBetaApi) {
+        return anthropic.beta.messages.create({
+          ...params,
+          tools: params.tools as Anthropic.Beta.Messages.BetaToolUnion[],
+          betas: ['advisor-tool-2026-03-01'],
+        }) as unknown as Promise<Anthropic.Message>;
+      }
+      return anthropic.messages.create({
+        ...params,
+        tools: params.tools as Anthropic.Tool[],
+      });
+    };
+
     if (!streaming) {
-      return handleNonStreamingRequest(auth, message, prunedHistory, image ? userContent : undefined, intentType, calibratedPrompt);
+      return handleNonStreamingRequest(auth, message, prunedHistory, image ? userContent : undefined, intentType, calibratedPrompt, executorModel, activeTools, useBetaApi);
     }
 
     const stream = new ReadableStream({
@@ -199,6 +270,18 @@ export async function POST(req: NextRequest) {
           }
         };
 
+        const advisorMetrics = createAdvisorMetrics({
+          requestId,
+          intentType: intentType || 'unknown',
+          executorModel,
+          advisorMode: advisorResolution.advisorMode,
+          advisorModel: advisorResolution.advisorTool?.model || null,
+          customReviewerModel: advisorResolution.customReviewerModel,
+          advisorMaxUses: advisorResolution.advisorTool?.max_uses || 0,
+          safetyKeywordsDetected: advisorResolution.safetyKeywordsDetected,
+          safetyKeywordsMatched: advisorResolution.safetyKeywordsMatched,
+        });
+
         try {
           sendEvent({
             type: 'progress',
@@ -207,6 +290,11 @@ export async function POST(req: NextRequest) {
             icon: '🤔'
           });
 
+          // Emit intent classification to client for micro-signal display
+          if (intentType) {
+            sendEvent({ type: 'intent', intent: intentType, confidence: intentConfidence });
+          }
+
           const messages: Anthropic.MessageParam[] = [
             ...(prunedHistory as Anthropic.MessageParam[]),
             { role: 'user' as const, content: image ? userContent : message }
@@ -214,16 +302,22 @@ export async function POST(req: NextRequest) {
 
           const apiStart = Date.now();
           let response = await withRetry(
-            () => anthropic.messages.create({
-              model: config.anthropic.model,
+            () => createMessage({
+              model: executorModel,
               max_tokens: config.anthropic.maxTokens,
               system: calibratedPrompt,
-              tools: tools as Anthropic.Tool[],
+              tools: activeTools,
               messages
             }),
             { maxRetries: 2, baseDelayMs: 1000, shouldRetry: shouldRetryAnthropic }
           );
           logger.info('Anthropic API call', { requestId, duration: Date.now() - apiStart, stopReason: response.stop_reason });
+          recordApiCall(advisorMetrics, {
+            inputTokens: response.usage?.input_tokens || 0,
+            outputTokens: response.usage?.output_tokens || 0,
+            latencyMs: Date.now() - apiStart,
+          });
+          extractAdvisorUsage(response, advisorMetrics);
 
           let loopCount = 0;
           const maxLoops = 10;
@@ -262,6 +356,16 @@ export async function POST(req: NextRequest) {
                   } catch { /* ignore parse errors */ }
                 }
 
+                // Forward video search results so the client can render the VideoResults component
+                if (block.name === 'search_project_videos') {
+                  try {
+                    const videoData = JSON.parse(result);
+                    if (videoData.success && videoData.videos?.length > 0) {
+                      sendEvent({ type: 'tool_result', toolName: 'video_results', result: videoData });
+                    }
+                  } catch { /* ignore parse errors */ }
+                }
+
                 assistantContent.push(block);
 
                 toolResults.push({
@@ -297,16 +401,22 @@ export async function POST(req: NextRequest) {
 
             const followUpStart = Date.now();
             response = await withRetry(
-              () => anthropic.messages.create({
-                model: config.anthropic.model,
+              () => createMessage({
+                model: executorModel,
                 max_tokens: config.anthropic.maxTokens,
                 system: calibratedPrompt,
-                tools: tools as Anthropic.Tool[],
+                tools: activeTools,
                 messages
               }),
               { maxRetries: 2, baseDelayMs: 1000, shouldRetry: shouldRetryAnthropic }
             );
             logger.info('Anthropic follow-up call', { requestId, duration: Date.now() - followUpStart, loop: loopCount, stopReason: response.stop_reason });
+            recordApiCall(advisorMetrics, {
+              inputTokens: response.usage?.input_tokens || 0,
+              outputTokens: response.usage?.output_tokens || 0,
+              latencyMs: Date.now() - followUpStart,
+            });
+            extractAdvisorUsage(response, advisorMetrics);
           }
 
           // Warn user if tool loop hit the limit
@@ -315,6 +425,89 @@ export async function POST(req: NextRequest) {
               type: 'warning',
               content: 'This response required more tool calls than allowed in a single turn. The answer below may be incomplete — try asking a follow-up to continue.'
             });
+          }
+
+          // ── Custom Review Loop (Mode C) ───────────────────────────
+          if (advisorResolution.advisorMode === 'custom' && response.stop_reason === 'end_turn') {
+            const draftText = response.content
+              .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+              .map(b => b.text)
+              .join('');
+
+            if (draftText.trim()) {
+              sendEvent({
+                type: 'progress',
+                step: 'reviewing',
+                message: 'Running safety review...',
+                icon: '🔍',
+              });
+
+              const fewShotExamples = await getWeightedExamples('general', 5);
+
+              const reviewProvider = new AnthropicReviewProvider(
+                advisorResolution.customReviewerModel!,
+                anthropic,
+              );
+
+              const loopResult = await runCustomReviewLoop({
+                userMessage: message,
+                draftResponse: draftText,
+                provider: reviewProvider,
+                maxIterations: config.advisor.customReviewer.maxIterations,
+                earlyStopOnApproval: config.advisor.customReviewer.earlyStopOnApproval,
+                safetyKeywordsDetected: advisorResolution.safetyKeywordsDetected,
+                safetyKeywordsMatched: advisorResolution.safetyKeywordsMatched,
+                fewShotExamples,
+              });
+
+              recordCustomLoopResult(advisorMetrics, {
+                iterationsUsed: loopResult.iterationsUsed,
+                wasRevised: loopResult.wasRevised,
+                reviewerInputTokens: loopResult.reviewerTokens.inputTokens,
+                reviewerOutputTokens: loopResult.reviewerTokens.outputTokens,
+                latencyMs: loopResult.latencyMs,
+              });
+
+              // Audit trail (fire-and-forget)
+              logReviewVerdict({
+                requestId,
+                intentType: intentType || 'unknown',
+                advisorMode: 'custom',
+                reviewerModel: advisorResolution.customReviewerModel!,
+                userQuestion: message,
+                draftResponse: draftText,
+                verdict: loopResult.wasRevised ? 'REVISE' : 'APPROVE',
+                confidence: null,
+                issues: loopResult.issues,
+                revisedResponse: loopResult.wasRevised ? loopResult.finalResponse : null,
+                iterationsUsed: loopResult.iterationsUsed,
+                safetyKeywords: advisorResolution.safetyKeywordsMatched,
+                category: null,
+                rubricVersion: loopResult.rubricVersion,
+                reviewerTokensIn: loopResult.reviewerTokens.inputTokens,
+                reviewerTokensOut: loopResult.reviewerTokens.outputTokens,
+                latencyMs: loopResult.latencyMs,
+              }).catch(() => {});
+
+              if (loopResult.wasRevised) {
+                logger.info('Custom review loop revised response', {
+                  requestId,
+                  iterationsUsed: loopResult.iterationsUsed,
+                  issueCount: loopResult.issues.length,
+                });
+                let replaced = false;
+                response = {
+                  ...response,
+                  content: response.content.map(block => {
+                    if (block.type === 'text' && !replaced) {
+                      replaced = true;
+                      return { ...block, text: loopResult.finalResponse };
+                    }
+                    return block;
+                  }),
+                };
+              }
+            }
           }
 
           // Stream final response in chunks
@@ -358,6 +551,7 @@ export async function POST(req: NextRequest) {
             }
           }
 
+          logAdvisorMetrics(advisorMetrics);
           logger.info('Chat stream complete', { requestId, duration: Date.now() - startTime, toolLoops: loopCount });
           sendEvent({ type: 'done', conversationId: responseConversationId });
           controller.close();
@@ -415,20 +609,45 @@ async function handleNonStreamingRequest(
   history: Array<{ role: string; content: string | Array<Record<string, unknown>> }>,
   multiModalContent?: Anthropic.ContentBlockParam[],
   intentType?: IntentType,
-  calibratedSystemPrompt?: string
+  calibratedSystemPrompt?: string,
+  executorModelOverride?: string,
+  activeToolsOverride?: unknown[],
+  useBetaApi?: boolean,
 ) {
   const effectivePrompt = calibratedSystemPrompt || systemPrompt;
+  const effectiveModel = executorModelOverride || config.anthropic.model;
+  const effectiveTools = activeToolsOverride || tools;
   const messages: Anthropic.MessageParam[] = [
     ...(history as Anthropic.MessageParam[]),
     { role: 'user' as const, content: multiModalContent || message }
   ];
 
+  const createMsg = (params: {
+    model: string;
+    max_tokens: number;
+    system: string;
+    tools: unknown[];
+    messages: Anthropic.MessageParam[];
+  }): Promise<Anthropic.Message> => {
+    if (useBetaApi) {
+      return anthropic.beta.messages.create({
+        ...params,
+        tools: params.tools as Anthropic.Beta.Messages.BetaToolUnion[],
+        betas: ['advisor-tool-2026-03-01'],
+      }) as unknown as Promise<Anthropic.Message>;
+    }
+    return anthropic.messages.create({
+      ...params,
+      tools: params.tools as Anthropic.Tool[],
+    });
+  };
+
   let response = await withRetry(
-    () => anthropic.messages.create({
-      model: config.anthropic.model,
+    () => createMsg({
+      model: effectiveModel,
       max_tokens: config.anthropic.maxTokens,
       system: effectivePrompt,
-      tools: tools as Anthropic.Tool[],
+      tools: effectiveTools,
       messages
     }),
     { maxRetries: 2, baseDelayMs: 1000, shouldRetry: shouldRetryAnthropic }
@@ -436,6 +655,7 @@ async function handleNonStreamingRequest(
 
   let loopCount = 0;
   const maxLoops = 10;
+  let videoDataPrefix = '';
 
   while (response.stop_reason === 'tool_use' && loopCount < maxLoops) {
     loopCount++;
@@ -446,6 +666,16 @@ async function handleNonStreamingRequest(
     for (const block of response.content) {
       if (block.type === 'tool_use') {
         const result = await executeTool(block.name, block.input as Record<string, unknown>, auth);
+
+        // Capture video results for injection into the final response
+        if (block.name === 'search_project_videos') {
+          try {
+            const videoData = JSON.parse(result);
+            if (videoData.success && videoData.videos?.length > 0) {
+              videoDataPrefix = `---VIDEO_DATA---\n${result}\n---END_VIDEO_DATA---\n`;
+            }
+          } catch { /* ignore parse errors */ }
+        }
 
         assistantContent.push(block);
 
@@ -470,11 +700,11 @@ async function handleNonStreamingRequest(
     });
 
     response = await withRetry(
-      () => anthropic.messages.create({
-        model: config.anthropic.model,
+      () => createMsg({
+        model: effectiveModel,
         max_tokens: config.anthropic.maxTokens,
         system: effectivePrompt,
-        tools: tools as Anthropic.Tool[],
+        tools: effectiveTools,
         messages
       }),
       { maxRetries: 2, baseDelayMs: 1000, shouldRetry: shouldRetryAnthropic }
@@ -486,7 +716,7 @@ async function handleNonStreamingRequest(
     ? '\n\n> **Note:** This response required more tool calls than allowed in a single turn and may be incomplete. Try asking a follow-up to continue.'
     : '';
 
-  let finalResponse = '';
+  let finalResponse = videoDataPrefix;
   const finalContent: Anthropic.ContentBlock[] = [];
 
   for (const block of response.content) {

@@ -121,7 +121,7 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
   if (!hasReport) return null;
 
   return (
-    <div className="bg-white border border-earth-sand rounded-lg overflow-hidden">
+    <div className="bg-white border border-white/10 rounded-lg overflow-hidden">
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
@@ -132,24 +132,24 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
           <h4 className="text-sm font-semibold text-foreground">
             Report Corrections
             {corrections.length > 0 && (
-              <span className="ml-1.5 text-xs font-normal text-earth-brown">({corrections.length})</span>
+              <span className="ml-1.5 text-xs font-normal text-white/60">({corrections.length})</span>
             )}
           </h4>
         </div>
-        {expanded ? <ChevronUp size={14} className="text-earth-brown" /> : <ChevronDown size={14} className="text-earth-brown" />}
+        {expanded ? <ChevronUp size={14} className="text-white/60" /> : <ChevronDown size={14} className="text-white/60" />}
       </button>
 
       {expanded && (
         <div className="px-4 py-3 space-y-3">
           {loading ? (
             <div className="flex items-center justify-center py-4">
-              <Spinner size="sm" className="text-terracotta" />
+              <Spinner size="sm" className="text-rust" />
             </div>
           ) : (
             <>
               {/* Existing corrections */}
               {corrections.map((c) => (
-                <div key={c.id} className="bg-earth-cream rounded-lg p-3">
+                <div key={c.id} className="bg-white/5 rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xs font-semibold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">
                       {SECTION_TYPES.find(s => s.value === c.section_type)?.label || c.section_type}
@@ -159,13 +159,13 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
                     </span>
                   </div>
                   {c.original_content && (
-                    <p className="text-xs text-earth-brown line-through mb-1">
+                    <p className="text-xs text-white/60 line-through mb-1">
                       AI said: {c.original_content}
                     </p>
                   )}
                   <p className="text-sm text-foreground">{c.corrected_content}</p>
                   {c.correction_reason && (
-                    <p className="text-xs text-earth-brown mt-1 italic">Reason: {c.correction_reason}</p>
+                    <p className="text-xs text-white/60 mt-1 italic">Reason: {c.correction_reason}</p>
                   )}
                 </div>
               ))}
@@ -196,9 +196,9 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
               )}
 
               {showForm && (
-                <div className="space-y-3 border-t border-earth-sand pt-3">
+                <div className="space-y-3 border-t border-white/10 pt-3">
                   <div>
-                    <label className="text-xs font-medium text-earth-brown block mb-1">Section</label>
+                    <label className="text-xs font-medium text-white/60 block mb-1">Section</label>
                     <Select
                       value={sectionType}
                       onChange={e => setSectionType(e.target.value)}
@@ -254,7 +254,7 @@ export default function CorrectionForm({ questionId, userRole, hasReport }: Corr
                     </button>
                     <button
                       onClick={() => setShowForm(false)}
-                      className="px-4 py-2 text-sm text-earth-brown hover:text-foreground transition-colors"
+                      className="px-4 py-2 text-sm text-white/60 hover:text-foreground transition-colors"
                     >
                       Cancel
                     </button>

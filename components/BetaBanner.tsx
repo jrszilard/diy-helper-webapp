@@ -5,7 +5,7 @@ export default function BetaBanner() {
   if (!isBeta) return null;
 
   return (
-    <div className="bg-[var(--terracotta)] text-white text-center py-1.5 px-4 text-sm font-medium z-50 relative">
+    <div className="bg-[var(--rust)] text-white text-center py-1.5 px-4 text-sm font-medium z-50 relative">
       <span className="font-bold">Beta</span> &mdash; All features are free during testing. No real charges apply.{' '}
       <button
         onClick={() => window.dispatchEvent(new CustomEvent('open-beta-feedback'))}

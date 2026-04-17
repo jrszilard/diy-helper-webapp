@@ -96,6 +96,10 @@ export async function PUT(req: NextRequest) {
     if (updateFields.qaRateCents !== undefined) updateData.qa_rate_cents = updateFields.qaRateCents;
     if (updateFields.isAvailable !== undefined) updateData.is_available = updateFields.isAvailable;
     if (updateFields.profilePhotoUrl !== undefined) updateData.profile_photo_url = updateFields.profilePhotoUrl;
+    if (updateFields.licenseNumber !== undefined) updateData.license_number = updateFields.licenseNumber;
+    if (updateFields.licenseType !== undefined) updateData.license_type = updateFields.licenseType;
+    if (updateFields.licenseState !== undefined) updateData.license_state = updateFields.licenseState;
+    if (updateFields.insuranceStatus !== undefined) updateData.insurance_status = updateFields.insuranceStatus;
 
     const { error: updateError } = await auth.supabaseClient
       .from('expert_profiles')

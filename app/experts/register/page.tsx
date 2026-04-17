@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import ExpertRegistrationForm from '@/components/marketplace/ExpertRegistrationForm';
 import AuthButton from '@/components/AuthButton';
-import { Wrench, DollarSign, Award, CheckCircle, ArrowRight } from 'lucide-react';
+import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
-import Link from 'next/link';
+import { DollarSign, Award, CheckCircle, ArrowRight } from 'lucide-react';
 
 export default function ExpertRegisterPage() {
   const router = useRouter();
@@ -40,7 +40,6 @@ export default function ExpertRegisterPage() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser({ id: session.user.id, email: session.user.email ?? undefined });
-        // User is authenticated, check expert status
         checkExpertStatus();
       } else {
         setUser(null);
@@ -63,28 +62,11 @@ export default function ExpertRegisterPage() {
     return () => subscription.unsubscribe();
   }, [checkExpertStatus]);
 
-  const header = (
-    <header className="bg-surface border-b border-earth-sand shadow-sm">
-      <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="bg-gradient-to-br from-terracotta to-terracotta-dark p-1.5 rounded-lg">
-            <Wrench className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-lg font-bold text-foreground">DIY Helper</span>
-        </Link>
-        <h1 className="text-sm font-semibold text-earth-brown">Expert Registration</h1>
-      </div>
-    </header>
-  );
-
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface">
-        {header}
-        <div className="flex items-center justify-center py-32">
-          <Spinner size="lg" className="text-terracotta" />
-        </div>
+      <div className="min-h-screen bg-earth-night flex items-center justify-center">
+        <Spinner size="lg" className="text-rust" />
       </div>
     );
   }
@@ -92,12 +74,11 @@ export default function ExpertRegisterPage() {
   // Authenticated + ready for registration
   if (user && showRegistration) {
     return (
-      <div className="min-h-screen bg-surface">
-        {header}
+      <div className="min-h-screen bg-earth-night">
         <main className="max-w-3xl mx-auto px-4 py-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-foreground">Become an Expert</h1>
-            <p className="text-sm text-earth-brown mt-2">
+            <h1 className="text-2xl font-bold text-white">Become an Expert</h1>
+            <p className="text-sm text-white/50 mt-2">
               Share your expertise with DIYers and earn money answering questions.
             </p>
           </div>
@@ -109,37 +90,36 @@ export default function ExpertRegisterPage() {
 
   // Unauthenticated — show value prop + sign-in CTA
   return (
-    <div className="min-h-screen bg-surface">
-      {header}
+    <div className="min-h-screen bg-earth-night">
+      <main className="max-w-3xl mx-auto px-4 py-12">
 
-      <main className="max-w-3xl mx-auto px-4 py-8">
         {/* Hero */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-terracotta to-terracotta-dark rounded-2xl mb-4 shadow-lg">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-rust to-copper rounded-2xl mb-5 shadow-lg">
             <Award className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-3">
-            Become an Expert on DIY Helper
+          <h1 className="text-3xl font-bold text-white mb-3">
+            Become an Expert
           </h1>
-          <p className="text-lg text-warm-brown max-w-xl mx-auto">
+          <p className="text-lg text-white/50 max-w-xl mx-auto">
             Share your trade knowledge, help DIYers succeed, and earn money on your own schedule.
           </p>
         </div>
 
         {/* Benefits */}
-        <div className="grid sm:grid-cols-3 gap-6 mb-10">
+        <div className="grid sm:grid-cols-3 gap-4 mb-8">
           {[
             {
               icon: DollarSign,
-              title: 'Answer Questions & Earn',
+              title: 'Answer & Earn',
               desc: 'Get paid for sharing your expertise. Answer DIY questions and provide consultations.',
               color: 'from-forest-green to-forest-green-dark',
             },
             {
               icon: Award,
-              title: 'Build Your Reputation',
+              title: 'Build Your Rep',
               desc: 'Earn verified reviews and ratings from satisfied DIYers. Stand out in your specialty.',
-              color: 'from-terracotta to-terracotta-dark',
+              color: 'from-rust to-copper',
             },
             {
               icon: CheckCircle,
@@ -150,20 +130,20 @@ export default function ExpertRegisterPage() {
           ].map((item, idx) => (
             <div
               key={idx}
-              className="bg-white rounded-2xl p-6 border border-earth-tan text-center"
+              className="bg-white/5 border border-white/[0.08] rounded-2xl p-6 text-center"
             >
               <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${item.color} mb-4 shadow-lg`}>
                 <item.icon className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">{item.title}</h3>
-              <p className="text-sm text-warm-brown leading-relaxed">{item.desc}</p>
+              <h3 className="text-base font-bold text-white mb-2">{item.title}</h3>
+              <p className="text-sm text-white/50 leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </div>
 
         {/* How it works */}
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-earth-tan mb-10">
-          <h2 className="text-xl font-bold text-foreground mb-6 text-center">How It Works</h2>
+        <div className="bg-white/5 border border-white/[0.08] rounded-2xl p-6 sm:p-8 mb-8">
+          <h2 className="text-lg font-bold text-white mb-6 text-center">How It Works</h2>
           <div className="grid sm:grid-cols-3 gap-6">
             {[
               { step: '1', title: 'Create your account', desc: 'Sign up for free and complete your expert profile.' },
@@ -171,18 +151,18 @@ export default function ExpertRegisterPage() {
               { step: '3', title: 'Start earning', desc: 'Answer questions, offer consultations, and get paid.' },
             ].map((item, idx) => (
               <div key={idx} className="text-center">
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-terracotta text-white font-bold text-sm mb-3">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-rust text-white font-bold text-sm mb-3">
                   {item.step}
                 </div>
-                <h3 className="font-semibold text-foreground mb-1">{item.title}</h3>
-                <p className="text-sm text-warm-brown">{item.desc}</p>
+                <h3 className="font-semibold text-white mb-1">{item.title}</h3>
+                <p className="text-sm text-white/50">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Sign-in CTA */}
-        <div className="text-center bg-gradient-to-br from-terracotta via-rust to-terracotta-dark rounded-2xl p-8 text-white relative overflow-hidden">
+        <div className="text-center bg-gradient-to-br from-rust via-rust to-copper rounded-2xl p-8 text-white relative overflow-hidden">
           <div className="absolute inset-0 opacity-10" style={{
             backgroundImage: `
               linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
@@ -192,7 +172,7 @@ export default function ExpertRegisterPage() {
           }} />
           <div className="relative">
             <h2 className="text-2xl font-bold mb-2">Ready to get started?</h2>
-            <p className="text-white/90 mb-6">
+            <p className="text-white/80 mb-6">
               Sign in or create an account to begin your expert registration.
             </p>
             <div className="inline-block">
@@ -203,24 +183,26 @@ export default function ExpertRegisterPage() {
               />
             </div>
             {!showAuth && (
-              <button
+              <Button
+                variant="ghost"
+                rightIcon={ArrowRight}
                 onClick={() => setShowAuth(true)}
-                className="flex items-center gap-2 mx-auto mt-4 text-sm text-white/80 hover:text-white transition-colors"
+                className="mx-auto mt-4 text-white/70 hover:text-white hover:bg-white/10"
               >
-                <span>Sign in to continue</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+                Sign in to continue
+              </Button>
             )}
           </div>
         </div>
 
         {/* Browse link */}
-        <p className="text-center mt-6 text-sm text-earth-brown">
+        <p className="text-center mt-6 text-sm text-white/30">
           Just looking?{' '}
-          <Link href="/experts" className="text-terracotta hover:underline">
+          <Button variant="ghost" href="/experts" className="text-white/50 hover:text-white p-0 h-auto">
             Browse the expert directory →
-          </Link>
+          </Button>
         </p>
+
       </main>
     </div>
   );

@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { LogOut, ChevronDown, FolderOpen, MessageSquare, Mail, Users, Award, Settings, User } from 'lucide-react';
+import { LogOut, ChevronDown, Mail, Settings, User, LayoutDashboard } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import TextInput from '@/components/ui/TextInput';
 import Modal from '@/components/ui/Modal';
 import Dropdown from '@/components/ui/Dropdown';
-import Avatar from '@/components/ui/Avatar';
+import { CHAT_STORAGE_KEY, CONVERSATION_ID_KEY, CHAT_USER_KEY } from '@/hooks/useChat';
+import { guestStorage } from '@/lib/guestStorage';
 
 export default function AuthButton({
   user,
@@ -16,12 +17,14 @@ export default function AuthButton({
   onAuthToggle,
   variant = 'light',
   isExpert = false,
+  dropdownPlacement = 'bottom',
 }: {
   user: { id: string; email?: string; name?: string } | null;
   externalShowAuth?: boolean;
   onAuthToggle?: (show: boolean) => void;
   variant?: 'light' | 'dark';
   isExpert?: boolean;
+  dropdownPlacement?: 'bottom' | 'top';
 }) {
   const [loading, setLoading] = useState(false);
   const [internalShowAuth, setInternalShowAuth] = useState(false);
@@ -90,6 +93,13 @@ export default function AuthButton({
   };
 
   const handleSignOut = async () => {
+    // Clear chat-related localStorage to prevent stale conversations
+    // from leaking across sessions / accounts
+    localStorage.removeItem(CHAT_STORAGE_KEY);
+    localStorage.removeItem(CONVERSATION_ID_KEY);
+    localStorage.removeItem(CHAT_USER_KEY);
+    guestStorage.clearAll();
+
     await supabase.auth.signOut();
     window.location.reload();
   };
@@ -99,18 +109,15 @@ export default function AuthButton({
 
     const items = isExpert
       ? [
+          { label: 'Dashboard', icon: LayoutDashboard, href: '/experts/dashboard' },
           { label: 'My Profile', icon: User, href: '/experts/dashboard/profile' },
           { label: 'Settings', icon: Settings, href: '/settings' },
           { label: 'Sign Out', icon: LogOut, onClick: handleSignOut, danger: true, dividerBefore: true },
         ]
       : [
-          { label: 'My Projects', icon: FolderOpen, href: '/chat' },
-          { label: 'My Questions', icon: MessageSquare, href: '/marketplace/qa' },
           { label: 'My Profile', icon: User, href: '/profile' },
           { label: 'Settings', icon: Settings, href: '/settings' },
           { label: 'Messages', icon: Mail, href: '/messages' },
-          { label: 'Find an Expert', icon: Users, href: '/experts' },
-          { label: 'Become an Expert', icon: Award, href: '/experts/register' },
           { label: 'Sign Out', icon: LogOut, onClick: handleSignOut, danger: true, dividerBefore: true },
         ];
 
@@ -123,17 +130,17 @@ export default function AuthButton({
             className={`flex items-center gap-2 cursor-pointer transition ${
               isDark
                 ? 'text-earth-sand hover:text-white'
-                : 'text-[var(--earth-brown-dark)] hover:text-terracotta'
+                : 'text-[var(--earth-brown-dark)] hover:text-rust'
             }`}
             role="button"
             aria-label="Account menu"
           >
-            <Avatar name={displayName} size="sm" />
-            <span className="hidden sm:inline text-sm font-medium">{displayName}</span>
+            <span className="text-sm font-medium">{displayName}</span>
             <ChevronDown className="w-4 h-4" />
           </span>
         }
         items={items}
+        placement={dropdownPlacement}
       />
     );
   }
@@ -146,13 +153,13 @@ export default function AuthButton({
 
       <Modal isOpen={showAuth} onClose={() => setShowAuth(false)}>
         {/* Tab toggle */}
-        <div className="flex mb-5 bg-earth-tan rounded-xl p-1">
+        <div className="flex mb-5 bg-white/10 rounded-xl p-1">
           <button
             onClick={() => setIsSignUp(false)}
             className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${
               !isSignUp
-                ? 'bg-white text-foreground shadow-sm'
-                : 'text-earth-brown hover:text-foreground'
+                ? 'bg-white/20 text-white shadow-sm'
+                : 'text-white/50 hover:text-white'
             }`}
           >
             Sign In
@@ -161,8 +168,8 @@ export default function AuthButton({
             onClick={() => setIsSignUp(true)}
             className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${
               isSignUp
-                ? 'bg-white text-foreground shadow-sm'
-                : 'text-earth-brown hover:text-foreground'
+                ? 'bg-white/20 text-white shadow-sm'
+                : 'text-white/50 hover:text-white'
             }`}
           >
             Create Account
@@ -170,7 +177,7 @@ export default function AuthButton({
         </div>
 
         {/* Header text */}
-        <p className="text-sm text-earth-brown mb-5 text-center">
+        <p className="text-sm text-white/60 mb-5 text-center">
           {isSignUp
             ? isExpertReferral
               ? 'Sign up to ask a verified expert — your first question is free!'
@@ -206,7 +213,7 @@ export default function AuthButton({
               minLength={8}
             />
             {isSignUp && (
-              <p className="text-xs text-earth-brown mt-1">At least 8 characters</p>
+              <p className="text-xs text-white/50 mt-1">At least 8 characters</p>
             )}
             {!isSignUp && (
               <button

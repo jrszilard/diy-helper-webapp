@@ -26,11 +26,11 @@ export default function SectionHeader({
   const config = sizeConfig[size];
 
   return (
-    <div className={cn('flex items-start justify-between gap-4', className)}>
+    <div className={cn('flex items-start justify-between gap-4 text-white', className)}>
       <div>
-        <h2 className={cn(config.title, 'text-[var(--earth-brown-dark)]')}>{title}</h2>
+        <h2 className={cn(config.title, 'text-inherit')}>{title}</h2>
         {subtitle && (
-          <p className={cn(config.subtitle, 'text-[var(--earth-brown-light)] mt-0.5')}>{subtitle}</p>
+          <p className={cn(config.subtitle, 'text-white/50 mt-0.5')}>{subtitle}</p>
         )}
       </div>
       {action && <div className="flex-shrink-0">{action}</div>}

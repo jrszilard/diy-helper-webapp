@@ -19,12 +19,12 @@ export default function GlobalHeader({ left, nav, right, className = '', logoHre
   const isDark = variant === 'dark';
 
   return (
-    <header className={`${isDark ? 'sticky top-0 z-50 backdrop-blur-xl bg-[var(--earth-brown-dark)]/95 border-b border-[var(--blueprint-grid-major)]' : 'bg-nav-surface border-b border-earth-sand shadow-sm'} ${className}`}>
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+    <header className={`${isDark ? 'sticky top-0 z-50 backdrop-blur-xl bg-[var(--earth-brown-dark)]/95 border-b border-[var(--blueprint-grid-major)]' : 'bg-[var(--earth-brown-dark)] border-b border-white/10 shadow-sm'} ${className}`}>
+      <div className="u-container">
         <div className="flex items-center justify-between h-14 sm:h-16">
           <div className="flex items-center gap-4">
             {left}
-            <AppLogo href={logoHref} variant={isDark ? 'dark' : 'light'} />
+            <AppLogo href={logoHref} />
             {nav && (
               <nav className="hidden sm:flex items-center gap-1 ml-2">
                 {nav}
@@ -35,7 +35,7 @@ export default function GlobalHeader({ left, nav, right, className = '', logoHre
             {!nav && (
               <Link
                 href="/about"
-                className={`text-sm font-medium transition-colors hidden sm:block ${isDark ? 'text-[var(--earth-sand)] hover:text-white' : 'text-earth-brown hover:text-foreground'}`}
+                className={`text-sm font-medium transition-colors hidden sm:block ${isDark ? 'text-[var(--earth-sand)] hover:text-white' : 'text-white/60 hover:text-foreground'}`}
               >
                 About
               </Link>

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Spinner from '@/components/ui/Spinner';
 import SectionHeader from '@/components/ui/SectionHeader';
-import Card from '@/components/ui/Card';
 import MessageList from '@/components/marketplace/MessageList';
 
 interface Thread {
@@ -50,17 +49,17 @@ export default function ExpertMessagesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Spinner size="lg" className="text-terracotta" />
+        <Spinner size="lg" className="text-rust" />
       </div>
     );
   }
 
   return (
     <div className="space-y-4 max-w-4xl">
-      <SectionHeader size="lg" title="Messages" />
-      <Card surface rounded="xl" padding="none" className="overflow-hidden">
+      <SectionHeader size="lg" title="Messages" className="text-white" />
+      <div className="bg-white/5 border border-white/[0.08] rounded-xl overflow-hidden">
         <MessageList threads={threads} basePath="/experts/dashboard/messages" />
-      </Card>
+      </div>
     </div>
   );
 }

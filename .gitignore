@@ -50,3 +50,5 @@ supabase/.temp
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+# Superpowers brainstorm sessions
+.superpowers/
