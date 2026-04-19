@@ -11,6 +11,7 @@ interface EmptyStateProps {
   action?: React.ReactNode;
   size?: 'sm' | 'md';
   className?: string;
+  variant?: 'dark' | 'light';
 }
 
 export default function EmptyState({
@@ -23,6 +24,7 @@ export default function EmptyState({
   action,
   size = 'md',
   className,
+  variant: _variant,
 }: EmptyStateProps) {
   const resolvedIconSize = iconSize ?? (size === 'sm' ? 32 : 48);
 
