@@ -1,6 +1,6 @@
 'use client';
 
-import { DollarSign, TrendingUp, Star, MessageSquare, Clock, CreditCard } from 'lucide-react';
+import { DollarSign, TrendingUp, Star, MessageSquare, Clock, Hourglass } from 'lucide-react';
 
 interface DashboardStatsProps {
   stats: {
@@ -10,6 +10,7 @@ interface DashboardStatsProps {
     avgRating: number;
     activeQuestions: number;
     pendingPayouts: number;
+    inEscrow: number;
   };
 }
 
@@ -21,11 +22,35 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
       icon: DollarSign,
       color: 'text-forest-green',
       bgColor: 'bg-forest-green/20',
+      subtitle: 'released to your account',
     },
     {
       label: 'This Month',
       value: `$${(stats.monthEarnings / 100).toFixed(2)}`,
       icon: TrendingUp,
+      color: 'text-slate-blue',
+      bgColor: 'bg-slate-blue/20',
+    },
+    {
+      label: 'Pending Payouts',
+      value: `$${(stats.pendingPayouts / 100).toFixed(2)}`,
+      icon: Clock,
+      color: 'text-gold',
+      bgColor: 'bg-gold/20',
+      subtitle: 'accepted, awaiting transfer',
+    },
+    {
+      label: 'In Escrow',
+      value: `$${(stats.inEscrow / 100).toFixed(2)}`,
+      icon: Hourglass,
+      color: 'text-rust',
+      bgColor: 'bg-rust/20',
+      subtitle: 'answered, awaiting accept',
+    },
+    {
+      label: 'Active Questions',
+      value: stats.activeQuestions.toString(),
+      icon: MessageSquare,
       color: 'text-slate-blue',
       bgColor: 'bg-slate-blue/20',
     },
@@ -36,27 +61,6 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
       color: 'text-rust',
       bgColor: 'bg-rust/20',
       subtitle: `${stats.totalReviews} review${stats.totalReviews !== 1 ? 's' : ''}`,
-    },
-    {
-      label: 'Active Questions',
-      value: stats.activeQuestions.toString(),
-      icon: MessageSquare,
-      color: 'text-slate-blue',
-      bgColor: 'bg-slate-blue/20',
-    },
-    {
-      label: 'Pending Payouts',
-      value: `$${(stats.pendingPayouts / 100).toFixed(2)}`,
-      icon: Clock,
-      color: 'text-gold',
-      bgColor: 'bg-gold/20',
-    },
-    {
-      label: 'Total Reviews',
-      value: stats.totalReviews.toString(),
-      icon: CreditCard,
-      color: 'text-forest-green',
-      bgColor: 'bg-forest-green/20',
     },
   ];
 

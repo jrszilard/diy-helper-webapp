@@ -43,8 +43,47 @@ export const UpdateExpertProfileSchema = z.object({
 
 // ── Q&A ─────────────────────────────────────────────────────────────────────
 
+/**
+ * Heuristic spam/gibberish detector. Catches keyboard-mashing like
+ * "sfsgdfs wfgseh;kamgh;msrhg" without false-positiving on short, real
+ * questions. Returns true if the text looks like a real question.
+ */
+function looksLikeRealQuestion(text: string): boolean {
+  const trimmed = text.trim();
+  // Split on whitespace only (semicolons/commas without spaces don't count
+  // as word breaks — that's how the gibberish samples disguise themselves).
+  const words = trimmed.split(/\s+/).filter(Boolean);
+  if (words.length < 5) return false;
+
+  // Vowel ratio in all letters — English text averages ~38%. Below 22%
+  // is heavy consonant mashing. Skip if there are no letters at all.
+  const letters = trimmed.replace(/[^a-zA-Z]/g, '');
+  if (letters.length > 0) {
+    const vowels = letters.replace(/[^aeiouAEIOU]/g, '').length;
+    if (vowels / letters.length < 0.22) return false;
+  }
+
+  // Any single "word" longer than 25 chars with no vowels is almost
+  // certainly mashing (real long words are things like "weatherproofing").
+  for (const w of words) {
+    if (w.length > 25) {
+      const wLetters = w.replace(/[^a-zA-Z]/g, '');
+      const wVowels = wLetters.replace(/[^aeiouAEIOU]/g, '').length;
+      if (wLetters.length > 0 && wVowels / wLetters.length < 0.2) return false;
+    }
+  }
+  return true;
+}
+
 export const SubmitQuestionSchema = z.object({
-  questionText: z.string().min(20, 'Please provide more detail').max(1500, 'Please keep your question under 1,500 characters'),
+  questionText: z
+    .string()
+    .min(20, 'Please provide more detail')
+    .max(1500, 'Please keep your question under 1,500 characters')
+    .refine(looksLikeRealQuestion, {
+      message:
+        'Please write your question in plain English with at least a few real sentences.',
+    }),
   category: z.enum(SPECIALTIES as unknown as [string, ...string[]]),
   reportId: z.string().uuid().optional(),
   projectId: z.string().uuid().optional(),

@@ -178,7 +178,7 @@ export default function AppSidebar() {
                 {[
                   { href: '/experts/dashboard', label: 'Dashboard', icon: LayoutDashboard },
                   { href: '/experts/dashboard/qa', label: 'Q&A Queue', icon: MessageSquare },
-                  { href: '/experts/dashboard/reviews', label: 'Reviews', icon: ClipboardCheck },
+                  { href: '/experts/dashboard/reviews', label: 'AI Review Queue', icon: ClipboardCheck },
                   { href: '/experts/dashboard/messages', label: 'Messages', icon: Mail },
                 ].map(({ href, label, icon: Icon }) => (
                   <Link

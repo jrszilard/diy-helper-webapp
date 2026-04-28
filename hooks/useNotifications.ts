@@ -29,7 +29,12 @@ export function useNotifications(userId: string | undefined) {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- standard data-fetch + polling pattern
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000);
+    // Poll every 60s. (Was 30s — agent sweep flagged 8+ calls per session.)
+    // Pause polling when the tab is hidden to avoid wasted requests.
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      fetchNotifications();
+    }, 60000);
     return () => clearInterval(interval);
   }, [fetchNotifications]);
 

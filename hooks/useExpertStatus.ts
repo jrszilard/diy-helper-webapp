@@ -5,11 +5,16 @@ import { supabase } from '@/lib/supabase';
 import type { ExpertProfile } from '@/lib/marketplace/types';
 
 const CACHE_KEY = 'expert-status';
+// Skip a background refetch if the cached entry is fresher than this. Three
+// instances of the hook (AppSidebar + AppHeader + settings page) used to fire
+// /api/experts/me back-to-back on every dashboard mount.
+const CACHE_TTL_MS = 60_000;
 
 interface ExpertStatusCache {
   isExpert: boolean;
   expert: ExpertProfile | null;
   openQueueCount: number;
+  cachedAt?: number;
 }
 
 export function useExpertStatus() {
@@ -52,6 +57,7 @@ export function useExpertStatus() {
         isExpert: !!data.expert,
         expert: data.expert ?? null,
         openQueueCount: data.openQueueCount ?? 0,
+        cachedAt: Date.now(),
       };
 
       applyCache(result);
@@ -65,18 +71,25 @@ export function useExpertStatus() {
 
   useEffect(() => {
     // Try sessionStorage cache first for instant rendering
+    let cacheIsFresh = false;
     try {
       const cached = sessionStorage.getItem(CACHE_KEY);
       if (cached) {
         const parsed: ExpertStatusCache = JSON.parse(cached);
         applyCache(parsed);
         setLoading(false);
+        if (parsed.cachedAt && Date.now() - parsed.cachedAt < CACHE_TTL_MS) {
+          cacheIsFresh = true;
+        }
       }
     } catch {
       // ignore parse errors
     }
 
-    fetchStatus();
+    // Only refetch in background if cache is stale or missing.
+    if (!cacheIsFresh) {
+      fetchStatus();
+    }
   }, [fetchStatus]);
 
   return { isExpert, expert, openQueueCount, loading, refresh: fetchStatus };

@@ -9,6 +9,38 @@ export type Specialty =
   | 'painting' | 'tile' | 'landscaping' | 'general_contracting'
   | 'other';
 
+export const ALL_SPECIALTIES: readonly Specialty[] = [
+  'electrical', 'plumbing', 'hvac', 'carpentry',
+  'flooring', 'roofing', 'concrete', 'drywall',
+  'painting', 'tile', 'landscaping', 'general_contracting',
+  'other',
+] as const;
+
+/**
+ * Trades that universally require a state-issued license to perform legally
+ * across most US jurisdictions. General Contractors are NOT auto-granted
+ * visibility into questions for these categories — they need the specific
+ * specialty on their profile to answer them.
+ *
+ * TODO: replace with a state-by-state license matrix. e.g., concrete and
+ * roofing have variable requirements. For beta we use the universal subset
+ * to stay conservative.
+ */
+export const LICENSE_REQUIRED_CATEGORIES: readonly Specialty[] = [
+  'electrical', 'plumbing', 'hvac',
+] as const;
+
+/**
+ * Map specialty slug to a human-readable label. Falls back to slug
+ * with underscores → spaces and title-cased.
+ */
+export function specialtyLabel(slug: string): string {
+  if (slug === 'hvac') return 'HVAC';
+  return slug
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export interface ExpertProfile {
   id: string;
   userId: string;
