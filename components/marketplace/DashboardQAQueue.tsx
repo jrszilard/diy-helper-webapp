@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { MessageSquare, Clock, ArrowRight } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
 import Badge from '@/components/ui/Badge';
@@ -52,7 +53,11 @@ export default function DashboardQAQueue({ questions }: DashboardQAQueueProps) {
       ) : (
         <div className="divide-y divide-white/[0.06]">
           {questions.map(q => (
-            <div key={q.id} className="px-4 py-3 hover:bg-white/5 transition-colors">
+            <Link
+              key={q.id}
+              href={`/marketplace/qa/${q.id}`}
+              className="block px-4 py-3 hover:bg-white/5 transition-colors focus-visible:outline-none focus-visible:bg-white/10"
+            >
               <p className="text-sm text-white/80 line-clamp-2">{q.questionText}</p>
               <div className="flex items-center gap-3 mt-1.5">
                 <Badge variant="default" size="sm">{q.category}</Badge>
@@ -68,7 +73,7 @@ export default function DashboardQAQueue({ questions }: DashboardQAQueueProps) {
                   {formatTimeAgo(q.createdAt)}
                 </span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

@@ -364,28 +364,43 @@ export default function ExpertProfilePage() {
             <h3 className="text-sm font-semibold text-white/80">Credentials</h3>
             <p className="text-xs text-white/40 mt-0.5">Optional — helps build trust with DIYers</p>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <TextInput
-              id="profile-license-type"
-              label="License Type"
-              type="text"
-              value={licenseType}
-              onChange={(e) => setLicenseType(e.target.value)}
-              placeholder="e.g., Master Electrician"
-              fullWidth
-              maxLength={100}
-            />
-            <TextInput
-              id="profile-license-number"
-              label="License Number"
-              type="text"
-              value={licenseNumber}
-              onChange={(e) => setLicenseNumber(e.target.value)}
-              placeholder="e.g., EL-12345"
-              fullWidth
-              maxLength={50}
-            />
-          </div>
+          {(() => {
+            const primary = specialties.find(s => s.isPrimary)?.specialty || specialties[0]?.specialty;
+            const tradeHints: Record<string, { type: string; number: string }> = {
+              electrical: { type: 'Master Electrician', number: 'EL-12345' },
+              plumbing: { type: 'Master Plumber', number: 'PL-12345' },
+              hvac: { type: 'HVAC Contractor', number: 'HV-12345' },
+              general_contracting: { type: 'General Contractor', number: 'GC-12345' },
+              roofing: { type: 'Roofing Contractor', number: 'RC-12345' },
+              concrete: { type: 'C-8 Concrete', number: '12345' },
+              carpentry: { type: 'Finish Carpenter', number: '12345' },
+            };
+            const hint = (primary && tradeHints[primary]) || { type: 'Trade License', number: '12345' };
+            return (
+              <div className="grid grid-cols-2 gap-3">
+                <TextInput
+                  id="profile-license-type"
+                  label="License Type"
+                  type="text"
+                  value={licenseType}
+                  onChange={(e) => setLicenseType(e.target.value)}
+                  placeholder={`e.g., ${hint.type}`}
+                  fullWidth
+                  maxLength={100}
+                />
+                <TextInput
+                  id="profile-license-number"
+                  label="License Number"
+                  type="text"
+                  value={licenseNumber}
+                  onChange={(e) => setLicenseNumber(e.target.value)}
+                  placeholder={`e.g., ${hint.number}`}
+                  fullWidth
+                  maxLength={50}
+                />
+              </div>
+            );
+          })()}
           <div className="grid grid-cols-2 gap-3">
             <Select
               id="profile-license-state"
@@ -437,15 +452,19 @@ export default function ExpertProfilePage() {
                     <option key={s} value={s}>{SPECIALTY_LABELS[s]}</option>
                   ))}
                 </Select>
-                <TextInput
-                  type="number"
-                  value={spec.yearsExperience ?? ''}
-                  onChange={(e) => updateSpecialty(index, 'yearsExperience', e.target.value ? parseInt(e.target.value) : null)}
-                  placeholder="Yrs"
-                  min={0}
-                  max={60}
-                  className="w-16 text-center"
-                />
+                <div className="flex items-center gap-1">
+                  <TextInput
+                    type="number"
+                    value={spec.yearsExperience ?? ''}
+                    onChange={(e) => updateSpecialty(index, 'yearsExperience', e.target.value ? parseInt(e.target.value) : null)}
+                    placeholder="0"
+                    min={0}
+                    max={60}
+                    className="w-14 text-center"
+                    aria-label="Years of experience"
+                  />
+                  <span className="text-xs text-white/40">yrs exp</span>
+                </div>
                 <Button
                   type="button"
                   variant={spec.isPrimary ? 'primary' : 'ghost'}
@@ -520,25 +539,32 @@ export default function ExpertProfilePage() {
             />
           </div>
 
-          {/* Embed code */}
+          {/* Embed code — use the configured public site URL for production
+              embeds, fall back to current origin for local preview. */}
           <div className="relative">
             <p className="text-xs font-semibold text-white/50 mb-1">HTML Embed Code</p>
-            <div className="bg-black/30 text-white/70 rounded-lg p-3 pr-12 text-xs font-mono overflow-x-auto border border-white/[0.08]">
-              {`<a href="${typeof window !== 'undefined' ? window.location.origin : ''}/experts/${profile.id}" target="_blank" rel="noopener"><img src="${typeof window !== 'undefined' ? window.location.origin : ''}/api/experts/${profile.id}/badge" alt="Verified Expert on DIY Helper" width="280" height="90" /></a>`}
-            </div>
-            <IconButton
-              icon={badgeCopied ? CheckCircle2 : Copy}
-              iconSize={14}
-              label="Copy embed code"
-              onClick={() => {
-                const origin = window.location.origin;
-                const code = `<a href="${origin}/experts/${profile.id}" target="_blank" rel="noopener"><img src="${origin}/api/experts/${profile.id}/badge" alt="Verified Expert on DIY Helper" width="280" height="90" /></a>`;
-                navigator.clipboard.writeText(code);
-                setBadgeCopied(true);
-                setTimeout(() => setBadgeCopied(false), 2000);
-              }}
-              className="absolute top-7 right-2 !p-1.5 text-white/40 hover:text-white hover:bg-white/10"
-            />
+            {(() => {
+              const publicUrl = process.env.NEXT_PUBLIC_SITE_URL ?? (typeof window !== 'undefined' ? window.location.origin : '');
+              const embedCode = `<a href="${publicUrl}/experts/${profile.id}" target="_blank" rel="noopener"><img src="${publicUrl}/api/experts/${profile.id}/badge" alt="Verified Expert on DIY Helper" width="280" height="90" /></a>`;
+              return (
+                <>
+                  <div className="bg-black/30 text-white/70 rounded-lg p-3 pr-12 text-xs font-mono overflow-x-auto border border-white/[0.08]">
+                    {embedCode}
+                  </div>
+                  <IconButton
+                    icon={badgeCopied ? CheckCircle2 : Copy}
+                    iconSize={14}
+                    label="Copy embed code"
+                    onClick={() => {
+                      navigator.clipboard.writeText(embedCode);
+                      setBadgeCopied(true);
+                      setTimeout(() => setBadgeCopied(false), 2000);
+                    }}
+                    className="absolute top-7 right-2 !p-1.5 text-white/40 hover:text-white hover:bg-white/10"
+                  />
+                </>
+              );
+            })()}
           </div>
 
           <p className="text-xs text-white/30">

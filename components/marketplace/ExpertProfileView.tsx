@@ -5,7 +5,7 @@ import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select';
 import Avatar from '@/components/ui/Avatar';
 import StarRating from '@/components/ui/StarRating';
-import type { ExpertProfile } from '@/lib/marketplace/types';
+import { specialtyLabel, type ExpertProfile } from '@/lib/marketplace/types';
 import ExpertLevelBadge from './ExpertLevelBadge';
 import type { ExpertLevel } from './ExpertLevelBadge';
 import ReviewCard from './ReviewCard';
@@ -176,8 +176,8 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
                       : 'bg-slate-blue/20 text-slate-blue'
                   }`}
                 >
-                  {s.specialty.replace('_', ' ')}
-                  {s.yearsExperience ? ` (${s.yearsExperience} yr)` : ''}
+                  {specialtyLabel(s.specialty)}
+                  {s.yearsExperience ? ` · ${s.yearsExperience} yr${s.yearsExperience === 1 ? '' : 's'}` : ''}
                 </span>
               ))}
             </div>

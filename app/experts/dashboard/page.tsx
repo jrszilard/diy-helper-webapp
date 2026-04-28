@@ -8,18 +8,24 @@ import Alert from '@/components/ui/Alert';
 import StripeOnboardBanner from '@/components/marketplace/StripeOnboardBanner';
 import DashboardStats from '@/components/marketplace/DashboardStats';
 import DashboardQAQueue from '@/components/marketplace/DashboardQAQueue';
+import ExpertTierBadge from '@/components/marketplace/ExpertTierBadge';
 
 interface DashboardApiResponse {
   dashboard: {
     totalEarningsCents: number;
+    thisMonthEarningsCents: number;
+    pendingPayoutCents: number;
+    inEscrowCents: number;
     recentReviewsCount: number;
     activeQACount: number;
-    pendingPayoutCents: number;
     avgRating: number;
     totalReviews: number;
     isAvailable: boolean;
     verificationLevel: number;
     stripeOnboardingComplete: boolean;
+    expertLevel: string;
+    reputationScore: number;
+    subscriptionTier: string;
   };
 }
 
@@ -94,11 +100,12 @@ export default function ExpertDashboardPage() {
   const d = data.dashboard;
   const stats = {
     totalEarnings: d.totalEarningsCents,
-    monthEarnings: d.pendingPayoutCents, // use pending as month proxy for now
+    monthEarnings: d.thisMonthEarningsCents,
     totalReviews: d.totalReviews,
     avgRating: d.avgRating,
     activeQuestions: d.activeQACount,
     pendingPayouts: d.pendingPayoutCents,
+    inEscrow: d.inEscrowCents,
   };
 
   return (
@@ -106,6 +113,11 @@ export default function ExpertDashboardPage() {
       <SectionHeader size="lg" title="Dashboard" className="text-white" />
 
       <StripeOnboardBanner stripeOnboardingComplete={d.stripeOnboardingComplete} />
+      <ExpertTierBadge
+        expertLevel={d.expertLevel}
+        reputationScore={d.reputationScore}
+        subscriptionTier={d.subscriptionTier}
+      />
       <DashboardStats stats={stats} />
       <DashboardQAQueue questions={queueQuestions} />
     </div>

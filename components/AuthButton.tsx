@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { LogOut, ChevronDown, Mail, Settings, User, LayoutDashboard } from 'lucide-react';
@@ -33,6 +33,29 @@ export default function AuthButton({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
+
+  // Auto-open modal when ?signIn=true is in the URL (e.g., redirect from
+  // an auth-gated page). Without this, users land on the homepage with no
+  // visible affordance to sign in. Read window.location directly rather
+  // than useSearchParams() to avoid forcing a Suspense boundary on every
+  // static page that hosts AuthButton.
+  useEffect(() => {
+    if (user) return; // already signed in
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('signIn') !== 'true') return;
+
+    if (externalShowAuth !== undefined) {
+      onAuthToggle?.(true);
+    } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reading URL params requires effect
+      setInternalShowAuth(true);
+    }
+    // Clean the URL so a refresh doesn't re-trigger the modal.
+    const url = new URL(window.location.href);
+    url.searchParams.delete('signIn');
+    window.history.replaceState({}, '', url.toString());
+  }, [user, externalShowAuth, onAuthToggle]);
 
   const showAuth = externalShowAuth !== undefined ? externalShowAuth : internalShowAuth;
   const setShowAuth = (show: boolean) => {

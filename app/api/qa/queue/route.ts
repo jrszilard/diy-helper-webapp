@@ -5,6 +5,7 @@ import { checkRateLimit } from '@/lib/rate-limit';
 import { getExpertByUserId } from '@/lib/marketplace/expert-helpers';
 import { releaseExpiredClaims } from '@/lib/marketplace/qa-helpers';
 import { getQueuePriorityTier, type ExpertLevel } from '@/lib/marketplace/reputation-engine';
+import { ALL_SPECIALTIES, LICENSE_REQUIRED_CATEGORIES, type Specialty } from '@/lib/marketplace/types';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { logger } from '@/lib/logger';
 
@@ -59,14 +60,27 @@ export async function GET(req: NextRequest) {
       : reputationPriority;
 
     // Get expert's specialties
-    const expertCategories = expert.specialties.map(s => s.specialty);
+    const expertCategories: Specialty[] = expert.specialties.map(s => s.specialty as Specialty);
+
+    // General Contractors get cross-trade visibility for non-license-required
+    // categories. License-required trades (electrical, plumbing, HVAC) still
+    // require the GC to also hold that specialty — we don't auto-grant visibility
+    // to questions a tradesperson without the appropriate license shouldn't be
+    // answering. (See LICENSE_REQUIRED_CATEGORIES in lib/marketplace/types.ts.)
+    let visibleCategories = expertCategories;
+    if (expertCategories.includes('general_contracting')) {
+      const crossTradeCategories = ALL_SPECIALTIES.filter(
+        c => !LICENSE_REQUIRED_CATEGORIES.includes(c)
+      );
+      visibleCategories = Array.from(new Set([...expertCategories, ...crossTradeCategories]));
+    }
 
     // Build query — Gold/Platinum experts see specialist questions first
     let query = adminClient
       .from('qa_questions')
       .select('*')
       .eq('status', 'open')
-      .in('category', expertCategories)
+      .in('category', visibleCategories)
       .neq('diyer_user_id', auth.userId);
 
     // Standard-tier experts don't see specialist bidding questions

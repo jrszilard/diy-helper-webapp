@@ -95,7 +95,7 @@ export async function GET(
   <rect x="195" y="10" width="${lc.label.length * 7 + 16}" height="18" rx="9" fill="${lc.bg}" opacity="0.15"/>
   <text x="${195 + (lc.label.length * 7 + 16) / 2}" y="22" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="${lc.text}" text-anchor="middle">${lc.label}</text>
   <!-- Powered by -->
-  <text x="268" y="80" font-family="Arial,sans-serif" font-size="7" fill="#B0A696" text-anchor="end">diyhelper.com</text>
+  <text x="268" y="80" font-family="Arial,sans-serif" font-size="7" fill="#B0A696" text-anchor="end">Crafted by DIY Helper</text>
 </svg>`;
 
   return new Response(svg, {

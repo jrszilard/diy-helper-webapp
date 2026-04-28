@@ -266,6 +266,7 @@ export function useChat(options: UseChatOptions = {}) {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let accumulatedContent = '';
+      let gotDoneEvent = false;
 
       if (!reader) throw new Error('No response body reader available');
 
@@ -324,8 +325,13 @@ export function useChat(options: UseChatOptions = {}) {
                   console.error('Stream error:', event.content);
                   accumulatedContent += `\n\n${event.content}`;
                   setStreamingContent(accumulatedContent);
+                  // Surface as a failed message so the retry banner appears.
+                  // Without this, the user sees an error string buried in the
+                  // chat bubble with no way to retry.
+                  setFailedMessage(messageContent);
                   break;
                 case 'done':
+                  gotDoneEvent = true;
                   setProgressSteps(prev => prev.map(s => ({ ...s, completed: true })));
                   if (accumulatedContent) {
                     const materials = extractMaterialsData(accumulatedContent);
@@ -348,6 +354,20 @@ export function useChat(options: UseChatOptions = {}) {
             }
           }
         }
+      }
+
+      // Stream closed without a 'done' event — partial response. Surface
+      // what we got so the user isn't left staring at a stuck spinner,
+      // and trigger the retry banner so they can try again.
+      // (Repro: HVAC chat from 2026-04-28 sweep returning only the
+      // tool-call narration "Let me pull up the codes..." with no body.)
+      if (!gotDoneEvent) {
+        if (accumulatedContent) {
+          setMessages(prev => [...prev, { role: 'assistant', content: accumulatedContent }]);
+        }
+        setStreamingContent('');
+        setIsStreaming(false);
+        setFailedMessage(messageContent);
       }
     } catch (error) {
       console.error('Error:', error);
