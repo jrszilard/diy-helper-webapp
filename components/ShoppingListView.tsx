@@ -69,17 +69,9 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
   itemsRef.current = items;
   const syncedPriceItemsRef = useRef<Set<string>>(new Set());
 
-  useEffect(() => {
-    if (project) {
-      loadItems();
-      storeSearch.clearResults();
-      syncedPriceItemsRef.current = new Set();
-    }
-  }, [project]);
-
   const isGuestProject = project?.isGuest === true;
 
-  const loadItems = async () => {
+  const loadItems = useCallback(async () => {
     if (!project) return;
     if (isGuestProject) {
       const guestProject = guestStorage.getProject(project.id);
@@ -101,7 +93,17 @@ export default function ShoppingListView({ project, isMobile = false }: Shopping
       }
       if (data) setItems(data);
     }
-  };
+  }, [project, isGuestProject]);
+
+  useEffect(() => {
+    if (project) {
+      loadItems();
+      storeSearch.clearResults();
+      syncedPriceItemsRef.current = new Set();
+    }
+    // storeSearch intentionally omitted — recreated each render, would cause infinite refetch
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project, loadItems]);
 
   const toggleItem = (itemId: string) => {
     const newSelected = new Set(selectedItems);

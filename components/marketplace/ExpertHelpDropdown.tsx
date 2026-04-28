@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { ChevronDown, MessageSquare, Video, Briefcase } from 'lucide-react';
 
 interface ExpertHelpDropdownProps {
@@ -95,7 +96,7 @@ export default function ExpertHelpDropdown({
                     <div>
                       <p className="text-sm font-medium text-foreground">{label}</p>
                       <p className="text-xs text-[var(--forest-green)] font-medium mt-0.5">First question free with a new account</p>
-                      <a
+                      <Link
                         href="/"
                         onClick={() => {
                           localStorage.setItem('expert-callout-referral', 'true');
@@ -105,7 +106,7 @@ export default function ExpertHelpDropdown({
                       >
                         Sign up to ask
                         <span aria-hidden="true">&rarr;</span>
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>

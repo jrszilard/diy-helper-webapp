@@ -23,7 +23,7 @@ export default function VideoResults({ videos, projectQuery }: VideoResultsProps
     return (
       <div className="bg-[var(--warning)]/15 border border-[var(--warning)]/30 rounded-lg p-4 my-4">
         <p className="text-[var(--warning-light)]">
-          No videos found for "{projectQuery}". Try searching with different keywords.
+          No videos found for &ldquo;{projectQuery}&rdquo;. Try searching with different keywords.
         </p>
       </div>
     );

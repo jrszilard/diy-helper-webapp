@@ -24,6 +24,7 @@ export default function SharePage() {
     try {
       const hash = window.location.hash.slice(1);
       if (!hash) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- reading window.location requires effect (browser-only)
         setError('No shared data found. The link may be invalid or expired.');
         return;
       }

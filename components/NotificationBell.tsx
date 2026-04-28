@@ -17,6 +17,7 @@ export default function NotificationBell({ userId, placement = 'bottom' }: Notif
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const [now] = useState(() => Date.now());
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -39,7 +40,7 @@ export default function NotificationBell({ userId, placement = 'bottom' }: Notif
   };
 
   const formatTimeAgo = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime();
+    const diff = now - new Date(dateStr).getTime();
     const minutes = Math.floor(diff / 60000);
     if (minutes < 1) return 'just now';
     if (minutes < 60) return `${minutes}m ago`;

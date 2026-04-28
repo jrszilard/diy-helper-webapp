@@ -36,6 +36,7 @@ export default function Modal({
   const [mounted, setMounted] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR-portal mount flag, value is constant after mount
   useEffect(() => { setMounted(true); }, []);
 
   // Auto-focus only when the modal opens — must not depend on onClose

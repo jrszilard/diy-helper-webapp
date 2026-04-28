@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Clock, DollarSign, Image, Target, Gavel } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -28,8 +29,9 @@ interface QAQuestionCardProps {
 }
 
 export default function QAQuestionCard({ question, onClaim, onBid, showClaim = false }: QAQuestionCardProps) {
+  const [now] = useState(() => Date.now());
   const formatTimeAgo = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime();
+    const diff = now - new Date(dateStr).getTime();
     const minutes = Math.floor(diff / 60000);
     if (minutes < 1) return 'just now';
     if (minutes < 60) return `${minutes}m ago`;
@@ -52,7 +54,7 @@ export default function QAQuestionCard({ question, onClaim, onBid, showClaim = f
   const estMinutes = (question.difficultyScore ?? 3) <= 3 ? '~5 min' : (question.difficultyScore ?? 5) <= 6 ? '~10 min' : '~15 min';
 
   const bidTimeLeft = isBidding && question.bidDeadline
-    ? Math.max(0, new Date(question.bidDeadline).getTime() - Date.now())
+    ? Math.max(0, new Date(question.bidDeadline).getTime() - now)
     : 0;
   const bidHoursLeft = Math.floor(bidTimeLeft / (60 * 60 * 1000));
   const bidMinsLeft = Math.floor((bidTimeLeft % (60 * 60 * 1000)) / (60 * 1000));

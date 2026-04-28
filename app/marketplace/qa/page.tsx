@@ -29,6 +29,7 @@ function QAPageContent() {
       const draft = sessionStorage.getItem('diy-expert-question-draft');
       if (draft) {
         const parsed = JSON.parse(draft);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- reading from sessionStorage is browser-only, must be in effect
         if (parsed.question) setInitialQuestion(parsed.question);
         if (parsed.trade) setInitialCategory(parsed.trade);
         sessionStorage.removeItem('diy-expert-question-draft');

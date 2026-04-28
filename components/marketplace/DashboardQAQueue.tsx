@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { MessageSquare, Clock, ArrowRight } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
 import Badge from '@/components/ui/Badge';
@@ -19,8 +20,9 @@ interface DashboardQAQueueProps {
 }
 
 export default function DashboardQAQueue({ questions }: DashboardQAQueueProps) {
+  const [now] = useState(() => Date.now());
   const formatTimeAgo = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime();
+    const diff = now - new Date(dateStr).getTime();
     const minutes = Math.floor(diff / 60000);
     if (minutes < 1) return 'just now';
     if (minutes < 60) return `${minutes}m ago`;

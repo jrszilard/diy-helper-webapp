@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Camera, X } from 'lucide-react';
 import IconButton from './IconButton';
 import Alert from './Alert';
@@ -30,20 +30,19 @@ export default function FileUpload({
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const previewUrls = useRef<Map<File, string>>(new Map());
+
+  // Object URLs derived from files. Regenerated when `files` changes; cleanup effect
+  // revokes URLs from the previous render to avoid leaks.
+  const previewUrls = useMemo(
+    () => files.map((file) => URL.createObjectURL(file)),
+    [files]
+  );
 
   useEffect(() => {
     return () => {
-      previewUrls.current.forEach((url) => URL.revokeObjectURL(url));
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, []);
-
-  const getPreviewUrl = (file: File) => {
-    if (!previewUrls.current.has(file)) {
-      previewUrls.current.set(file, URL.createObjectURL(file));
-    }
-    return previewUrls.current.get(file)!;
-  };
+  }, [previewUrls]);
 
   const addFiles = useCallback(
     (newFiles: FileList | File[]) => {
@@ -71,12 +70,6 @@ export default function FileUpload({
 
   const removeFile = useCallback(
     (index: number) => {
-      const file = files[index];
-      const url = previewUrls.current.get(file);
-      if (url) {
-        URL.revokeObjectURL(url);
-        previewUrls.current.delete(file);
-      }
       onChange(files.filter((_, i) => i !== index));
     },
     [files, onChange]
@@ -153,7 +146,7 @@ export default function FileUpload({
               className="relative w-20 h-20 rounded-lg border border-white/10 overflow-hidden"
             >
               <img
-                src={getPreviewUrl(file)}
+                src={previewUrls[i]}
                 alt={file.name}
                 className="w-full h-full object-cover"
               />

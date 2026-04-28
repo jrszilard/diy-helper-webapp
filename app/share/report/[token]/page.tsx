@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import ReportView from '@/components/ReportView';
 import type { ProjectReportRecord } from '@/lib/agents/types';
 
@@ -53,12 +54,12 @@ export default function SharedReportPage() {
           <p className="text-sm text-white/60 mb-6">
             {error || 'This shared report link may have expired or been disabled.'}
           </p>
-          <a
+          <Link
             href="/"
             className="inline-block px-5 py-2.5 bg-rust text-white font-semibold rounded-lg hover:bg-copper transition-colors"
           >
             Create Your Own Project Plan
-          </a>
+          </Link>
         </div>
       </div>
     );

@@ -15,6 +15,7 @@ export default function ExpertBar({ user }: { user: { id: string } | null }) {
     if (stored) {
       const dismissedAt = parseInt(stored, 10);
       const daysSince = (Date.now() - dismissedAt) / (1000 * 60 * 60 * 24);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage is browser-only, must read in effect
       setDismissed(daysSince < DISMISS_DAYS);
     } else {
       setDismissed(false);
