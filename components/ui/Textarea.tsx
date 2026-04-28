@@ -6,7 +6,6 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   error?: string;
   fullWidth?: boolean;
   resize?: 'none' | 'vertical' | 'horizontal' | 'both';
-  variant?: 'dark' | 'light';
 }
 
 const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
@@ -16,7 +15,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
   resize = 'vertical',
   className,
   id,
-  variant: _variant,
   ...props
 }, ref) => {
   const resizeClass = {

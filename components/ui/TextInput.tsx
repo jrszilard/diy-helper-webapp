@@ -10,7 +10,6 @@ interface TextInputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   fullWidth?: boolean;
   inputSize?: 'sm' | 'md' | 'lg';
-  variant?: 'dark' | 'light';
 }
 
 const sizeClasses = {
@@ -30,7 +29,6 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({
   inputSize = 'md',
   className,
   id,
-  variant: _variant,
   ...props
 }, ref) => {
   const paddingLeft = LeftIcon ? 'pl-9' : 'pl-3';

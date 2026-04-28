@@ -17,6 +17,7 @@ export default function GuestExpertCallout({ messageCount, onRequestAuth }: Gues
 
   useEffect(() => {
     const stored = localStorage.getItem(DISMISS_KEY);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage is browser-only, must read in effect
     setDismissed(!!stored);
   }, []);
 

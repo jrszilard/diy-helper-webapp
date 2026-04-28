@@ -182,6 +182,7 @@ export default function QADetailPage() {
   // Fetch expert info when question loads with an expert
   useEffect(() => {
     if (question?.expertId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- standard data-fetch pattern
       fetchExpertInfo(question.expertId);
     }
   }, [question?.expertId, fetchExpertInfo]);
@@ -189,6 +190,7 @@ export default function QADetailPage() {
   // Fetch bids when question is in bidding mode
   useEffect(() => {
     if (question?.pricingMode === 'bidding') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- standard data-fetch pattern
       fetchBids();
     }
   }, [question?.pricingMode, fetchBids]);
@@ -196,6 +198,7 @@ export default function QADetailPage() {
   // Sync second opinion ID from API response
   useEffect(() => {
     if (question && (question as unknown as { secondOpinionId?: string }).secondOpinionId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing initial value from server-loaded question
       setSecondOpinionId((question as unknown as { secondOpinionId?: string }).secondOpinionId!);
     }
   }, [question]);

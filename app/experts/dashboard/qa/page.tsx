@@ -262,7 +262,6 @@ export default function ExpertQAQueuePage() {
               onChange={(e) => setBidPriceDollars(e.target.value)}
               placeholder="45"
               fullWidth
-              variant="dark"
             />
             {bidPriceDollars && (
               <p className="text-xs text-white/50 -mt-2">
@@ -280,7 +279,6 @@ export default function ExpertQAQueuePage() {
               placeholder="I've worked on similar projects for 15 years and can help you..."
               resize="none"
               fullWidth
-              variant="dark"
             />
 
             {/* Estimated time */}
@@ -293,7 +291,6 @@ export default function ExpertQAQueuePage() {
               onChange={(e) => setBidEstMinutes(e.target.value)}
               placeholder="15"
               fullWidth
-              variant="dark"
             />
 
             {/* Relevant experience */}
@@ -305,7 +302,6 @@ export default function ExpertQAQueuePage() {
               placeholder="Licensed electrician with 20 years of residential experience..."
               resize="none"
               fullWidth
-              variant="dark"
             />
 
             {bidError && (

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import NextLink from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import {
   FileText, Printer, FolderPlus, ArrowLeft, ExternalLink,
@@ -288,13 +289,13 @@ export default function ReportView({
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <a
+              <NextLink
                 href="/"
                 className="flex items-center gap-2 px-4 py-2 bg-rust text-white text-sm font-semibold rounded-lg hover:bg-copper transition-colors whitespace-nowrap"
               >
                 <LogIn size={16} />
                 Sign In
-              </a>
+              </NextLink>
               <button
                 onClick={() => setShowLoginPrompt(false)}
                 className="p-1.5 text-white/60 hover:bg-[#E8E0D4] rounded-lg transition-colors"
@@ -323,13 +324,13 @@ export default function ReportView({
               />
             )}
             {isSharedView ? (
-              <a
+              <NextLink
                 href="/"
                 className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white bg-rust hover:bg-copper transition-colors shadow-md"
               >
                 <FolderPlus size={18} />
                 Create Your Own Project Plan
-              </a>
+              </NextLink>
             ) : appliedProjectId ? (
               <div className="flex items-center gap-2 text-sm text-forest-green font-medium">
                 <CheckCircle2 size={18} />

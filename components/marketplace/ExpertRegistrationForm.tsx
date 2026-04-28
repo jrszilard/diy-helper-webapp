@@ -169,7 +169,6 @@ export default function ExpertRegistrationForm() {
             onChange={e => setDisplayName(e.target.value)}
             fullWidth
             placeholder="Your professional name"
-            variant="dark"
           />
           <div className="grid grid-cols-2 gap-4">
             <TextInput
@@ -178,7 +177,6 @@ export default function ExpertRegistrationForm() {
               value={city}
               onChange={e => setCity(e.target.value)}
               fullWidth
-              variant="dark"
             />
             <TextInput
               label="State *"
@@ -188,7 +186,6 @@ export default function ExpertRegistrationForm() {
               fullWidth
               maxLength={2}
               placeholder="CA"
-              variant="dark"
             />
           </div>
           <TextInput
@@ -198,7 +195,6 @@ export default function ExpertRegistrationForm() {
             onChange={e => setZipCode(e.target.value)}
             fullWidth
             maxLength={5}
-            variant="dark"
           />
           <Textarea
             label="Bio"
@@ -208,7 +204,6 @@ export default function ExpertRegistrationForm() {
             fullWidth
             resize="none"
             placeholder="Tell homeowners about your experience..."
-            variant="dark"
           />
         </div>
       )}
@@ -244,7 +239,6 @@ export default function ExpertRegistrationForm() {
                         onChange={e => setSpecialtyYears(value, parseInt(e.target.value) || 1)}
                         className="w-14 text-xs"
                         inputSize="sm"
-                        variant="dark"
                       />
                     </div>
                   )}
@@ -269,7 +263,6 @@ export default function ExpertRegistrationForm() {
             onChange={e => setHourlyRate(e.target.value)}
             fullWidth
             placeholder="75.00"
-            variant="dark"
           />
           <div>
             <TextInput
@@ -281,7 +274,6 @@ export default function ExpertRegistrationForm() {
               onChange={e => setQaRate(e.target.value)}
               fullWidth
               placeholder="10.00"
-              variant="dark"
             />
             <p className="text-xs text-white/40 mt-1">Rate for answering Q&A questions from homeowners.</p>
           </div>

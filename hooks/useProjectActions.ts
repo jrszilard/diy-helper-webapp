@@ -14,16 +14,6 @@ export function useProjectActions({ userId }: UseProjectActionsOptions = {}) {
   const [guestProjects, setGuestProjects] = useState<GuestProject[]>([]);
   const [isGuestMode, setIsGuestMode] = useState(false);
 
-  useEffect(() => {
-    if (userId) {
-      loadProjects();
-      setIsGuestMode(false);
-    } else {
-      setGuestProjects(guestStorage.getProjects());
-      setIsGuestMode(true);
-    }
-  }, [userId]);
-
   const loadProjects = useCallback(async () => {
     try {
       let currentUserId = userId;
@@ -44,6 +34,17 @@ export function useProjectActions({ userId }: UseProjectActionsOptions = {}) {
       console.error('Error loading projects:', error);
     }
   }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- standard data-fetch pattern
+      loadProjects();
+      setIsGuestMode(false);
+    } else {
+      setGuestProjects(guestStorage.getProjects());
+      setIsGuestMode(true);
+    }
+  }, [userId, loadProjects]);
 
   const refreshGuestProjects = useCallback(() => {
     setGuestProjects(guestStorage.getProjects());

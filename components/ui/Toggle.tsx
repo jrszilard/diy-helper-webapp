@@ -7,10 +7,9 @@ interface ToggleProps {
   description?: string;
   disabled?: boolean;
   id?: string;
-  variant?: 'dark' | 'light';
 }
 
-export default function Toggle({ checked, onChange, label, description, disabled, id, variant: _variant }: ToggleProps) {
+export default function Toggle({ checked, onChange, label, description, disabled, id }: ToggleProps) {
   return (
     <div className="flex items-center justify-between gap-4">
       {(label || description) && (

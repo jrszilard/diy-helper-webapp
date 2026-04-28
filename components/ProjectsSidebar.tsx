@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { guestStorage } from '@/lib/guestStorage';
 import { cn } from '@/lib/utils';
@@ -90,21 +90,16 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
 
-  useEffect(() => {
-    if (user) loadProjects();
-    else loadGuestProjects();
-  }, [user, refreshTrigger]);
-
-  const loadGuestProjects = () => {
+  const loadGuestProjects = useCallback(() => {
     const guestProjects = guestStorage.getProjects();
     setProjects(guestProjects.map(p => ({
       id: p.id, name: p.name, description: p.description,
       created_at: p.createdAt, category: categorizeProject(p.name),
       status: 'research', isGuest: true, materials: p.materials
     })));
-  };
+  }, []);
 
-  const loadProjects = async () => {
+  const loadProjects = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase
       .from('projects').select('*')
@@ -117,7 +112,13 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
         status: project.status || 'research'
       })));
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- standard data-fetch pattern
+    if (user) loadProjects();
+    else loadGuestProjects();
+  }, [user, refreshTrigger, loadProjects, loadGuestProjects]);
 
   const deleteProject = async (id: string, e: React.MouseEvent, isGuest: boolean = false) => {
     e.stopPropagation();

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks -- `use` here is Playwright's fixture API, not React's hook */
 import { test as base, Page } from '@playwright/test';
 import { buildSSEBody, sseHeaders } from './sse-helpers';
 import { SIMPLE_CHAT_EVENTS, STORE_SEARCH_RESPONSE, EXTRACT_MATERIALS_RESPONSE } from './mock-data';

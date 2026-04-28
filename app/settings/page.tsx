@@ -57,6 +57,7 @@ function SettingsContent() {
 
   useEffect(() => {
     if (sessionId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- side-effect on URL param; toast is one-shot UI
       setToast({ type: 'success', message: 'Subscription activated! Welcome to Pro.' });
       // Clean the URL without triggering a re-render
       window.history.replaceState({}, '', '/settings');

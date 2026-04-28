@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Lightbulb } from 'lucide-react';
 
 interface ContextualHintProps {
@@ -16,21 +16,23 @@ export default function ContextualHint({ hintKey, children, dismissWhen }: Conte
   const storageKey = `hint_seen_${hintKey}`;
   const [visible, setVisible] = useState(false);
 
+  const dismiss = useCallback(() => {
+    setVisible(false);
+    localStorage.setItem(storageKey, 'true');
+  }, [storageKey]);
+
   useEffect(() => {
     const seen = localStorage.getItem(storageKey);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage is browser-only, must read in effect
     if (!seen) setVisible(true);
   }, [storageKey]);
 
   useEffect(() => {
     if (dismissWhen && visible) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- auto-dismiss when prop becomes truthy
       dismiss();
     }
-  }, [dismissWhen]);
-
-  const dismiss = () => {
-    setVisible(false);
-    localStorage.setItem(storageKey, 'true');
-  };
+  }, [dismissWhen, visible, dismiss]);
 
   if (!visible) return null;
 

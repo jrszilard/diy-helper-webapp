@@ -31,6 +31,16 @@ export default function LandingPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [materialsCount, setMaterialsCount] = useState(0);
 
+  const fetchConversations = useCallback(async (userId: string) => {
+    const { data } = await supabase
+      .from('conversations')
+      .select('id, title, updated_at')
+      .eq('user_id', userId)
+      .order('updated_at', { ascending: false })
+      .limit(6);
+    setConversations(data ?? []);
+  }, []);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       const u = session?.user ? { id: session.user.id } : null;
@@ -46,17 +56,7 @@ export default function LandingPage() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
-
-  const fetchConversations = async (userId: string) => {
-    const { data } = await supabase
-      .from('conversations')
-      .select('id, title, updated_at')
-      .eq('user_id', userId)
-      .order('updated_at', { ascending: false })
-      .limit(6);
-    setConversations(data ?? []);
-  };
+  }, [fetchConversations]);
 
   const openConversation = (id: string) => {
     setActiveChatConversationId(id);

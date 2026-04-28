@@ -40,12 +40,13 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
   const [aiCorrectionDone, setAiCorrectionDone] = useState(false);
   const [correctionText, setCorrectionText] = useState('');
   const [correctionSubmitting, setCorrectionSubmitting] = useState(false);
+  const [now] = useState(() => Date.now());
 
   const isClaimed = question.status === 'claimed';
   const isAnswered = question.status === 'answered';
 
   const formatTimeAgo = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime();
+    const diff = now - new Date(dateStr).getTime();
     const minutes = Math.floor(diff / 60000);
     if (minutes < 1) return 'just now';
     if (minutes < 60) return `${minutes}m ago`;
@@ -57,7 +58,7 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
 
   const getTimeRemaining = () => {
     if (!question.claimExpiresAt) return null;
-    const remaining = new Date(question.claimExpiresAt).getTime() - Date.now();
+    const remaining = new Date(question.claimExpiresAt).getTime() - now;
     if (remaining <= 0) return 'Expired';
     const minutes = Math.floor(remaining / 60000);
     if (minutes < 60) return `${minutes}m left`;
@@ -239,7 +240,6 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
                 maxLength={2000}
                 resize="none"
                 fullWidth
-                variant="dark"
               />
               <div className="flex items-center justify-between mt-1">
                 <p className="text-xs text-white/30">{answerText.length}/2000</p>
