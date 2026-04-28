@@ -6,7 +6,7 @@ test.describe('Chat Messaging', () => {
   test('shows hero state with input on landing', async ({ chatPage }) => {
     const chat = new ChatPage(chatPage);
     await expect(chat.chatInput).toBeVisible();
-    await expect(chatPage.locator('h1')).toContainText('Plan it');
+    await expect(chatPage.locator('button', { hasText: 'Ask Anything' })).toBeVisible();
   });
 
   test('send message shows user message and streaming response', async ({ chatPage }) => {

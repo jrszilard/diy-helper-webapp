@@ -16,8 +16,7 @@ test.describe('Landing Page', () => {
     await page.goto('/');
   });
 
-  test('renders hero section with headline and tabs', async ({ page }) => {
-    await expect(page.locator('h1')).toContainText('Plan it. Price it. Ask a pro. Build it right.');
+  test('renders hero section with tabs', async ({ page }) => {
     // Two tabs should be visible
     await expect(page.locator('button', { hasText: 'Ask Anything' })).toBeVisible();
     await expect(page.locator('button', { hasText: 'Talk to a Pro' })).toBeVisible();
@@ -34,27 +33,27 @@ test.describe('Landing Page', () => {
     const chip = page.locator('button', { hasText: 'bathroom remodel' });
     await chip.click();
 
-    // Hero headline should disappear
-    await expect(page.locator('h1')).not.toBeVisible();
     // User message should appear
     await expect(page.locator('text=Price out a bathroom remodel')).toBeVisible();
+    // Suggestion chips should disappear once chat is active
+    await expect(chip).not.toBeVisible();
   });
 
   test('typing and sending morphs to chat', async ({ page }) => {
-    const textarea = page.locator('textarea');
+    const textarea = page.getByPlaceholder(/Describe your project or ask a question/);
     await textarea.fill('How do I install a ceiling fan?');
     await textarea.press('Enter');
 
     // User message should appear in chat
     await expect(page.locator('text=How do I install a ceiling fan?')).toBeVisible();
-    // Hero headline should disappear
-    await expect(page.locator('h1')).not.toBeVisible();
+    // Suggestion chips should disappear once chat is active
+    await expect(page.locator('button', { hasText: 'bathroom remodel' })).not.toBeVisible();
   });
 
   test('tab switching shows expert form', async ({ page }) => {
     await page.locator('button', { hasText: 'Talk to a Pro' }).click();
-    // Expert form should appear (QASubmitForm has a textarea for the question)
-    await expect(page.locator('textarea').first()).toBeVisible();
+    // Expert form's question textarea should appear (QASubmitForm)
+    await expect(page.getByPlaceholder(/Describe your question in detail/)).toBeVisible();
   });
 
   test('/chat redirects to /', async ({ page }) => {

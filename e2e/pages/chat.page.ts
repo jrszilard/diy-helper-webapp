@@ -3,6 +3,10 @@ import { Page, Locator, expect } from '@playwright/test';
 /**
  * Page object for the unified landing page chat experience.
  * Chat now lives on / instead of /chat.
+ *
+ * Two textareas exist on /: the chat one (this page object) and the
+ * expert-form one (hidden until "Talk to a Pro" tab is selected).
+ * Use the placeholder to disambiguate.
  */
 export class ChatPage {
   readonly page: Page;
@@ -12,7 +16,7 @@ export class ChatPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.chatInput = page.locator('textarea');
+    this.chatInput = page.getByPlaceholder(/Describe your project or ask a question|Ask a follow-up/);
     this.sendButton = page.locator('button[aria-label="Send message"]');
     this.messagesArea = page.locator('.overflow-y-auto');
   }
