@@ -218,7 +218,6 @@ export default function ExpertProfilePage() {
     return (
       <EmptyState
         description="Unable to load profile."
-        variant="dark"
         className="py-20"
       />
     );
@@ -269,7 +268,6 @@ export default function ExpertProfilePage() {
           onChange={(e) => setDisplayName(e.target.value)}
           fullWidth
           maxLength={100}
-          variant="dark"
         />
 
         {/* Bio */}
@@ -283,7 +281,6 @@ export default function ExpertProfilePage() {
             placeholder="Tell DIYers about your experience..."
             resize="none"
             fullWidth
-            variant="dark"
           />
           <p className="text-xs text-white/30 mt-1">{bio.length}/500</p>
         </div>
@@ -298,7 +295,6 @@ export default function ExpertProfilePage() {
             onChange={(e) => setCity(e.target.value)}
             fullWidth
             maxLength={100}
-            variant="dark"
           />
           <Select
             id="profile-state"
@@ -306,7 +302,6 @@ export default function ExpertProfilePage() {
             value={state}
             onChange={(e) => setState(e.target.value)}
             fullWidth
-            variant="dark"
           >
             <option value="">Select...</option>
             {US_STATES.map(s => (
@@ -324,7 +319,6 @@ export default function ExpertProfilePage() {
             onChange={(e) => setZipCode(e.target.value)}
             fullWidth
             maxLength={10}
-            variant="dark"
           />
           <TextInput
             id="profile-radius"
@@ -335,7 +329,6 @@ export default function ExpertProfilePage() {
             min={1}
             max={500}
             fullWidth
-            variant="dark"
           />
         </div>
 
@@ -351,7 +344,6 @@ export default function ExpertProfilePage() {
             min="0"
             placeholder="75.00"
             fullWidth
-            variant="dark"
           />
           <TextInput
             id="profile-qa-rate"
@@ -363,7 +355,6 @@ export default function ExpertProfilePage() {
             min="0"
             placeholder="10.00"
             fullWidth
-            variant="dark"
           />
         </div>
 
@@ -383,7 +374,6 @@ export default function ExpertProfilePage() {
               placeholder="e.g., Master Electrician"
               fullWidth
               maxLength={100}
-              variant="dark"
             />
             <TextInput
               id="profile-license-number"
@@ -394,7 +384,6 @@ export default function ExpertProfilePage() {
               placeholder="e.g., EL-12345"
               fullWidth
               maxLength={50}
-              variant="dark"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -404,7 +393,6 @@ export default function ExpertProfilePage() {
               value={licenseState}
               onChange={(e) => setLicenseState(e.target.value)}
               fullWidth
-              variant="dark"
             >
               <option value="">Select...</option>
               {US_STATES.map(s => (
@@ -417,7 +405,6 @@ export default function ExpertProfilePage() {
               value={insuranceStatus}
               onChange={(e) => setInsuranceStatus(e.target.value)}
               fullWidth
-              variant="dark"
             >
               <option value="">Not specified</option>
               <option value="insured">Insured</option>
@@ -433,7 +420,6 @@ export default function ExpertProfilePage() {
           description="Toggle off to pause receiving new questions"
           checked={isAvailable}
           onChange={setIsAvailable}
-          variant="dark"
         />
 
         {/* Specialties */}
@@ -446,7 +432,6 @@ export default function ExpertProfilePage() {
                   value={spec.specialty}
                   onChange={(e) => updateSpecialty(index, 'specialty', e.target.value)}
                   className="flex-1"
-                  variant="dark"
                 >
                   {SPECIALTIES.map(s => (
                     <option key={s} value={s}>{SPECIALTY_LABELS[s]}</option>
@@ -460,7 +445,6 @@ export default function ExpertProfilePage() {
                   min={0}
                   max={60}
                   className="w-16 text-center"
-                  variant="dark"
                 />
                 <Button
                   type="button"

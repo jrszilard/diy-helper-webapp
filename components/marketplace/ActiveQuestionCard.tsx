@@ -240,7 +240,6 @@ export default function ActiveQuestionCard({ question, onAnswer }: ActiveQuestio
                 maxLength={2000}
                 resize="none"
                 fullWidth
-                variant="dark"
               />
               <div className="flex items-center justify-between mt-1">
                 <p className="text-xs text-white/30">{answerText.length}/2000</p>

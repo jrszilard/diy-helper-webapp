@@ -9,7 +9,6 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   error?: string;
   fullWidth?: boolean;
   inputSize?: 'sm' | 'md' | 'lg';
-  variant?: 'dark' | 'light';
 }
 
 const sizeClasses = {
@@ -28,7 +27,6 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(({
   className,
   id,
   children,
-  variant: _variant,
   ...props
 }, ref) => {
   const paddingLeft = LeftIcon ? 'pl-9' : 'pl-3';

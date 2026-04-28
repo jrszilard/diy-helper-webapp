@@ -46,7 +46,6 @@ export default function MessageList({ threads, basePath }: MessageListProps) {
         size="sm"
         description="No messages yet"
         subtext="Your conversations will appear here"
-        variant="dark"
         className="py-12"
       />
     );
