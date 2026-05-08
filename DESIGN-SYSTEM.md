@@ -1,4 +1,4 @@
-# DIY Helper Design System Reference
+# Fixerator Design System Reference
 
 Reference for all UI work. Follow these tokens, patterns, and components to maintain consistency.
 

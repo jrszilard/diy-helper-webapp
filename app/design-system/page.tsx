@@ -94,7 +94,7 @@ export default function DesignSystemPage() {
 
         <div className="mb-10">
           <h1 className="text-3xl font-bold text-foreground">Design System</h1>
-          <p className="text-earth-brown mt-1">DIY Helper component library</p>
+          <p className="text-earth-brown mt-1">Fixerator component library</p>
         </div>
 
         {/* ── Colors ─────────────────────────────────────────────────────── */}

@@ -184,7 +184,7 @@ export async function POST(req: NextRequest) {
         price_data: {
           currency: 'usd',
           product_data: {
-            name: `DIY Helper Expert ${tierConfig.label}`,
+            name: `Fixerator Expert ${tierConfig.label}`,
             description: tierConfig.features.join(' | '),
           },
           unit_amount: tierConfig.priceCents,

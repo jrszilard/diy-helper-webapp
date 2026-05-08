@@ -1,4 +1,4 @@
-# DIY Helper - Application Features
+# Fixerator - Application Features
 
 > Last updated: 2026-03-11 | 36 features
 

@@ -81,11 +81,11 @@ export async function GET(
   <rect width="280" height="90" rx="8" fill="url(#bg)" stroke="#D4C8B8" stroke-width="1"/>
   <!-- Logo area -->
   <rect x="8" y="8" width="36" height="36" rx="6" fill="#5D7B93"/>
-  <text x="26" y="32" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle">DH</text>
+  <text x="26" y="32" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle">FX</text>
   <!-- Expert name -->
   <text x="52" y="22" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#3E2723">${escapeXml(truncate(name, 24))}</text>
   <!-- Verified badge -->
-  ${verified ? '<text x="52" y="35" font-family="Arial,sans-serif" font-size="9" fill="#5D7B93">Verified Expert</text>' : '<text x="52" y="35" font-family="Arial,sans-serif" font-size="9" fill="#7D6B5D">Expert on DIY Helper</text>'}
+  ${verified ? '<text x="52" y="35" font-family="Arial,sans-serif" font-size="9" fill="#5D7B93">Verified Expert</text>' : '<text x="52" y="35" font-family="Arial,sans-serif" font-size="9" fill="#7D6B5D">Expert on Fixerator</text>'}
   <!-- Stars -->
   ${starsXml}
   <text x="202" y="53" font-family="Arial,sans-serif" font-size="9" fill="#7D6B5D">${rating} (${reviews})</text>
@@ -95,7 +95,7 @@ export async function GET(
   <rect x="195" y="10" width="${lc.label.length * 7 + 16}" height="18" rx="9" fill="${lc.bg}" opacity="0.15"/>
   <text x="${195 + (lc.label.length * 7 + 16) / 2}" y="22" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="${lc.text}" text-anchor="middle">${lc.label}</text>
   <!-- Powered by -->
-  <text x="268" y="80" font-family="Arial,sans-serif" font-size="7" fill="#B0A696" text-anchor="end">Crafted by DIY Helper</text>
+  <text x="268" y="80" font-family="Arial,sans-serif" font-size="7" fill="#B0A696" text-anchor="end">Crafted by Fixerator</text>
 </svg>`;
 
   return new Response(svg, {
