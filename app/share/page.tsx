@@ -67,7 +67,7 @@ export default function SharePage() {
             className="inline-flex items-center gap-2 px-6 py-3 bg-rust text-white rounded-lg hover:bg-copper transition"
           >
             <ArrowLeft className="w-4 h-4" />
-            Go to DIY Helper
+            Go to Fixerator
           </Link>
         </div>
       </div>
@@ -142,7 +142,7 @@ export default function SharePage() {
 
           {/* Footer */}
           <div className="bg-white/6 p-4 border-t border-earth-tan flex items-center justify-between">
-            <span className="text-xs text-white/40">Shared via DIY Helper</span>
+            <span className="text-xs text-white/40">Shared via Fixerator</span>
             <Link
               href="/"
               className="inline-flex items-center gap-1 text-sm text-rust hover:text-copper font-medium"

@@ -6,6 +6,7 @@ export { default as Button, buttonVariants } from './Button';
 export { default as Card } from './Card';
 export { default as Divider } from './Divider';
 export { default as EmptyState } from './EmptyState';
+export { default as FixSays } from './FixSays';
 export { default as IconButton } from './IconButton';
 export { default as Modal } from './Modal';
 export { default as NavLink } from './NavLink';

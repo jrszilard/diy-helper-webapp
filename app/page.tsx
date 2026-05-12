@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import LandingHero from '@/components/LandingHero';
 import AppHeader from '@/components/AppHeader';
-import Button from '@/components/ui/Button';
+import FixBot from '@/components/FixBot';
 import { MessageSquare } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -105,7 +105,44 @@ export default function LandingPage() {
         onBack={handleNewChat}
       />
 
-      <section className="pt-[var(--space-3xl)] pb-[var(--space-2xl)]">
+      {!chatActive && (
+        <section className="pt-[var(--space-2xl)] pb-[var(--space-l)]">
+          <div className="u-container">
+            <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center max-w-3xl mx-auto">
+              <div className="text-center md:text-left">
+                <p className="font-mono text-[11px] tracking-[0.18em] uppercase text-[var(--gold)] mb-3">
+                  AI-powered DIY assistant
+                </p>
+                <h1 className="text-4xl sm:text-5xl font-extrabold leading-[1.05] tracking-tight text-white">
+                  Hi, I&apos;m Fix.
+                  <br />
+                  I&apos;m here to{' '}
+                  <span className="text-[var(--rust)]">terminate</span> your project.
+                </h1>
+                <p className="mt-3 text-white/60 text-base sm:text-lg max-w-md mx-auto md:mx-0">
+                  Building codes, materials lists, store prices, project planning — locked and loaded.
+                </p>
+                <span className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-3 py-1.5 font-mono text-xs text-white/70">
+                  <span className="fix-thinking-dot" aria-hidden />
+                  I&apos;ll be back… with the receipts from Home Depot.
+                </span>
+              </div>
+              <div className="flex justify-center md:justify-end">
+                <FixBot
+                  size={180}
+                  theme="dark"
+                  withNailgun
+                  floating
+                  withShadow
+                  ariaLabel="Fix the FIX-3000, the Fixerator mascot"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className={chatActive ? 'pt-[var(--space-3xl)] pb-[var(--space-2xl)]' : 'pb-[var(--space-2xl)]'}>
         <div className="u-container">
           <LandingHero
             chatActive={chatActive}

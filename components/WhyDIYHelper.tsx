@@ -128,10 +128,10 @@ export default function WhyDIYHelper() {
           {/* Section Header */}
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Why DIY Helper?
+              Why Fixerator?
             </h2>
             <p className="text-lg text-warm-brown max-w-2xl mx-auto">
-              See how DIY Helper compares to other options for your home improvement projects
+              See how Fixerator compares to other options for your home improvement projects
             </p>
           </div>
 
@@ -200,7 +200,7 @@ export default function WhyDIYHelper() {
               </div>
             </div>
 
-            {/* DIY Helper */}
+            {/* Fixerator */}
             <div className="bg-gradient-to-br from-[#FDF8F3] to-[var(--status-progress-bg)] rounded-xl p-6 border-2 border-rust relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <span className="bg-rust text-white text-xs font-bold px-3 py-1 rounded-full">
@@ -211,7 +211,7 @@ export default function WhyDIYHelper() {
                 <div className="p-2 bg-[var(--status-progress-bg)] rounded-lg">
                   <Zap className="w-5 h-5 text-rust" />
                 </div>
-                <h3 className="font-bold text-foreground">DIY Helper</h3>
+                <h3 className="font-bold text-foreground">Fixerator</h3>
               </div>
               <p className="text-warm-brown text-sm mb-4 font-medium">{scenario.diyHelper.answer}</p>
               <div className="space-y-2">

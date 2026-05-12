@@ -56,6 +56,12 @@
   /* Accent (Expert/Award) */
   --gold: #D4A574;
 
+  /* Fixerator robot accents — keep on mascot + "thinking" pulse only */
+  --bot-eye:    #FF4438;
+  --bot-glow:   #FFB5AC;
+  --bot-chrome: #C9C2BA;
+  --bot-chrome-dark: #E2DDD6;
+
   /* Surface Hierarchy */
   --surface: #F8F7F7;
   --surface-raised: #FFFFFF;
@@ -115,6 +121,9 @@
   --color-warm-brown: var(--warm-brown);
   --color-muted: var(--muted);
   --color-gold: var(--gold);
+  --color-bot-eye: var(--bot-eye);
+  --color-bot-glow: var(--bot-glow);
+  --color-bot-chrome: var(--bot-chrome);
   --color-foreground: var(--foreground);
 
   --nav-surface: #FDFBF7;
@@ -390,4 +399,104 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--earth-brown);
+}
+
+/* ============ Fixerator / Fix the FIX-3000 mascot ============ */
+.fix-bot { display: block; }
+.fix-bot .head { fill: var(--bot-chrome); stroke: var(--earth-brown-dark); stroke-width: 2; }
+.fix-bot .visor { fill: var(--earth-brown-dark); }
+.fix-bot .eye { fill: var(--bot-eye); }
+.fix-bot .eye-glow { fill: var(--bot-glow); opacity: 0.55; }
+.fix-bot .ant-line { stroke: var(--earth-brown-dark); stroke-width: 2; stroke-linecap: round; }
+.fix-bot .ant-tip { fill: var(--bot-eye); }
+.fix-bot .mouth { fill: none; stroke: var(--earth-brown-dark); stroke-width: 1.6; stroke-linecap: round; }
+.fix-bot .bolt { fill: var(--earth-brown-dark); }
+
+.fix-bot.on-dark .head { fill: var(--bot-chrome-dark); stroke: rgba(255, 255, 255, 0.2); }
+.fix-bot.on-dark .visor { fill: var(--earth-night); }
+.fix-bot.on-dark .ant-line { stroke: rgba(255, 255, 255, 0.6); }
+.fix-bot.on-dark .mouth { stroke: var(--earth-night); }
+.fix-bot.on-dark .bolt { fill: var(--earth-night); }
+
+.fix-bot .arm { fill: var(--bot-chrome); stroke: var(--earth-brown-dark); stroke-width: 2; stroke-linejoin: round; }
+.fix-bot.on-dark .arm { fill: var(--bot-chrome-dark); stroke: rgba(255, 255, 255, 0.2); }
+.fix-bot .hand { fill: var(--earth-brown-dark); }
+.fix-bot.on-dark .hand { fill: var(--earth-night); }
+.fix-bot .gun-body { fill: var(--rust); stroke: var(--earth-night); stroke-width: 1.6; stroke-linejoin: round; }
+.fix-bot .gun-dark { fill: #2A2A30; stroke: var(--earth-night); stroke-width: 1.2; stroke-linejoin: round; }
+.fix-bot .mag-housing { fill: #1F1A16; stroke: var(--earth-night); stroke-width: 1.2; stroke-linejoin: round; }
+.fix-bot .nail-head { fill: #E4B16A; stroke: var(--earth-night); stroke-width: 0.5; }
+.fix-bot .nail-shaft { fill: var(--gold); stroke: var(--earth-night); stroke-width: 0.5; }
+.fix-bot .muzzle { fill: var(--bot-eye); opacity: 0; }
+
+.fix-bot.shooting .muzzle { animation: fix-muzzle-pop 0.4s ease-out infinite; }
+.fix-bot.shooting .nail-fly { animation: fix-nail-fly 0.4s linear infinite; }
+.fix-bot.shooting .gun-recoil { animation: fix-gun-recoil 0.4s ease-out infinite; }
+
+@keyframes fix-muzzle-pop {
+  0%, 25%, 100% { opacity: 0; transform: scale(0.4); transform-origin: center; }
+  5%            { opacity: 1; transform: scale(1.5); transform-origin: center; }
+  18%           { opacity: 0.5; transform: scale(0.9); transform-origin: center; }
+}
+@keyframes fix-nail-fly {
+  0%   { transform: translateX(0); opacity: 0; }
+  10%  { opacity: 1; }
+  75%  { opacity: 1; }
+  100% { transform: translateX(16px); opacity: 0; }
+}
+@keyframes fix-gun-recoil {
+  0%, 100% { transform: translateX(0); }
+  8%       { transform: translateX(-2px); }
+  25%      { transform: translateX(0); }
+}
+
+.fix-float       { animation: fix-float 3.6s ease-in-out infinite; }
+.fix-float-slow  { animation: fix-float 5s ease-in-out infinite; }
+.fix-float-tilt  { animation: fix-float-tilt 4.2s ease-in-out infinite; }
+@keyframes fix-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+@keyframes fix-float-tilt {
+  0%, 100% { transform: translateY(0)    rotate(-1.5deg); }
+  50%      { transform: translateY(-7px) rotate(1.5deg); }
+}
+
+.fix-float-stage { position: relative; display: inline-block; }
+.fix-float-stage::after {
+  content: '';
+  position: absolute; left: 50%; bottom: -10px;
+  transform: translateX(-50%);
+  width: 64%; height: 10px; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(26, 22, 18, 0.22), transparent 70%);
+  animation: fix-shadow-pulse 3.6s ease-in-out infinite;
+}
+@keyframes fix-shadow-pulse {
+  0%, 100% { transform: translateX(-50%) scale(1);    opacity: 0.55; }
+  50%      { transform: translateX(-50%) scale(0.78); opacity: 0.32; }
+}
+
+.fix-thinking-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--bot-eye);
+  box-shadow: 0 0 8px var(--bot-eye);
+  animation: fix-pulse 1.6s ease-in-out infinite;
+  display: inline-block;
+}
+@keyframes fix-pulse {
+  0%, 100% { opacity: 0.45; transform: scale(0.85); }
+  50%      { opacity: 1;    transform: scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fix-float,
+  .fix-float-slow,
+  .fix-float-tilt,
+  .fix-float-stage::after,
+  .fix-thinking-dot,
+  .fix-bot.shooting .muzzle,
+  .fix-bot.shooting .nail-fly,
+  .fix-bot.shooting .gun-recoil {
+    animation: none !important;
+  }
 }

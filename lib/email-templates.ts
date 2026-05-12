@@ -14,14 +14,14 @@ function wrapInLayout(content: string): string {
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;max-width:600px;width:100%;">
         <tr><td style="background-color:#1a1a2e;padding:20px 24px;">
-          <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:600;">DIY Helper</h1>
+          <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:0.02em;">FIXERATOR</h1>
         </td></tr>
         <tr><td style="padding:24px;">
           ${content}
         </td></tr>
         <tr><td style="padding:16px 24px;background-color:#f9fafb;border-top:1px solid #e5e7eb;">
           <p style="margin:0;color:#6b7280;font-size:12px;text-align:center;">
-            You received this email from DIY Helper. If you believe this was sent in error, please ignore it.
+            You received this email from Fixerator. If you believe this was sent in error, please ignore it.
           </p>
         </td></tr>
       </table>
@@ -87,7 +87,7 @@ export function qaAnswerAccepted(params: { title: string; link?: string }): Emai
 
 export function messageReceived(params: { title: string; body?: string; link?: string }): EmailContent {
   return {
-    subject: 'New message on DIY Helper',
+    subject: 'New message on Fixerator',
     html: wrapInLayout(`
       <h2 style="margin:0 0 12px;font-size:18px;color:#111827;">New Message</h2>
       <p style="color:#374151;font-size:14px;line-height:1.6;">
