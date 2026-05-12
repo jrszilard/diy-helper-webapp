@@ -129,7 +129,7 @@ export default function AdminCorrectionCard({ item, onApprove, onReject }: Admin
           correctionText={item.correctionText || ''}
           userQuestion={item.userQuestion}
           aiResponse={item.aiResponse}
-          category={item.category || 'general'}
+          category={item.category || 'other'}
           onApprove={handleApprove}
           onClose={() => setShowModal(false)}
         />

@@ -31,7 +31,7 @@ export async function GET(
     const adminClient = getAdminClient();
 
     const profile = await getExpertById(adminClient, id);
-    if (!profile || !profile.isActive) {
+    if (!profile || !profile.isActive || profile.isTestAccount) {
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Expert not found' }),
         { status: 404, headers: { 'Content-Type': 'application/json' } }
@@ -45,7 +45,8 @@ export async function GET(
       .eq('id', id)
       .single();
 
-    // Return public profile (exclude sensitive fields)
+    // Public profile — excludes payout-related sensitive fields (Stripe IDs, earnings totals).
+    // License/insurance are public-trust signals and ARE included.
     const publicProfile = {
       id: profile.id,
       userId: profile.userId,
@@ -64,6 +65,10 @@ export async function GET(
       responseTimeHours: profile.responseTimeHours,
       isAvailable: profile.isAvailable,
       specialties: profile.specialties,
+      licenseNumber: profile.licenseNumber,
+      licenseType: profile.licenseType,
+      licenseState: profile.licenseState,
+      insuranceStatus: profile.insuranceStatus,
       createdAt: profile.createdAt,
       // Reputation data
       reputationScore: Number(repData?.reputation_score) || 0,

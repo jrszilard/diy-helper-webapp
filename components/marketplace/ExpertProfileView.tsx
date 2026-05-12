@@ -1,6 +1,6 @@
 'use client';
 
-import { MapPin, DollarSign, Clock, Shield, MessageSquare, HelpCircle, CheckCircle, TrendingUp } from 'lucide-react';
+import { MapPin, DollarSign, Clock, Shield, MessageSquare, HelpCircle, CheckCircle, TrendingUp, BadgeCheck } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select';
 import Avatar from '@/components/ui/Avatar';
@@ -279,6 +279,46 @@ export default function ExpertProfileView({ expert, reviews }: ExpertProfileView
           </div>
         )}
       </div>
+
+      {/* Credentials — license + insurance trust signals */}
+      {(expert.licenseType || expert.licenseNumber || expert.insuranceStatus) && (
+        <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+          <h3 className="text-sm font-semibold text-earth-cream mb-3 flex items-center gap-2">
+            <BadgeCheck size={16} className="text-slate-blue" />
+            Credentials
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {expert.licenseType && (
+              <div>
+                <p className="text-xs text-white/50">License</p>
+                <p className="text-sm font-semibold text-earth-cream">
+                  {expert.licenseType}
+                  {expert.licenseState ? ` · ${expert.licenseState}` : ''}
+                </p>
+                {expert.licenseNumber && (
+                  <p className="text-xs text-white/40 mt-0.5">
+                    License #{expert.licenseNumber}
+                  </p>
+                )}
+              </div>
+            )}
+            {expert.insuranceStatus && (
+              <div>
+                <p className="text-xs text-white/50">Insurance</p>
+                <p className="text-sm font-semibold text-forest-green flex items-center gap-1">
+                  <Shield size={14} />
+                  {expert.insuranceStatus === 'bonded_insured' ? 'Bonded & Insured' : 'Insured'}
+                </p>
+              </div>
+            )}
+          </div>
+          <p className="text-[10px] text-white/30 mt-3 pt-3 border-t border-white/10">
+            {expert.verificationLevel >= 2
+              ? 'Verified by Fixerator'
+              : 'Self-reported by the expert. Always confirm with the relevant state board for licensed work.'}
+          </p>
+        </div>
+      )}
 
       {/* Rates */}
       {(expert.hourlyRateCents || expert.qaRateCents) && (

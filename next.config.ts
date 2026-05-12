@@ -37,6 +37,11 @@ const nextConfig: NextConfig = {
         destination: '/',
         permanent: true,
       },
+      {
+        source: '/login',
+        destination: '/?signIn=true',
+        permanent: true,
+      },
     ];
   },
 };

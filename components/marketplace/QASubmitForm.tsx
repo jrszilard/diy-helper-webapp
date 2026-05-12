@@ -6,6 +6,7 @@ import { formatPrice } from '@/lib/formatPrice';
 import { supabase } from '@/lib/supabase';
 import { Spinner, Button, Select, Textarea, FileUpload } from '@/components/ui';
 import type { ExpertContext } from '@/lib/marketplace/types';
+import { SPECIALTIES, SPECIALTY_LABELS } from '@/lib/marketplace/constants';
 import ProjectContextCard from '@/components/marketplace/ProjectContextCard';
 
 interface QASubmitFormProps {
@@ -19,21 +20,6 @@ interface QASubmitFormProps {
   initialCategory?: string;
 }
 
-const CATEGORIES = [
-  'electrical',
-  'plumbing',
-  'hvac',
-  'carpentry',
-  'flooring',
-  'roofing',
-  'concrete',
-  'drywall',
-  'painting',
-  'tile',
-  'landscaping',
-  'general',
-];
-
 export default function QASubmitForm({
   reportId,
   reportContext,
@@ -44,7 +30,7 @@ export default function QASubmitForm({
   initialQuestion,
   initialCategory,
 }: QASubmitFormProps) {
-  const [category, setCategory] = useState(initialCategory || 'general');
+  const [category, setCategory] = useState(initialCategory || 'other');
   const [questionText, setQuestionText] = useState(initialQuestion || '');
   const [photos, setPhotos] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -358,9 +344,9 @@ export default function QASubmitForm({
             fullWidth
             className="bg-white/10 text-white border-white/20"
           >
-            {CATEGORIES.map(c => (
+            {SPECIALTIES.map(c => (
               <option key={c} value={c} className="bg-[var(--earth-brown-dark)] text-white">
-                {c.charAt(0).toUpperCase() + c.slice(1)}
+                {SPECIALTY_LABELS[c]}
               </option>
             ))}
           </Select>
