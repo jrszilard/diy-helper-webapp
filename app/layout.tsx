@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   description: 'Meet Fix. Get instant AI-powered help with building codes, material lists, store prices, and project planning.',
   keywords: ['Fixerator', 'DIY', 'home improvement', 'building codes', 'materials list', 'AI assistant'],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://diyhelper.app'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://fixerator.com'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
