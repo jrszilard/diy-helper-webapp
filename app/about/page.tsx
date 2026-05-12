@@ -176,7 +176,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Why DIY Helper Comparison */}
+      {/* Why Fixerator Comparison */}
       <WhyDIYHelper />
 
       {/* Features Grid */}
@@ -221,7 +221,7 @@ export default function AboutPage() {
               <span className="text-sm font-medium text-[var(--copper)] uppercase tracking-wider">Expert Spotlight</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
-              Experts on DIY Helper
+              Experts on Fixerator
             </h2>
             <p className="text-lg text-[var(--warm-brown)]">Real professionals. Real earnings.</p>
           </div>

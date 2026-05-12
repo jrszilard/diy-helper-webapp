@@ -254,13 +254,21 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
     </>
   );
 
-  const emptyState = (
+  const isFiltered = !!(searchQuery || hasActiveFilters);
+  const emptyState = isFiltered ? (
     <EmptyState
       icon={FolderOpen}
       iconSize={isMobile ? 64 : 48}
       iconClassName="opacity-50"
-      title={searchQuery || hasActiveFilters ? 'No matching projects' : 'No projects yet'}
-      description={searchQuery || hasActiveFilters ? 'Try different filters' : 'Save your first conversation!'}
+      title="No matching projects"
+      description="Try different filters"
+      className={isMobile ? 'py-12' : 'py-8'}
+    />
+  ) : (
+    <EmptyState
+      fixBot
+      title="No projects yet"
+      description="Tell Fix what's broken and we'll figure it out together."
       className={isMobile ? 'py-12' : 'py-8'}
     />
   );

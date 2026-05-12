@@ -1,6 +1,7 @@
-# DIY Helper Design System Reference
+# Fixerator Design System Reference
 
 Reference for all UI work. Follow these tokens, patterns, and components to maintain consistency.
+Brand identity: see `FIXERATOR-REBRAND.md` for the rebrand history and the `Fix the FIX-3000` mascot rules.
 
 ## Color Tokens
 

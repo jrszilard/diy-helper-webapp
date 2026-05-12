@@ -61,7 +61,7 @@ export async function createCheckoutSession(params: {
     line_items: [{
       price_data: {
         currency: 'usd',
-        product_data: { name: 'DIY Helper Pro' },
+        product_data: { name: 'Fixerator Pro' },
         unit_amount: params.priceAmountCents,
         recurring: { interval: 'month' },
       },

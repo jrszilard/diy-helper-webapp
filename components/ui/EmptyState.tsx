@@ -1,10 +1,15 @@
 import { ElementType } from 'react';
 import { cn } from '@/lib/utils';
+import FixBot from '@/components/FixBot';
 
 interface EmptyStateProps {
   icon?: ElementType;
   iconSize?: number;
   iconClassName?: string;
+  /** Render the Fix the FIX-3000 mascot in place of the icon. */
+  fixBot?: boolean;
+  /** Theme for the Fix mascot. Defaults to 'dark' since EmptyState is used on dark surfaces. */
+  fixBotTheme?: 'light' | 'dark';
   title?: string;
   description: string;
   subtext?: string;
@@ -17,6 +22,8 @@ export default function EmptyState({
   icon: Icon,
   iconSize,
   iconClassName,
+  fixBot,
+  fixBotTheme = 'dark',
   title,
   description,
   subtext,
@@ -28,7 +35,11 @@ export default function EmptyState({
 
   return (
     <div className={cn('text-center', className)}>
-      {Icon && (
+      {fixBot ? (
+        <div className={cn('flex justify-center', size === 'sm' ? 'mb-3' : 'mb-4')}>
+          <FixBot size={size === 'sm' ? 56 : 72} theme={fixBotTheme} floating />
+        </div>
+      ) : Icon && (
         <Icon
           size={resolvedIconSize}
           className={cn('mx-auto text-white/20', size === 'sm' ? 'mb-3' : 'mb-4', iconClassName)}

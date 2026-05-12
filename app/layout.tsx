@@ -18,16 +18,16 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'DIY Helper - AI Assistant for Home Improvement Projects',
-    template: '%s | DIY Helper',
+    default: 'Fixerator — AI Assistant for Home Improvement Projects',
+    template: '%s | Fixerator',
   },
-  description: 'Get instant AI-powered help with building codes, material lists, store prices, and project planning.',
-  keywords: ['DIY', 'home improvement', 'building codes', 'materials list', 'AI assistant'],
+  description: 'Meet Fix. Get instant AI-powered help with building codes, material lists, store prices, and project planning.',
+  keywords: ['Fixerator', 'DIY', 'home improvement', 'building codes', 'materials list', 'AI assistant'],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://diyhelper.app'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    siteName: 'DIY Helper',
+    siteName: 'Fixerator',
     images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
   twitter: {

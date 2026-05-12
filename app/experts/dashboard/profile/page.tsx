@@ -545,7 +545,7 @@ export default function ExpertProfilePage() {
             <p className="text-xs font-semibold text-white/50 mb-1">HTML Embed Code</p>
             {(() => {
               const publicUrl = process.env.NEXT_PUBLIC_SITE_URL ?? (typeof window !== 'undefined' ? window.location.origin : '');
-              const embedCode = `<a href="${publicUrl}/experts/${profile.id}" target="_blank" rel="noopener"><img src="${publicUrl}/api/experts/${profile.id}/badge" alt="Verified Expert on DIY Helper" width="280" height="90" /></a>`;
+              const embedCode = `<a href="${publicUrl}/experts/${profile.id}" target="_blank" rel="noopener"><img src="${publicUrl}/api/experts/${profile.id}/badge" alt="Verified Expert on Fixerator" width="280" height="90" /></a>`;
               return (
                 <>
                   <div className="bg-black/30 text-white/70 rounded-lg p-3 pr-12 text-xs font-mono overflow-x-auto border border-white/[0.08]">

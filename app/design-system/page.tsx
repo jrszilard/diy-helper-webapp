@@ -19,6 +19,8 @@ import ProgressBar from '@/components/ui/ProgressBar';
 import StarRating from '@/components/ui/StarRating';
 import Divider from '@/components/ui/Divider';
 import AppLogo from '@/components/AppLogo';
+import FixBot from '@/components/FixBot';
+import FixSays from '@/components/ui/FixSays';
 import Dropdown from '@/components/ui/Dropdown';
 import Toggle from '@/components/ui/Toggle';
 
@@ -94,7 +96,7 @@ export default function DesignSystemPage() {
 
         <div className="mb-10">
           <h1 className="text-3xl font-bold text-foreground">Design System</h1>
-          <p className="text-earth-brown mt-1">DIY Helper component library</p>
+          <p className="text-earth-brown mt-1">Fixerator component library</p>
         </div>
 
         {/* ── Colors ─────────────────────────────────────────────────────── */}
@@ -127,6 +129,12 @@ export default function DesignSystemPage() {
             <Swatch color="#D4A574" label="gold" textDark />
             <Swatch color="#B87333" label="copper" />
           </Row>
+          <Row label="Robot accents · new for Fixerator">
+            <Swatch color="#FF4438" label="bot-eye" />
+            <Swatch color="#FFB5AC" label="bot-glow" textDark />
+            <Swatch color="#C9C2BA" label="bot-chrome" textDark />
+            <Swatch color="#E2DDD6" label="bot-chrome-dark" textDark />
+          </Row>
           <Row label="Status — foreground">
             <Swatch color="#5C7882" label="status-research" />
             <Swatch color="#B8593B" label="status-progress" />
@@ -158,9 +166,118 @@ export default function DesignSystemPage() {
 
         {/* ── AppLogo ─────────────────────────────────────────────────────── */}
         <Section title="AppLogo">
-          <Row label="Dark variant">
-            <div className="bg-[#2A2520] p-4 rounded-lg">
-              <AppLogo />
+          <Row label="Dark surface">
+            <div className="bg-[var(--earth-brown-dark)] p-4 rounded-lg">
+              <AppLogo theme="dark" />
+            </div>
+          </Row>
+          <Row label="Light surface">
+            <div className="bg-[var(--earth-cream)] p-4 rounded-lg border border-earth-sand">
+              <AppLogo theme="light" />
+            </div>
+          </Row>
+          <Row label="Sizes">
+            <div className="bg-[var(--earth-brown-dark)] p-4 rounded-lg flex items-center gap-6">
+              <AppLogo size="sm" />
+              <AppLogo size="md" />
+              <AppLogo size="lg" />
+            </div>
+          </Row>
+        </Section>
+
+        {/* ── Fix the FIX-3000 mascot ────────────────────────────────────── */}
+        <Section title="Fix — the FIX-3000 mascot">
+          <Row label="Mascot gallery">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="bg-[var(--earth-cream)] border border-earth-sand rounded-lg p-5 flex flex-col items-center gap-2 text-center">
+                <span className="fix-float-stage">
+                  <FixBot size={80} theme="light" floating />
+                </span>
+                <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-earth-brown mt-2">
+                  Default · Floating
+                </p>
+                <p className="text-xs italic text-warm-brown">
+                  &ldquo;Greetings, hooman. Show me the leak.&rdquo;
+                </p>
+              </div>
+              <div className="bg-[var(--earth-cream)] border border-earth-sand rounded-lg p-5 flex flex-col items-center gap-2 text-center">
+                <FixBot size={80} theme="light" expression="winking" />
+                <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-earth-brown mt-2">
+                  Winking
+                </p>
+                <p className="text-xs italic text-warm-brown">
+                  &ldquo;Permits? Already pulled. Trust the bot.&rdquo;
+                </p>
+              </div>
+              <div className="bg-[var(--earth-cream)] border border-earth-sand rounded-lg p-5 flex flex-col items-center gap-2 text-center">
+                <FixBot size={80} theme="light" expression="computing" />
+                <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-earth-brown mt-2">
+                  Computing
+                </p>
+                <p className="text-xs italic text-warm-brown">
+                  &ldquo;Calculating studs… please hold your boards.&rdquo;
+                </p>
+              </div>
+              <div className="bg-[var(--earth-brown-dark)] rounded-lg p-5 flex flex-col items-center gap-2 text-center">
+                <FixBot size={80} theme="dark" expression="terminator" />
+                <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-white/60 mt-2">
+                  Terminator mode
+                </p>
+                <p className="text-xs italic text-white/50">
+                  &ldquo;Your bathroom regrout will not survive.&rdquo;
+                </p>
+              </div>
+            </div>
+          </Row>
+          <Row label="Hero pose · nailgun + floating">
+            <div className="bg-[var(--earth-brown-dark)] rounded-lg p-6 flex justify-center">
+              <span className="fix-float-stage">
+                <FixBot size={180} theme="dark" withNailgun floating ariaLabel="Fix with nailgun" />
+              </span>
+            </div>
+          </Row>
+          <Row label="Thinking pulse">
+            <div className="bg-[var(--earth-brown-dark)] rounded-lg p-4 inline-flex items-center gap-2">
+              <span className="fix-thinking-dot" aria-hidden />
+              <span className="font-mono text-xs text-white/70">Fix is computing…</span>
+            </div>
+          </Row>
+        </Section>
+
+        {/* ── FixSays card ────────────────────────────────────────────────── */}
+        <Section title="FixSays">
+          <Row label="Default">
+            <div className="max-w-md">
+              <FixSays>
+                &ldquo;Heads up — Travis County wants a permit if you&apos;re
+                moving the toilet flange. I&apos;ll add it to your checklist.&rdquo;
+              </FixSays>
+            </div>
+          </Row>
+          <Row label="With actions">
+            <div className="max-w-md">
+              <FixSays
+                actions={
+                  <>
+                    <Button size="xs" variant="outline" className="bg-white text-[var(--earth-brown-dark)] border-white">
+                      Add to plan
+                    </Button>
+                    <Button size="xs" variant="ghost" className="text-white/70 hover:bg-white/10">
+                      Dismiss
+                    </Button>
+                  </>
+                }
+              >
+                &ldquo;Materials list locked and loaded — 7 items, ~$184 at your
+                nearest Lowe&apos;s.&rdquo;
+              </FixSays>
+            </div>
+          </Row>
+          <Row label="Computing expression">
+            <div className="max-w-md">
+              <FixSays expression="computing" label="Fix is thinking">
+                &ldquo;Calculating studs… please hold your boards.&rdquo;
+              </FixSays>
             </div>
           </Row>
         </Section>
@@ -500,6 +617,15 @@ export default function DesignSystemPage() {
         </Section>
 
         <Section title="Empty State">
+          <Row label="With Fix mascot (new)">
+            <div className="w-full max-w-sm bg-[var(--earth-brown-dark)] border border-white/10 rounded-xl p-6">
+              <EmptyState
+                fixBot
+                title="No projects yet"
+                description="Tell Fix what's broken and we'll figure it out together."
+              />
+            </div>
+          </Row>
           <Row label="With icon + title + description">
             <div className="w-full max-w-sm bg-white/6 border border-white/10 rounded-xl p-6">
               <EmptyState
