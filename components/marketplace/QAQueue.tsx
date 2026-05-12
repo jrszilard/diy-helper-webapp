@@ -6,6 +6,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
 import type { QAQuestion } from '@/lib/marketplace/types';
+import { SPECIALTIES, SPECIALTY_LABELS } from '@/lib/marketplace/constants';
 import QAQuestionCard from './QAQuestionCard';
 
 interface QAQueueProps {
@@ -14,21 +15,7 @@ interface QAQueueProps {
   onBid?: (id: string) => void;
 }
 
-const FILTER_OPTIONS = [
-  'all',
-  'electrical',
-  'plumbing',
-  'hvac',
-  'carpentry',
-  'flooring',
-  'roofing',
-  'concrete',
-  'drywall',
-  'painting',
-  'tile',
-  'landscaping',
-  'general',
-];
+const FILTER_OPTIONS = ['all', ...SPECIALTIES] as const;
 
 export default function QAQueue({ questions, onClaim, onBid }: QAQueueProps) {
   const [activeFilter, setActiveFilter] = useState('all');
@@ -62,7 +49,7 @@ export default function QAQueue({ questions, onClaim, onBid }: QAQueueProps) {
               onClick={() => setActiveFilter(opt)}
               className="whitespace-nowrap rounded-full"
             >
-              {opt === 'all' ? 'All' : opt.charAt(0).toUpperCase() + opt.slice(1)}
+              {opt === 'all' ? 'All' : SPECIALTY_LABELS[opt]}
             </Button>
           ))}
         </div>

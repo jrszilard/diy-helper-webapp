@@ -30,7 +30,8 @@ export async function GET(req: NextRequest) {
     let query = adminClient
       .from('expert_profiles')
       .select('*, expert_specialties(*)', { count: 'exact' })
-      .eq('is_active', true);
+      .eq('is_active', true)
+      .eq('is_test_account', false);
 
     if (state) {
       query = query.ilike('state', state);
@@ -56,7 +57,8 @@ export async function GET(req: NextRequest) {
         const fallbackQuery = adminClient
           .from('expert_profiles')
           .select('*', { count: 'exact' })
-          .eq('is_active', true);
+          .eq('is_active', true)
+          .eq('is_test_account', false);
         if (state) fallbackQuery.ilike('state', state);
         if (city) fallbackQuery.ilike('city', `%${city}%`);
         if (minRating) fallbackQuery.gte('avg_rating', parseFloat(minRating));

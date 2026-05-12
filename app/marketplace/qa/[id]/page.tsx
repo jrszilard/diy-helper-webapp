@@ -522,15 +522,9 @@ export default function QADetailPage() {
             <div className="flex items-center gap-2">
               <ArrowUpRight size={16} className="text-slate-blue" />
               <p className="text-sm text-slate-blue font-medium">
-                This Q&A has been graduated to a project.
+                This Q&A has been graduated to a project. Bidding is coming soon.
               </p>
             </div>
-            <a
-              href={`/marketplace/projects/${question.graduatedToRfpId}`}
-              className="text-xs underline mt-1 inline-block"
-            >
-              View Project →
-            </a>
           </Alert>
         )}
 

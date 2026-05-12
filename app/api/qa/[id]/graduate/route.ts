@@ -164,7 +164,7 @@ export async function POST(
           type: 'rfp_new_bid',
           title: 'Q&A graduated to project — you have priority!',
           body: `The DIYer wants hands-on help. As the Q&A expert, you get first bid on this project.`,
-          link: `/experts/dashboard/projects/${rfp.id}`,
+          link: `/marketplace/qa/${question.id}`,
         });
       }
     } else if (isExpert) {

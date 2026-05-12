@@ -69,6 +69,7 @@ export interface ExpertProfile {
   licenseType: string | null;
   licenseState: string | null;
   insuranceStatus: 'insured' | 'bonded_insured' | null;
+  isTestAccount: boolean;
   specialties: ExpertSpecialty[];
   createdAt: string;
   updatedAt: string;
@@ -446,6 +447,7 @@ export interface ExpertProfileRow {
   license_type: string | null;
   license_state: string | null;
   insurance_status: string | null;
+  is_test_account?: boolean;
   created_at: string;
   updated_at: string;
   expert_specialties?: Array<{
@@ -485,6 +487,7 @@ export function toExpertProfile(row: ExpertProfileRow): ExpertProfile {
     licenseType: row.license_type ?? null,
     licenseState: row.license_state ?? null,
     insuranceStatus: row.insurance_status as 'insured' | 'bonded_insured' | null ?? null,
+    isTestAccount: row.is_test_account ?? false,
     specialties: (row.expert_specialties || []).map(s => ({
       id: s.id,
       specialty: s.specialty as Specialty,
