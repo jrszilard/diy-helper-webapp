@@ -41,12 +41,13 @@ Tracks the migration from the internal "DIY Helper" / aspirational "Crafted" bra
 
 Action: regenerate from the `FixBot` SVG in `components/FixBot.tsx` + the FIXERATOR wordmark. Target sizes: 32×32 + 48×48 (favicon), 180×180 (apple-touch), 1200×630 (og-image).
 
-### 2. Infra-bound strings (deliberately not changed — would break things)
+### 2. Infra-bound strings
 
-| String | Where | Why left |
+| String | Where | Status |
 |---|---|---|
-| `diyhelper.app` host | `app/layout.tsx` `metadataBase`, `lib/notifications.ts` `EMAIL_DOMAIN` fallback, `lib/config.ts` Vercel-preview regex | Bound to production DNS / SPF / DKIM / Vercel project. Domain migration is its own ticket. |
-| `diy-helper-*` localStorage keys | `hooks/useChat.ts`, `lib/guestStorage.ts`, e2e tests | Renaming wipes guest carts, in-flight conversations, and project drafts for every existing user |
+| `fixerator.com` host | `.env.example`, `app/layout.tsx` `metadataBase`, `lib/notifications.ts` `EMAIL_DOMAIN` fallback | ✅ Swapped (Cloudflare custom domain provisioned May 2026). Resend domain verification must be re-run for the new hostname. |
+| `diy-helper-*` localStorage keys | `hooks/useChat.ts`, `lib/guestStorage.ts`, e2e tests | Deliberately preserved — renaming wipes guest carts, in-flight conversations, and project drafts for every existing user. Phase B refactor. |
+| `diy-helper[a-z0-9-]*\.vercel\.app` regex | `lib/config.ts` | Preserved — Vercel project slug is the URL; renaming invalidates all preview URLs and CLI history. |
 
 ### 3. Optional polish (design doc doesn't dictate placement)
 

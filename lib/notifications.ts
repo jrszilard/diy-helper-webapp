@@ -84,7 +84,7 @@ async function sendEmailNotification(params: {
       Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
     },
     body: JSON.stringify({
-      from: `Fixerator <notifications@${process.env.EMAIL_DOMAIN || 'diyhelper.app'}>`,
+      from: `Fixerator <notifications@${process.env.EMAIL_DOMAIN || 'fixerator.com'}>`,
       to: email,
       subject: content.subject,
       html: content.html,
