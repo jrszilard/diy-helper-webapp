@@ -3,17 +3,6 @@
   "extends": ["config:recommended"],
   "minimumReleaseAge": "3 days",
   "rangeStrategy": "bump",
-  "packageRules": [
-    {
-      "matchUpdateTypes": ["patch"],
-      "automerge": true,
-      "automergeType": "pr"
-    },
-    {
-      "matchDepTypes": ["devDependencies"],
-      "automerge": true
-    }
-  ],
   "vulnerabilityAlerts": {
     "enabled": true,
     "minimumReleaseAge": "0 days"
