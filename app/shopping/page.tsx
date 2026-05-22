@@ -42,6 +42,7 @@ export default function ShoppingPage() {
     });
     return () => subscription.unsubscribe();
   }, []);
+
   if (loaded && !user) {
     return (
       <div className="min-h-screen bg-earth-night flex flex-col">
