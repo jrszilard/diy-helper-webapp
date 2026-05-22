@@ -297,7 +297,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
   if (isMobile) {
     return (
       <div className="flex-1 overflow-y-auto">
-        <div className="p-4 space-y-3 bg-[#1A1612] border-b border-[var(--blueprint-grid-major)] sticky top-0 z-10">
+        <div className="p-4 space-y-3 bg-[#1A1612] border-b border-white/[0.06] sticky top-0 z-10">
           {searchAndFilters}
         </div>
         <div className="p-4 space-y-3">
@@ -310,7 +310,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
   // Desktop view
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      <div className="p-3 border-b border-[var(--blueprint-grid-major)]">
+      <div className="p-3 border-b border-white/[0.06]">
         {searchAndFilters}
       </div>
 
@@ -318,7 +318,7 @@ export default function ProjectsSidebar({ user, onSelectProject, isMobile = fals
         {Object.keys(groupedProjects).length === 0 ? emptyState : (
           Object.entries(groupedProjects).map(([category, categoryProjects]) => (
             <div key={category}>
-              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--earth-sand)]/60 uppercase tracking-wide mb-2">
+              <div className="flex items-center gap-2 text-xs font-medium text-white/30 uppercase tracking-wide mb-2">
                 {getCategoryIcon(category)}
                 <span>{category}</span>
                 <span className="text-white/30">({categoryProjects.length})</span>

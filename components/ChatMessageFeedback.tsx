@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { ThumbsUp, Flag, X, Send, Loader2 } from 'lucide-react';
+import Textarea from '@/components/ui/Textarea';
 
 interface ChatMessageFeedbackProps {
   messageIndex: number;
@@ -143,17 +144,15 @@ export default function ChatMessageFeedback({
             ))}
           </div>
 
-          <textarea
+          <Textarea
             value={details}
             onChange={e => setDetails(e.target.value)}
             placeholder="Tell us more (optional)..."
             rows={2}
+            fullWidth
+            resize="none"
             maxLength={500}
-            className={`w-full text-xs rounded-lg p-2 resize-none focus:outline-none focus:ring-1 focus:ring-rust border ${
-              isDark
-                ? 'bg-white/5 border-white/20 text-white placeholder:text-white/40'
-                : 'border-white/10'
-            }`}
+            className="text-xs"
           />
 
           <button

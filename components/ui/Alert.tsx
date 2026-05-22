@@ -8,36 +8,31 @@ const variantConfig: Record<AlertVariant, {
   container: string;
   icon: ElementType;
   iconClass: string;
-  titleClass: string;
-  bodyClass: string;
+  bodyColor: string;
 }> = {
   info: {
-    container: 'bg-[var(--slate-blue)]/15 border border-[var(--slate-blue)]/30',
+    container: 'bg-[rgba(92,120,130,0.12)] border border-[rgba(92,120,130,0.30)]',
     icon: Info,
     iconClass: 'text-[var(--slate-blue)]',
-    titleClass: 'text-[var(--slate-blue)]',
-    bodyClass:  'text-white/60',
+    bodyColor: '#B5CBD3',
   },
   success: {
-    container: 'bg-[var(--forest-green)]/15 border border-[var(--forest-green)]/30',
+    container: 'bg-[rgba(92,122,64,0.12)] border border-[rgba(92,122,64,0.32)]',
     icon: CheckCircle,
     iconClass: 'text-[var(--forest-green)]',
-    titleClass: 'text-[var(--forest-green)]',
-    bodyClass:  'text-white/60',
+    bodyColor: '#B8D196',
   },
   warning: {
-    container: 'bg-[var(--warning)]/15 border border-[var(--warning)]/30',
+    container: 'bg-[rgba(212,165,116,0.12)] border border-[rgba(212,165,116,0.32)]',
     icon: AlertTriangle,
-    iconClass: 'text-[var(--warning-light)]',
-    titleClass: 'text-[var(--warning-light)]',
-    bodyClass:  'text-white/60',
+    iconClass: 'text-[var(--gold)]',
+    bodyColor: '#E8C99A',
   },
   error: {
-    container: 'bg-[var(--rust)]/15 border border-[var(--rust)]/30',
+    container: 'bg-[rgba(184,89,59,0.14)] border border-[rgba(184,89,59,0.35)]',
     icon: XCircle,
     iconClass: 'text-[var(--rust)]',
-    titleClass: 'text-[var(--rust)]',
-    bodyClass:  'text-white/60',
+    bodyColor: '#E89580',
   },
 };
 
@@ -60,15 +55,15 @@ export default function Alert({
   const Icon = icon === false ? null : (icon ?? config.icon);
 
   return (
-    <div className={cn('flex gap-3 rounded-lg p-3', config.container, className)}>
+    <div className={cn('flex gap-3 rounded-none p-[14px_16px]', config.container, className)}>
       {Icon && (
         <Icon size={16} className={cn('flex-shrink-0 mt-0.5', config.iconClass)} />
       )}
       <div className="flex-1 min-w-0">
         {title && (
-          <p className={cn('text-sm font-semibold mb-0.5', config.titleClass)}>{title}</p>
+          <p className="font-serif italic text-white mb-0.5" style={{ fontSize: 15 }}>{title}</p>
         )}
-        <div className={cn('text-sm', config.bodyClass)}>{children}</div>
+        <div style={{ fontSize: 13, lineHeight: 1.5, color: config.bodyColor }}>{children}</div>
       </div>
     </div>
   );

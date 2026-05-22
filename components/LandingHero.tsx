@@ -13,10 +13,10 @@ const TABS = [
 ];
 
 const SUGGESTION_CHIPS = [
-  { emoji: '🔧', text: "I'm mid-project \u2014 my mortar isn't setting" },
-  { emoji: '🔌', text: 'Is my electrical panel safe for a hot tub?' },
-  { emoji: '🛁', text: 'Price out a bathroom remodel' },
-  { emoji: '📋', text: 'What permits do I need for a deck?' },
+  { text: "I'm mid-project — my mortar isn't setting" },
+  { text: 'Is my electrical panel safe for a hot tub?' },
+  { text: 'Price out a bathroom remodel' },
+  { text: 'What permits do I need for a deck?' },
 ];
 
 interface LandingHeroProps {
@@ -42,7 +42,7 @@ export default function LandingHero({
     <div>
       {/* Tab bar */}
       <div className="flex justify-center mb-[var(--space-m)]">
-        <div className="inline-flex gap-1 bg-white/5 p-1 rounded-2xl">
+        <div className="inline-flex gap-1 bg-white/5 p-1 rounded-none">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -50,9 +50,9 @@ export default function LandingHero({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-none text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-white/15 text-white'
+                    ? 'bg-white/10 text-white'
                     : 'text-white/40 hover:text-white/70 hover:bg-white/5'
                 }`}
               >

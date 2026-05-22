@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Download, FileText, Printer, Copy, X, Check, Share2, FileDown } from 'lucide-react';
 import { escapeHtml } from '@/lib/security';
+import TextInput from '@/components/ui/TextInput';
 
 interface ExportMaterial {
   product_name: string;
@@ -520,11 +521,12 @@ export default function MaterialsExport({ projectName, materials, onClose }: Mat
           <div className="mb-4 p-3 bg-[var(--status-research-bg)] rounded-xl">
             <p className="text-xs text-slate-blue font-medium mb-2">Shareable link:</p>
             <div className="flex gap-2">
-              <input
-                type="text"
+              <TextInput
                 value={shareUrl}
                 readOnly
-                className="flex-1 px-3 py-1.5 text-xs bg-white/6 border border-white/10 rounded-lg text-foreground truncate"
+                inputSize="sm"
+                fullWidth
+                className="truncate"
               />
               <button
                 onClick={copyShareLink}

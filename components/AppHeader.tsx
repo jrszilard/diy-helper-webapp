@@ -30,7 +30,7 @@ export default function AppHeader({ extraRight, showBack, onBack }: AppHeaderPro
 
   return (
     <>
-      <nav className="sticky top-0 z-50 backdrop-blur-xl bg-[var(--earth-brown-dark)]/95 border-b border-[var(--blueprint-grid-major)]">
+      <nav className="sticky top-0 z-50 backdrop-blur-xl bg-earth-night/95 border-b border-white/[0.06]">
         <div className="u-container">
           <div className="flex justify-between items-center h-16">
             {/* Mobile: logo (hamburger is owned by AppSidebar) */}
@@ -43,7 +43,7 @@ export default function AppHeader({ extraRight, showBack, onBack }: AppHeaderPro
               <div className="hidden md:flex flex-col justify-center">
                 <button
                   onClick={onBack}
-                  className="flex items-center gap-1 text-[var(--earth-sand)] hover:text-white hover:bg-white/10 transition-colors text-sm font-medium px-2 py-1 rounded-md"
+                  className="flex items-center gap-1 text-[var(--earth-sand)] hover:text-white hover:bg-white/10 transition-colors text-sm font-medium px-2 py-1 rounded-none"
                 >
                   <MessageSquarePlus size={14} />
                   New Chat
@@ -57,7 +57,7 @@ export default function AppHeader({ extraRight, showBack, onBack }: AppHeaderPro
                 {showBack && (
                   <button
                     onClick={onBack}
-                    className="flex items-center gap-1 text-[var(--earth-sand)] hover:text-white transition-colors text-sm font-medium px-2 py-1 rounded-md"
+                    className="flex items-center gap-1 text-[var(--earth-sand)] hover:text-white transition-colors text-sm font-medium px-2 py-1 rounded-none"
                   >
                     <MessageSquarePlus size={14} />
                   </button>

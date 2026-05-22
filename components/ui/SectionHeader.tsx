@@ -2,10 +2,11 @@ import { cn } from '@/lib/utils';
 
 type SectionHeaderSize = 'sm' | 'md' | 'lg';
 
+// Title uses Newsreader 400 upright; subtitle uses Newsreader italic
 const sizeConfig: Record<SectionHeaderSize, { title: string; subtitle: string }> = {
-  sm: { title: 'text-base font-semibold', subtitle: 'text-xs' },
-  md: { title: 'text-lg font-semibold',   subtitle: 'text-sm' },
-  lg: { title: 'text-2xl font-bold',      subtitle: 'text-sm' },
+  sm: { title: 'text-xs  font-normal font-serif', subtitle: 'text-2xs font-serif italic' },
+  md: { title: 'text-base font-normal font-serif', subtitle: 'text-xs  font-serif italic' },
+  lg: { title: 'text-xl  font-normal font-serif', subtitle: 'text-sm  font-serif italic' },
 };
 
 interface SectionHeaderProps {
@@ -26,11 +27,14 @@ export default function SectionHeader({
   const config = sizeConfig[size];
 
   return (
-    <div className={cn('flex items-start justify-between gap-4 text-white', className)}>
+    <div className={cn(
+      'flex items-start justify-between gap-4 text-white pb-[10px] border-b border-white/[0.08]',
+      className,
+    )}>
       <div>
-        <h2 className={cn(config.title, 'text-inherit')}>{title}</h2>
+        <h2 className={cn(config.title, 'text-inherit leading-tight')}>{title}</h2>
         {subtitle && (
-          <p className={cn(config.subtitle, 'text-white/50 mt-0.5')}>{subtitle}</p>
+          <p className={cn(config.subtitle, 'text-white/50 mt-1')}>{subtitle}</p>
         )}
       </div>
       {action && <div className="flex-shrink-0">{action}</div>}

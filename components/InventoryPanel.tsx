@@ -40,8 +40,9 @@ interface InventoryItem {
 
 interface InventoryPanelProps {
   userId: string;
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+  standalone?: boolean;
 }
 
 const CATEGORIES = [
@@ -75,7 +76,7 @@ function conditionVariant(condition: string): BadgeVariant {
 
 const darkInput = 'bg-white/10 text-white border-white/20 placeholder-white/40';
 
-export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPanelProps) {
+export default function InventoryPanel({ userId, isOpen, onClose, standalone = false }: InventoryPanelProps) {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -92,11 +93,11 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
   });
 
   useEffect(() => {
-    if (isOpen) {
+    if (standalone || isOpen) {
       if (userId) loadInventory();
       else { setLoading(false); setInventory([]); }
     }
-  }, [isOpen, userId]);
+  }, [isOpen, userId, standalone]);
 
   const loadInventory = async () => {
     setLoading(true);
@@ -195,22 +196,24 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
     return acc;
   }, {} as Record<string, InventoryItem[]>);
 
-  if (!isOpen) return null;
+  if (!standalone && !isOpen) return null;
 
   return (
-    <div className="fixed left-0 md:left-64 top-16 bottom-0 w-[85vw] md:w-80 bg-[#1A1612] border-r border-[var(--blueprint-grid-major)] z-30 flex flex-col shadow-xl animate-slide-in-left">
+    <div className={standalone ? 'flex flex-col' : 'fixed left-0 md:left-64 top-16 bottom-0 w-[85vw] md:w-80 bg-[#1A1612] border-r border-white/[0.06] z-30 flex flex-col shadow-xl animate-slide-in-left'}>
 
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-[var(--blueprint-grid-major)]">
-        <div>
-          <h2 className="font-bold text-lg text-white">My Tools</h2>
-          <p className="text-xs text-[var(--earth-sand)]/60 mt-0.5">{inventory.length} items</p>
+      {/* Header — hidden in standalone mode (page provides its own heading) */}
+      {!standalone && (
+        <div className="flex items-center justify-between p-4 border-b border-white/[0.06]">
+          <div>
+            <h2 className="font-serif font-normal text-lg text-white">My Tools</h2>
+            <p className="text-xs text-[var(--earth-sand)]/60 mt-0.5">{inventory.length} items</p>
+          </div>
+          <IconButton icon={X} iconSize={18} label="Close" onClick={onClose} className="text-[var(--earth-sand)] hover:bg-white/10 hover:text-white" />
         </div>
-        <IconButton icon={X} iconSize={18} label="Close" onClick={onClose} className="text-[var(--earth-sand)] hover:bg-white/10 hover:text-white" />
-      </div>
+      )}
 
       {/* Search — only when there are items */}
-      {!loading && inventory.length > 0 && <div className="p-3 border-b border-[var(--blueprint-grid-major)]">
+      {!loading && inventory.length > 0 && <div className="p-3 border-b border-white/[0.06]">
         <TextInput
           type="text"
           placeholder="Search inventory..."
@@ -246,8 +249,8 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
 
       {/* Add / Edit form */}
       {(showAddForm || editingItem) && (
-        <div className="p-3 border-b border-[var(--blueprint-grid-major)] bg-white/5 space-y-2">
-          <h3 className="text-sm font-semibold text-white">
+        <div className="p-3 border-b border-white/[0.06] bg-white/5 space-y-2">
+          <h3 className="text-sm font-medium text-white">
             {editingItem ? 'Edit Item' : 'Add New Item'}
           </h3>
           <TextInput
@@ -331,7 +334,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
               const Icon = catInfo?.icon || Package;
               return (
                 <div key={category}>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-[var(--earth-sand)]/60 uppercase tracking-wide mb-2">
+                  <div className="flex items-center gap-2 text-xs font-medium text-white/30 uppercase tracking-wide mb-2">
                     <Icon size={12} />
                     <span>{catInfo?.label || category}</span>
                     <span className="text-white/30">({items.length})</span>
@@ -340,7 +343,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
                     {items.map(item => (
                       <div
                         key={item.id}
-                        className="group flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg bg-white/5 border border-transparent hover:bg-white/10 transition-colors"
+                        className="group flex items-center justify-between gap-2 px-3 py-2.5 rounded-none bg-white/5 border border-transparent hover:bg-white/10 transition-colors"
                       >
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium text-white truncate">
@@ -373,7 +376,7 @@ export default function InventoryPanel({ userId, isOpen, onClose }: InventoryPan
 
       {/* Add button */}
       {!showAddForm && !editingItem && userId && (
-        <div className="p-3 border-t border-[var(--blueprint-grid-major)]">
+        <div className="p-3 border-t border-white/[0.06]">
           <Button variant="primary" size="sm" fullWidth leftIcon={Plus} iconSize={16} onClick={() => setShowAddForm(true)}>
             Add Item
           </Button>

@@ -28,18 +28,18 @@ import {
   Wrench, ArrowRight, Plus, Trash2, Check, X, Home, Settings,
   Bell, Menu, MessageSquare, Users, Package, ShoppingCart, Search, MapPin,
   Gavel, Target, CheckCircle, Star, FolderOpen, HelpCircle, LayoutDashboard,
-  ClipboardCheck, Mail,
+  ClipboardCheck, Mail, ArrowUp, FolderPlus,
 } from 'lucide-react';
 
 // ─── Dark section wrapper ─────────────────────────────────────────────────────
 function DarkSection({ title, label, children }: { title: string; label?: string; children: React.ReactNode }) {
   return (
     <section className="mb-12">
-      <h2 className="text-xs font-semibold uppercase tracking-widest text-earth-brown mb-4 pb-2 border-b border-earth-sand">
+      <h2 className="text-xs font-medium uppercase tracking-widest text-white/40 mb-4 pb-2 border-b border-white/[0.08]">
         {title}
       </h2>
-      {label && <p className="text-xs text-earth-brown mb-2">{label}</p>}
-      <div className="bg-[#4A3F35] rounded-xl p-6 space-y-4">
+      {label && <p className="text-xs text-white/30 mb-2">{label}</p>}
+      <div className="bg-[#4A3F35] rounded-none p-6 space-y-4">
         {children}
       </div>
     </section>
@@ -50,7 +50,7 @@ function DarkSection({ title, label, children }: { title: string; label?: string
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-12">
-      <h2 className="text-xs font-semibold uppercase tracking-widest text-earth-brown mb-4 pb-2 border-b border-earth-sand">
+      <h2 className="text-xs font-medium uppercase tracking-widest text-white/40 mb-4 pb-2 border-b border-white/[0.08]">
         {title}
       </h2>
       {children}
@@ -73,7 +73,7 @@ function Swatch({ color, label, textDark = false }: { color: string; label: stri
   return (
     <div className="flex flex-col items-center gap-1">
       <div
-        className={`w-16 h-16 rounded-lg shadow-sm border border-earth-sand flex items-end p-1`}
+        className={`w-16 h-16 rounded-none shadow-sm border border-white/10 flex items-end p-1`}
         style={{ background: color }}
       >
         <span className={`text-[9px] font-mono leading-tight ${textDark ? 'text-foreground' : 'text-white'}`}>
@@ -95,7 +95,7 @@ export default function DesignSystemPage() {
       <div className="max-w-4xl mx-auto px-6 py-12">
 
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-foreground">Design System</h1>
+          <h1 className="font-serif font-normal text-3xl text-white">Design System</h1>
           <p className="text-earth-brown mt-1">Fixerator component library</p>
         </div>
 
@@ -103,6 +103,7 @@ export default function DesignSystemPage() {
         <Section title="Color Tokens">
           <Row label="Primary">
             <Swatch color="#B8593B" label="rust" />
+            <Swatch color="#D97757" label="rust-glow" />
             <Swatch color="#B87333" label="copper" />
           </Row>
           <Row label="Secondary">
@@ -129,55 +130,62 @@ export default function DesignSystemPage() {
             <Swatch color="#D4A574" label="gold" textDark />
             <Swatch color="#B87333" label="copper" />
           </Row>
-          <Row label="Robot accents · new for Fixerator">
-            <Swatch color="#FF4438" label="bot-eye" />
-            <Swatch color="#FFB5AC" label="bot-glow" textDark />
-            <Swatch color="#C9C2BA" label="bot-chrome" textDark />
-            <Swatch color="#E2DDD6" label="bot-chrome-dark" textDark />
+          <Row label="Robot accents · Fixerator palette">
+            <Swatch color="#E83A2C" label="bot-eye" />
+            <Swatch color="#E8C2B6" label="bot-eye-outer" textDark />
+            <Swatch color="#C77A66" label="bot-eye-mid" />
+            <Swatch color="#F1ECE5" label="bot-cream" textDark />
+            <Swatch color="#FBF8F2" label="bot-cream-hi" textDark />
+            <Swatch color="#2E2823" label="bot-visor" />
+            <Swatch color="#2A211A" label="bot-outline" />
           </Row>
-          <Row label="Status — foreground">
-            <Swatch color="#5C7882" label="status-research" />
-            <Swatch color="#B8593B" label="status-progress" />
-            <Swatch color="#B87333" label="status-waiting" />
-            <Swatch color="#5C7A40" label="status-complete" />
+          <Row label="Status — foreground (dark surface)">
+            <Swatch color="#7EA0AD" label="research-fg" />
+            <Swatch color="#D97757" label="progress-fg" />
+            <Swatch color="#D49A4A" label="waiting-fg" />
+            <Swatch color="#7A9A56" label="complete-fg" />
           </Row>
-          <Row label="Status — backgrounds">
-            <Swatch color="#E8F0F5" label="status-research-bg" textDark />
-            <Swatch color="#FDF3ED" label="status-progress-bg" textDark />
-            <Swatch color="#FDF4E7" label="status-waiting-bg" textDark />
-            <Swatch color="#E8F3EC" label="status-complete-bg" textDark />
+          <Row label="Status — background (dark surface)">
+            <Swatch color="#1B2D33" label="research-bg" />
+            <Swatch color="#3A1F18" label="progress-bg" />
+            <Swatch color="#3A2A14" label="waiting-bg" />
+            <Swatch color="#1F2E16" label="complete-bg" />
           </Row>
         </Section>
 
         {/* ── Typography ──────────────────────────────────────────────────── */}
         <Section title="Typography Scale">
-          <div className="space-y-2">
-            <div className="flex items-baseline gap-4"><span className="text-4xl font-bold text-foreground">text-4xl bold</span><span className="text-xs text-muted">48px</span></div>
-            <div className="flex items-baseline gap-4"><span className="text-3xl font-bold text-foreground">text-3xl bold</span><span className="text-xs text-muted">36px</span></div>
-            <div className="flex items-baseline gap-4"><span className="text-2xl font-bold text-foreground">text-2xl bold</span><span className="text-xs text-muted">30px — page headings</span></div>
-            <div className="flex items-baseline gap-4"><span className="text-xl font-semibold text-foreground">text-xl semibold</span><span className="text-xs text-muted">24px</span></div>
-            <div className="flex items-baseline gap-4"><span className="text-lg font-semibold text-foreground">text-lg semibold</span><span className="text-xs text-muted">20px — section headings</span></div>
-            <div className="flex items-baseline gap-4"><span className="text-base text-foreground">text-base</span><span className="text-xs text-muted">18px — sub-headings</span></div>
-            <div className="flex items-baseline gap-4"><span className="text-sm text-foreground">text-sm</span><span className="text-xs text-muted">16px — body text</span></div>
-            <div className="flex items-baseline gap-4"><span className="text-xs text-foreground">text-xs</span><span className="text-xs text-muted">14px — captions, labels (minimum)</span></div>
-            <div className="flex items-baseline gap-4"><span className="text-2xs text-muted">text-2xs</span><span className="text-xs text-muted">12px — legal, timestamps</span></div>
+          <div className="space-y-3">
+            <div className="flex items-baseline gap-4"><span className="font-serif font-normal text-4xl text-white">Display serif · 48px</span><span className="text-xs text-white/30 font-jetbrains">Newsreader · hero headlines</span></div>
+            <div className="flex items-baseline gap-4"><span className="font-serif font-normal text-3xl text-white">Page heading · 36px</span><span className="text-xs text-white/30 font-jetbrains">Newsreader · page titles</span></div>
+            <div className="flex items-baseline gap-4"><span className="font-serif font-normal text-2xl text-white">Section heading · 30px</span><span className="text-xs text-white/30 font-jetbrains">Newsreader · h2</span></div>
+            <div className="flex items-baseline gap-4"><span className="font-serif font-normal text-xl text-white">Sub-section · 24px</span><span className="text-xs text-white/30 font-jetbrains">Newsreader · h3</span></div>
+            <div className="flex items-baseline gap-4"><span className="font-serif font-normal text-lg text-white">Card title · 20px</span><span className="text-xs text-white/30 font-jetbrains">Newsreader · h4</span></div>
+            <div className="border-t border-white/[0.06] pt-3" />
+            <div className="flex items-baseline gap-4"><span className="text-base text-white/70">text-base · 18px</span><span className="text-xs text-white/30 font-jetbrains">Geist Sans · body</span></div>
+            <div className="flex items-baseline gap-4"><span className="text-sm text-white/70">text-sm · 16px</span><span className="text-xs text-white/30 font-jetbrains">Geist Sans · body small</span></div>
+            <div className="flex items-baseline gap-4"><span className="text-xs text-white/50">text-xs · 14px</span><span className="text-xs text-white/30 font-jetbrains">Geist Sans · captions, labels (min)</span></div>
+            <div className="flex items-baseline gap-4"><span className="text-2xs text-white/30">text-2xs · 12px</span><span className="text-xs text-white/30 font-jetbrains">Geist Sans · timestamps, legal</span></div>
+            <div className="border-t border-white/[0.06] pt-3" />
+            <div className="flex items-baseline gap-4"><span className="font-serif italic font-normal text-lg text-white/70">Italic serif · labels, hints, FixSays</span><span className="text-xs text-white/30 font-jetbrains">Newsreader Italic</span></div>
+            <div className="flex items-baseline gap-4"><span className="font-jetbrains text-sm text-[var(--gold)] tracking-[0.1em] uppercase">MONO LABEL · BADGES</span><span className="text-xs text-white/30 font-jetbrains">JetBrains Mono · uppercase caps</span></div>
           </div>
         </Section>
 
         {/* ── AppLogo ─────────────────────────────────────────────────────── */}
         <Section title="AppLogo">
           <Row label="Dark surface">
-            <div className="bg-[var(--earth-brown-dark)] p-4 rounded-lg">
+            <div className="bg-[var(--earth-brown-dark)] p-4 rounded-none">
               <AppLogo theme="dark" />
             </div>
           </Row>
           <Row label="Light surface">
-            <div className="bg-[var(--earth-cream)] p-4 rounded-lg border border-earth-sand">
+            <div className="bg-[var(--earth-cream)] p-4 rounded-none border border-earth-sand">
               <AppLogo theme="light" />
             </div>
           </Row>
           <Row label="Sizes">
-            <div className="bg-[var(--earth-brown-dark)] p-4 rounded-lg flex items-center gap-6">
+            <div className="bg-[var(--earth-brown-dark)] p-4 rounded-none flex items-center gap-6">
               <AppLogo size="sm" />
               <AppLogo size="md" />
               <AppLogo size="lg" />
@@ -189,7 +197,7 @@ export default function DesignSystemPage() {
         <Section title="Fix — the FIX-3000 mascot">
           <Row label="Mascot gallery">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="bg-[var(--earth-cream)] border border-earth-sand rounded-lg p-5 flex flex-col items-center gap-2 text-center">
+              <div className="bg-[var(--earth-cream)] border border-earth-sand rounded-none p-5 flex flex-col items-center gap-2 text-center">
                 <span className="fix-float-stage">
                   <FixBot size={80} theme="light" floating />
                 </span>
@@ -200,7 +208,7 @@ export default function DesignSystemPage() {
                   &ldquo;Greetings, hooman. Show me the leak.&rdquo;
                 </p>
               </div>
-              <div className="bg-[var(--earth-cream)] border border-earth-sand rounded-lg p-5 flex flex-col items-center gap-2 text-center">
+              <div className="bg-[var(--earth-cream)] border border-earth-sand rounded-none p-5 flex flex-col items-center gap-2 text-center">
                 <FixBot size={80} theme="light" expression="winking" />
                 <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-earth-brown mt-2">
                   Winking
@@ -209,7 +217,7 @@ export default function DesignSystemPage() {
                   &ldquo;Permits? Already pulled. Trust the bot.&rdquo;
                 </p>
               </div>
-              <div className="bg-[var(--earth-cream)] border border-earth-sand rounded-lg p-5 flex flex-col items-center gap-2 text-center">
+              <div className="bg-[var(--earth-cream)] border border-earth-sand rounded-none p-5 flex flex-col items-center gap-2 text-center">
                 <FixBot size={80} theme="light" expression="computing" />
                 <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-earth-brown mt-2">
                   Computing
@@ -218,7 +226,7 @@ export default function DesignSystemPage() {
                   &ldquo;Calculating studs… please hold your boards.&rdquo;
                 </p>
               </div>
-              <div className="bg-[var(--earth-brown-dark)] rounded-lg p-5 flex flex-col items-center gap-2 text-center">
+              <div className="bg-[var(--earth-brown-dark)] rounded-none p-5 flex flex-col items-center gap-2 text-center">
                 <FixBot size={80} theme="dark" expression="terminator" />
                 <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-white/60 mt-2">
                   Terminator mode
@@ -230,14 +238,14 @@ export default function DesignSystemPage() {
             </div>
           </Row>
           <Row label="Hero pose · nailgun + floating">
-            <div className="bg-[var(--earth-brown-dark)] rounded-lg p-6 flex justify-center">
+            <div className="bg-[var(--earth-brown-dark)] rounded-none p-6 flex justify-center">
               <span className="fix-float-stage">
                 <FixBot size={180} theme="dark" withNailgun floating ariaLabel="Fix with nailgun" />
               </span>
             </div>
           </Row>
           <Row label="Thinking pulse">
-            <div className="bg-[var(--earth-brown-dark)] rounded-lg p-4 inline-flex items-center gap-2">
+            <div className="bg-[var(--earth-brown-dark)] rounded-none p-4 inline-flex items-center gap-2">
               <span className="fix-thinking-dot" aria-hidden />
               <span className="font-mono text-xs text-white/70">Fix is computing…</span>
             </div>
@@ -289,33 +297,33 @@ export default function DesignSystemPage() {
             {/* DIYer variant */}
             <div>
               <p className="text-xs text-earth-brown mb-2">DIYer</p>
-              <div className="w-64 bg-[var(--earth-brown-dark)] rounded-xl overflow-hidden flex flex-col" style={{ height: 420 }}>
-                <div className="p-4 pb-3">
+              <div className="w-64 bg-[#2F2823] rounded-none overflow-hidden flex flex-col" style={{ height: 420 }}>
+                <div className="px-[14px] pt-4 pb-3">
                   <AppLogo />
                 </div>
                 <nav className="px-2 flex-1">
-                  <p className="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-white/30">DIY</p>
+                  <p className="px-[10px] pt-[14px] pb-[6px] font-semibold uppercase text-white/[0.35] tracking-[0.12em]" style={{ fontSize: 10, fontFamily: 'var(--font-jetbrains-mono, monospace)', lineHeight: 1 }}>DIY</p>
                   {[
                     { label: 'My Projects', icon: <FolderOpen size={16} /> },
                     { label: 'My Tools', icon: <Package size={16} />, active: true },
                     { label: 'Shopping', icon: <ShoppingCart size={16} /> },
                   ].map(({ label, icon, active }) => (
-                    <div key={label} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${active ? 'bg-white/10 text-white' : 'text-white/50'}`}>
+                    <div key={label} className={`flex items-center gap-[10px] px-[10px] py-[9px] rounded-none font-medium ${active ? 'bg-white/[0.08] text-white' : 'text-white/[0.35]'}`} style={{ fontSize: 13, lineHeight: 1 }}>
                       {icon}{label}
                     </div>
                   ))}
-                  <p className="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wider text-white/30">Experts</p>
+                  <p className="px-[10px] pt-[14px] pb-[6px] font-semibold uppercase text-white/[0.35] tracking-[0.12em]" style={{ fontSize: 10, fontFamily: 'var(--font-jetbrains-mono, monospace)', lineHeight: 1 }}>Experts</p>
                   {[
                     { label: 'Find an Expert', icon: <Users size={16} /> },
                     { label: 'My Questions', icon: <HelpCircle size={16} /> },
                   ].map(({ label, icon }) => (
-                    <div key={label} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/50">
+                    <div key={label} className="flex items-center gap-[10px] px-[10px] py-[9px] rounded-none font-medium text-white/[0.35]" style={{ fontSize: 13, lineHeight: 1 }}>
                       {icon}{label}
                     </div>
                   ))}
                 </nav>
-                <div className="px-4 py-3 border-t border-white/[0.06] flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center"><Settings size={14} className="text-white/40" /></div>
+                <div className="px-[14px] py-3 border-t border-white/[0.06] flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-[#4A3F35] border border-white/[0.08] flex items-center justify-center"><Settings size={14} className="text-white/40" /></div>
                   <div className="flex-1 h-2 rounded bg-white/10" />
                 </div>
               </div>
@@ -324,44 +332,44 @@ export default function DesignSystemPage() {
             {/* Expert variant */}
             <div>
               <p className="text-xs text-earth-brown mb-2">Expert</p>
-              <div className="w-64 bg-[var(--earth-brown-dark)] rounded-xl overflow-hidden flex flex-col" style={{ height: 560 }}>
-                <div className="p-4 pb-3">
+              <div className="w-64 bg-[#2F2823] rounded-none overflow-hidden flex flex-col" style={{ height: 560 }}>
+                <div className="px-[14px] pt-4 pb-3">
                   <AppLogo />
                 </div>
                 <nav className="px-2 flex-1">
-                  <p className="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-white/30">DIY</p>
+                  <p className="px-[10px] pt-[14px] pb-[6px] font-semibold uppercase text-white/[0.35] tracking-[0.12em]" style={{ fontSize: 10, fontFamily: 'var(--font-jetbrains-mono, monospace)', lineHeight: 1 }}>DIY</p>
                   {[
                     { label: 'My Projects', icon: <FolderOpen size={16} /> },
                     { label: 'My Tools', icon: <Package size={16} /> },
                     { label: 'Shopping', icon: <ShoppingCart size={16} /> },
                   ].map(({ label, icon }) => (
-                    <div key={label} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/50">
+                    <div key={label} className="flex items-center gap-[10px] px-[10px] py-[9px] rounded-none font-medium text-white/[0.35]" style={{ fontSize: 13, lineHeight: 1 }}>
                       {icon}{label}
                     </div>
                   ))}
-                  <p className="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wider text-white/30">Experts</p>
+                  <p className="px-[10px] pt-[14px] pb-[6px] font-semibold uppercase text-white/[0.35] tracking-[0.12em]" style={{ fontSize: 10, fontFamily: 'var(--font-jetbrains-mono, monospace)', lineHeight: 1 }}>Experts</p>
                   {[
                     { label: 'Find an Expert', icon: <Users size={16} /> },
                     { label: 'My Questions', icon: <HelpCircle size={16} /> },
                   ].map(({ label, icon }) => (
-                    <div key={label} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/50">
+                    <div key={label} className="flex items-center gap-[10px] px-[10px] py-[9px] rounded-none font-medium text-white/[0.35]" style={{ fontSize: 13, lineHeight: 1 }}>
                       {icon}{label}
                     </div>
                   ))}
-                  <p className="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wider text-white/30">Expert</p>
+                  <p className="px-[10px] pt-[14px] pb-[6px] font-semibold uppercase text-white/[0.35] tracking-[0.12em]" style={{ fontSize: 10, fontFamily: 'var(--font-jetbrains-mono, monospace)', lineHeight: 1 }}>Expert</p>
                   {[
                     { label: 'Dashboard', icon: <LayoutDashboard size={16} />, active: true },
                     { label: 'Q&A Queue', icon: <MessageSquare size={16} /> },
                     { label: 'Reviews', icon: <ClipboardCheck size={16} /> },
                     { label: 'Messages', icon: <Mail size={16} /> },
                   ].map(({ label, icon, active }) => (
-                    <div key={label} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${active ? 'bg-white/10 text-white' : 'text-white/50'}`}>
+                    <div key={label} className={`flex items-center gap-[10px] px-[10px] py-[9px] rounded-none font-medium ${active ? 'bg-white/[0.08] text-white' : 'text-white/[0.35]'}`} style={{ fontSize: 13, lineHeight: 1 }}>
                       {icon}{label}
                     </div>
                   ))}
                 </nav>
-                <div className="px-4 py-3 border-t border-white/[0.06] flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center"><Settings size={14} className="text-white/40" /></div>
+                <div className="px-[14px] py-3 border-t border-white/[0.06] flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-[#4A3F35] border border-white/[0.08] flex items-center justify-center"><Settings size={14} className="text-white/40" /></div>
                   <div className="flex-1 h-2 rounded bg-white/10" />
                 </div>
               </div>
@@ -534,38 +542,42 @@ export default function DesignSystemPage() {
         </Section>
 
         <Section title="Card">
-          <Row label="Default">
+          <Row label="Default · surface · hover">
             <Card className="w-48">
-              <p className="text-sm text-earth-brown">Basic card with default padding and border.</p>
+              <p className="text-sm">Basic card with default padding and border.</p>
             </Card>
-          </Row>
-          <Row label="Surface background">
             <Card surface className="w-48">
-              <p className="text-sm text-earth-brown">Surface card (off-white).</p>
+              <p className="text-sm">Surface card · off-white over earth.</p>
+            </Card>
+            <Card hover className="w-48">
+              <p className="text-sm">Hover for shadow & accent border.</p>
             </Card>
           </Row>
-          <Row label="With shadow">
+          <Row label="Shadows">
             <Card shadow="sm" className="w-48">
-              <p className="text-sm text-earth-brown">Shadow sm.</p>
+              <p className="text-sm">Shadow · sm</p>
             </Card>
             <Card shadow="md" className="w-48">
-              <p className="text-sm text-earth-brown">Shadow md.</p>
+              <p className="text-sm">Shadow · md</p>
             </Card>
           </Row>
-          <Row label="Hoverable">
-            <Card hover className="w-48">
-              <p className="text-sm text-earth-brown">Hover for shadow and accent border.</p>
-            </Card>
-          </Row>
-          <Row label="Rounded variants">
-            <Card rounded="lg" className="w-32 text-center">
-              <p className="text-xs text-earth-brown">lg</p>
-            </Card>
-            <Card rounded="xl" className="w-32 text-center">
-              <p className="text-xs text-earth-brown">xl</p>
-            </Card>
-            <Card rounded="2xl" className="w-32 text-center">
-              <p className="text-xs text-earth-brown">2xl</p>
+          <Row label="Project card · in context">
+            <Card shadow="sm" className="max-w-sm flex-1 space-y-3">
+              <div className="flex justify-between items-start gap-3">
+                <div>
+                  <p className="font-medium text-base text-white leading-tight">Kitchen sink replacement</p>
+                  <p className="font-jetbrains text-xs text-[var(--muted)] mt-0.5 tracking-[0.04em]">PR-241 · created 3 days ago</p>
+                </div>
+                <StatusBadge status="in_progress" size="sm" />
+              </div>
+              <ProgressBar value={62} variant="primary" size="sm" />
+              <div className="flex justify-between items-center">
+                <div className="flex gap-1.5">
+                  <Badge variant="neutral" size="sm">Plumbing</Badge>
+                  <Badge variant="warning" size="sm">Complex</Badge>
+                </div>
+                <StarRating value={4} size="sm" />
+              </div>
             </Card>
           </Row>
         </Section>
@@ -617,59 +629,39 @@ export default function DesignSystemPage() {
         </Section>
 
         <Section title="Empty State">
-          <Row label="With Fix mascot (new)">
-            <div className="w-full max-w-sm bg-[var(--earth-brown-dark)] border border-white/10 rounded-xl p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
+            <Card padding="lg">
               <EmptyState
                 fixBot
                 title="No projects yet"
                 description="Tell Fix what's broken and we'll figure it out together."
+                action={<Button variant="primary" size="sm" leftIcon={Plus}>New project</Button>}
               />
-            </div>
-          </Row>
-          <Row label="With icon + title + description">
-            <div className="w-full max-w-sm bg-white/6 border border-white/10 rounded-xl p-6">
+            </Card>
+            <Card padding="lg">
               <EmptyState
                 icon={MessageSquare}
                 title="No conversations yet"
-                description="Start chatting to see your history here"
+                description="Start chatting to see your history here."
               />
-            </div>
-          </Row>
-          <Row label="Icon + description only (sm)">
-            <div className="w-full max-w-sm bg-white/6 border border-white/10 rounded-xl p-6">
+            </Card>
+            <Card padding="lg">
               <EmptyState
                 icon={Bell}
-                iconSize={24}
-                size="sm"
-                description="No notifications yet"
+                iconSize={36}
+                title="No notifications yet"
+                description="Your alerts will appear here."
               />
-            </div>
-          </Row>
-          <Row label="With subtext">
-            <div className="w-full max-w-sm bg-white/6 border border-white/10 rounded-xl p-6">
-              <EmptyState
-                icon={Package}
-                size="sm"
-                description="No messages yet"
-                subtext="Your conversations will appear here"
-              />
-            </div>
-          </Row>
-          <Row label="No icon">
-            <div className="w-full max-w-sm bg-white/6 border border-white/10 rounded-xl p-6">
-              <EmptyState description="No questions match your filter" />
-            </div>
-          </Row>
-          <Row label="With action">
-            <div className="w-full max-w-sm bg-white/6 border border-white/10 rounded-xl p-6">
+            </Card>
+            <Card padding="lg">
               <EmptyState
                 icon={Users}
                 title="No experts found"
-                description="Try adjusting your search or filters"
-                action={<Button variant="primary" size="sm">Browse all experts</Button>}
+                description="Try adjusting your search or filters."
+                action={<Button variant="outline" size="sm">Browse all experts</Button>}
               />
-            </div>
-          </Row>
+            </Card>
+          </div>
         </Section>
 
         {/* ── Spinner ──────────────────────────────────────────────────────── */}
@@ -788,7 +780,7 @@ export default function DesignSystemPage() {
           <Row label="Default (right-aligned)">
             <Dropdown
               trigger={
-                <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white/70 border border-white/20 rounded-lg hover:bg-white/10 hover:text-white transition-colors">
+                <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white/70 border border-white/20 rounded-none hover:bg-white/10 hover:text-white transition-colors">
                   Account <span className="text-white/40">▾</span>
                 </button>
               }
@@ -803,7 +795,7 @@ export default function DesignSystemPage() {
             <Dropdown
               align="left"
               trigger={
-                <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white/70 border border-white/20 rounded-lg hover:bg-white/10 hover:text-white transition-colors">
+                <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white/70 border border-white/20 rounded-none hover:bg-white/10 hover:text-white transition-colors">
                   Options <span className="text-white/40">▾</span>
                 </button>
               }
@@ -816,7 +808,96 @@ export default function DesignSystemPage() {
           </Row>
         </Section>
 
-        {/* Guided bot components removed — replaced by unified chat */}
+        {/* ── Chat ────────────────────────────────────────────────────────── */}
+        <Section title="Chat">
+
+          <Row label="Message bubbles">
+            <div className="w-full max-w-lg space-y-3">
+              <div className="flex justify-end">
+                <div className="max-w-[85%] bg-rust text-white rounded-2xl rounded-br-md px-4 py-2.5">
+                  <p style={{ fontSize: 14 }}>How do I fix a leaky faucet?</p>
+                </div>
+              </div>
+              <div className="flex justify-start">
+                <div className="max-w-[85%] bg-[var(--earth-brown-dark)] border border-white/[0.08] text-[var(--earth-cream)] rounded-2xl rounded-bl-md px-4 py-3">
+                  <p style={{ fontSize: 14 }}>Turn off the water supply, remove the handle, replace the washer or cartridge, and reassemble. Most faucet repairs take under 30 minutes.</p>
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <div className="max-w-[85%] bg-rust text-white rounded-2xl rounded-br-md px-4 py-2.5">
+                  <p style={{ fontSize: 14 }}>What tools do I need?</p>
+                </div>
+              </div>
+              <div className="flex justify-start">
+                <div className="max-w-[85%] bg-[var(--earth-brown-dark)] border border-white/[0.08] text-[var(--earth-cream)] rounded-2xl rounded-bl-md px-4 py-3">
+                  <p style={{ fontSize: 14 }}>Adjustable wrench, flathead and Phillips screwdrivers, needle-nose pliers, and replacement washers or a cartridge kit.</p>
+                </div>
+              </div>
+            </div>
+          </Row>
+
+          <Row label="Loading / typing state">
+            <div className="flex justify-start">
+              <Spinner size="sm" />
+            </div>
+          </Row>
+
+          <Row label="Input area">
+            <div className="w-full max-w-lg space-y-2">
+              <Textarea
+                placeholder="Describe your project or ask a question..."
+                resize="none"
+                fullWidth
+                rows={2}
+              />
+              <div className="flex justify-end">
+                <button
+                  className="p-2 rounded-none bg-rust text-white hover:bg-copper transition-all"
+                  aria-label="Send"
+                >
+                  <ArrowUp className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </Row>
+
+          <Row label="Suggestion chips">
+            <div className="w-full max-w-lg grid grid-cols-2 gap-2">
+              {[
+                "I'm mid-project — my mortar isn't setting",
+                'Is my electrical panel safe for a hot tub?',
+                'Price out a bathroom remodel',
+                'What permits do I need for a deck?',
+              ].map((text, i) => (
+                <Card key={i} padding="sm" hover className="text-left cursor-pointer">
+                  <p className="font-medium text-white leading-tight" style={{ fontSize: 13 }}>{text}</p>
+                </Card>
+              ))}
+            </div>
+          </Row>
+
+          <Row label="Post-response actions">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button variant="primary" size="sm" leftIcon={ShoppingCart} iconSize={16}>Save Materials</Button>
+              <Button variant="ghost" size="sm" leftIcon={FolderPlus} iconSize={16} className="bg-white/8 text-white/70 hover:text-white hover:bg-white/15 border border-white/10">Save to Project</Button>
+            </div>
+          </Row>
+
+          <Row label="Error state">
+            <div className="bg-rust/20 border border-rust/30 text-earth-cream rounded-lg p-3 w-full max-w-lg" style={{ fontSize: 14 }}>
+              Failed to send message.
+              <button className="ml-2 underline">Retry</button>
+            </div>
+          </Row>
+
+          <Row label="Inventory toast">
+            <div className="flex items-start gap-2 bg-forest-green/20 border border-forest-green/30 text-earth-cream rounded-lg px-3 py-2.5 w-full max-w-lg" style={{ fontSize: 14 }}>
+              <Package className="w-4 h-4 flex-shrink-0 mt-0.5 text-forest-green" />
+              <span>Added to inventory: 2x4 lumber, deck screws.</span>
+            </div>
+          </Row>
+
+        </Section>
 
       </div>
     </div>

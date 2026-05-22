@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Button from '@/components/ui/Button';
+import Textarea from '@/components/ui/Textarea';
 
 const FEEDBACK_TYPES = [
   { value: 'bug', label: 'Bug' },
@@ -111,11 +112,13 @@ export default function BetaFeedbackWidget() {
                 </div>
 
                 {/* Message */}
-                <textarea
+                <Textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="What's on your mind? (min 5 characters)"
-                  className="w-full h-24 px-3 py-2 text-sm bg-white border border-white/10 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-rust text-white placeholder:text-white/60"
+                  resize="none"
+                  fullWidth
+                  className="h-24"
                 />
 
                 {status === 'error' && (

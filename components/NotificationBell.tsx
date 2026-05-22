@@ -66,7 +66,7 @@ export default function NotificationBell({ userId, placement = 'bottom' }: Notif
       </button>
 
       {isOpen && (
-        <div className={`absolute right-0 w-80 bg-[var(--earth-brown-dark)] border border-white/10 rounded-lg shadow-xl z-50 overflow-hidden ${placement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'}`}>
+        <div className={`absolute left-0 w-80 bg-[var(--earth-brown-dark)] border border-white/10 rounded-lg shadow-xl z-50 overflow-hidden ${placement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'}`}>
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
             <h3 className="text-sm font-semibold text-white/80">Notifications</h3>
             {unreadCount > 0 && (

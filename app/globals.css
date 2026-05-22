@@ -21,7 +21,10 @@
   --earth-night: #1A1612;
 
   /* Accent Colors - Warm & Natural */
+  --terracotta: #C67B5C;
+  --terracotta-dark: #A65D3F;
   --rust: #B8593B;
+  --rust-glow: #D97757;
   --copper: #B87333;
   --forest-green: #5C7A40;
   --forest-green-dark: #3E5428;
@@ -57,10 +60,23 @@
   --gold: #D4A574;
 
   /* Fixerator robot accents — keep on mascot + "thinking" pulse only */
-  --bot-eye:    #FF4438;
-  --bot-glow:   #FFB5AC;
-  --bot-chrome: #C9C2BA;
-  --bot-chrome-dark: #E2DDD6;
+  --bot-eye:       #E83A2C;
+  --bot-cream:     #F1ECE5;
+  --bot-cream-hi:  #FBF8F2;
+  --bot-outline:   #2A211A;
+  --bot-visor:     #2E2823;
+  --bot-eye-outer: #E8C2B6;
+  --bot-eye-mid:   #C77A66;
+
+  /* Dark-on-dark status badge pairs */
+  --status-research-fg-dark:  #7EA0AD;
+  --status-research-bg-dark:  #1B2D33;
+  --status-progress-fg-dark:  #D97757;
+  --status-progress-bg-dark:  #3A1F18;
+  --status-waiting-fg-dark:   #D49A4A;
+  --status-waiting-bg-dark:   #3A2A14;
+  --status-complete-fg-dark:  #7A9A56;
+  --status-complete-bg-dark:  #1F2E16;
 
   /* Surface Hierarchy */
   --surface: #F8F7F7;
@@ -104,6 +120,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-newsreader, 'Newsreader', 'Source Serif Pro', Georgia, serif);
+  --font-jetbrains: var(--font-jetbrains-mono, 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace);
 
   --color-earth-cream: var(--earth-cream);
   --color-earth-tan: var(--earth-tan);
@@ -112,6 +130,8 @@
   --color-earth-brown: var(--earth-brown);
   --color-earth-brown-dark: var(--earth-brown-dark);
   --color-earth-night: var(--earth-night);
+  --color-terracotta: var(--terracotta);
+  --color-terracotta-dark: var(--terracotta-dark);
   --color-rust: var(--rust);
   --color-copper: var(--copper);
   --color-forest-green: var(--forest-green);
@@ -122,8 +142,8 @@
   --color-muted: var(--muted);
   --color-gold: var(--gold);
   --color-bot-eye: var(--bot-eye);
-  --color-bot-glow: var(--bot-glow);
-  --color-bot-chrome: var(--bot-chrome);
+  --color-bot-cream: var(--bot-cream);
+  --color-rust-glow: var(--rust-glow);
   --color-foreground: var(--foreground);
 
   --nav-surface: #FDFBF7;
@@ -165,7 +185,25 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif);
+}
+
+/* Plate shadow — filled button / icon-button inner highlight */
+.plate-shadow {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .18),
+    inset 0 0 0 1px rgba(255, 255, 255, .08),
+    0 1px 0 rgba(0, 0, 0, .35);
+}
+
+/* Progress bar primary gradient fill */
+.progress-fill-primary {
+  background: linear-gradient(90deg, var(--rust), var(--rust-glow, #D97757));
+}
+
+@keyframes fixfloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
 }
 
 /* Dark Brown Blueprint Grid Background */
@@ -403,16 +441,16 @@ body {
 
 /* ============ Fixerator / Fix the FIX-3000 mascot ============ */
 .fix-bot { display: block; }
-.fix-bot .head { fill: var(--bot-chrome); stroke: var(--earth-brown-dark); stroke-width: 2; }
-.fix-bot .visor { fill: var(--earth-brown-dark); }
+.fix-bot .head { fill: var(--bot-cream); stroke: var(--bot-outline); stroke-width: 2; }
+.fix-bot .visor { fill: var(--bot-visor); }
 .fix-bot .eye { fill: var(--bot-eye); }
-.fix-bot .eye-glow { fill: var(--bot-glow); opacity: 0.55; }
-.fix-bot .ant-line { stroke: var(--earth-brown-dark); stroke-width: 2; stroke-linecap: round; }
+.fix-bot .eye-glow { fill: var(--bot-eye-outer); opacity: 0.55; }
+.fix-bot .ant-line { stroke: var(--bot-outline); stroke-width: 2; stroke-linecap: round; }
 .fix-bot .ant-tip { fill: var(--bot-eye); }
-.fix-bot .mouth { fill: none; stroke: var(--earth-brown-dark); stroke-width: 1.6; stroke-linecap: round; }
-.fix-bot .bolt { fill: var(--earth-brown-dark); }
+.fix-bot .mouth { fill: none; stroke: var(--bot-outline); stroke-width: 1.6; stroke-linecap: round; }
+.fix-bot .bolt { fill: var(--bot-outline); }
 
-.fix-bot.on-dark .head { fill: var(--bot-chrome-dark); stroke: rgba(255, 255, 255, 0.2); }
+.fix-bot.on-dark .head { fill: var(--bot-cream-hi); stroke: rgba(255, 255, 255, 0.2); }
 .fix-bot.on-dark .visor { fill: var(--earth-night); }
 .fix-bot.on-dark .ant-line { stroke: rgba(255, 255, 255, 0.6); }
 .fix-bot.on-dark .mouth { stroke: var(--earth-night); }
