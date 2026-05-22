@@ -19,6 +19,14 @@ export default function ShoppingPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
+  const loadProjects = async (userId: string) => {
+    const { data } = await supabase
+      .from('projects').select('id, name, description')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    if (data) setProjects(data);
+  };
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       const u = session?.user ? { id: session.user.id } : null;
@@ -34,14 +42,6 @@ export default function ShoppingPage() {
     });
     return () => subscription.unsubscribe();
   }, []);
-
-  const loadProjects = async (userId: string) => {
-    const { data } = await supabase
-      .from('projects').select('id, name, description')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-    if (data) setProjects(data);
-  };
 
   if (loaded && !user) {
     return (

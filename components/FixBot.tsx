@@ -39,6 +39,7 @@ export default function FixBot({
   // Randomized begin offset so multiple bots don't blink in unison.
   // Must be deferred to after mount so SSR and client hydration produce the same value.
   const [glanceBegin, setGlanceBegin] = useState('0s');
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setGlanceBegin(`${-Math.random() * 7}s`); }, []);
 
   const a11yProps = ariaLabel
