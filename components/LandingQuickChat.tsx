@@ -12,6 +12,8 @@ import { useChat, CHAT_STORAGE_KEY } from '@/hooks/useChat';
 import { useAgentRun } from '@/hooks/useAgentRun';
 import Spinner from '@/components/ui/Spinner';
 import Button from '@/components/ui/Button';
+import Textarea from '@/components/ui/Textarea';
+import Card from '@/components/ui/Card';
 import SaveToProjectModal from '@/components/SaveToProjectModal';
 import IntentSignal from '@/components/IntentSignal';
 import PlanningCTA from '@/components/PlanningCTA';
@@ -25,7 +27,6 @@ import type { IntentType } from '@/lib/intelligence/types';
 import type { StartAgentRunRequest } from '@/lib/agents/types';
 
 interface SuggestionChip {
-  emoji: string;
   text: string;
 }
 
@@ -47,9 +48,9 @@ export default function LandingQuickChat({
     ul: ({ children }: { children?: React.ReactNode }) => <ul className="list-disc ml-4 mb-2 text-earth-cream">{children}</ul>,
     ol: ({ children }: { children?: React.ReactNode }) => <ol className="list-decimal ml-4 mb-2 text-earth-cream">{children}</ol>,
     li: ({ children }: { children?: React.ReactNode }) => <li className="text-earth-cream">{children}</li>,
-    h1: ({ children }: { children?: React.ReactNode }) => <h1 className="text-xl font-bold mb-2 text-earth-cream">{children}</h1>,
-    h2: ({ children }: { children?: React.ReactNode }) => <h2 className="text-lg font-bold mb-2 text-earth-cream">{children}</h2>,
-    h3: ({ children }: { children?: React.ReactNode }) => <h3 className="text-md font-bold mb-2 text-earth-cream">{children}</h3>,
+    h1: ({ children }: { children?: React.ReactNode }) => <h1 className="font-serif italic font-normal text-xl leading-tight tracking-[-0.01em] mb-2 text-earth-cream">{children}</h1>,
+    h2: ({ children }: { children?: React.ReactNode }) => <h2 className="font-serif font-normal text-lg leading-tight tracking-[-0.01em] mb-2 text-earth-cream">{children}</h2>,
+    h3: ({ children }: { children?: React.ReactNode }) => <h3 className="font-serif font-normal text-base leading-tight mb-2 text-earth-cream">{children}</h3>,
     strong: ({ children }: { children?: React.ReactNode }) => <strong className="font-bold text-earth-cream">{children}</strong>,
     em: ({ children }: { children?: React.ReactNode }) => <em className="italic text-earth-sand">{children}</em>,
     code: ({ children }: { children?: React.ReactNode }) => <code className="px-1 py-0.5 rounded text-sm bg-white/10 text-earth-cream">{children}</code>,
@@ -300,7 +301,7 @@ export default function LandingQuickChat({
                 className={`max-w-[85%] ${
                   msg.role === 'user'
                     ? 'bg-rust text-white rounded-2xl rounded-br-md px-4 py-2.5'
-                    : 'bg-white/10 text-earth-cream rounded-2xl rounded-bl-md px-4 py-3'
+                    : 'bg-[var(--earth-brown-dark)] border border-white/[0.08] text-[var(--earth-cream)] rounded-2xl rounded-bl-md px-4 py-3'
                 }`}
               >
                 {msg.role === 'assistant' ? (
@@ -383,7 +384,7 @@ export default function LandingQuickChat({
         {/* Streaming content */}
         {chat.isStreaming && chat.streamingContent && (
           <div className="flex justify-start">
-            <div className="max-w-[85%] bg-white/10 text-earth-cream rounded-2xl rounded-bl-md px-4 py-3">
+            <div className="max-w-[85%] bg-[var(--earth-brown-dark)] border border-white/[0.08] text-[var(--earth-cream)] rounded-2xl rounded-bl-md px-4 py-3">
               <div className="prose prose-sm prose-invert max-w-none">
                 <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>{cleanMessageContent(chat.streamingContent)}</ReactMarkdown>
               </div>
@@ -394,16 +395,14 @@ export default function LandingQuickChat({
         {/* Loading spinner */}
         {chat.isLoading && !chat.streamingContent && (
           <div className="flex justify-start">
-            <div className="bg-white/10 rounded-2xl rounded-bl-md px-4 py-3">
-              <Spinner size="sm" />
-            </div>
+            <Spinner size="sm" />
           </div>
         )}
       </div>
 
       {/* Error */}
       {chat.failedMessage && (
-        <div className="bg-red-900/30 border border-red-500/30 text-red-200 rounded-lg p-3 text-sm">
+        <div className="bg-rust/20 border border-rust/30 text-earth-cream rounded-lg p-3 text-sm">
           Failed to send message.
           <button onClick={chat.handleRetry} className="ml-2 underline">
             Retry
@@ -412,8 +411,8 @@ export default function LandingQuickChat({
       )}
 
       {/* Input area */}
-      <div className="bg-white/10 rounded-2xl p-4">
-        <textarea
+      <div className="space-y-2">
+        <Textarea
           value={chat.input}
           onChange={e => chat.setInput(e.target.value)}
           onKeyDown={e => {
@@ -423,16 +422,17 @@ export default function LandingQuickChat({
             }
           }}
           placeholder={hasConversation ? 'Ask a follow-up...' : 'Describe your project or ask a question...'}
-          className="w-full bg-transparent text-earth-cream placeholder-earth-cream/40 text-base resize-none focus:outline-none disabled:opacity-50"
+          resize="none"
+          fullWidth
           disabled={chat.isLoading}
           rows={2}
         />
-        <div className="flex justify-end mt-2">
+        <div className="flex justify-end">
           <button
             onClick={handleSend}
             disabled={chat.isLoading || !chat.input.trim()}
             aria-label="Send message"
-            className={`p-2 rounded-xl transition-all ${
+            className={`p-2 rounded-none transition-all ${
               chat.input.trim() && !chat.isLoading
                 ? 'bg-rust text-white hover:bg-copper'
                 : 'text-white/30 cursor-not-allowed'
@@ -447,14 +447,16 @@ export default function LandingQuickChat({
       {!hasConversation && suggestionChips && (
         <div className="grid grid-cols-2 gap-2">
           {suggestionChips.map((chip, idx) => (
-            <button
+            <Card
               key={idx}
+              as="button"
+              padding="sm"
+              hover
               onClick={() => handleChipClick(chip.text)}
-              className="rounded-2xl bg-white/5 hover:bg-white/10 border border-white/8 text-left transition-all p-4 text-earth-cream font-semibold text-sm leading-tight"
+              className="text-left w-full"
             >
-              <span className="mr-1.5">{chip.emoji}</span>
-              {chip.text}
-            </button>
+              <p className="font-medium text-white leading-tight" style={{ fontSize: 13 }}>{chip.text}</p>
+            </Card>
           ))}
         </div>
       )}

@@ -6,9 +6,7 @@ interface EmptyStateProps {
   icon?: ElementType;
   iconSize?: number;
   iconClassName?: string;
-  /** Render the Fix the FIX-3000 mascot in place of the icon. */
   fixBot?: boolean;
-  /** Theme for the Fix mascot. Defaults to 'dark' since EmptyState is used on dark surfaces. */
   fixBotTheme?: 'light' | 'dark';
   title?: string;
   description: string;
@@ -34,23 +32,21 @@ export default function EmptyState({
   const resolvedIconSize = iconSize ?? (size === 'sm' ? 32 : 48);
 
   return (
-    <div className={cn('text-center', className)}>
+    <div className={cn('flex flex-col items-center text-center gap-3', className)}>
       {fixBot ? (
-        <div className={cn('flex justify-center', size === 'sm' ? 'mb-3' : 'mb-4')}>
-          <FixBot size={size === 'sm' ? 56 : 72} theme={fixBotTheme} floating />
-        </div>
-      ) : Icon && (
+        <FixBot size={size === 'sm' ? 56 : 72} theme={fixBotTheme} floating />
+      ) : Icon ? (
         <Icon
           size={resolvedIconSize}
-          className={cn('mx-auto text-white/20', size === 'sm' ? 'mb-3' : 'mb-4', iconClassName)}
+          className={cn('text-white/20', iconClassName)}
         />
-      )}
+      ) : null}
       {title && (
-        <p className="font-medium mb-1 text-white/70">{title}</p>
+        <p className="font-serif font-normal text-white/80 leading-tight" style={{ fontSize: 18 }}>{title}</p>
       )}
-      <p className="text-sm text-white/50">{description}</p>
+      <p className="font-serif italic text-white/50 max-w-[32ch]" style={{ fontSize: 14 }}>{description}</p>
       {subtext && (
-        <p className="text-xs mt-1 text-white/30">{subtext}</p>
+        <p className="font-serif italic text-white/30" style={{ fontSize: 13 }}>{subtext}</p>
       )}
       {action && (
         <div className="mt-4">{action}</div>

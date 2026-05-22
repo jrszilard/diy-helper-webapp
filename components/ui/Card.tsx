@@ -4,20 +4,14 @@ import { cn } from '@/lib/utils';
 const paddingClasses = {
   none: '',
   sm:   'p-3',
-  md:   'p-4',
+  md:   'p-5',
   lg:   'p-6',
-};
-
-const roundedClasses = {
-  lg:   'rounded-lg',
-  xl:   'rounded-xl',
-  '2xl': 'rounded-2xl',
 };
 
 interface CardProps {
   children: React.ReactNode;
   padding?:  keyof typeof paddingClasses;
-  rounded?:  keyof typeof roundedClasses;
+  rounded?:  'lg' | 'xl' | '2xl'; // kept for API compat — all render square
   hover?:    boolean;
   shadow?:   boolean | 'sm' | 'md';
   surface?:  boolean;
@@ -29,7 +23,6 @@ interface CardProps {
 export default function Card({
   children,
   padding  = 'md',
-  rounded  = 'lg',
   hover    = false,
   shadow   = false,
   surface  = false,
@@ -38,21 +31,22 @@ export default function Card({
   as: Tag  = 'div',
 }: CardProps) {
   const shadowClass =
-    shadow === 'sm' ? 'shadow-sm'
-    : shadow === 'md' || shadow === true ? 'shadow-md'
+    shadow === 'sm' ? 'shadow-[0_2px_8px_rgba(0,0,0,0.25)]'
+    : shadow === 'md' || shadow === true ? 'shadow-[0_8px_24px_rgba(0,0,0,0.32)]'
     : '';
 
   return (
     <Tag
       onClick={onClick}
       className={cn(
-        'border border-white/10',
-        surface ? 'bg-white/10' : 'bg-white/6',
-        roundedClasses[rounded],
+        'rounded-none border',
+        surface
+          ? 'bg-[var(--earth-cream)] text-[#29261B] border-[var(--earth-sand)]'
+          : 'bg-[var(--earth-brown-dark)] border-white/[0.08] text-[var(--muted)]',
         paddingClasses[padding],
         shadowClass,
-        hover && 'transition-all hover:shadow-md hover:border-[var(--rust)]/30',
-        onClick && 'cursor-pointer',
+        hover && 'transition-all duration-150 cursor-pointer hover:shadow-[0_8px_24px_rgba(0,0,0,0.32)] hover:border-[var(--rust)]',
+        onClick && !hover && 'cursor-pointer',
         className,
       )}
     >

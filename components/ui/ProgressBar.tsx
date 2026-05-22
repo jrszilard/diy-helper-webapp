@@ -4,17 +4,17 @@ type ProgressBarVariant = 'default' | 'primary' | 'success' | 'warning';
 type ProgressBarSize    = 'sm' | 'md' | 'lg';
 
 const variantTrack: Record<ProgressBarVariant, string> = {
-  default: 'bg-[var(--earth-tan)]',
-  primary: 'bg-[var(--earth-tan)]',
-  success: 'bg-[var(--earth-tan)]',
-  warning: 'bg-amber-100',
+  default: 'bg-white/[0.08]',
+  primary: 'bg-white/[0.08]',
+  success: 'bg-white/[0.08]',
+  warning: 'bg-white/[0.08]',
 };
 
 const variantFill: Record<ProgressBarVariant, string> = {
-  default: 'bg-[var(--earth-brown)]',
-  primary: 'bg-[var(--rust)]',
+  default: 'bg-[var(--earth-brown-light)]',
+  primary: 'progress-fill-primary',
   success: 'bg-[var(--forest-green)]',
-  warning: 'bg-amber-500',
+  warning: 'bg-[var(--gold)]',
 };
 
 const sizeClasses: Record<ProgressBarSize, string> = {
@@ -45,9 +45,11 @@ export default function ProgressBar({
   return (
     <div className={cn('w-full', className)}>
       {(label || showValue) && (
-        <div className="flex justify-between items-center mb-1">
-          {label && <span className="text-xs text-[var(--earth-brown)]">{label}</span>}
-          {showValue && <span className="text-xs font-medium text-[var(--earth-brown-dark)]">{clamped}%</span>}
+        <div className="flex justify-between items-center mb-1.5">
+          {label && <span className="text-xs font-medium text-[var(--muted)]">{label}</span>}
+          {showValue && (
+            <span className="font-jetbrains font-semibold text-xs text-[var(--foreground)]">{clamped}%</span>
+          )}
         </div>
       )}
       <div className={cn('w-full rounded-full overflow-hidden', sizeClasses[size], variantTrack[variant])}>

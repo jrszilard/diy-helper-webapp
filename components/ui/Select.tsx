@@ -1,6 +1,5 @@
 import { SelectHTMLAttributes, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
-import { ChevronDown } from 'lucide-react';
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
@@ -12,10 +11,13 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 const sizeClasses = {
-  sm: 'py-1.5 text-sm',
-  md: 'py-2 text-sm',
-  lg: 'py-3 text-base',
+  sm: 'h-[30px] text-[13px] px-[10px]',
+  md: 'h-[38px] text-[14px] px-3',
+  lg: 'h-[46px] text-[15px] px-[14px]',
 };
+
+// Inline chevron SVG via data URL — avoids Lucide layout overhead inside select
+const chevronBg = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0h10L5 6z' fill='%23AEA8A3'/></svg>")`;
 
 const Select = forwardRef<HTMLSelectElement, SelectProps>(({
   label,
@@ -29,47 +31,47 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(({
   children,
   ...props
 }, ref) => {
-  const paddingLeft = LeftIcon ? 'pl-9' : 'pl-3';
+  const paddingLeft = LeftIcon ? 'pl-9' : undefined;
 
   return (
-    <div className={cn('flex flex-col gap-1', fullWidth && 'w-full')}>
+    <div className={cn('flex flex-col', fullWidth && 'w-full')} style={{ gap: 6 }}>
       {label && (
-        <label htmlFor={id} className="text-sm font-medium text-white/60">
+        <label htmlFor={id} className="font-serif italic text-[var(--muted)]" style={{ fontSize: 14 }}>
           {label}
         </label>
       )}
       <div className={cn('relative', fullWidth && 'w-full')}>
         {LeftIcon && (
-          <LeftIcon
-            size={iconSize}
-            className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30"
-          />
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--earth-brown)] flex">
+            <LeftIcon size={iconSize} />
+          </span>
         )}
         <select
           ref={ref}
           id={id}
           className={cn(
-            'appearance-none bg-white/10 text-white border border-white/20 rounded-lg transition-colors',
+            'appearance-none bg-[#1F1B17] text-white border border-white/[0.08] rounded-none transition-colors',
             '[&>option]:bg-[#2a2420] [&>option]:text-white',
-            'focus:outline-none focus:ring-2 focus:ring-[var(--rust)] focus:border-[var(--rust)]',
+            'focus:outline-none focus:border-[var(--rust)] focus:bg-[var(--background)]',
             'disabled:opacity-50 disabled:cursor-not-allowed',
-            error && 'border-[var(--rust)] focus:ring-[var(--rust)] focus:border-[var(--rust)]',
+            error && 'border-[#C24A33]',
             sizeClasses[inputSize],
             paddingLeft,
             'pr-9',
             fullWidth && 'w-full',
             className,
           )}
+          style={{
+            backgroundImage: chevronBg,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right 12px center',
+          }}
           {...props}
         >
           {children}
         </select>
-        <ChevronDown
-          size={iconSize}
-          className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30"
-        />
         {error && (
-          <p className="mt-1 text-xs text-[var(--rust)]">{error}</p>
+          <p className="font-jetbrains font-medium text-[#E89580]" style={{ fontSize: 11, marginTop: 2 }}>{error}</p>
         )}
       </div>
     </div>

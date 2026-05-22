@@ -17,13 +17,14 @@ export default function Toggle({ checked, onChange, label, description, disabled
           {label && (
             <label
               htmlFor={id}
-              className="block text-sm font-semibold cursor-pointer text-white/80"
+              className="block font-medium cursor-pointer text-white leading-[1.3]"
+              style={{ fontSize: 14 }}
             >
               {label}
             </label>
           )}
           {description && (
-            <p className="text-xs mt-0.5 text-white/40">{description}</p>
+            <p className="mt-0.5 text-[var(--muted)] leading-[1.4]" style={{ fontSize: 12 }}>{description}</p>
           )}
         </div>
       )}
@@ -35,16 +36,17 @@ export default function Toggle({ checked, onChange, label, description, disabled
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={cn(
-          'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--rust)]',
+          'relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--rust)]',
           'disabled:opacity-50 disabled:cursor-not-allowed',
-          checked ? 'bg-forest-green' : 'bg-white/20',
+          checked ? 'bg-[var(--rust)]' : 'bg-white/[0.18]',
         )}
       >
         <span
           className={cn(
-            'inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform',
-            checked ? 'translate-x-6' : 'translate-x-1',
+            'absolute top-0.5 h-4 w-4 transform rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)] transition-transform duration-[180ms]',
+            checked ? 'translate-x-4' : 'translate-x-0.5',
           )}
+          style={{ transitionTimingFunction: 'cubic-bezier(.4,.2,.2,1)' }}
         />
       </button>
     </div>

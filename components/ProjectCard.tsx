@@ -73,7 +73,7 @@ export default function ProjectCard({
               <>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-[var(--earth-sand)]">{categoryIcon}</span>
-                  <span className="font-semibold text-base truncate text-white">{project.name}</span>
+                  <span className="font-medium text-base truncate text-white">{project.name}</span>
                 </div>
                 {project.description && (
                   <p className="text-sm text-[var(--earth-sand)]/70 line-clamp-2 ml-6">{project.description}</p>
@@ -139,7 +139,7 @@ export default function ProjectCard({
             />
           ) : (
             <>
-              <span className="font-semibold text-sm text-white block truncate">
+              <span className="font-medium text-sm text-white block truncate">
                 {project.name}
               </span>
               {project.description && (

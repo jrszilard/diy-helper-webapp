@@ -2,22 +2,22 @@ import { ElementType } from 'react';
 import { cn } from '@/lib/utils';
 
 export type BadgeVariant =
-  | 'default'    // slate-blue tint  — categories, specialties
-  | 'primary'    // rust tint  — specialist tier, featured
-  | 'success'    // forest-green tint — selected, answered
-  | 'neutral'    // earth-tan         — pool, standard
-  | 'warning'    // amber             — complex tier
-  | 'purple'     // purple            — direct mode, waiting
-  | 'solid';     // slate-blue solid  — Pro, paid tier
+  | 'default'
+  | 'primary'
+  | 'success'
+  | 'neutral'
+  | 'warning'
+  | 'purple'
+  | 'solid';
 
 const variantClasses: Record<BadgeVariant, string> = {
-  default:  'bg-[var(--slate-blue)]/10 text-[var(--slate-blue)]',
-  primary:  'bg-[var(--rust)]/10 text-[var(--rust)]',
-  success:  'bg-[var(--forest-green)]/10 text-[var(--forest-green)]',
-  neutral:  'bg-[var(--earth-tan)] text-[var(--earth-brown)]',
-  warning:  'bg-amber-100 text-amber-700',
-  purple:   'bg-[var(--status-waiting-bg)] text-[var(--status-waiting)]',
-  solid:    'bg-[var(--slate-blue)] text-white',
+  default:  'bg-[var(--slate-blue)]/10 text-[var(--slate-blue)] border border-[var(--slate-blue)]/20',
+  primary:  'bg-[rgba(184,89,59,0.18)] text-[#E89580] border border-[rgba(184,89,59,0.35)]',
+  success:  'bg-[rgba(92,122,64,0.18)] text-[#A8C28A] border border-[rgba(92,122,64,0.4)]',
+  neutral:  'bg-[rgba(174,168,163,0.12)] text-[var(--earth-sand)] border border-[rgba(174,168,163,0.18)]',
+  warning:  'bg-[rgba(212,165,116,0.18)] text-[var(--gold)] border border-[rgba(212,165,116,0.35)]',
+  purple:   'bg-[var(--status-waiting-bg)] text-[var(--status-waiting)] border border-[rgba(140,108,184,0.35)]',
+  solid:    'bg-[var(--foreground)] text-[var(--background)] border border-transparent',
 };
 
 interface BadgeProps {
@@ -38,8 +38,10 @@ export default function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full font-medium',
-        size === 'sm' ? 'text-[10px] px-1.5 py-0.5' : 'text-xs px-2 py-0.5',
+        'inline-flex items-center gap-1 rounded-none font-medium',
+        size === 'sm'
+          ? 'text-[11px] px-[7px] py-[2px]'
+          : 'text-[12px] px-[9px] py-[4px]',
         variantClasses[variant],
         className,
       )}

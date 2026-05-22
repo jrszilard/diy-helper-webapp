@@ -13,9 +13,9 @@ interface TextInputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const sizeClasses = {
-  sm: 'py-1.5 text-sm',
-  md: 'py-2 text-sm',
-  lg: 'py-3 text-base',
+  sm: 'h-[30px] text-[13px] px-[10px]',
+  md: 'h-[38px] text-[14px] px-3',
+  lg: 'h-[46px] text-[15px] px-[14px]',
 };
 
 const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({
@@ -31,34 +31,34 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({
   id,
   ...props
 }, ref) => {
-  const paddingLeft = LeftIcon ? 'pl-9' : 'pl-3';
-  const paddingRight = RightIcon ? 'pr-9' : 'pr-3';
+  const paddingLeft  = LeftIcon  ? 'pl-9'  : undefined;
+  const paddingRight = RightIcon ? 'pr-9'  : undefined;
 
   return (
-    <div className={cn('flex flex-col gap-1', fullWidth && 'w-full')}>
+    <div className={cn('flex flex-col', fullWidth && 'w-full')} style={{ gap: 6 }}>
       {label && (
         <label
           htmlFor={id}
-          className={cn('text-sm font-medium text-white/60', labelClassName)}
+          className={cn('font-serif italic text-[var(--muted)]', labelClassName)}
+          style={{ fontSize: 14 }}
         >
           {label}
         </label>
       )}
       <div className="relative">
         {LeftIcon && (
-          <LeftIcon
-            size={iconSize}
-            className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30"
-          />
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--earth-brown)] flex">
+            <LeftIcon size={iconSize} />
+          </span>
         )}
         <input
           ref={ref}
           id={id}
           className={cn(
-            'bg-white/10 text-white placeholder:text-white/50 border border-white/20 rounded-lg transition-colors',
-            'focus:outline-none focus:ring-2 focus:ring-[var(--rust)] focus:border-[var(--rust)]',
+            'bg-[#1F1B17] text-white placeholder:text-[var(--earth-brown)] border border-white/[0.08] rounded-none transition-colors',
+            'focus:outline-none focus:border-[var(--rust)] focus:bg-[var(--background)]',
             'disabled:opacity-50 disabled:cursor-not-allowed',
-            error && 'border-[var(--rust)] focus:ring-[var(--rust)] focus:border-[var(--rust)]',
+            error && 'border-[#C24A33]',
             sizeClasses[inputSize],
             paddingLeft,
             paddingRight,
@@ -68,14 +68,13 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({
           {...props}
         />
         {RightIcon && (
-          <RightIcon
-            size={iconSize}
-            className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30"
-          />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--earth-brown)] flex">
+            <RightIcon size={iconSize} />
+          </span>
         )}
       </div>
       {error && (
-        <p className="text-xs text-[var(--rust)]">{error}</p>
+        <p className="font-jetbrains font-medium text-[#E89580]" style={{ fontSize: 11, marginTop: 2 }}>{error}</p>
       )}
     </div>
   );

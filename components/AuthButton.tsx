@@ -170,43 +170,34 @@ export default function AuthButton({
 
   return (
     <>
-      <Button variant="tertiary" onClick={() => setShowAuth(true)}>
+      <Button variant="primary" fullWidth onClick={() => setShowAuth(true)}>
         Sign In
       </Button>
 
       <Modal isOpen={showAuth} onClose={() => setShowAuth(false)}>
         {/* Tab toggle */}
         <div className="flex mb-5 bg-white/10 rounded-xl p-1">
-          <button
-            onClick={() => setIsSignUp(false)}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${
-              !isSignUp
-                ? 'bg-white/20 text-white shadow-sm'
-                : 'text-white/50 hover:text-white'
-            }`}
-          >
-            Sign In
-          </button>
-          <button
-            onClick={() => setIsSignUp(true)}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${
-              isSignUp
-                ? 'bg-white/20 text-white shadow-sm'
-                : 'text-white/50 hover:text-white'
-            }`}
-          >
-            Create Account
-          </button>
+            <button
+              onClick={() => setIsSignUp(false)}
+              className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${
+                !isSignUp
+                  ? 'bg-white/10 text-white shadow-sm'
+                  : 'text-white/40 hover:text-white'
+              }`}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => setIsSignUp(true)}
+              className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${
+                isSignUp
+                  ? 'bg-white/10 text-white shadow-sm'
+                  : 'text-white/40 hover:text-white'
+              }`}
+            >
+              Create Account
+            </button>
         </div>
-
-        {/* Header text */}
-        <p className="text-sm text-white/60 mb-5 text-center">
-          {isSignUp
-            ? isExpertReferral
-              ? 'Sign up to ask a verified expert — your first question is free!'
-              : 'Create a free account to get started'
-            : 'Welcome back! Sign in to continue'}
-        </p>
 
         {/* Form */}
         <form onSubmit={handleEmailAuth} className="space-y-4">
@@ -246,7 +237,7 @@ export default function AuthButton({
                   await supabase.auth.resetPasswordForEmail(email);
                   alert('Check your email for a password reset link');
                 }}
-                className="text-xs text-slate-blue hover:underline mt-1"
+                className="text-xs text-sky-300 hover:text-sky-200 mt-1"
               >
                 Forgot password?
               </button>

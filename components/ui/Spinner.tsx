@@ -1,17 +1,17 @@
-import { Loader2 } from 'lucide-react';
+import { FixSpinner } from '@/components/FixBot';
 import { cn } from '@/lib/utils';
 
 const sizeMap = {
-  sm: 16,
-  md: 20,
-  lg: 32,
+  sm: 28,
+  md: 40,
+  lg: 56,
 };
 
 const colorMap = {
-  default: 'text-[var(--earth-brown)]',
-  primary: 'text-[var(--rust)]',
-  blue:    'text-[var(--slate-blue)]',
-  green:   'text-[var(--forest-green)]',
+  default: '#E83A2C',
+  primary: '#E83A2C',
+  blue:    '#5C7882',
+  green:   '#5C7A40',
 };
 
 interface SpinnerProps {
@@ -22,9 +22,10 @@ interface SpinnerProps {
 
 export default function Spinner({ size = 'md', color = 'default', className }: SpinnerProps) {
   return (
-    <Loader2
+    <FixSpinner
       size={sizeMap[size]}
-      className={cn('animate-spin', colorMap[color], className)}
+      color={colorMap[color]}
+      className={cn(className)}
     />
   );
 }

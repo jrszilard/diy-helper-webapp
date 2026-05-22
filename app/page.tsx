@@ -110,19 +110,19 @@ export default function LandingPage() {
           <div className="u-container">
             <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center max-w-3xl mx-auto">
               <div className="text-center md:text-left">
-                <p className="font-mono text-[11px] tracking-[0.18em] uppercase text-[var(--gold)] mb-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40 mb-3">
                   AI-powered DIY assistant
                 </p>
-                <h1 className="text-4xl sm:text-5xl font-extrabold leading-[1.05] tracking-tight text-white">
+                <h1 className="font-serif italic font-normal leading-[1.05] tracking-[-0.015em] text-white" style={{ fontSize: 'clamp(2.25rem, 5vw, 3rem)' }}>
                   Hi, I&apos;m Fix.
                   <br />
                   I&apos;m here to{' '}
                   <span className="text-[var(--rust)]">terminate</span> your project.
                 </h1>
-                <p className="mt-3 text-white/60 text-base sm:text-lg max-w-md mx-auto md:mx-0">
+                <p className="mt-3 text-white/40 text-base sm:text-lg max-w-md mx-auto md:mx-0">
                   Building codes, materials lists, store prices, project planning — locked and loaded.
                 </p>
-                <span className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-3 py-1.5 font-mono text-xs text-white/70">
+                <span className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/[0.06] px-3 py-1.5 text-xs text-white/40">
                   <span className="fix-thinking-dot" aria-hidden />
                   I&apos;ll be back… with the receipts from Home Depot.
                 </span>

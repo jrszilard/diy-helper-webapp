@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { X, Sparkles, MapPin, User, DollarSign, Clock } from 'lucide-react';
+import Textarea from '@/components/ui/Textarea';
+import TextInput from '@/components/ui/TextInput';
 import type { StartAgentRunRequest } from '@/lib/agents/types';
 
 interface AgentIntakeFormProps {
@@ -71,14 +73,13 @@ export default function AgentIntakeForm({
         <form onSubmit={handleSubmit} className="p-5 space-y-5">
           {/* Project Description */}
           <div>
-            <label className="block text-sm font-semibold text-foreground mb-2">
-              What do you want to build?
-            </label>
-            <textarea
+            <Textarea
+              label="What do you want to build?"
               value={description}
               onChange={e => setDescription(e.target.value)}
               placeholder="e.g., Build a 12x16 composite deck attached to my house with stairs and railing"
-              className="w-full px-4 py-3 rounded-lg border border-white/20 bg-white/10 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[var(--slate-blue)] resize-none"
+              resize="none"
+              fullWidth
               rows={3}
               maxLength={2000}
             />
@@ -94,22 +95,24 @@ export default function AgentIntakeForm({
               Location
             </label>
             <div className="flex gap-3">
-              <input
-                type="text"
-                value={city}
-                onChange={e => setCity(e.target.value)}
-                placeholder="City"
-                className="flex-1 px-4 py-2.5 rounded-lg border border-white/20 bg-white/10 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[var(--slate-blue)]"
-                maxLength={100}
-              />
-              <input
-                type="text"
-                value={state}
-                onChange={e => setState(e.target.value)}
-                placeholder="State"
-                className="w-24 px-4 py-2.5 rounded-lg border border-white/20 bg-white/10 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[var(--slate-blue)]"
-                maxLength={50}
-              />
+              <div className="flex-1">
+                <TextInput
+                  value={city}
+                  onChange={e => setCity(e.target.value)}
+                  placeholder="City"
+                  fullWidth
+                  maxLength={100}
+                />
+              </div>
+              <div className="w-24">
+                <TextInput
+                  value={state}
+                  onChange={e => setState(e.target.value)}
+                  placeholder="State"
+                  fullWidth
+                  maxLength={50}
+                />
+              </div>
             </div>
             <p className="text-xs text-muted mt-1">
               Used to look up local building codes and find nearby stores
@@ -171,12 +174,11 @@ export default function AgentIntakeForm({
               Timeframe
               <span className="text-xs font-normal text-muted">(optional)</span>
             </label>
-            <input
-              type="text"
+            <TextInput
               value={timeframe}
               onChange={e => setTimeframe(e.target.value)}
               placeholder="e.g., 2 weekends, 1 week, before summer"
-              className="w-full px-4 py-2.5 rounded-lg border border-white/20 bg-white/10 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[var(--slate-blue)]"
+              fullWidth
               maxLength={100}
             />
           </div>
