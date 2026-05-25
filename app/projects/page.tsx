@@ -23,8 +23,10 @@ export default function ProjectsPage() {
 
   const handleSelectProject = (project: Project | null) => {
     if (!project) return;
-    window.dispatchEvent(new CustomEvent('diy:projectSelect', { detail: project }));
-    router.push('/');
+    // Pass the selection through the URL so it survives the navigation to the
+    // homepage. A window event would be dispatched before the homepage (its only
+    // listener) is mounted, so it would be lost — see app/page.tsx.
+    router.push(`/?project=${project.id}`);
   };
 
   return (

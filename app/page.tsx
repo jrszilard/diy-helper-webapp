@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import LandingHero from '@/components/LandingHero';
 import AppHeader from '@/components/AppHeader';
 import FixBot from '@/components/FixBot';
@@ -24,7 +25,9 @@ function formatRelativeTime(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
-export default function LandingPage() {
+function LandingPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [user, setUser] = useState<{ id: string } | null>(null);
   const [chatActive, setChatActive] = useState(false);
   const [activeChatConversationId, setActiveChatConversationId] = useState<string | undefined>(undefined);
@@ -88,15 +91,16 @@ export default function LandingPage() {
     window.dispatchEvent(new CustomEvent('diy:materialsCount', { detail: materialsCount }));
   }, [materialsCount]);
 
-  // Listen for project selection from the global sidebar
+  // Open a project selected on the /projects page. It's passed via the URL
+  // (?project=<id>) because that survives the navigation here — a window event
+  // would fire before this page, its only listener, is mounted.
   useEffect(() => {
-    const handler = (e: Event) => {
-      const project = (e as CustomEvent<{ id: string }>).detail;
-      handleProjectSelect(project);
-    };
-    window.addEventListener('diy:projectSelect', handler);
-    return () => window.removeEventListener('diy:projectSelect', handler);
-  }, [handleProjectSelect]);
+    const projectId = searchParams.get('project');
+    if (!projectId) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- async; setState runs after an awaited fetch
+    handleProjectSelect({ id: projectId });
+    router.replace('/', { scroll: false });
+  }, [searchParams, handleProjectSelect, router]);
 
   return (
     <div className="min-h-screen bg-earth-night">
@@ -185,5 +189,13 @@ export default function LandingPage() {
       )}
 
     </div>
+  );
+}
+
+export default function LandingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-earth-night" />}>
+      <LandingPageContent />
+    </Suspense>
   );
 }
