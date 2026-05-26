@@ -9,7 +9,7 @@ import UsageBanner from '@/components/UsageBanner';
 import UpgradeModal from '@/components/UpgradeModal';
 import DIYerHeader from '@/components/DIYerHeader';
 import {
-  ArrowLeft, CreditCard, Zap, Crown, LayoutDashboard, User, Shield, Banknote,
+  ArrowLeft, CreditCard, Zap, Crown, LayoutDashboard, User, Banknote,
 } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
 import Button from '@/components/ui/Button';
@@ -195,19 +195,21 @@ function SettingsContent() {
                 <p className="text-sm font-semibold text-[var(--earth-sand)] uppercase tracking-wide mb-3">
                   Expert Subscription
                 </p>
-                <div className="rounded-xl p-5 border bg-white/5 border-white/[0.08]">
+                <Link
+                  href="/experts/dashboard/subscription"
+                  className="flex items-center justify-between p-3 rounded-lg border border-[var(--blueprint-grid-major)] hover:bg-white/5 transition-colors group"
+                >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
-                      <Shield className="w-5 h-5 text-white/50" />
-                    </div>
+                    <Crown className="w-4 h-4 text-[var(--earth-sand)]" />
                     <div>
-                      <span className="text-lg font-bold text-white">Free Tier</span>
-                      <p className="text-sm text-white/50">
-                        Expert subscription tiers (Pro &amp; Premium) with queue priority and reduced fees are coming soon.
+                      <span className="text-sm font-medium text-white">Manage Subscription</span>
+                      <p className="text-xs text-white/50">
+                        Free, Pro &amp; Premium tiers with queue priority and reduced fees.
                       </p>
                     </div>
                   </div>
-                </div>
+                  <ArrowLeft className="w-4 h-4 text-[var(--earth-sand)] rotate-180 group-hover:text-white transition-colors" />
+                </Link>
               </div>
             </>
           )}
