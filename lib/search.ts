@@ -1,5 +1,6 @@
+import { lookup } from 'node:dns/promises';
 import { logger } from '@/lib/logger';
-import { isUrlSafe } from '@/lib/security';
+import { isUrlSafe, isBlockedIp } from '@/lib/security';
 
 export interface BraveSearchResult {
   title: string;
@@ -142,38 +143,84 @@ export async function webSearchStructured(
   return { results: [], error: 'Search failed after retries' };
 }
 
-export async function webFetch(url: string): Promise<string> {
-  if (!isUrlSafe(url)) {
-    logger.warn('Blocked unsafe URL in webFetch', { url: url.substring(0, 200) });
-    return 'Error: URL not allowed';
-  }
+const WEB_FETCH_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+  'Accept-Language': 'en-US,en;q=0.5',
+  'Accept-Encoding': 'gzip, deflate, br',
+  'DNT': '1',
+  'Connection': 'keep-alive',
+  'Upgrade-Insecure-Requests': '1',
+};
 
+const MAX_REDIRECTS = 4;
+
+/**
+ * SSRF defense-in-depth: confirm the hostname resolves only to public IPs.
+ * Catches DNS rebinding — a public hostname that points at an internal address.
+ * Returns false on DNS failure (can't prove the target is public → treat unsafe).
+ */
+async function hostResolvesToPublicIp(hostname: string): Promise<boolean> {
+  const host = hostname.replace(/^\[/, '').replace(/\]$/, '');
   try {
+    const records = await lookup(host, { all: true });
+    return records.length > 0 && records.every((r) => !isBlockedIp(r.address));
+  } catch {
+    return false;
+  }
+}
+
+export async function webFetch(url: string): Promise<string> {
+  // Follow redirects manually so every hop — the initial URL and each redirect
+  // target — is re-validated against the SSRF guard AND DNS-resolved. Default
+  // redirect:'follow' would let a public URL bounce to an internal address
+  // unchecked; manual + re-check closes that hole.
+  let currentUrl = url;
+
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    if (!isUrlSafe(currentUrl)) {
+      logger.warn('Blocked unsafe URL in webFetch', { url: currentUrl.substring(0, 200) });
+      return 'Error: URL not allowed';
+    }
+    if (!(await hostResolvesToPublicIp(new URL(currentUrl).hostname))) {
+      logger.warn('Blocked URL resolving to a private address in webFetch', { url: currentUrl.substring(0, 200) });
+      return 'Error: URL not allowed';
+    }
+
+    let response: Response;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
+    try {
+      response = await fetch(currentUrl, {
+        redirect: 'manual',
+        headers: { ...WEB_FETCH_HEADERS },
+        signal: controller.signal,
+      });
+    } catch (error: unknown) {
+      logger.error('Fetch error', error, { url: currentUrl });
+      if (error instanceof Error && error.name === 'AbortError') {
+        return 'Error fetching URL: Request timeout';
+      }
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      return `Error fetching URL: ${message}`;
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'DNT': '1',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1'
-      },
-      signal: controller.signal
-    });
-
-    clearTimeout(timeoutId);
+    // Redirect — resolve Location relative to the current URL and re-validate.
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location');
+      if (!location) break;
+      currentUrl = new URL(location, currentUrl).toString();
+      continue;
+    }
 
     if (!response.ok) {
-      logger.error('Fetch failed', null, { url, status: response.status });
+      logger.error('Fetch failed', null, { url: currentUrl, status: response.status });
       return `Error fetching URL: HTTP ${response.status}`;
     }
 
     const html = await response.text();
-
     const text = html
       .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
@@ -186,14 +233,8 @@ export async function webFetch(url: string): Promise<string> {
       .trim();
 
     return text.substring(0, 15000);
-  } catch (error: unknown) {
-    logger.error('Fetch error', error, { url });
-
-    if (error instanceof Error && error.name === 'AbortError') {
-      return 'Error fetching URL: Request timeout';
-    }
-
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return `Error fetching URL: ${message}`;
   }
+
+  logger.warn('webFetch exceeded redirect limit', { url: url.substring(0, 200) });
+  return 'Error fetching URL: too many redirects';
 }

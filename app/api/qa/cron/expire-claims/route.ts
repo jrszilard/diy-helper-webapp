@@ -1,17 +1,22 @@
 import { NextRequest } from 'next/server';
 import { releaseExpiredClaims, autoAcceptAnswered } from '@/lib/marketplace/qa-helpers';
 import { getAdminClient } from '@/lib/supabase-admin';
+import { verifyCronAuth } from '@/lib/cron-auth';
 import { logger } from '@/lib/logger';
 
 export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   try {
-    // Verify cron secret
-    const cronSecret = process.env.CRON_SECRET;
-    const authHeader = req.headers.get('authorization');
-
-    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+    // Verify cron secret (rejects missing/weak/placeholder secrets too).
+    const auth = verifyCronAuth(req.headers.get('authorization'), process.env.CRON_SECRET);
+    if (!auth.ok) {
+      // A misconfigured/unrotated secret is an operational problem, not a normal
+      // 401 — surface it via logger.error (→ Sentry) so it pages instead of
+      // silently rejecting every cron run.
+      if (auth.reason !== 'mismatch') {
+        logger.error('Cron secret misconfigured', null, { reason: auth.reason });
+      }
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
