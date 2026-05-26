@@ -378,6 +378,7 @@ export default function LandingQuickChat({
         {!userId && (
           <GuestExpertCallout
             messageCount={chat.messages.filter(m => m.role === 'assistant').length}
+            onRequestAuth={() => window.dispatchEvent(new CustomEvent('diy:openAuth'))}
           />
         )}
 

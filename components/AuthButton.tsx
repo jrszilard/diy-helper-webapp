@@ -57,6 +57,24 @@ export default function AuthButton({
     window.history.replaceState({}, '', url.toString());
   }, [user, externalShowAuth, onAuthToggle]);
 
+  // Let other components open the auth modal via a window event. AuthButton
+  // owns the modal but lives in the global sidebar, so the guest expert callout
+  // in chat can't reach it directly. Mirrors the diy:projectSelect pattern.
+  useEffect(() => {
+    if (user) return;
+    const handler = () => {
+      const referral = localStorage.getItem('expert-callout-referral');
+      if (referral) {
+        setIsSignUp(true);
+        setIsExpertReferral(true);
+      }
+      if (onAuthToggle) onAuthToggle(true);
+      else setInternalShowAuth(true);
+    };
+    window.addEventListener('diy:openAuth', handler);
+    return () => window.removeEventListener('diy:openAuth', handler);
+  }, [user, onAuthToggle]);
+
   const showAuth = externalShowAuth !== undefined ? externalShowAuth : internalShowAuth;
   const setShowAuth = (show: boolean) => {
     if (show) {
