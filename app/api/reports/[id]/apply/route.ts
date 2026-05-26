@@ -4,6 +4,7 @@ import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { isValidUUID } from '@/lib/validation';
 import { logger } from '@/lib/logger';
+import { dedupeNewListItems } from '@/lib/marketplace/shopping-dedup';
 import type { ReportSection, PricedMaterial, DesignMaterial } from '@/lib/agents/types';
 
 // POST /api/reports/[id]/apply — Apply report materials to a project's shopping list
@@ -166,24 +167,44 @@ export async function POST(
           notes: m.notes || null,
         }));
 
-    const { error: insertError } = await auth.supabaseClient
+    // Dedupe against what's already on this project's list (and within the
+    // batch itself) so repeated report applies / chat extractions don't pile up
+    // duplicate rows and inflate the item count + estimated cost (diyer-04).
+    const { data: existing } = await auth.supabaseClient
       .from('shopping_list_items')
-      .insert(items);
+      .select('product_name')
+      .eq('project_id', targetProjectId);
 
-    if (insertError) {
-      logger.error('Failed to insert shopping list items', insertError);
-      return applyCorsHeaders(req, new Response(
-        JSON.stringify({ error: 'Failed to save materials to shopping list' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      ));
+    const newItems = dedupeNewListItems(
+      items,
+      (item) => item.product_name,
+      (existing ?? []).map((e) => e.product_name as string)
+    );
+
+    if (newItems.length > 0) {
+      const { error: insertError } = await auth.supabaseClient
+        .from('shopping_list_items')
+        .insert(newItems);
+
+      if (insertError) {
+        logger.error('Failed to insert shopping list items', insertError);
+        return applyCorsHeaders(req, new Response(
+          JSON.stringify({ error: 'Failed to save materials to shopping list' }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        ));
+      }
     }
 
+    const skipped = items.length - newItems.length;
     return applyCorsHeaders(req, new Response(
       JSON.stringify({
         success: true,
         projectId: targetProjectId,
-        itemCount: items.length,
-        message: `Saved ${items.length} materials to your project shopping list.`,
+        itemCount: newItems.length,
+        skippedDuplicates: skipped,
+        message: skipped > 0
+          ? `Saved ${newItems.length} new material${newItems.length === 1 ? '' : 's'} (${skipped} already on your list).`
+          : `Saved ${newItems.length} materials to your project shopping list.`,
       }),
       { headers: { 'Content-Type': 'application/json' } }
     ));

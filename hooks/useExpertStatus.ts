@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { ExpertProfile } from '@/lib/marketplace/types';
 
-const CACHE_KEY = 'expert-status';
+export const EXPERT_STATUS_CACHE_KEY = 'expert-status';
 // Skip a background refetch if the cached entry is fresher than this. Three
 // instances of the hook (AppSidebar + AppHeader + settings page) used to fire
 // /api/experts/me back-to-back on every dashboard mount.
@@ -37,7 +37,7 @@ export function useExpertStatus() {
         setExpert(null);
         setOpenQueueCount(0);
         setLoading(false);
-        sessionStorage.removeItem(CACHE_KEY);
+        sessionStorage.removeItem(EXPERT_STATUS_CACHE_KEY);
         return;
       }
 
@@ -61,7 +61,7 @@ export function useExpertStatus() {
       };
 
       applyCache(result);
-      sessionStorage.setItem(CACHE_KEY, JSON.stringify(result));
+      sessionStorage.setItem(EXPERT_STATUS_CACHE_KEY, JSON.stringify(result));
     } catch {
       // ignore fetch errors
     } finally {
@@ -73,7 +73,7 @@ export function useExpertStatus() {
     // Try sessionStorage cache first for instant rendering
     let cacheIsFresh = false;
     try {
-      const cached = sessionStorage.getItem(CACHE_KEY);
+      const cached = sessionStorage.getItem(EXPERT_STATUS_CACHE_KEY);
       if (cached) {
         const parsed: ExpertStatusCache = JSON.parse(cached);
         applyCache(parsed);
