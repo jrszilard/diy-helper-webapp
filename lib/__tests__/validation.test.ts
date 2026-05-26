@@ -196,7 +196,11 @@ describe('parseRequestBody', () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error).toContain('role');
+      // Both field errors are joined into the message. Assert on the stable
+      // custom content message and the role enum's listed options (Zod's enum
+      // message text changed across versions, so don't assert the field name).
+      expect(result.error).toContain('Content is required');
+      expect(result.error).toContain('assistant');
     }
   });
 });
