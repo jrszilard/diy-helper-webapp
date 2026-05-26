@@ -80,6 +80,7 @@ export async function GET(req: NextRequest) {
       .from('qa_questions')
       .select('*')
       .eq('status', 'open')
+      .eq('is_test_account', false) // keep test-DIYer questions out of real experts' queues
       .in('category', visibleCategories)
       .neq('diyer_user_id', auth.userId);
 
