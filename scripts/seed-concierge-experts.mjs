@@ -69,5 +69,116 @@ ${rows}
 `;
 }
 
+function loadEnv() {
+  const env = {};
+  const content = readFileSync(ENV_PATH, 'utf-8');
+  for (const line of content.split('\n')) {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) continue;
+    const i = t.indexOf('=');
+    if (i === -1) continue;
+    env[t.slice(0, i).trim()] = t.slice(i + 1).trim();
+  }
+  return env;
+}
+
+async function ensureUser(supabase, email, password) {
+  const { data: { users } } = await supabase.auth.admin.listUsers();
+  const existing = users.find((u) => u.email === email);
+  if (existing) {
+    console.log(`  ⟳ ${email} exists (${existing.id})`);
+    return existing.id;
+  }
+  const { data, error } = await supabase.auth.admin.createUser({
+    email, password, email_confirm: true,
+  });
+  if (error) {
+    console.error(`  ✗ createUser ${email}: ${error.message}`);
+    return null;
+  }
+  console.log(`  ✓ created ${email} (${data.user.id})`);
+  return data.user.id;
+}
+
+async function ensureProfile(supabase, userId, e) {
+  const { data: existing } = await supabase
+    .from('expert_profiles').select('id').eq('user_id', userId).maybeSingle();
+  if (existing) {
+    console.log(`  ⟳ profile exists for ${e.displayName}`);
+    return existing.id;
+  }
+  const { data: profile, error } = await supabase.from('expert_profiles').insert({
+    user_id: userId,
+    display_name: e.displayName,
+    bio: e.bio,
+    city: e.city,
+    state: e.state,
+    service_radius_miles: 25,
+    hourly_rate_cents: 7500,
+    qa_rate_cents: 1500,
+    is_active: true,
+    is_available: true,
+    is_test_account: false,
+    is_seed_expert: true,
+    verification_level: 2,
+    verification_status: 'verified',
+    license_number: e.licenseNumber,
+    license_type: e.licenseType,
+    license_state: e.licenseState,
+    insurance_status: e.insuranceStatus,
+  }).select('id').single();
+  if (error) {
+    console.error(`  ✗ profile ${e.displayName}: ${error.message}`);
+    return null;
+  }
+  const specialties = [
+    { expert_id: profile.id, specialty: e.specialty, years_experience: 15, is_primary: true },
+  ];
+  if (e.secondary) {
+    specialties.push({ expert_id: profile.id, specialty: e.secondary, years_experience: 15, is_primary: false });
+  }
+  const { error: specErr } = await supabase.from('expert_specialties').insert(specialties);
+  if (specErr) console.error(`  ✗ specialties ${e.displayName}: ${specErr.message}`);
+  console.log(`  ✓ profile created for ${e.displayName} (${e.specialty})`);
+  return profile.id;
+}
+
+async function main() {
+  const dryRun = process.argv.includes('--dry-run');
+  const env = loadEnv();
+  const password = env.SEED_EXPERT_PASSWORD;
+  if (!password) {
+    console.error('Missing SEED_EXPERT_PASSWORD in .env.local');
+    process.exit(1);
+  }
+
+  // Always (re)write the local cheat-sheet — safe offline, no Supabase needed.
+  writeFileSync(CHEAT_SHEET_PATH, buildCheatSheet(ROSTER, { password, signinUrl: SIGNIN_URL }));
+  console.log(`✓ wrote ${CHEAT_SHEET_PATH}`);
+
+  if (dryRun) {
+    console.log('\n[dry-run] Would seed:');
+    for (const e of ROSTER) {
+      console.log(`  - ${e.displayName} <${emailFor(e)}> (${e.specialty}${e.secondary ? ' + ' + e.secondary : ''})`);
+    }
+    return;
+  }
+
+  const url = env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+    process.exit(1);
+  }
+  const supabase = createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
+
+  for (const e of ROSTER) {
+    console.log(`\n${e.displayName}:`);
+    const userId = await ensureUser(supabase, emailFor(e), password);
+    if (userId) await ensureProfile(supabase, userId, e);
+  }
+  console.log('\nDone. Public /experts directory repopulated.');
+}
+
 const isMain = process.argv[1] === fileURLToPath(import.meta.url);
 if (isMain) main();
