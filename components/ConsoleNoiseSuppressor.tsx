@@ -2,7 +2,9 @@
 
 import { useEffect } from 'react';
 
-export default function ErrorBoundary({ children }: { children: React.ReactNode }) {
+// NOTE: This is NOT a React error boundary — it only filters noisy Chrome-extension
+// console errors. Render-error recovery lives in app/error.tsx and app/global-error.tsx.
+export default function ConsoleNoiseSuppressor({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Suppress Chrome extension accessibility tree errors
     const originalError = console.error;
