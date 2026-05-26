@@ -153,6 +153,7 @@ function LandingPageContent() {
             onFirstMessage={() => setChatActive(true)}
             initialConversationId={activeChatConversationId}
             onMaterialsDetected={setMaterialsCount}
+            initialTab={searchParams.get('tab') === 'expert' ? 'expert' : 'chat'}
           />
         </div>
       </section>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 
 // Last-resort boundary for errors thrown in the root layout itself. It replaces
 // the whole document, so it must render its own <html>/<body> and cannot rely on
@@ -13,7 +14,9 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // TODO(B2): forward to error monitoring (Sentry) once configured in prod.
+    // Root-layout crashes are the most severe — always report. No-op until a
+    // DSN is set; console trace covers local dev.
+    Sentry.captureException(error);
     console.error('Global error:', error);
   }, [error]);
 

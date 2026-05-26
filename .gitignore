@@ -50,5 +50,9 @@ supabase/.temp
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Concierge seed-account credentials cheat-sheet (generated, never commit)
+seed-accounts.local.md
+
 # Superpowers brainstorm sessions
 .superpowers/

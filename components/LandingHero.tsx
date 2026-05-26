@@ -28,6 +28,8 @@ interface LandingHeroProps {
   initialConversationId?: string;
   /** Called when materials are extracted (for header badge) */
   onMaterialsDetected?: (count: number) => void;
+  /** Tab to open on mount — e.g. from the ?tab=expert deep link */
+  initialTab?: TabId;
 }
 
 export default function LandingHero({
@@ -35,8 +37,9 @@ export default function LandingHero({
   onFirstMessage,
   initialConversationId,
   onMaterialsDetected,
+  initialTab = 'chat',
 }: LandingHeroProps) {
-  const [activeTab, setActiveTab] = useState<TabId>('chat');
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
 
   return (
     <div>

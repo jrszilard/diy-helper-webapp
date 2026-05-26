@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import * as Sentry from '@sentry/nextjs';
 
 // Route-segment error boundary. Catches render/runtime errors in the page tree
 // while keeping the root layout (sidebar/header) intact, and offers recovery.
@@ -13,8 +14,9 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // TODO(B2): forward to error monitoring (Sentry) once configured in prod.
-    // Until then this at least surfaces in the browser/runtime logs.
+    // Report to Sentry (no-op until a DSN is configured) and keep a local
+    // console trace for dev, where Sentry stays dormant.
+    Sentry.captureException(error);
     console.error('Route error:', error);
   }, [error]);
 
