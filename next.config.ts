@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   images: {
@@ -46,4 +47,18 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// withSentryConfig enables source-map upload (readable stack traces) and the
+// tunnelRoute. tunnelRoute is REQUIRED here, not optional: it proxies browser
+// events through a same-origin path so the strict connect-src 'self' CSP above
+// doesn't silently block them (and ad-blockers can't drop them either).
+// org/project/authToken are read from env — source-map upload is skipped
+// gracefully when they're absent (e.g. local builds), so nothing breaks before
+// the Sentry account is provisioned.
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  tunnelRoute: "/monitoring",
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+});
