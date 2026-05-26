@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/nextjs';
+
 type LogLevel = 'info' | 'warn' | 'error';
 
 interface LogEntry {
@@ -58,5 +60,18 @@ export const logger = {
       entry.errorMessage = String(error);
     }
     console.error(JSON.stringify(entry));
+
+    // Forward to Sentry so explicitly-logged errors (e.g. caught API failures)
+    // become alertable events, not just buried console lines. No-op until a DSN
+    // is configured. Reuse sanitize() so secrets stay [REDACTED] in Sentry too.
+    const context = { logMessage: message, ...(meta ? sanitize(meta) : {}) };
+    if (error instanceof Error) {
+      Sentry.captureException(error, { extra: context });
+    } else {
+      Sentry.captureMessage(message, {
+        level: 'error',
+        extra: error !== undefined ? { ...context, error: String(error) } : context,
+      });
+    }
   },
 };
