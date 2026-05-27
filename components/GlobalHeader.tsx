@@ -3,6 +3,7 @@
 import { ReactNode } from 'react';
 import Link from 'next/link';
 import AppLogo from './AppLogo';
+import MobileNavToggle from './MobileNavToggle';
 
 interface GlobalHeaderProps {
   left?: ReactNode;
@@ -23,6 +24,7 @@ export default function GlobalHeader({ left, nav, right, className = '', logoHre
       <div className="u-container">
         <div className="flex items-center justify-between h-14 sm:h-16">
           <div className="flex items-center gap-4">
+            <MobileNavToggle />
             {left}
             <AppLogo href={logoHref} />
             {nav && (
