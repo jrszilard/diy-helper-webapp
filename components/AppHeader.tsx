@@ -5,6 +5,7 @@ import { MessageSquarePlus } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useExpertStatus } from '@/hooks/useExpertStatus';
 import AppLogo from './AppLogo';
+import MobileNavToggle from './MobileNavToggle';
 import NotificationBell from './NotificationBell';
 import ExpertQuickBar from './ExpertQuickBar';
 
@@ -33,8 +34,9 @@ export default function AppHeader({ extraRight, showBack, onBack }: AppHeaderPro
       <nav className="sticky top-0 z-50 backdrop-blur-xl bg-earth-night/95 border-b border-white/[0.06]">
         <div className="u-container">
           <div className="flex justify-between items-center h-16">
-            {/* Mobile: logo (hamburger is owned by AppSidebar) */}
-            <div className="flex items-center md:hidden pl-10">
+            {/* Mobile: hamburger + logo together in the header row */}
+            <div className="flex items-center gap-1 md:hidden">
+              <MobileNavToggle />
               <AppLogo />
             </div>
 

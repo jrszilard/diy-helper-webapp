@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { FolderOpen, Package, HelpCircle, ShoppingCart, Users, MessageSquare, Mail, ClipboardCheck, LayoutDashboard, Menu } from 'lucide-react';
+import { FolderOpen, Package, HelpCircle, ShoppingCart, Users, MessageSquare, Mail, ClipboardCheck, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useExpertStatus } from '@/hooks/useExpertStatus';
@@ -50,6 +50,15 @@ export default function AppSidebar() {
     return () => window.removeEventListener('diy:materialsCount', handler);
   }, []);
 
+  // The hamburger that opens this drawer now lives in the header bar
+  // (MobileNavToggle), decoupled via this event so it rides with the sticky
+  // header instead of floating over the BetaBanner.
+  useEffect(() => {
+    const handler = () => setMobileOpen((open) => !open);
+    window.addEventListener('diy:toggleMobileNav', handler);
+    return () => window.removeEventListener('diy:toggleMobileNav', handler);
+  }, []);
+
   const navItem = (label: string, icon: React.ReactNode, href: string, badge?: number) => {
     const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));
     return (
@@ -73,17 +82,6 @@ export default function AppSidebar() {
 
   return (
     <>
-      {/* Mobile trigger */}
-      {!mobileOpen && (
-        <button
-          onClick={() => setMobileOpen(true)}
-          className="fixed top-3 left-3 z-50 md:hidden p-2 rounded-none bg-[var(--earth-brown-dark)] text-white/60 hover:text-white hover:bg-white/10 transition-colors shadow-md"
-          aria-label="Open menu"
-        >
-          <Menu size={20} />
-        </button>
-      )}
-
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
