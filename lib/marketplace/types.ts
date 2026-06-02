@@ -65,6 +65,7 @@ export interface ExpertProfile {
   stripeOnboardingComplete: boolean;
   isActive: boolean;
   isAvailable: boolean;
+  emailOnNewQuestion: boolean;
   licenseNumber: string | null;
   licenseType: string | null;
   licenseState: string | null;
@@ -443,6 +444,7 @@ export interface ExpertProfileRow {
   stripe_onboarding_complete: boolean;
   is_active: boolean;
   is_available: boolean;
+  email_on_new_question: boolean;
   license_number: string | null;
   license_type: string | null;
   license_state: string | null;
@@ -483,6 +485,7 @@ export function toExpertProfile(row: ExpertProfileRow): ExpertProfile {
     stripeOnboardingComplete: row.stripe_onboarding_complete,
     isActive: row.is_active,
     isAvailable: row.is_available,
+    emailOnNewQuestion: row.email_on_new_question,
     licenseNumber: row.license_number ?? null,
     licenseType: row.license_type ?? null,
     licenseState: row.license_state ?? null,
