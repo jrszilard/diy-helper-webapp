@@ -82,7 +82,7 @@ export default function LandingQuickChat({
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
   const [detectedIntent, setDetectedIntent] = useState<IntentType | null>(null);
   const [isPlanning, setIsPlanning] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const chat = useChat({
     projectId: undefined,
@@ -136,9 +136,7 @@ export default function LandingQuickChat({
 
   // Auto-scroll
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chat.messages, chat.streamingContent, agentRun.phases]);
 
   // Detect first message for hero morph
@@ -293,7 +291,7 @@ export default function LandingQuickChat({
       )}
 
       {/* Messages */}
-      <div ref={scrollRef} className="max-h-[60vh] overflow-y-auto space-y-3">
+      <div className="space-y-3">
         {chat.messages.map((msg, idx) => (
           <div key={idx}>
             <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -399,6 +397,7 @@ export default function LandingQuickChat({
             <Spinner size="sm" />
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Error */}
