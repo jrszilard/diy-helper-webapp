@@ -187,7 +187,7 @@ export default function SaveMaterialsDialog({
       {/* Auth Prompt Dialog */}
       <Modal isOpen={showAuthPrompt} onClose={onCloseAuthPrompt} title="Sign In Required">
         <div>
-          <p className="text-warm-brown mb-6">
+          <p className="text-earth-cream mb-6">
             You need to be signed in to save materials and create projects.
             Create a free account to get started!
           </p>
