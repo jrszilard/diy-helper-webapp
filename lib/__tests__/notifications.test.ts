@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mutable per-test preference value read by the mocked admin client.
-let mockPref: boolean = true;
+let mockPref: boolean | null = true;
 const mockInsert = vi.fn(async () => ({ error: null }));
 
 vi.mock('@/lib/supabase-admin', () => ({
@@ -14,13 +14,13 @@ vi.mock('@/lib/supabase-admin', () => ({
         }),
       },
     },
-    from: () => ({
+    from: (table: string) => ({
       select: () => ({
         eq: () => ({
-          single: async () => ({ data: { email_on_new_question: mockPref }, error: null }),
+          single: async () => ({ data: mockPref === null ? null : { email_on_new_question: mockPref }, error: null }),
         }),
       }),
-      insert: mockInsert,
+      insert: table === 'notifications' ? mockInsert : vi.fn(async () => ({ error: null })),
     }),
   }),
 }));
@@ -35,6 +35,7 @@ describe('sendEmailNotification — new-question preference gate', () => {
     process.env.EMAIL_DOMAIN = 'fixerator.com';
     global.fetch = vi.fn(async () => ({ ok: true, text: async () => '' })) as unknown as typeof fetch;
     mockInsert.mockClear();
+    mockPref = true;
   });
 
   afterEach(() => {
@@ -101,5 +102,20 @@ describe('sendEmailNotification — new-question preference gate', () => {
     });
 
     expect(mockInsert).toHaveBeenCalledTimes(1); // bell fires regardless of email preference
+  });
+
+  it('sends the new-question email when the expert has no preference row (null → default send)', async () => {
+    mockPref = null;
+    const { sendEmailNotification } = await import('@/lib/notifications');
+
+    await sendEmailNotification({
+      userId: 'expert-1',
+      type: 'qa_question_posted',
+      title: 'New question in your specialty',
+      body: 'How do I install a faucet?',
+      link: '/experts/dashboard/qa',
+    });
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 });
