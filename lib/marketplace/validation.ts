@@ -29,6 +29,7 @@ export const UpdateExpertProfileSchema = z.object({
   hourlyRateCents: z.number().int().min(0).max(50000).nullable().optional(),
   qaRateCents: z.number().int().min(0).max(5000).nullable().optional(),
   isAvailable: z.boolean().optional(),
+  emailOnNewQuestion: z.boolean().optional(),
   profilePhotoUrl: z.string().url().max(500).optional(),
   licenseNumber: z.string().max(50).nullable().optional(),
   licenseType: z.string().max(100).nullable().optional(),

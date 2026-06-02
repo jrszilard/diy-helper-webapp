@@ -95,6 +95,7 @@ export async function PUT(req: NextRequest) {
     if (updateFields.hourlyRateCents !== undefined) updateData.hourly_rate_cents = updateFields.hourlyRateCents;
     if (updateFields.qaRateCents !== undefined) updateData.qa_rate_cents = updateFields.qaRateCents;
     if (updateFields.isAvailable !== undefined) updateData.is_available = updateFields.isAvailable;
+    if (updateFields.emailOnNewQuestion !== undefined) updateData.email_on_new_question = updateFields.emailOnNewQuestion;
     if (updateFields.profilePhotoUrl !== undefined) updateData.profile_photo_url = updateFields.profilePhotoUrl;
     if (updateFields.licenseNumber !== undefined) updateData.license_number = updateFields.licenseNumber;
     if (updateFields.licenseType !== undefined) updateData.license_type = updateFields.licenseType;
