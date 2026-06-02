@@ -40,6 +40,7 @@ export default function ExpertProfilePage() {
   const [hourlyRate, setHourlyRate] = useState('');
   const [qaRate, setQaRate] = useState('');
   const [isAvailable, setIsAvailable] = useState(true);
+  const [emailOnNewQuestion, setEmailOnNewQuestion] = useState(true);
   const [specialties, setSpecialties] = useState<ExpertSpecialty[]>([]);
   const [licenseNumber, setLicenseNumber] = useState('');
   const [licenseType, setLicenseType] = useState('');
@@ -71,6 +72,7 @@ export default function ExpertProfilePage() {
         setHourlyRate(p.hourlyRateCents != null ? (p.hourlyRateCents / 100).toFixed(2) : '');
         setQaRate(p.qaRateCents != null ? (p.qaRateCents / 100).toFixed(2) : '');
         setIsAvailable(p.isAvailable);
+        setEmailOnNewQuestion(p.emailOnNewQuestion);
         setSpecialties(p.specialties.length > 0 ? p.specialties : [{ specialty: 'electrical', yearsExperience: null, isPrimary: true }]);
         setLicenseNumber(p.licenseNumber || '');
         setLicenseType(p.licenseType || '');
@@ -131,6 +133,7 @@ export default function ExpertProfilePage() {
         zipCode,
         serviceRadiusMiles,
         isAvailable,
+        emailOnNewQuestion,
         specialties: specialties.map(s => ({
           specialty: s.specialty,
           yearsExperience: s.yearsExperience,
@@ -435,6 +438,15 @@ export default function ExpertProfilePage() {
           description="Toggle off to pause receiving new questions"
           checked={isAvailable}
           onChange={setIsAvailable}
+        />
+
+        {/* New-question email preference */}
+        <Toggle
+          id="profile-email-new-question"
+          label="Email me about new questions"
+          description="Get an email when a new question matches your specialty"
+          checked={emailOnNewQuestion}
+          onChange={setEmailOnNewQuestion}
         />
 
         {/* Specialties */}

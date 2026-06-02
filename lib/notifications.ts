@@ -38,7 +38,7 @@ export async function createNotification(params: {
   }
 }
 
-async function sendEmailNotification(params: {
+export async function sendEmailNotification(params: {
   userId: string;
   type: NotificationType;
   title: string;
@@ -71,6 +71,17 @@ async function sendEmailNotification(params: {
     case 'payment_received':
       content = emailTemplates.paymentReceived(templateParams);
       break;
+    case 'qa_question_posted':
+    case 'qa_bidding_open': {
+      const { data: pref } = await adminClient
+        .from('expert_profiles')
+        .select('email_on_new_question')
+        .eq('user_id', params.userId)
+        .single();
+      if (pref?.email_on_new_question === false) return; // expert opted out — skip email
+      content = emailTemplates.qaNewQuestion(templateParams);
+      break;
+    }
     default:
       return;
   }
