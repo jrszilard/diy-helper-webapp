@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mutable per-test preference value read by the mocked admin client.
 let mockPref: boolean = true;
+const mockInsert = vi.fn(async () => ({ error: null }));
 
 vi.mock('@/lib/supabase-admin', () => ({
   getAdminClient: () => ({
@@ -19,7 +20,7 @@ vi.mock('@/lib/supabase-admin', () => ({
           single: async () => ({ data: { email_on_new_question: mockPref }, error: null }),
         }),
       }),
-      insert: async () => ({ error: null }),
+      insert: mockInsert,
     }),
   }),
 }));
@@ -33,6 +34,7 @@ describe('sendEmailNotification — new-question preference gate', () => {
     process.env.RESEND_API_KEY = 're_test';
     process.env.EMAIL_DOMAIN = 'fixerator.com';
     global.fetch = vi.fn(async () => ({ ok: true, text: async () => '' })) as unknown as typeof fetch;
+    mockInsert.mockClear();
   });
 
   afterEach(() => {
@@ -84,5 +86,20 @@ describe('sendEmailNotification — new-question preference gate', () => {
     });
 
     expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('still inserts the in-app notification when the email preference is off', async () => {
+    mockPref = false;
+    const { createNotification } = await import('@/lib/notifications');
+
+    await createNotification({
+      userId: 'expert-1',
+      type: 'qa_question_posted',
+      title: 'New question in your specialty',
+      body: 'How do I install a faucet?',
+      link: '/experts/dashboard/qa',
+    });
+
+    expect(mockInsert).toHaveBeenCalledTimes(1); // bell fires regardless of email preference
   });
 });
