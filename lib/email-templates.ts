@@ -85,6 +85,20 @@ export function qaAnswerAccepted(params: { title: string; link?: string }): Emai
   };
 }
 
+export function qaNewQuestion(params: { title: string; body?: string; link?: string }): EmailContent {
+  return {
+    subject: 'New question waiting for you',
+    html: wrapInLayout(`
+      <h2 style="margin:0 0 12px;font-size:18px;color:#111827;">${escapeHtml(params.title)}</h2>
+      ${params.body ? `<p style="color:#374151;font-size:14px;line-height:1.6;">${escapeHtml(params.body)}</p>` : ''}
+      <p style="color:#374151;font-size:14px;line-height:1.6;">
+        Claim it from your Q&amp;A queue to start answering.
+      </p>
+      ${params.link ? actionButton('View Q&A Queue', params.link) : ''}
+    `),
+  };
+}
+
 export function messageReceived(params: { title: string; body?: string; link?: string }): EmailContent {
   return {
     subject: 'New message on Fixerator',
