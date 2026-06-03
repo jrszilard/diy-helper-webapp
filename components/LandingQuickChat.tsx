@@ -75,6 +75,7 @@ export default function LandingQuickChat({
     tr: ({ children }: { children?: React.ReactNode }) => (
       <tr>{children}</tr>
     ),
+    hr: () => <hr className="border-white/10 my-3" />,
   };
 
   const [userId, setUserId] = useState<string | null>(null);
