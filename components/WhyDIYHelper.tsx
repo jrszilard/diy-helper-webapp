@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, XCircle, Zap, ArrowRight, Search, MessageSquare, Bot } from 'lucide-react';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 
 interface Scenario {
   id: string;
@@ -122,120 +124,119 @@ export default function WhyDIYHelper() {
   };
 
   return (
-    <section className="py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="content-card">
-          {/* Section Header */}
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Why Fixerator?
-            </h2>
-            <p className="text-lg text-warm-brown max-w-2xl mx-auto">
-              See how Fixerator compares to other options for your home improvement projects
-            </p>
-          </div>
+    <section className="py-[var(--space-2xl)]">
+      <div className="u-container">
+        {/* Section Header */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-serif font-normal text-white mb-4">
+            Why Fixerator?
+          </h2>
+          <p className="text-lg text-white/60 max-w-2xl mx-auto">
+            See how Fixerator compares to other options for your home improvement projects
+          </p>
+        </div>
 
-          {/* Scenario Tabs */}
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
-            {scenarios.map((s, idx) => (
-              <button
-                key={s.id}
-                onClick={() => setActiveScenario(idx)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  idx === activeScenario
-                    ? 'bg-rust text-white shadow-lg'
-                    : 'bg-white/6 text-warm-brown hover:bg-white/5 border border-earth-tan'
-                }`}
-              >
-                {s.id === 'electrical' && 'Electrical'}
-                {s.id === 'deck' && 'Deck Building'}
-                {s.id === 'bathroom' && 'Bathroom Tile'}
-              </button>
-            ))}
-          </div>
-
-          {/* Question Display */}
-          <div className="bg-earth-brown-dark text-white rounded-xl p-4 mb-8 text-center">
-            <p className="text-sm text-earth-sand mb-1">Your question:</p>
-            <p className="text-lg font-medium">&ldquo;{scenario.question}&rdquo;</p>
-          </div>
-
-          {/* Comparison Grid */}
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* ChatGPT */}
-            <div className="bg-white/6 rounded-xl p-6 border border-earth-tan">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-white/5 rounded-lg">
-                  <Bot className="w-5 h-5 text-white/60" />
-                </div>
-                <h3 className="font-bold text-foreground">Generic AI</h3>
-              </div>
-              <p className="text-warm-brown text-sm mb-4">{scenario.chatgpt.answer}</p>
-              <div className="space-y-2">
-                {scenario.chatgpt.issues.map((issue, idx) => (
-                  <div key={idx} className="flex items-start gap-2">
-                    <XCircle className="w-4 h-4 text-rust flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-warm-brown">{issue}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Google Search */}
-            <div className="bg-white/6 rounded-xl p-6 border border-earth-tan">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-white/5 rounded-lg">
-                  <Search className="w-5 h-5 text-white/60" />
-                </div>
-                <h3 className="font-bold text-foreground">Google Search</h3>
-              </div>
-              <p className="text-warm-brown text-sm mb-4">{scenario.google.answer}</p>
-              <div className="space-y-2">
-                {scenario.google.issues.map((issue, idx) => (
-                  <div key={idx} className="flex items-start gap-2">
-                    <XCircle className="w-4 h-4 text-rust flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-warm-brown">{issue}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Fixerator */}
-            <div className="bg-gradient-to-br from-[#FDF8F3] to-[var(--status-progress-bg)] rounded-xl p-6 border-2 border-rust relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="bg-rust text-white text-xs font-bold px-3 py-1 rounded-full">
-                  BEST OPTION
-                </span>
-              </div>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-[var(--status-progress-bg)] rounded-lg">
-                  <Zap className="w-5 h-5 text-rust" />
-                </div>
-                <h3 className="font-bold text-foreground">Fixerator</h3>
-              </div>
-              <p className="text-warm-brown text-sm mb-4 font-medium">{scenario.diyHelper.answer}</p>
-              <div className="space-y-2">
-                {scenario.diyHelper.benefits.map((benefit, idx) => (
-                  <div key={idx} className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-forest-green flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-warm-brown">{benefit}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div className="text-center mt-10">
+        {/* Scenario Tabs */}
+        <div className="flex flex-wrap justify-center gap-2 mb-8">
+          {scenarios.map((s, idx) => (
             <button
-              onClick={handleTryIt}
-              className="inline-flex items-center gap-2 bg-rust text-white px-6 py-3 rounded-xl font-semibold hover:bg-copper transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+              key={s.id}
+              onClick={() => setActiveScenario(idx)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                idx === activeScenario
+                  ? 'bg-rust text-white shadow-lg'
+                  : 'bg-white/[0.06] text-white/60 hover:bg-white/[0.10] border border-white/[0.08]'
+              }`}
             >
-              <MessageSquare className="w-5 h-5" />
-              Try This Question
-              <ArrowRight className="w-4 h-4" />
+              {s.id === 'electrical' && 'Electrical'}
+              {s.id === 'deck' && 'Deck Building'}
+              {s.id === 'bathroom' && 'Bathroom Tile'}
             </button>
-          </div>
+          ))}
+        </div>
+
+        {/* Question Display */}
+        <Card padding="md" className="mb-8 text-center">
+          <p className="text-sm text-white/40 mb-1">Your question:</p>
+          <p className="text-lg font-medium text-white">&ldquo;{scenario.question}&rdquo;</p>
+        </Card>
+
+        {/* Comparison Grid */}
+        <div className="grid md:grid-cols-3 gap-6">
+          {/* Generic AI */}
+          <Card padding="lg">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-white/[0.06] rounded-lg">
+                <Bot className="w-5 h-5 text-white/60" />
+              </div>
+              <h3 className="font-serif font-normal text-white">Generic AI</h3>
+            </div>
+            <p className="text-white/60 text-sm mb-4">{scenario.chatgpt.answer}</p>
+            <div className="space-y-2">
+              {scenario.chatgpt.issues.map((issue, idx) => (
+                <div key={idx} className="flex items-start gap-2">
+                  <XCircle className="w-4 h-4 text-rust flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-white/60">{issue}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Google Search */}
+          <Card padding="lg">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-white/[0.06] rounded-lg">
+                <Search className="w-5 h-5 text-white/60" />
+              </div>
+              <h3 className="font-serif font-normal text-white">Google Search</h3>
+            </div>
+            <p className="text-white/60 text-sm mb-4">{scenario.google.answer}</p>
+            <div className="space-y-2">
+              {scenario.google.issues.map((issue, idx) => (
+                <div key={idx} className="flex items-start gap-2">
+                  <XCircle className="w-4 h-4 text-rust flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-white/60">{issue}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Fixerator */}
+          <Card padding="lg" className="border-2 border-rust bg-rust/[0.08] relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <span className="bg-rust text-white text-xs font-bold px-3 py-1 rounded-full">
+                BEST OPTION
+              </span>
+            </div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-rust/20 rounded-lg">
+                <Zap className="w-5 h-5 text-rust" />
+              </div>
+              <h3 className="font-serif font-normal text-white">Fixerator</h3>
+            </div>
+            <p className="text-white/80 text-sm mb-4 font-medium">{scenario.diyHelper.answer}</p>
+            <div className="space-y-2">
+              {scenario.diyHelper.benefits.map((benefit, idx) => (
+                <div key={idx} className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-forest-green flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-white/60">{benefit}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+
+        {/* CTA */}
+        <div className="text-center mt-10">
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={handleTryIt}
+            leftIcon={MessageSquare}
+            rightIcon={ArrowRight}
+          >
+            Try This Question
+          </Button>
         </div>
       </div>
     </section>

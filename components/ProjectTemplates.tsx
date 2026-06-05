@@ -33,11 +33,11 @@ const categoryIcons: Record<string, React.ReactNode> = {
   outdoor: <Fence className="w-5 h-5" />
 };
 
-// Difficulty badges - earthy colors
+// Difficulty badges - dark-context safe
 const difficultyStyles: Record<string, { bg: string; text: string }> = {
-  beginner: { bg: 'bg-[var(--status-complete-bg)]', text: 'text-forest-green' },
-  intermediate: { bg: 'bg-[var(--status-progress-bg)]', text: 'text-rust' },
-  advanced: { bg: 'bg-[#FADDD0]', text: 'text-rust' }
+  beginner: { bg: 'bg-forest-green/20', text: 'text-forest-green' },
+  intermediate: { bg: 'bg-rust/20', text: 'text-rust' },
+  advanced: { bg: 'bg-rust/20', text: 'text-rust' }
 };
 
 interface ProjectTemplatesProps {
@@ -83,9 +83,9 @@ export default function ProjectTemplates({
             onClick={() => handleStartProject(template)}
             className="w-full flex items-center gap-3 p-3 bg-white/6 rounded-lg border border-white/10 hover:border-rust hover:bg-white/10 transition-all text-left"
           >
-            <span className="text-2xl">{template.icon}</span>
+            <template.icon className="w-5 h-5 text-white/60 flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-foreground truncate">{template.name}</p>
+              <p className="font-medium text-white truncate">{template.name}</p>
               <p className="text-xs text-white/60">{template.estimatedTime}</p>
             </div>
             <ArrowRight className="w-4 h-4 text-white/40" />
@@ -107,12 +107,12 @@ export default function ProjectTemplates({
               className="bg-white/6 rounded-xl border border-white/10 p-5 hover:border-rust hover:shadow-md transition-all cursor-pointer group"
             >
               <div className="flex items-start justify-between mb-3">
-                <span className="text-3xl">{template.icon}</span>
+                <template.icon className="w-6 h-6 text-white/60" />
                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${diffStyle.bg} ${diffStyle.text}`}>
                   {template.difficulty}
                 </span>
               </div>
-              <h3 className="font-bold text-foreground mb-1">{template.name}</h3>
+              <h3 className="font-bold text-white mb-1">{template.name}</h3>
               <p className="text-sm text-white/60 mb-3 line-clamp-2">{template.description}</p>
               <div className="flex items-center justify-between text-sm">
                 <span className="flex items-center gap-1 text-white/60">
@@ -182,10 +182,10 @@ export default function ProjectTemplates({
                 onClick={() => setExpandedTemplate(isExpanded ? null : template.id)}
               >
                 <div className="flex items-center gap-4">
-                  <span className="text-3xl">{template.icon}</span>
+                  <template.icon className="w-6 h-6 text-white/60 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-bold text-foreground">{template.name}</h3>
+                      <h3 className="font-bold text-white">{template.name}</h3>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${diffStyle.bg} ${diffStyle.text}`}>
                         {template.difficulty}
                       </span>
@@ -208,11 +208,11 @@ export default function ProjectTemplates({
 
               {/* Expanded Details */}
               {isExpanded && (
-                <div className="px-4 pb-4 border-t border-earth-tan pt-4">
+                <div className="px-4 pb-4 border-t border-white/[0.08] pt-4">
                   <div className="grid sm:grid-cols-2 gap-4 mb-4">
                     {template.commonMaterials && (
                       <div>
-                        <h4 className="text-sm font-semibold text-warm-brown mb-2">Common Materials:</h4>
+                        <h4 className="text-sm font-semibold text-white/60 mb-2">Common Materials:</h4>
                         <ul className="text-sm text-white/60 space-y-1">
                           {template.commonMaterials.map((material, idx) => (
                             <li key={idx} className="flex items-center gap-2">
@@ -225,7 +225,7 @@ export default function ProjectTemplates({
                     )}
                     {template.safetyNotes && (
                       <div>
-                        <h4 className="text-sm font-semibold text-warm-brown mb-2 flex items-center gap-1">
+                        <h4 className="text-sm font-semibold text-white/60 mb-2 flex items-center gap-1">
                           <AlertTriangle className="w-4 h-4 text-rust" />
                           Safety Notes:
                         </h4>

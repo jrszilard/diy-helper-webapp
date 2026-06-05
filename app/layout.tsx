@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Newsreader, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import ConsoleNoiseSuppressor from "@/components/ConsoleNoiseSuppressor";
-import BetaBanner from "@/components/BetaBanner";
 import BetaFeedbackWidget from "@/components/BetaFeedbackWidget";
 import AppShell from "@/components/AppShell";
 
@@ -69,7 +68,6 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${newsreader.variable} ${jetbrainsMono.variable} antialiased`}
       >
-        <BetaBanner />
         <ConsoleNoiseSuppressor>
           <AppShell>
             {children}
