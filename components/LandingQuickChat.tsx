@@ -8,6 +8,7 @@ import { sanitizeHref } from '@/lib/security';
 import { cleanMessageContent } from '@/components/ChatMessages';
 import ChatMessageFeedback from '@/components/ChatMessageFeedback';
 import { supabase } from '@/lib/supabase';
+import { linkConversationToProject } from '@/lib/projectLink';
 import { useChat, CHAT_STORAGE_KEY } from '@/hooks/useChat';
 import { useAgentRun } from '@/hooks/useAgentRun';
 import Spinner from '@/components/ui/Spinner';
@@ -209,6 +210,12 @@ export default function LandingQuickChat({
       );
       if (count > 0) {
         setSavedProjectId(targetProjectId);
+        // Link this conversation to the project so it can be restored later
+        // (the /projects → click flow reads conversations.project_id). Skip for
+        // guest projects, which have no server-side conversation row.
+        if (!(isGuestProject || projectActions.isGuestMode)) {
+          await linkConversationToProject(supabase, chat.conversationId, targetProjectId);
+        }
         chat.setShowSaveDialog(false);
         chat.setExtractedMaterials(null);
         let successMsg = `Saved ${count} items to your project!`;
@@ -491,6 +498,9 @@ export default function LandingQuickChat({
           onSaved={(projectId) => {
             setSavedProjectId(projectId);
             setShowSaveModal(false);
+            // Link the active conversation to the project so clicking it on
+            // /projects restores this chat instead of opening a blank one.
+            void linkConversationToProject(supabase, chat.conversationId, projectId);
           }}
         />
       )}
