@@ -7,6 +7,36 @@ import { supabase } from '@/lib/supabase';
 import type { Specialty } from '@/lib/marketplace/types';
 import TextInput from '@/components/ui/TextInput';
 import Textarea from '@/components/ui/Textarea';
+import Select from '@/components/ui/Select';
+
+const US_STATES: { value: string; label: string }[] = [
+  { value: 'AL', label: 'Alabama' }, { value: 'AK', label: 'Alaska' },
+  { value: 'AZ', label: 'Arizona' }, { value: 'AR', label: 'Arkansas' },
+  { value: 'CA', label: 'California' }, { value: 'CO', label: 'Colorado' },
+  { value: 'CT', label: 'Connecticut' }, { value: 'DE', label: 'Delaware' },
+  { value: 'FL', label: 'Florida' }, { value: 'GA', label: 'Georgia' },
+  { value: 'HI', label: 'Hawaii' }, { value: 'ID', label: 'Idaho' },
+  { value: 'IL', label: 'Illinois' }, { value: 'IN', label: 'Indiana' },
+  { value: 'IA', label: 'Iowa' }, { value: 'KS', label: 'Kansas' },
+  { value: 'KY', label: 'Kentucky' }, { value: 'LA', label: 'Louisiana' },
+  { value: 'ME', label: 'Maine' }, { value: 'MD', label: 'Maryland' },
+  { value: 'MA', label: 'Massachusetts' }, { value: 'MI', label: 'Michigan' },
+  { value: 'MN', label: 'Minnesota' }, { value: 'MS', label: 'Mississippi' },
+  { value: 'MO', label: 'Missouri' }, { value: 'MT', label: 'Montana' },
+  { value: 'NE', label: 'Nebraska' }, { value: 'NV', label: 'Nevada' },
+  { value: 'NH', label: 'New Hampshire' }, { value: 'NJ', label: 'New Jersey' },
+  { value: 'NM', label: 'New Mexico' }, { value: 'NY', label: 'New York' },
+  { value: 'NC', label: 'North Carolina' }, { value: 'ND', label: 'North Dakota' },
+  { value: 'OH', label: 'Ohio' }, { value: 'OK', label: 'Oklahoma' },
+  { value: 'OR', label: 'Oregon' }, { value: 'PA', label: 'Pennsylvania' },
+  { value: 'RI', label: 'Rhode Island' }, { value: 'SC', label: 'South Carolina' },
+  { value: 'SD', label: 'South Dakota' }, { value: 'TN', label: 'Tennessee' },
+  { value: 'TX', label: 'Texas' }, { value: 'UT', label: 'Utah' },
+  { value: 'VT', label: 'Vermont' }, { value: 'VA', label: 'Virginia' },
+  { value: 'WA', label: 'Washington' }, { value: 'WV', label: 'West Virginia' },
+  { value: 'WI', label: 'Wisconsin' }, { value: 'WY', label: 'Wyoming' },
+  { value: 'DC', label: 'Washington, D.C.' },
+];
 
 const SPECIALTIES: { value: Specialty; label: string }[] = [
   { value: 'electrical', label: 'Electrical' },
@@ -61,6 +91,16 @@ export default function ExpertRegistrationForm() {
     setSpecialties(prev =>
       prev.map(s => s.specialty === spec ? { ...s, yearsExperience: years } : s)
     );
+  };
+
+  const setPrimarySpecialty = (spec: Specialty) => {
+    setSpecialties(prev => {
+      const idx = prev.findIndex(s => s.specialty === spec);
+      if (idx <= 0) return prev;
+      const updated = [...prev];
+      const [item] = updated.splice(idx, 1);
+      return [item, ...updated];
+    });
   };
 
   const canProceed = () => {
@@ -178,21 +218,26 @@ export default function ExpertRegistrationForm() {
               onChange={e => setCity(e.target.value)}
               fullWidth
             />
-            <TextInput
+            <Select
               label="State *"
-              type="text"
+              id="state"
               value={state}
               onChange={e => setState(e.target.value)}
               fullWidth
-              maxLength={2}
-              placeholder="CA"
-            />
+            >
+              <option value="">Select state</option>
+              {US_STATES.map(s => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
+            </Select>
           </div>
           <TextInput
             label="Zip Code"
             type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             value={zipCode}
-            onChange={e => setZipCode(e.target.value)}
+            onChange={e => setZipCode(e.target.value.replace(/\D/g, ''))}
             fullWidth
             maxLength={5}
           />
@@ -212,37 +257,65 @@ export default function ExpertRegistrationForm() {
       {step === 2 && (
         <div className="space-y-4">
           <h2 className="text-lg font-bold text-white">Your Specialties</h2>
-          <p className="text-sm text-white/50">Select all that apply. The first selected will be your primary specialty.</p>
-          <div className="grid grid-cols-2 gap-2">
+          <p className="text-sm text-white/50">Select up to 5.</p>
+          <div className="space-y-1.5">
             {SPECIALTIES.map(({ value, label }) => {
-              const selected = specialties.find(s => s.specialty === value);
-              return (
-                <div key={value}>
-                  <button
-                    onClick={() => toggleSpecialty(value)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                      selected
-                        ? 'bg-rust/20 border-rust text-rust'
-                        : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                  {selected && (
-                    <div className="mt-1 px-1 flex items-center gap-2">
-                      <label className="text-xs text-white/40">Years exp:</label>
+              const entry = specialties.find(s => s.specialty === value);
+              const isSelected = !!entry;
+              const isPrimary = isSelected && specialties[0].specialty === value;
+              const atMax = specialties.length >= 5 && !isSelected;
+              return isSelected ? (
+                <div key={value} className="border border-rust/30 bg-rust/10 rounded-lg overflow-hidden">
+                  <div className="flex items-center gap-3 px-3 py-2.5">
+                    <span className="flex-1 text-sm font-medium text-rust">{label}</span>
+                    <button
+                      onClick={() => toggleSpecialty(value)}
+                      aria-label={`Remove ${label}`}
+                      className="text-lg leading-none text-white/20 hover:text-white/50 transition-colors"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between px-3 pb-3 pt-1 border-t border-rust/20">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-white/40">Years of experience</span>
                       <TextInput
                         type="number"
                         min={1}
                         max={50}
-                        value={selected.yearsExperience}
+                        value={entry.yearsExperience}
                         onChange={e => setSpecialtyYears(value, parseInt(e.target.value) || 1)}
-                        className="w-14 text-xs"
+                        className="w-16"
                         inputSize="sm"
                       />
                     </div>
-                  )}
+                    {isPrimary ? (
+                      <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-rust/20 text-rust">
+                        Primary
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => setPrimarySpecialty(value)}
+                        className="text-xs text-white/30 hover:text-white/60 transition-colors"
+                      >
+                        Set as primary
+                      </button>
+                    )}
+                  </div>
                 </div>
+              ) : (
+                <button
+                  key={value}
+                  onClick={() => !atMax && toggleSpecialty(value)}
+                  disabled={atMax}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
+                    atMax
+                      ? 'bg-white/5 border-white/[0.06] text-white/20 cursor-not-allowed'
+                      : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  {label}
+                </button>
               );
             })}
           </div>
@@ -304,9 +377,9 @@ export default function ExpertRegistrationForm() {
             <div>
               <span className="text-xs text-white/40">Specialties</span>
               <div className="flex flex-wrap gap-1 mt-1">
-                {specialties.map(s => (
+                {specialties.map((s, idx) => (
                   <span key={s.specialty} className="px-2 py-0.5 text-xs bg-rust/20 text-rust rounded-full font-medium">
-                    {s.specialty.replace('_', ' ')} ({s.yearsExperience}yr)
+                    {SPECIALTIES.find(sp => sp.value === s.specialty)?.label} ({s.yearsExperience}yr){idx === 0 ? ' · Primary' : ''}
                   </span>
                 ))}
               </div>

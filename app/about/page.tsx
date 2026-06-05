@@ -1,177 +1,97 @@
-import Link from 'next/link';
-import {
-  ArrowRight,
-  Zap,
-  BookOpen,
-  ShoppingCart,
-  Video,
-  MapPin,
-  Package,
-  Ruler,
-  Award,
-  CheckCircle,
-  Star,
-  Home,
-} from 'lucide-react';
+import { ArrowRight, Ruler, CheckCircle } from 'lucide-react';
 import WhyDIYHelper from '@/components/WhyDIYHelper';
 import ProjectTemplates from '@/components/ProjectTemplates';
-import AppLogo from '@/components/AppLogo';
 import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import Badge from '@/components/ui/Badge';
 
 const features = [
   {
-    icon: BookOpen,
     title: "Building Codes",
-    description: "Instant access to NEC, IRC, and local codes. No more searching through confusing documents.",
-    color: "from-[#C67B5C] to-[#A65D3F]"
+    description: "Search NEC, IRC, and local codes by project type — without reading through the full document.",
   },
   {
-    icon: Video,
-    title: "Video Tutorials",
-    description: "Curated tutorial videos for your specific project. Learn from the pros before you start.",
-    color: "from-[#B87333] to-[#8B5A2B]"
+    title: "Video Guides",
+    description: "Project-specific video walkthroughs sourced from licensed tradespeople and trusted instructors.",
   },
   {
-    icon: ShoppingCart,
-    title: "Smart Shopping Lists",
-    description: "Auto-generated materials lists with local store pricing. Never over-buy again.",
-    color: "from-[#4A7C59] to-[var(--forest-green-dark)]"
+    title: "Materials Lists",
+    description: "Generated based on your project specs, with current pricing from Home Depot, Lowe's, and local suppliers.",
   },
   {
-    icon: Package,
     title: "Tool Inventory",
-    description: "Track what you own. We'll exclude items you already have from shopping lists.",
-    color: "from-[#5D7B93] to-[var(--slate-blue-dark)]"
+    description: "Log the tools you already own. Shopping lists will automatically exclude them.",
   },
   {
-    icon: MapPin,
     title: "Local Store Finder",
-    description: "Find materials at Home Depot, Lowe's, and Ace Hardware near you with real-time pricing.",
-    color: "from-[#7D6B5D] to-[var(--warm-brown)]"
+    description: "Find materials at stores near you with up-to-date availability and pricing.",
   },
   {
-    icon: Zap,
-    title: "Smart Calculations",
-    description: "Wire sizing, outlet counts, tile quantities—calculated correctly the first time.",
-    color: "from-[#9B7BA6] to-[#7A5C87]"
-  }
+    title: "Project Calculations",
+    description: "Wire gauge, outlet load, tile coverage, lumber quantities — calculated from your project dimensions.",
+  },
 ];
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-[var(--earth-cream)]">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 backdrop-blur-xl bg-[var(--earth-brown-dark)]/95 border-b border-[var(--blueprint-grid-major)]">
-        <div className="u-container">
-          <div className="flex justify-between items-center h-16">
-            <AppLogo />
-            <div className="flex items-center gap-3">
-              <Link href="/about" className="text-sm font-medium text-white">
-                About
-              </Link>
-              <Button variant="ghost" href="/experts/register" className="text-[var(--earth-sand)] hover:text-white hover:bg-white/10">
-                Become an Expert
-              </Button>
-              <Link
-                href="/"
-                className="bg-rust text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-copper transition-colors"
-              >
-                Get Started
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Social Proof Bar */}
-      <section className="py-[var(--space-s)] border-b border-[#E8DFD0]">
-        <div className="u-container">
-          <div className="flex flex-wrap justify-center items-center gap-[var(--space-m)] sm:gap-[var(--space-xl)] text-[#7D6B5D]">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-[#3E2723]">Free</span>
-              <span className="text-sm">to use</span>
-            </div>
-            <div className="h-8 w-px bg-[#D4C8B8] hidden sm:block" />
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-[#3E2723]">Instant</span>
-              <span className="text-sm">answers</span>
-            </div>
-            <div className="h-8 w-px bg-[#D4C8B8] hidden sm:block" />
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-[#3E2723]">No signup</span>
-              <span className="text-sm">required</span>
-            </div>
-            <div className="h-8 w-px bg-[#D4C8B8] hidden sm:block" />
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-[#3E2723]">Verified</span>
-              <span className="text-sm">experts</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
+    <div className="min-h-screen bg-earth-night">
       {/* Two-Sided Value Section */}
       <section className="py-[var(--space-2xl)]">
         <div className="u-container">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
-              One platform, two ways to win
+            <h2 className="text-3xl sm:text-4xl font-serif font-normal text-white mb-4">
+              Built for homeowners and trade professionals
             </h2>
-            <p className="text-lg text-[var(--warm-brown)] max-w-2xl mx-auto">
-              Whether you&apos;re tackling a project or sharing your trade knowledge
+            <p className="text-lg text-white/60 max-w-2xl mx-auto">
+              Whether you&apos;re planning a renovation or want to put your trade knowledge to work
             </p>
           </div>
 
           <div className="u-grid">
             {/* For Homeowners */}
-            <div className="col-span-12 sm:col-span-6 bg-white/6 rounded-2xl p-6 border border-[#E8DFD0] hover:border-[#C67B5C] transition-all duration-300 hover:shadow-lg">
-              <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-[#5D7B93] to-[var(--slate-blue-dark)] mb-4 shadow-lg">
-                <Home className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-[#3E2723] mb-4">Get your project done right</h3>
-              <ul className="space-y-3 mb-6">
+            <Card padding="lg" className="col-span-12 sm:col-span-6 flex flex-col">
+              <h3 className="text-xl font-serif font-normal text-white mb-4">Plan, prepare, and build with confidence</h3>
+              <ul className="space-y-3 mb-6 flex-1">
                 {[
-                  'AI-powered project plans with local building codes',
-                  'Smart shopping lists with real store prices',
-                  'Expert help when you get stuck',
+                  'Project plans that reference local building codes automatically',
+                  'Materials lists with pricing from stores near you',
+                  'Access to licensed trade professionals when you need a second opinion',
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm text-[var(--warm-brown)]">
-                    <CheckCircle className="w-4 h-4 text-[#4A7C59] mt-0.5 flex-shrink-0" />
+                  <li key={idx} className="flex items-start gap-2 text-sm text-white/60">
+                    <CheckCircle className="w-4 h-4 text-forest-green mt-0.5 flex-shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
               <Button variant="tertiary" size="lg" href="/" rightIcon={ArrowRight}>
-                Start My Project
+                Start a Project
               </Button>
-            </div>
+            </Card>
 
             {/* For Trade Professionals */}
-            <div className="col-span-12 sm:col-span-6 bg-white/6 rounded-2xl p-6 border border-[#E8DFD0] hover:border-[var(--gold)] transition-all duration-300 hover:shadow-lg">
-              <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-[var(--gold)] to-[var(--copper)] mb-4 shadow-lg">
-                <Award className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-[#3E2723] mb-4">Turn your expertise into income</h3>
-              <ul className="space-y-3 mb-6">
+            <Card padding="lg" className="col-span-12 sm:col-span-6 flex flex-col">
+              <h3 className="text-xl font-serif font-normal text-white mb-4">Share your expertise on your schedule</h3>
+              <ul className="space-y-3 mb-6 flex-1">
                 {[
-                  'Answer DIY questions and get paid per response',
-                  'Set your own rates and schedule',
-                  'Build your reputation with verified reviews',
+                  'Answer project questions in your trade area',
+                  'Set your own availability and per-question rate',
+                  'Build a verified profile with reviews from real clients',
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm text-[var(--warm-brown)]">
-                    <CheckCircle className="w-4 h-4 text-[#4A7C59] mt-0.5 flex-shrink-0" />
+                  <li key={idx} className="flex items-start gap-2 text-sm text-white/60">
+                    <CheckCircle className="w-4 h-4 text-forest-green mt-0.5 flex-shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
-              <Link
+              <Button
                 href="/experts/register"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--gold)] to-[var(--copper)] text-white px-5 py-2.5 rounded-xl hover:from-[var(--copper)] hover:to-[#B8860B] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
+                rightIcon={ArrowRight}
+                size="lg"
+                className="bg-gradient-to-r from-gold to-copper text-white hover:from-copper hover:to-copper hover:shadow-lg hover:-translate-y-0.5"
               >
-                <span>Start Earning</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
+                Apply as an Expert
+              </Button>
+            </Card>
           </div>
         </div>
       </section>
@@ -184,46 +104,42 @@ export default function AboutPage() {
         <div className="u-container">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 mb-4">
-              <Ruler className="w-5 h-5 text-[#5D7B93]" />
-              <span className="text-sm font-medium text-[#5D7B93] uppercase tracking-wider">Features</span>
+              <Badge variant="default" icon={Ruler}>Features</Badge>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
-              Everything you need to DIY with confidence
+            <h2 className="text-3xl sm:text-4xl font-serif font-normal text-white mb-4">
+              What DIY Helper includes
             </h2>
-            <p className="text-lg text-[var(--warm-brown)] max-w-2xl mx-auto">
-              From planning to purchasing, we&apos;ve got you covered
+            <p className="text-lg text-white/60 max-w-2xl mx-auto">
+              Tools to help you plan, shop, and build — without the guesswork
             </p>
           </div>
 
           <div className="u-grid">
             {features.map((feature, idx) => (
-              <div
+              <Card
                 key={idx}
-                className="col-span-12 sm:col-span-6 lg:col-span-4 group relative bg-white/6 rounded-2xl p-6 border border-[#E8DFD0] hover:border-[#C67B5C] transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                padding="lg"
+                className="col-span-12 sm:col-span-6 lg:col-span-4"
               >
-                <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${feature.color} mb-4 shadow-lg`}>
-                  <feature.icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-lg font-bold text-[#3E2723] mb-2">{feature.title}</h3>
-                <p className="text-[var(--warm-brown)] text-sm leading-relaxed">{feature.description}</p>
-              </div>
+                <h3 className="text-lg font-serif font-normal text-white mb-2">{feature.title}</h3>
+                <p className="text-white/60 text-sm leading-relaxed">{feature.description}</p>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Expert Earnings Spotlight */}
-      <section className="py-[var(--space-2xl)] bg-[var(--earth-tan)]">
+      {/* Expert Earnings Spotlight — hidden, uncomment to restore */}
+      {/* <section className="py-[var(--space-2xl)] bg-earth-brown-dark">
         <div className="u-container">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 mb-4">
-              <Award className="w-5 h-5 text-[var(--copper)]" />
-              <span className="text-sm font-medium text-[var(--copper)] uppercase tracking-wider">Expert Spotlight</span>
+              <Badge variant="warning" icon={Award}>Expert Spotlight</Badge>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
-              Experts on Fixerator
+            <h2 className="text-3xl sm:text-4xl font-serif font-normal text-white mb-4">
+              How trade professionals use DIY Helper
             </h2>
-            <p className="text-lg text-[var(--warm-brown)]">Real professionals. Real earnings.</p>
+            <p className="text-lg text-white/60">Licensed tradespeople who answer questions on their own time.</p>
           </div>
 
           <div className="u-grid mb-10">
@@ -232,73 +148,62 @@ export default function AboutPage() {
                 name: 'Mike T.',
                 trade: 'Licensed Electrician',
                 location: 'Portland, OR',
-                quote: 'I answer 5-6 questions a week during downtime between jobs. Easy extra income doing what I already know.',
-                earnings: '$2,400',
-                period: '/mo avg',
-                rating: '4.9',
+                quote: 'I set aside a few hours a week for questions during slower periods. The homeowners asking are usually a couple steps in and genuinely stuck — so the answers are specific, not generic.',
+                rating: 4.9,
                 reviews: '47',
               },
               {
                 name: 'Sarah K.',
                 trade: 'Master Plumber',
                 location: 'Austin, TX',
-                quote: 'I do a couple video consultations a week. DIYers love getting real-time help, and the pay is great.',
-                earnings: '$1,800',
-                period: '/mo avg',
-                rating: '4.8',
+                quote: 'Most questions take me 10 or 15 minutes. I can see photos of what they\'re working with, which makes it easy to give a real answer instead of a guess.',
+                rating: 4.8,
                 reviews: '32',
               },
             ].map((expert, idx) => (
-              <div key={idx} className="col-span-12 sm:col-span-6 bg-white/6 rounded-2xl p-6 border border-[#E8DFD0]">
+              <Card key={idx} padding="lg" className="col-span-12 sm:col-span-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--gold)] to-[var(--copper)] flex items-center justify-center text-white font-bold text-lg">
-                    {expert.name[0]}
-                  </div>
+                  <Avatar name={expert.name} size="lg" />
                   <div>
-                    <p className="font-bold text-[#3E2723]">{expert.name}</p>
-                    <p className="text-sm text-[#7D6B5D]">{expert.trade} · {expert.location}</p>
+                    <p className="font-bold text-white">{expert.name}</p>
+                    <p className="text-sm text-white/40">{expert.trade} · {expert.location}</p>
                   </div>
                 </div>
-                <p className="text-sm text-[var(--warm-brown)] italic mb-4 leading-relaxed">
+                <p className="text-sm text-white/60 italic mb-4 leading-relaxed">
                   &ldquo;{expert.quote}&rdquo;
                 </p>
-                <div className="flex items-center gap-4 pt-4 border-t border-[#E8DFD0]">
-                  <div>
-                    <span className="text-xl font-bold text-[#3E2723]">{expert.earnings}</span>
-                    <span className="text-sm text-[#7D6B5D]">{expert.period}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 text-[var(--copper)] fill-[var(--copper)]" />
-                    <span className="font-bold text-[#3E2723]">{expert.rating}</span>
-                    <span className="text-sm text-[#7D6B5D]">({expert.reviews} reviews)</span>
-                  </div>
+                <div className="flex items-center gap-1.5 pt-4 border-t border-white/[0.08]">
+                  <StarRating value={expert.rating} size="sm" />
+                  <span className="font-bold text-white">{expert.rating}</span>
+                  <span className="text-sm text-white/40">({expert.reviews} reviews)</span>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
 
           <div className="text-center">
-            <Link
+            <Button
               href="/experts/register"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--gold)] to-[var(--copper)] text-white px-6 py-3 rounded-xl hover:from-[var(--copper)] hover:to-[#B8860B] font-semibold transition-all hover:shadow-lg hover:-translate-y-0.5"
+              rightIcon={ArrowRight}
+              size="lg"
+              className="bg-gradient-to-r from-gold to-copper text-white hover:from-copper hover:to-copper hover:shadow-lg hover:-translate-y-0.5"
             >
-              <span>Become an Expert</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <p className="mt-3 text-sm text-[#7D6B5D]">Free to join — start earning within days</p>
+              Apply as an Expert
+            </Button>
+            <p className="mt-3 text-sm text-white/40">Free to apply — most approvals within 48 hours</p>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Project Templates */}
       <section className="py-[var(--space-2xl)]">
         <div className="u-container">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#3E2723] mb-4">
-              Popular Project Templates
+            <h2 className="text-3xl sm:text-4xl font-serif font-normal text-white mb-4">
+              Common Project Types
             </h2>
-            <p className="text-lg text-[var(--warm-brown)] max-w-2xl mx-auto">
-              Get started quickly with step-by-step guidance for common DIY projects
+            <p className="text-lg text-white/60 max-w-2xl mx-auto">
+              Pre-built guidance, code references, and materials estimates for the most frequent home improvement projects
             </p>
           </div>
           <ProjectTemplates variant="grid" maxItems={6} />
@@ -306,34 +211,22 @@ export default function AboutPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-[var(--space-3xl)]">
+      <section className="py-[var(--space-3xl)] border-t border-white/[0.08]">
         <div className="u-container">
-          <div className="max-w-3xl mx-auto">
-            <div className="relative bg-gradient-to-br from-[#C67B5C] via-[#B8593B] to-[#A65D3F] rounded-3xl p-8 sm:p-12 text-center text-white overflow-hidden">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-xl" />
-              <div className="relative">
-                <h2 className="text-3xl sm:text-4xl font-bold mb-4">Ready to get started?</h2>
-                <p className="text-lg text-white/90 mb-8 max-w-xl mx-auto">
-                  Whether you&apos;re tackling a project or sharing your expertise
-                </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-[var(--space-s)]">
-                  <Link
-                    href="/"
-                    className="inline-flex items-center gap-3 bg-white/6 text-[#3E2723] px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#F5F0E6] transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
-                  >
-                    <span>Start My Project</span>
-                    <ArrowRight className="w-5 h-5" />
-                  </Link>
-                  <Link
-                    href="/experts/register"
-                    className="inline-flex items-center gap-3 bg-white/15 text-white border-2 border-white/40 px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/25 transition-all hover:-translate-y-0.5"
-                  >
-                    <span>Become an Expert</span>
-                    <ArrowRight className="w-5 h-5" />
-                  </Link>
-                </div>
-              </div>
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-serif font-normal text-white mb-4">
+              Ready to start your project?
+            </h2>
+            <p className="text-lg text-white/60 mb-10">
+              No account needed. Create one if you want to save your work or connect with a licensed expert.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-[var(--space-s)]">
+              <Button variant="primary" href="/" size="lg" rightIcon={ArrowRight}>
+                Start a Project
+              </Button>
+              <Button variant="outline" href="/experts/register" size="lg" rightIcon={ArrowRight}>
+                Apply as an Expert
+              </Button>
             </div>
           </div>
         </div>

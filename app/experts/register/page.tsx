@@ -5,16 +5,14 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import ExpertRegistrationForm from '@/components/marketplace/ExpertRegistrationForm';
 import AuthButton from '@/components/AuthButton';
-import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
-import { DollarSign, Award, CheckCircle, ArrowRight } from 'lucide-react';
+import Card from '@/components/ui/Card';
 
 export default function ExpertRegisterPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [showRegistration, setShowRegistration] = useState(false);
-  const [showAuth, setShowAuth] = useState(false);
 
   const checkExpertStatus = useCallback(async () => {
     try {
@@ -62,7 +60,6 @@ export default function ExpertRegisterPage() {
     return () => subscription.unsubscribe();
   }, [checkExpertStatus]);
 
-  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-earth-night flex items-center justify-center">
@@ -71,15 +68,14 @@ export default function ExpertRegisterPage() {
     );
   }
 
-  // Authenticated + ready for registration
   if (user && showRegistration) {
     return (
       <div className="min-h-screen bg-earth-night">
-        <main className="max-w-3xl mx-auto px-4 py-8">
+        <main className="max-w-3xl mx-auto px-4 py-[var(--space-3xl)]">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white">Become an Expert</h1>
+            <h1 className="text-3xl font-serif font-normal text-white">Expert Application</h1>
             <p className="text-sm text-white/50 mt-2">
-              Share your expertise with DIYers and earn money answering questions.
+              Tell us about your trade background and experience.
             </p>
           </div>
           <ExpertRegistrationForm />
@@ -88,21 +84,17 @@ export default function ExpertRegisterPage() {
     );
   }
 
-  // Unauthenticated — show value prop + sign-in CTA
   return (
     <div className="min-h-screen bg-earth-night">
-      <main className="max-w-3xl mx-auto px-4 py-12">
+      <main className="max-w-3xl mx-auto px-4 py-[var(--space-3xl)]">
 
         {/* Hero */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-rust to-copper rounded-2xl mb-5 shadow-lg">
-            <Award className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-white mb-3">
-            Become an Expert
+        <div className="text-center mb-[var(--space-2xl)]">
+          <h1 className="text-3xl font-serif font-normal text-white mb-3">
+            Apply as a Trade Expert
           </h1>
           <p className="text-lg text-white/50 max-w-xl mx-auto">
-            Share your trade knowledge, help DIYers succeed, and earn money on your own schedule.
+            Put your trade knowledge to work. Help homeowners navigate projects you&apos;ve done a hundred times.
           </p>
         </div>
 
@@ -110,51 +102,51 @@ export default function ExpertRegisterPage() {
         <div className="grid sm:grid-cols-3 gap-4 mb-8">
           {[
             {
-              icon: DollarSign,
-              title: 'Answer & Earn',
-              desc: 'Get paid for sharing your expertise. Answer DIY questions and provide consultations.',
-              color: 'from-forest-green to-forest-green-dark',
+              title: 'Answer questions in your trade',
+              desc: 'Review project questions from homeowners and respond to the ones that fit your expertise. You choose which ones to answer.',
             },
             {
-              icon: Award,
-              title: 'Build Your Rep',
-              desc: 'Earn verified reviews and ratings from satisfied DIYers. Stand out in your specialty.',
-              color: 'from-rust to-copper',
+              title: 'Build a verified profile',
+              desc: 'Every answered question earns a review. Your rating and response history are visible to homeowners before they reach out.',
             },
             {
-              icon: CheckCircle,
-              title: 'Set Your Terms',
-              desc: 'Choose your own rates, availability, and areas of expertise. Work when it suits you.',
-              color: 'from-slate-blue to-slate-blue-dark',
+              title: 'Work on your schedule',
+              desc: 'Set your availability, per-question rate, and trade categories. No minimum hours or commitments required.',
             },
           ].map((item, idx) => (
-            <div
-              key={idx}
-              className="bg-white/5 border border-white/[0.08] rounded-2xl p-6 text-center"
-            >
-              <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${item.color} mb-4 shadow-lg`}>
-                <item.icon className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-base font-bold text-white mb-2">{item.title}</h3>
+            <Card key={idx} padding="lg" className="text-center flex flex-col">
+              <h3 className="text-base font-serif font-normal text-white mb-2">{item.title}</h3>
               <p className="text-sm text-white/50 leading-relaxed">{item.desc}</p>
-            </div>
+            </Card>
           ))}
         </div>
 
         {/* How it works */}
-        <div className="bg-white/5 border border-white/[0.08] rounded-2xl p-6 sm:p-8 mb-8">
-          <h2 className="text-lg font-bold text-white mb-6 text-center">How It Works</h2>
+        <div className="mb-[var(--space-xl)]">
+          <h2 className="text-xl font-serif font-normal text-white mb-6 text-center">How the application works</h2>
           <div className="grid sm:grid-cols-3 gap-6">
             {[
-              { step: '1', title: 'Create your account', desc: 'Sign up for free and complete your expert profile.' },
-              { step: '2', title: 'Get verified', desc: 'We review your credentials and activate your expert status.' },
-              { step: '3', title: 'Start earning', desc: 'Answer questions, offer consultations, and get paid.' },
+              {
+                step: '1',
+                title: 'Create an account',
+                desc: 'Sign up and fill out your trade background, license info, and service area.',
+              },
+              {
+                step: '2',
+                title: 'We review your application',
+                desc: 'We verify your credentials and trade experience before you go live.',
+              },
+              {
+                step: '3',
+                title: 'Start answering questions',
+                desc: 'Browse open questions in your trade and respond to the ones you can help with.',
+              },
             ].map((item, idx) => (
               <div key={idx} className="text-center">
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-rust text-white font-bold text-sm mb-3">
+                <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/[0.08] text-white/60 font-bold text-sm mb-3">
                   {item.step}
                 </div>
-                <h3 className="font-semibold text-white mb-1">{item.title}</h3>
+                <h3 className="text-sm font-serif font-normal text-white mb-1">{item.title}</h3>
                 <p className="text-sm text-white/50">{item.desc}</p>
               </div>
             ))}
@@ -162,46 +154,13 @@ export default function ExpertRegisterPage() {
         </div>
 
         {/* Sign-in CTA */}
-        <div className="text-center bg-gradient-to-br from-rust via-rust to-copper rounded-2xl p-8 text-white relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10" style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)
-            `,
-            backgroundSize: '30px 30px'
-          }} />
-          <div className="relative">
-            <h2 className="text-2xl font-bold mb-2">Ready to get started?</h2>
-            <p className="text-white/80 mb-6">
-              Sign in or create an account to begin your expert registration.
-            </p>
-            <div className="inline-block">
-              <AuthButton
-                user={user}
-                externalShowAuth={showAuth}
-                onAuthToggle={setShowAuth}
-              />
-            </div>
-            {!showAuth && (
-              <Button
-                variant="ghost"
-                rightIcon={ArrowRight}
-                onClick={() => setShowAuth(true)}
-                className="mx-auto mt-4 text-white/70 hover:text-white hover:bg-white/10"
-              >
-                Sign in to continue
-              </Button>
-            )}
-          </div>
+        <div className="text-center pt-[var(--space-xl)] border-t border-white/[0.08]">
+          <h2 className="text-xl font-serif font-normal text-white mb-3">Create an account to apply</h2>
+          <p className="text-white/50 text-sm mb-8 max-w-sm mx-auto">
+            The application takes about 5 minutes. We&apos;ll need your trade background and license information.
+          </p>
+          <AuthButton user={user} />
         </div>
-
-        {/* Browse link */}
-        <p className="text-center mt-6 text-sm text-white/30">
-          Just looking?{' '}
-          <Button variant="ghost" href="/experts" className="text-white/50 hover:text-white p-0 h-auto">
-            Browse the expert directory →
-          </Button>
-        </p>
 
       </main>
     </div>
