@@ -19,8 +19,14 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
+    // In CI, run a production build so every route/chunk is precompiled up front.
+    // `next dev` compiles routes on first hit, which under CI CPU contention can blow
+    // past assertion timeouts and flake (e.g. the landing chip-morph test). Locally we
+    // keep `next dev` for fast HMR iteration.
+    command: process.env.CI ? 'npm run build && npm run start' : 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
+    // `next build` takes longer than Playwright's default 60s webServer startup window.
+    timeout: 180_000,
   },
 });
