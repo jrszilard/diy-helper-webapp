@@ -14,6 +14,7 @@ import { buildReport } from '@/lib/agents/phases/report-builder';
 import { prefetchInventory } from '@/lib/agents/inventory-prefetch';
 import type { AgentContext, AgentStreamEvent, AgentPhase, TokenUsage } from '@/lib/agents/types';
 import { checkUsageLimit, incrementUsage } from '@/lib/usage';
+import { checkAnonAiBudget } from '@/lib/anon-budget';
 
 const StartRunSchema = z.object({
   projectDescription: z.string().min(10, 'Please describe your project in more detail').max(2000),
@@ -74,6 +75,21 @@ export async function POST(req: NextRequest) {
       } catch (usageErr) {
         // Usage tables may not exist yet — allow the request through
         logger.error('Usage limit check failed, allowing request', usageErr);
+      }
+    } else {
+      // Anonymous runs are allowed (the landing-page "try it" funnel), but bounded
+      // by a global daily ceiling so IP-rotating bots can't run up an unbounded
+      // Anthropic bill at public launch. Authenticated users are unaffected.
+      const dayKey = new Date().toISOString().slice(0, 10);
+      const budget = await checkAnonAiBudget(dayKey, 'agent-run');
+      if (!budget.allowed) {
+        return applyCorsHeaders(req, new Response(
+          JSON.stringify({
+            error: 'Free demo capacity for today has been reached. Please sign in to continue.',
+            code: 'ANON_DAILY_LIMIT',
+          }),
+          { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': '3600' } }
+        ));
       }
     }
 

@@ -120,7 +120,12 @@ function cleanup() {
 function getClientIdentifier(req: NextRequest, userId: string | null): string {
   if (userId) return `user:${userId}`;
 
-  const ip = req.headers.get('x-real-ip') || req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  // On Vercel the platform sets x-forwarded-for; its left-most entry is the real
+  // client IP as observed at the edge. Prefer it over x-real-ip, which a client
+  // can set on its own request to rotate identifiers and slip past per-IP limits.
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || req.headers.get('x-real-ip')
+    || 'unknown';
   return `ip:${ip}`;
 }
 

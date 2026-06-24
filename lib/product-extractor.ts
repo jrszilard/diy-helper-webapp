@@ -12,6 +12,7 @@
  */
 
 import { logger } from '@/lib/logger';
+import { isUrlSafe } from '@/lib/security';
 import type { BraveSearchResult } from '@/lib/search';
 
 export interface ExtractedProductData {
@@ -562,6 +563,13 @@ export async function fetchProductData(url: string, store?: string): Promise<Ext
     source: 'fetch-failed',
   };
 
+  // SSRF guard: never let this server-side fetch reach internal/private hosts.
+  // Mirrors the protection on webFetch (lib/search.ts) for this second outbound path.
+  if (!isUrlSafe(url)) {
+    logger.warn('Blocked unsafe product URL (SSRF guard)', { url });
+    return defaultResult;
+  }
+
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
@@ -577,6 +585,8 @@ export async function fetchProductData(url: string, store?: string): Promise<Ext
         'Upgrade-Insecure-Requests': '1',
         'Cache-Control': 'no-cache',
       },
+      // Don't auto-follow redirects: a safe URL could 30x to an internal address.
+      redirect: 'manual',
       signal: controller.signal,
     });
 
