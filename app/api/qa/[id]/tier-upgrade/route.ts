@@ -113,17 +113,34 @@ export async function POST(
       ));
     }
 
-    // Charge the DIYer
-    let paymentIntentId: string;
-
+    // Payment method must be on file before we reserve the tier slot.
     if (!question.stripe_customer_id || !question.payment_method_id) {
-      // Free question or missing payment info — shouldn't get here, but handle gracefully
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'No payment method on file. Please update your payment method.' }),
         { status: 402, headers: { 'Content-Type': 'application/json' } }
       ));
     }
 
+    // STEP 1: Atomically claim the tier advance BEFORE charging. The
+    // .eq('current_tier', question.current_tier) guard is an optimistic lock, so
+    // two concurrent upgrade requests can't both charge for the same tier jump.
+    const { data: reserved, error: reserveErr } = await adminClient
+      .from('qa_questions')
+      .update({ current_tier: targetTier, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('current_tier', question.current_tier)
+      .select('id')
+      .single();
+
+    if (reserveErr || !reserved) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: 'Tier was already upgraded. Please refresh and try again.' }),
+        { status: 409, headers: { 'Content-Type': 'application/json' } }
+      ));
+    }
+
+    // STEP 2: Charge. Only one request reaches here per tier jump.
+    let paymentIntentId: string;
     try {
       const chargeResult = await chargeQAQuestion({
         amountCents: totalUpgradeCents,
@@ -135,9 +152,15 @@ export async function POST(
           from_tier: String(question.current_tier),
           to_tier: String(targetTier),
         },
+        idempotencyKey: `qa-tier-${id}-${question.current_tier}-${targetTier}`,
       });
       paymentIntentId = chargeResult.paymentIntentId;
     } catch (chargeErr) {
+      // ROLLBACK: restore the previous tier so the DIYer can retry cleanly.
+      await adminClient
+        .from('qa_questions')
+        .update({ current_tier: question.current_tier, updated_at: new Date().toISOString() })
+        .eq('id', id);
       logger.error('Tier upgrade charge failed', chargeErr, { questionId: id });
       return applyCorsHeaders(req, new Response(
         JSON.stringify({ error: 'Payment failed. Please check your payment method.' }),
@@ -145,7 +168,8 @@ export async function POST(
       ));
     }
 
-    // Update question with new tier and payment record
+    // STEP 3: Finalize — record the tier payment and accumulate pricing.
+    // (current_tier was already advanced by the reserve in step 1.)
     const now = new Date().toISOString();
     const existingPayments = (question.tier_payments as Array<Record<string, unknown>>) || [];
     const newPayment = {
@@ -155,14 +179,12 @@ export async function POST(
       charged_at: now,
     };
 
-    // Calculate new expert payout amounts
     const platformFeeCents = Math.round(totalUpgradeCents * marketplaceConfig.platformFeeRate);
     const additionalExpertPayoutCents = totalUpgradeCents - platformFeeCents;
 
     await adminClient
       .from('qa_questions')
       .update({
-        current_tier: targetTier,
         tier_payments: [...existingPayments, newPayment],
         // Accumulate total price and expert payout
         price_cents: question.price_cents + totalUpgradeCents,

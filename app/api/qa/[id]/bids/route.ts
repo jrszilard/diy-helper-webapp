@@ -4,7 +4,7 @@ import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { chargeQAQuestion } from '@/lib/stripe';
-import { applyCredits } from '@/lib/marketplace/qa-helpers';
+import { applyCredits, reverseCredits } from '@/lib/marketplace/qa-helpers';
 import { createNotification } from '@/lib/notifications';
 import { validateBidPrice, calculateBidPricing, checkBidWindowStatus } from '@/lib/marketplace/bidding';
 import { CLAIM_EXPIRY_HOURS } from '@/lib/marketplace/constants';
@@ -424,12 +424,57 @@ async function handleSelectBid(
     ));
   }
 
-  // Charge the DIYer at the bid price
+  const now = new Date();
+  const claimExpiresAt = new Date(now.getTime() + CLAIM_EXPIRY_HOURS * 60 * 60 * 1000);
+
+  // STEP 1: Atomically reserve the question BEFORE charging. The
+  // .eq('status','open') / .is('accepted_bid_id', null) guards act as an
+  // optimistic lock so only one concurrent bid-select can succeed — preventing
+  // the double-charge race where two requests both pass the accepted_bid_id
+  // check above and both charge the DIYer's card.
+  const { data: reserved, error: reserveError } = await adminClient
+    .from('qa_questions')
+    .update({
+      expert_id: bid.expert_id,
+      accepted_bid_id: bidId,
+      status: 'claimed',
+      claimed_at: now.toISOString(),
+      claim_expires_at: claimExpiresAt.toISOString(),
+      updated_at: now.toISOString(),
+    })
+    .eq('id', questionId)
+    .eq('status', 'open')
+    .is('accepted_bid_id', null)
+    .select('id')
+    .single();
+
+  if (reserveError || !reserved) {
+    return applyCorsHeaders(req, new Response(
+      JSON.stringify({ error: 'A bid has already been selected' }),
+      { status: 409, headers: { 'Content-Type': 'application/json' } }
+    ));
+  }
+
+  // Release the reservation back to open (used on any charge-failure path).
+  const rollbackReserve = async () => {
+    await adminClient
+      .from('qa_questions')
+      .update({
+        status: 'open',
+        expert_id: null,
+        accepted_bid_id: null,
+        claimed_at: null,
+        claim_expires_at: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', questionId);
+  };
+
+  // STEP 2: Charge the DIYer at the bid price. Only one request reaches here.
   let paymentIntentId: string | null = null;
 
   if (question.payout_status !== 'free' && bid.proposed_price_cents > 0) {
-    // Apply credits first
-    const { effectiveChargeCents } = await applyCredits(
+    const { effectiveChargeCents, creditAppliedCents } = await applyCredits(
       adminClient,
       userId,
       questionId,
@@ -438,6 +483,8 @@ async function handleSelectBid(
 
     if (effectiveChargeCents > 0) {
       if (!question.payment_method_id || !question.stripe_customer_id) {
+        await reverseCredits(adminClient, userId, questionId, creditAppliedCents);
+        await rollbackReserve();
         return applyCorsHeaders(req, new Response(
           JSON.stringify({ error: 'Payment method not saved. Please update your payment method.' }),
           { status: 402, headers: { 'Content-Type': 'application/json' } }
@@ -454,9 +501,12 @@ async function handleSelectBid(
             qa_bid_id: bidId,
             type: 'qa_bid_accepted',
           },
+          idempotencyKey: `qa-bid-${questionId}-${bidId}`,
         });
         paymentIntentId = chargeResult.paymentIntentId;
       } catch (chargeErr) {
+        await reverseCredits(adminClient, userId, questionId, creditAppliedCents);
+        await rollbackReserve();
         logger.error('Failed to charge on bid select', chargeErr, { questionId, bidId });
         return applyCorsHeaders(req, new Response(
           JSON.stringify({ error: 'Payment failed. Please check your payment method.' }),
@@ -466,16 +516,13 @@ async function handleSelectBid(
     }
   }
 
-  const now = new Date();
-  const claimExpiresAt = new Date(now.getTime() + CLAIM_EXPIRY_HOURS * 60 * 60 * 1000);
-
-  // Accept the bid and claim the question
+  // STEP 3: Finalize — record price/payout + payment intent (claim fields were
+  // already set by the reserve), accept the chosen bid, reject the rest.
   await adminClient
     .from('qa_bids')
     .update({ status: 'accepted', updated_at: now.toISOString() })
     .eq('id', bidId);
 
-  // Reject other pending bids
   await adminClient
     .from('qa_bids')
     .update({ status: 'rejected', updated_at: now.toISOString() })
@@ -483,20 +530,14 @@ async function handleSelectBid(
     .neq('id', bidId)
     .eq('status', 'pending');
 
-  // Update question: assign expert, set price from bid, mark claimed
   await adminClient
     .from('qa_questions')
     .update({
-      expert_id: bid.expert_id,
-      accepted_bid_id: bidId,
-      status: 'claimed',
-      claimed_at: now.toISOString(),
-      claim_expires_at: claimExpiresAt.toISOString(),
       price_cents: bid.proposed_price_cents,
       platform_fee_cents: bid.platform_fee_cents,
       expert_payout_cents: bid.expert_payout_cents,
       payment_intent_id: paymentIntentId,
-      updated_at: now.toISOString(),
+      updated_at: new Date().toISOString(),
     })
     .eq('id', questionId);
 

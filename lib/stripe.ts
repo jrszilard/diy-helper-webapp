@@ -189,20 +189,29 @@ export async function chargeQAQuestion(params: {
   customerId: string;
   paymentMethodId: string;
   metadata?: Record<string, string>;
+  /**
+   * Stripe idempotency key. Derive it from the operation identity (e.g.
+   * `qa-claim-<questionId>` or `qa-bid-<questionId>-<bidId>`) so a retried or
+   * raced request reuses the same PaymentIntent instead of charging twice.
+   */
+  idempotencyKey?: string;
 }): Promise<{ paymentIntentId: string }> {
   if (isTestMode()) {
     return { paymentIntentId: `pi_test_${randomUUID().slice(0, 8)}` };
   }
 
-  const paymentIntent = await getStripeClient().paymentIntents.create({
-    amount: params.amountCents,
-    currency: 'usd',
-    customer: params.customerId,
-    payment_method: params.paymentMethodId,
-    off_session: true,
-    confirm: true,
-    metadata: params.metadata || {},
-  });
+  const paymentIntent = await getStripeClient().paymentIntents.create(
+    {
+      amount: params.amountCents,
+      currency: 'usd',
+      customer: params.customerId,
+      payment_method: params.paymentMethodId,
+      off_session: true,
+      confirm: true,
+      metadata: params.metadata || {},
+    },
+    params.idempotencyKey ? { idempotencyKey: params.idempotencyKey } : undefined,
+  );
 
   return { paymentIntentId: paymentIntent.id };
 }

@@ -242,3 +242,48 @@ export async function applyCredits(
 
   return { effectiveChargeCents, creditAppliedCents };
 }
+
+/**
+ * Reverse a credit deduction made by applyCredits when the subsequent Stripe
+ * charge fails (or no payment method is on file). Restores the balance via the
+ * atomic increment RPC, records a compensating (positive) audit row, and clears
+ * credit_applied_cents on the question so a later retry recomputes from scratch.
+ * No-op when no credits were applied.
+ */
+export async function reverseCredits(
+  adminClient: SupabaseClient,
+  userId: string,
+  questionId: string,
+  creditAppliedCents: number,
+): Promise<void> {
+  if (creditAppliedCents <= 0) return;
+
+  const { error: rpcError } = await adminClient.rpc('increment_user_credits', {
+    p_user_id: userId,
+    p_amount_cents: creditAppliedCents,
+  });
+
+  if (rpcError) {
+    // Surface loudly: a failed reversal means a user is out real credits.
+    logger.error('Failed to reverse credits after charge failure', rpcError, {
+      userId,
+      questionId,
+      creditAppliedCents,
+    });
+    return;
+  }
+
+  await adminClient
+    .from('credit_transactions')
+    .insert({
+      user_id: userId,
+      amount_cents: creditAppliedCents, // positive: credits returned
+      reason: 'credit_reversal',
+      qa_question_id: questionId,
+    });
+
+  await adminClient
+    .from('qa_questions')
+    .update({ credit_applied_cents: 0 })
+    .eq('id', questionId);
+}
