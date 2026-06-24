@@ -25,15 +25,23 @@ REVOKE ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public FROM anon;
 -- 2. Prevent future tables/migrations from silently re-granting to anon. Supabase's
 --    default privileges are attached to the object-creating roles, so revoke the
 --    default for each role that exists in this database.
+--    Each ALTER is guarded so roles the migration runner cannot manage (e.g.
+--    supabase_admin on hosted Supabase) are skipped rather than failing the whole
+--    migration. The immediate REVOKEs above are the actual control; this is
+--    future-proofing for tables created later by these roles.
 DO $$
 DECLARE r text;
 BEGIN
   FOREACH r IN ARRAY ARRAY['postgres', 'supabase_admin']
   LOOP
     IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r) THEN
-      EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE ALL ON TABLES FROM anon', r);
-      EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE ALL ON SEQUENCES FROM anon', r);
-      EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE ALL ON FUNCTIONS FROM anon', r);
+      BEGIN
+        EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE ALL ON TABLES FROM anon', r);
+        EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE ALL ON SEQUENCES FROM anon', r);
+        EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA public REVOKE ALL ON FUNCTIONS FROM anon', r);
+      EXCEPTION WHEN insufficient_privilege THEN
+        RAISE NOTICE 'Skipping default privileges for role % (insufficient privilege)', r;
+      END;
     END IF;
   END LOOP;
 END $$;
