@@ -3,7 +3,7 @@ import { getAuthFromRequest } from '@/lib/auth';
 import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { getExpertByUserId } from '@/lib/marketplace/expert-helpers';
-import { applyCredits } from '@/lib/marketplace/qa-helpers';
+import { applyCredits, reverseCredits } from '@/lib/marketplace/qa-helpers';
 import { chargeQAQuestion } from '@/lib/stripe';
 import { createNotification } from '@/lib/notifications';
 import { getAdminClient } from '@/lib/supabase-admin';
@@ -123,7 +123,7 @@ export async function POST(
 
     if (question.payout_status !== 'free' && question.price_cents > 0) {
       // Apply credits first (atomic deduction)
-      const { effectiveChargeCents } = await applyCredits(
+      const { effectiveChargeCents, creditAppliedCents } = await applyCredits(
         adminClient,
         question.diyer_user_id,
         id,
@@ -132,7 +132,8 @@ export async function POST(
 
       if (effectiveChargeCents > 0) {
         if (!question.payment_method_id || !question.stripe_customer_id) {
-          // ROLLBACK: release the claim so the question returns to open
+          // ROLLBACK: restore deducted credits and release the claim back to open
+          await reverseCredits(adminClient, question.diyer_user_id, id, creditAppliedCents);
           await adminClient
             .from('qa_questions')
             .update({
@@ -160,10 +161,12 @@ export async function POST(
               diyer_user_id: question.diyer_user_id,
               type: 'qa_question',
             },
+            idempotencyKey: `qa-claim-${id}`,
           });
           paymentIntentId = chargeResult.paymentIntentId;
         } catch (chargeError) {
-          // ROLLBACK: release the claim so another expert can try
+          // ROLLBACK: restore deducted credits and release the claim so another expert can try
+          await reverseCredits(adminClient, question.diyer_user_id, id, creditAppliedCents);
           await adminClient
             .from('qa_questions')
             .update({
