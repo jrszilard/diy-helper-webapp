@@ -16,12 +16,13 @@ import { logger } from '@/lib/logger';
 export async function checkAnonAiBudget(
   dayKey: string,
   bucket = 'agent-run',
-): Promise<{ allowed: boolean; limit: number }> {
+): Promise<{ allowed: boolean; limit: number; count: number | null }> {
   const limit = Number(process.env.ANON_AI_DAILY_LIMIT || '500');
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-  if (!url || !token) return { allowed: true, limit };
+  // count is null when the ceiling isn't enforced (Upstash absent or errored).
+  if (!url || !token) return { allowed: true, limit, count: null };
 
   try {
     const redis = new Redis({ url, token });
@@ -31,9 +32,9 @@ export async function checkAnonAiBudget(
       // ~26h TTL so the daily counter self-expires after the day rolls over.
       await redis.expire(key, 26 * 60 * 60);
     }
-    return { allowed: count <= limit, limit };
+    return { allowed: count <= limit, limit, count };
   } catch (err) {
     logger.error('Anon AI budget check failed (failing open)', err, { dayKey, bucket });
-    return { allowed: true, limit };
+    return { allowed: true, limit, count: null };
   }
 }

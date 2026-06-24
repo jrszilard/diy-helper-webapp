@@ -16,20 +16,26 @@ describe('checkAnonAiBudget', () => {
     process.env.ANON_AI_DAILY_LIMIT = '3';
   });
 
-  it('allows up to the daily limit, then blocks (caps total anon spend across all IPs)', async () => {
+  it('allows up to the daily limit, then blocks, and reports the live count', async () => {
     const { checkAnonAiBudget } = await import('@/lib/anon-budget');
     expect((await checkAnonAiBudget('2026-06-24')).allowed).toBe(true); // 1
     expect((await checkAnonAiBudget('2026-06-24')).allowed).toBe(true); // 2
     expect((await checkAnonAiBudget('2026-06-24')).allowed).toBe(true); // 3
-    expect((await checkAnonAiBudget('2026-06-24')).allowed).toBe(false); // 4 > limit
+    const blocked = await checkAnonAiBudget('2026-06-24'); // 4 > limit
+    expect(blocked.allowed).toBe(false);
+    // count = limit + 1 on the first blocked request — the "trip" signal.
+    expect(blocked.count).toBe(4);
+    expect(blocked.limit).toBe(3);
     // TTL is set exactly once (on the first increment of the day's key).
     expect(expire).toHaveBeenCalledTimes(1);
   });
 
-  it('fails open when Upstash is not configured (never blocks legit traffic on misconfig)', async () => {
+  it('fails open with a null count when Upstash is not configured', async () => {
     delete process.env.UPSTASH_REDIS_REST_URL;
     const { checkAnonAiBudget } = await import('@/lib/anon-budget');
-    expect((await checkAnonAiBudget('2026-06-24')).allowed).toBe(true);
+    const res = await checkAnonAiBudget('2026-06-24');
+    expect(res.allowed).toBe(true);
+    expect(res.count).toBe(null);
     expect(incr).not.toHaveBeenCalled();
   });
 });

@@ -5,6 +5,7 @@ import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { parseRequestBody } from '@/lib/validation';
 import { logger } from '@/lib/logger';
+import * as Sentry from '@sentry/nextjs';
 import { CancellationError } from '@/lib/agents/runner';
 import { sanitizeReportRecord } from '@/lib/security';
 import { isCancelled, clearCancellation } from '@/lib/agents/cancellation';
@@ -83,6 +84,19 @@ export async function POST(req: NextRequest) {
       const dayKey = new Date().toISOString().slice(0, 10);
       const budget = await checkAnonAiBudget(dayKey, 'agent-run');
       if (!budget.allowed) {
+        // Observability: every blocked request hits the Vercel log (the count
+        // shows true demand to inform raising ANON_AI_DAILY_LIMIT); the first
+        // trip of the day also raises a Sentry WARNING (not an error, so it
+        // doesn't skew error-rate alerts).
+        logger.warn('Anonymous AI daily ceiling reached', {
+          requestId, dayKey, count: budget.count, limit: budget.limit,
+        });
+        if (budget.count != null && budget.count === budget.limit + 1) {
+          Sentry.captureMessage('Anonymous AI daily ceiling reached — consider raising ANON_AI_DAILY_LIMIT', {
+            level: 'warning',
+            extra: { dayKey, limit: budget.limit },
+          });
+        }
         return applyCorsHeaders(req, new Response(
           JSON.stringify({
             error: 'Free demo capacity for today has been reached. Please sign in to continue.',
