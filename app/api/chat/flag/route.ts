@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase-admin';
+import { getAuthFromRequest } from '@/lib/auth';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { isValidUUID } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 
 const VALID_FLAG_TYPES = ['safety', 'incorrect', 'missing_steps', 'wrong_for_situation'];
+// Cap attacker-controllable free-text so the correction queue can't be stuffed
+// with huge payloads. Anonymous safety flags are still allowed (valuable on a
+// DIY-safety app) but are now attributed when the caller is signed in.
+const MAX_FIELD_LEN = 4000;
 
 export async function POST(req: NextRequest) {
-  const rateLimitResult = await checkRateLimit(req, null, 'marketplace');
+  const auth = await getAuthFromRequest(req);
+
+  // Per-user limit when signed in, per-IP otherwise.
+  const rateLimitResult = await checkRateLimit(req, auth.userId, 'marketplace');
   if (!rateLimitResult.allowed) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
@@ -44,6 +53,7 @@ export async function POST(req: NextRequest) {
   }
 
   const details = typeof body.details === 'string' ? body.details.slice(0, 500) : null;
+  const conversationId = isValidUUID(String(body.conversationId)) ? (body.conversationId as string) : null;
 
   try {
     const supabase = getAdminClient();
@@ -52,13 +62,14 @@ export async function POST(req: NextRequest) {
       .insert({
         source: 'user_flag',
         status: 'pending',
-        user_question: userMessage,
-        ai_response: aiResponse,
+        user_question: userMessage.slice(0, MAX_FIELD_LEN),
+        ai_response: aiResponse.slice(0, MAX_FIELD_LEN),
         flag_type: flagType,
         correction_text: details,
-        conversation_id: body.conversationId || null,
-        message_id: body.messageIndex != null ? String(body.messageIndex) : null,
-        reporter_id: null,
+        conversation_id: conversationId,
+        message_id: body.messageIndex != null ? String(body.messageIndex).slice(0, 64) : null,
+        // Attribute to the signed-in user when present; null for anonymous flags.
+        reporter_id: auth.userId,
         reporter_role: 'diy_user',
       });
 

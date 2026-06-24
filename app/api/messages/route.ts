@@ -4,7 +4,7 @@ import { applyCorsHeaders, handleCorsOptions } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { parseRequestBody } from '@/lib/validation';
 import { SendMessageSchema } from '@/lib/marketplace/validation';
-import { sendMessage } from '@/lib/marketplace/messaging';
+import { sendMessage, ColdDmLimitError } from '@/lib/marketplace/messaging';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { logger } from '@/lib/logger';
 
@@ -197,6 +197,12 @@ export async function POST(req: NextRequest) {
       { status: 201, headers: { 'Content-Type': 'application/json' } }
     ));
   } catch (error) {
+    if (error instanceof ColdDmLimitError) {
+      return applyCorsHeaders(req, new Response(
+        JSON.stringify({ error: error.message }),
+        { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': '3600' } }
+      ));
+    }
     logger.error('Messages POST error', error);
     return applyCorsHeaders(req, new Response(
       JSON.stringify({ error: 'Internal server error' }),
