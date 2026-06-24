@@ -1,7 +1,8 @@
 import Stripe from 'stripe';
-import { stripe as stripeConfig, marketplace as marketplaceConfig, beta } from '@/lib/config';
+import { stripe as stripeConfig, marketplace as marketplaceConfig } from '@/lib/config';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
+import { logger } from '@/lib/logger';
 
 let _stripeClient: Stripe | null = null;
 
@@ -15,8 +16,27 @@ export function getStripeClient(): Stripe {
   return _stripeClient;
 }
 
+let _testModeWarned = false;
+
+/**
+ * Whether Stripe charges/transfers/refunds are stubbed (no real money moves).
+ *
+ * Controlled ONLY by the server-only QA_PAYMENT_TEST_MODE flag — deliberately
+ * decoupled from the client-exposed NEXT_PUBLIC_BETA_MODE flag, so that enabling
+ * the public beta UI never silently stops real charges. If you want real money
+ * to move, set QA_PAYMENT_TEST_MODE=false (or unset it) in the environment.
+ */
 export function isTestMode(): boolean {
-  return marketplaceConfig.testMode || beta.enabled;
+  const testMode = marketplaceConfig.testMode;
+  // Surface (loudly, once) when payments are stubbed in production so it is a
+  // deliberate state, never an accident.
+  if (testMode && !_testModeWarned && process.env.VERCEL_ENV === 'production') {
+    _testModeWarned = true;
+    logger.warn(
+      'Stripe TEST MODE is active in PRODUCTION (QA_PAYMENT_TEST_MODE=true): all charges, transfers, and refunds are stubbed and NO real money moves.',
+    );
+  }
+  return testMode;
 }
 
 export async function createConnectAccount(email: string): Promise<Stripe.Account> {
