@@ -3,6 +3,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { getAuthFromRequest } from '@/lib/auth';
 import { handleCorsOptions, applyCorsHeaders } from '@/lib/cors';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { checkAnonAiBudget } from '@/lib/anon-budget';
 import { ChatRequestSchema, parseRequestBody } from '@/lib/validation';
 import config from '@/lib/config';
 import { pruneConversation } from '@/lib/conversation-pruner';
@@ -117,6 +118,26 @@ export async function POST(req: NextRequest) {
       } catch (usageErr) {
         // Usage tables may not exist yet — allow the request through
         logger.error('Usage limit check failed, allowing request', usageErr);
+      }
+    } else {
+      // Anonymous chat (landing-page funnel) calls Anthropic and can fan out to tools
+      // and the Opus advisor. The per-IP limiter above is defeated by IP rotation, so
+      // bound worst-case anon spend with the same global daily ceiling used by the
+      // agent-run route (shared budget, distinct bucket). Authenticated users are
+      // unaffected (they have per-user limits + freemium caps above).
+      const dayKey = new Date().toISOString().slice(0, 10);
+      const budget = await checkAnonAiBudget(dayKey, 'chat');
+      if (!budget.allowed) {
+        logger.warn('Anonymous AI daily ceiling reached (chat)', {
+          requestId, dayKey, count: budget.count, limit: budget.limit,
+        });
+        return applyCorsHeaders(req, new Response(
+          JSON.stringify({
+            error: 'Free demo capacity for today has been reached. Please sign in to continue.',
+            code: 'ANON_DAILY_LIMIT',
+          }),
+          { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': '3600' } }
+        ));
       }
     }
 
