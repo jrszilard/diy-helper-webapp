@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { checkAnonAiBudget } from '@/lib/anon-budget';
 import { projectTemplates } from '@/lib/templates/index';
 import { anthropic as anthropicConfig } from '@/lib/config';
 import { logger } from '@/lib/logger';
@@ -14,6 +15,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { error: 'Too many requests. Please try again later.' },
       { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter) } }
+    );
+  }
+
+  // This route is fully anonymous and calls Anthropic. The per-IP limiter above is
+  // defeated by IP rotation, so enforce the same global daily ceiling that bounds
+  // worst-case anon Anthropic spend at public launch (shared budget, distinct bucket).
+  const dayKey = new Date().toISOString().slice(0, 10);
+  const budget = await checkAnonAiBudget(dayKey, 'guided-chat');
+  if (!budget.allowed) {
+    logger.warn('Anonymous AI daily ceiling reached (guided-chat)', {
+      dayKey, count: budget.count, limit: budget.limit,
+    });
+    return NextResponse.json(
+      { error: 'Free demo capacity for today has been reached. Please sign in to continue.', code: 'ANON_DAILY_LIMIT' },
+      { status: 429, headers: { 'Retry-After': '3600' } }
     );
   }
 
