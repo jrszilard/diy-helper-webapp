@@ -161,7 +161,15 @@ export async function POST(
               diyer_user_id: question.diyer_user_id,
               type: 'qa_question',
             },
-            idempotencyKey: `qa-claim-${id}`,
+            // Scope the idempotency key to THIS claim cycle (claimed_at), not just the
+            // question. A question can be claimed -> expire (refund + payment_intent
+            // cleared) -> re-claimed by another expert within Stripe's 24h key window.
+            // A per-question key would make that second charge a no-op (Stripe replays
+            // the original, now-refunded PaymentIntent), so the DIYer is never charged
+            // for the re-claim = free answer / revenue leak. claimed_at is unique per
+            // cycle, so retries of the SAME claim stay idempotent while a genuine new
+            // claim charges correctly.
+            idempotencyKey: `qa-claim-${id}-${now.toISOString()}`,
           });
           paymentIntentId = chargeResult.paymentIntentId;
         } catch (chargeError) {
