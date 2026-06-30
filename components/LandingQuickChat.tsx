@@ -15,6 +15,7 @@ import Spinner from '@/components/ui/Spinner';
 import Button from '@/components/ui/Button';
 import Textarea from '@/components/ui/Textarea';
 import Card from '@/components/ui/Card';
+import AiDisclaimer from '@/components/AiDisclaimer';
 import SaveToProjectModal from '@/components/SaveToProjectModal';
 import IntentSignal from '@/components/IntentSignal';
 import PlanningCTA from '@/components/PlanningCTA';
@@ -449,6 +450,7 @@ export default function LandingQuickChat({
             <ArrowUp className="w-4 h-4" />
           </button>
         </div>
+        <AiDisclaimer />
       </div>
 
       {/* Suggestion chips */}
