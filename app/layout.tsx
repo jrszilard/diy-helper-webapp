@@ -4,6 +4,7 @@ import "./globals.css";
 import ConsoleNoiseSuppressor from "@/components/ConsoleNoiseSuppressor";
 import BetaFeedbackWidget from "@/components/BetaFeedbackWidget";
 import AppShell from "@/components/AppShell";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -74,6 +75,9 @@ export default function RootLayout({
           </AppShell>
         </ConsoleNoiseSuppressor>
         <BetaFeedbackWidget />
+        {/* Serves its script and beacon from /_vercel/insights/* (same-origin),
+            so the strict `script-src 'self'` / `connect-src 'self'` CSP covers it. */}
+        <Analytics />
       </body>
     </html>
   );
