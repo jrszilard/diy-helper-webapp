@@ -72,6 +72,16 @@ describe('classifyIntent', () => {
     expect(result.reasoning).toContain('fallback');
   });
 
+  it('parses JSON wrapped in a markdown code fence', async () => {
+    // Reproduces the Sentry SyntaxError: Haiku returned ```json{...}``` and JSON.parse choked on the backtick.
+    mockCreate.mockResolvedValueOnce({
+      content: [{ type: 'text', text: '```json\n{"intent":"quick_question","confidence":0.9,"reasoning":"fenced"}\n```' }],
+    });
+    const result = await classifyIntent('What size nail for baseboards?', { hasActiveProjects: false });
+    expect(result.intent).toBe('quick_question');
+    expect(result.confidence).toBe(0.9);
+  });
+
   it('defaults to full_project on malformed JSON response', async () => {
     mockCreate.mockResolvedValueOnce({
       content: [{ type: 'text', text: 'not valid json' }],

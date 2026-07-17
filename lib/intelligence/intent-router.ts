@@ -9,6 +9,18 @@ const FALLBACK_CLASSIFICATION: IntentClassification = {
   reasoning: 'Classification fallback — using default mode',
 };
 
+/**
+ * Extract a JSON object from a model reply. Haiku (like most models) sometimes
+ * wraps its JSON in a ```json code fence or adds prose around it, even when told
+ * to return "ONLY a JSON object" — a raw JSON.parse then throws on the backtick.
+ * Grab the first `{` … last `}` span so parsing survives the fence. Returns the
+ * text unchanged when no object is present (the caller's try/catch then falls back).
+ */
+function extractJsonObject(text: string): string {
+  const match = text.match(/\{[\s\S]*\}/);
+  return match ? match[0] : text;
+}
+
 const CLASSIFICATION_SYSTEM_PROMPT = `You are an intent classifier for a DIY home improvement assistant. Classify the user's message into exactly one category:
 
 - quick_question: Simple factual questions with short answers (e.g., "What size nail for baseboards?", "Can I mix PEX and copper?")
@@ -69,7 +81,7 @@ export async function classifyIntent(
         .map(b => b.text)
         .join('');
 
-      const parsed = JSON.parse(text) as IntentClassification;
+      const parsed = JSON.parse(extractJsonObject(text)) as IntentClassification;
 
       const validIntents = ['quick_question', 'troubleshooting', 'mid_project', 'full_project'];
       if (!validIntents.includes(parsed.intent)) {
