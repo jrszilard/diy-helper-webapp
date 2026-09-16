@@ -16,7 +16,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.87.0",
     "@sentry/nextjs": "^10.53.1",
-    "@stripe/react-stripe-js": "^5.6.0",
+    "@stripe/react-stripe-js": "^5.6.1",
     "@stripe/stripe-js": "^8.8.0",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/supabase-js": "^2.83.0",
